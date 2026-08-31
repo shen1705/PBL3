@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using MotorbikeRental.Web.Models;
+using CarRental.Web.Models;
 
-namespace MotorbikeRental.Web.Controllers;
+namespace CarRental.Web.Controllers;
 
 public class HomeController : Controller
 {

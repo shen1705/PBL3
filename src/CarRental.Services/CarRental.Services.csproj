@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\MotorbikeRental.Models\MotorbikeRental.Models.csproj" />
+    <ProjectReference Include="..\CarRental.Data\CarRental.Data.csproj" />
+    <ProjectReference Include="..\CarRental.Models\CarRental.Models.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
