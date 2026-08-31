@@ -1,4 +1,4 @@
-namespace MotorbikeRental.Web.Models;
+namespace CarRental.Web.Models;
 
 public class ErrorViewModel
 {

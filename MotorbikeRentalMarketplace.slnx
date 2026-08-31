@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/MotorbikeRental.Data/MotorbikeRental.Data.csproj" />
-    <Project Path="src/MotorbikeRental.Models/MotorbikeRental.Models.csproj" />
-    <Project Path="src/MotorbikeRental.Services/MotorbikeRental.Services.csproj" />
-    <Project Path="src/MotorbikeRental.Web/MotorbikeRental.Web.csproj" />
-  </Folder>
-</Solution>
