@@ -1,4 +1,4 @@
-# Motorbike Rental Marketplace
+# Vehicle Rental Marketplace
 
 Nền tảng trung gian kết nối chủ xe máy cá nhân với người có nhu cầu thuê xe — tương tự mô hình Airbnb/Mioto, áp dụng cho xe máy.
 
