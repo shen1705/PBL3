@@ -17,7 +17,13 @@ git clone <repo-url>
 cd <project-folder>
 dotnet restore
 dotnet build
-dotnet run --project src/MotorbikeRental.Web
+dotnet run --project src/CarRental.Web
 ```
 
 ## Tài liệu liên quan
+
+- [Tổng quan và phạm vi dự án](docs/requirements/project-context.md)
+- [Yêu cầu dự án](docs/requirements/project-requirements.md)
+- [Các quyết định nghiệp vụ còn mở](docs/requirements/open-decisions.md)
+- [Thiết kế hệ thống](docs/architecture/system-design.md)
+- [Nguồn báo cáo cuối kỳ](docs/report/README.md)
