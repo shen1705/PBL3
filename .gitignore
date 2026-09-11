@@ -84,3 +84,11 @@ node_modules/
 *.tmp
 *.bak
 *.swp
+
+# Documentation vault: share only the reviewed minimal settings
+**/.obsidian*/
+!/docs/.obsidian/
+/docs/.obsidian/*
+!/docs/.obsidian/app.json
+/docs/.trash/
+/docs/report/exports/
