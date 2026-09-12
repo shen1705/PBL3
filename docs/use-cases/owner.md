@@ -44,7 +44,7 @@ Quy tắc chung: [PBL - Shared Rental Rules](../requirements/shared-rental-rules
 3. Chọn duyệt; hệ thống kiểm tra lại trạng thái, hạn phản hồi, quyền sở hữu và lịch qua UC-S-01.
 4. Lưu Approved, duy trì lịch đã giữ và hiển thị kết quả cho hai bên.
 
-**Alternative / Exception Flows:** Chủ xe có thể từ chối; cách ghi trạng thái và xử lý cọc còn cần bổ sung. Hết thời hạn 15–30 phút mà chưa phản hồi thì chuyển Expired và giải phóng lịch. Nếu người thuê đã hủy hoặc trạng thái đổi, không duyệt theo dữ liệu cũ.
+**Alternative / Exception Flows:** Chủ xe có thể từ chối; cách ghi trạng thái và xử lý cọc còn cần bổ sung. Hết thời hạn 1–2 ngày mà chưa phản hồi thì chuyển Expired và giải phóng lịch. Nếu người thuê đã hủy hoặc trạng thái đổi, không duyệt theo dữ liệu cũ.
 
 **Postconditions:** Đơn được duyệt chỉ khi còn hợp lệ. Lịch đã được giữ từ Pending, không đợi chủ xe duyệt mới giữ.
 
@@ -95,4 +95,3 @@ Quy tắc chung: [PBL - Shared Rental Rules](../requirements/shared-rental-rules
 ## Đánh giá và khiếu nại
 
 Chủ xe dùng UC-S-02 và UC-S-03 tại [Shared-Use-Case-Specification](shared.md).
-

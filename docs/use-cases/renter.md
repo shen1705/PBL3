@@ -57,7 +57,7 @@ Quy tắc chung: [PBL - Shared Rental Rules](../requirements/shared-rental-rules
 2. Hệ thống kiểm tra ngày, giá và lịch trống qua UC-S-01; hiển thị tiền thuê và tiền cọc.
 3. Người thuê kiểm tra thông tin và thực hiện đặt cọc trực tuyến mô phỏng theo UC-R-05.
 4. Khi cọc thành công, hệ thống kiểm tra lại và đồng thời tạo đơn Pending, ghi nhận cọc, giữ lịch xe.
-5. Hiển thị mã đơn, trạng thái chờ duyệt và hạn phản hồi của chủ xe trong khoảng 15–30 phút.
+5. Hiển thị mã đơn, trạng thái chờ duyệt và hạn phản hồi của chủ xe trong khoảng 1–2 ngày.
 
 **Alternative / Exception Flows:** Ngày hoặc lịch không hợp lệ thì chọn lại. Mô phỏng cọc thất bại thì không xác nhận đã tạo đơn chờ duyệt giữ lịch. Nếu giá hoặc lịch thay đổi trước khi lưu, hiển thị lại thông tin và kết quả thực tế.
 
@@ -150,4 +150,3 @@ Quy tắc chung: [PBL - Shared Rental Rules](../requirements/shared-rental-rules
 ## Đánh giá và khiếu nại
 
 Người thuê dùng UC-S-02 và UC-S-03 tại [Shared-Use-Case-Specification](shared.md).
-

@@ -29,7 +29,7 @@ Người thuê tìm xe và đặt thuê. Chủ xe quản lý xe, duyệt đơn v
 
 ## Quy trình chính
 
-Người thuê chọn xe, thời gian và đặt cọc trực tuyến qua mô phỏng. Đơn chờ duyệt giữ lịch ngay; chủ xe phản hồi trong 1-2 ngày. Hết thời hạn chưa phản hồi thì đơn hết hạn và giải phóng lịch. Sau khi được duyệt, hai bên bàn giao xe với ảnh và thời điểm xác nhận.
+Người thuê chọn xe, thời gian và đặt cọc trực tuyến qua mô phỏng. Đơn chờ duyệt giữ lịch ngay; chủ xe phản hồi trong khoảng 1–2 ngày. Hết thời hạn chưa phản hồi thì đơn hết hạn và giải phóng lịch. Sau khi được duyệt, hai bên bàn giao xe với ảnh và thời điểm xác nhận.
 
 Khi trả xe, cả hai bên phải xác nhận. Đơn đã trả xe chỉ hoàn tất khi không còn vấn đề phát sinh hoặc khiếu nại đang mở. Doanh thu và quyền đánh giá được ghi nhận từ lúc hoàn tất.
 

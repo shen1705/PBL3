@@ -17,7 +17,6 @@ tags: [project/pbl, type/review]
 
 ## Duyệt đơn và bàn giao
 
-- Số ngày cụ thể trong khoảng **1-2 ngày** dành cho chủ xe phản hồi.
 - Trạng thái lưu khi chủ xe từ chối: nguồn mới có hành vi từ chối nhưng chưa nêu tên trạng thái riêng. Không tự giữ `Rejected` của bản cũ như một quyết định mới.
 - Ai cần xác nhận lúc giao xe đầu chuyến và các điều kiện chuyển sang `InRental`; xử lý khi một bên không phản hồi hoặc trả xe trễ.
 - Số ảnh, dung lượng ảnh bàn giao và loại tệp được nhận. Ảnh cùng thời điểm xác nhận đã là yêu cầu bắt buộc.
