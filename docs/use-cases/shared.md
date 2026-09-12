@@ -16,7 +16,10 @@ Quy tắc chung: [PBL - Shared Rental Rules](../requirements/shared-rental-rules
 
 ## UC-S-01 — Kiểm tra lịch xe
 
-**Actor:** System (được gọi từ quy trình tạo đơn hoặc duyệt đơn).
+**Type:** Internal / Included Use Case
+**Called by:**
+- UC-R-03 Tạo đơn thuê
+- UC-O-02 Duyệt yêu cầu thuê
 
 **Preconditions:** Có xe và khoảng thời gian thuê hợp lệ.
 

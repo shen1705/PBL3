@@ -25,7 +25,7 @@ tags: [project/pbl, type/specification]
 
 1. Người thuê chọn xe và thời gian thuê. Hệ thống kiểm tra lịch, hiển thị giá và số tiền cọc.
 2. Người thuê đặt cọc trực tuyến qua mô phỏng. Khi cọc thành công, đơn chuyển sang **Chờ duyệt** (`Pending`) và giữ lịch xe.
-3. Chủ xe có **1-2 ngày** để duyệt hoặc từ chối. Nếu duyệt, đơn chuyển sang **Đã duyệt** (`Approved`). Nếu hết thời hạn mà chưa phản hồi, đơn chuyển sang **Hết hạn** (`Expired`) và lịch được giải phóng. 
+3. Chủ xe có **1–2 ngày** để duyệt hoặc từ chối. Nếu duyệt, đơn chuyển sang **Đã duyệt** (`Approved`). Nếu hết thời hạn mà chưa phản hồi, đơn chuyển sang **Hết hạn** (`Expired`) và lịch được giải phóng.
 4. Hai bên thực hiện bàn giao đầu chuyến, có ảnh và thời điểm xác nhận. Khi hoàn tất bàn giao, đơn chuyển sang **Đang thuê** (`InRental`).
 5. Khi kết thúc chuyến, **cả người thuê và chủ xe phải xác nhận trả xe**. Nếu mới một bên xác nhận, hệ thống lưu tiến độ và giữ trạng thái `InRental`. Khi đủ hai xác nhận, đơn chuyển sang **Đã trả xe** (`Returned`).
 6. Đơn chỉ chuyển sang **Hoàn tất** (`Completed`) sau khi đã trả xe và không còn vấn đề phát sinh, gồm khiếu nại đang mở. Đây là thời điểm ghi nhận doanh thu và cho phép đánh giá.
