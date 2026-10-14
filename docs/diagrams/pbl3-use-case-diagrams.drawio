@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" pages="5">
+<mxfile host="app.diagrams.net" pages="6">
   <diagram name="UC00 - System Overview" id="j602GpwLcVUP9XkHfZdq">
     <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1600" pageHeight="900" background="light-dark(#ffffff, #121212)" math="0" shadow="0">
       <root>
@@ -230,6 +230,20 @@
         </mxCell>
         <mxCell id="e-26" edge="1" parent="1" source="v-7" style="endArrow=open;endFill=0;dashed=1;html=1;rounded=0;strokeWidth=1.2;strokeColor=#475569;fontFamily=Arial;fontSize=11;fontColor=#334155;labelBackgroundColor=#ffffff;" target="v-13" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-r-09" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.4;strokeColor=#334155;fillColor=#ffffff;fontFamily=Arial;fontSize=12;fontColor=#111827;align=center;verticalAlign=middle;" value="Cung cấp GPLX" vertex="1">
+          <mxGeometry x="700" y="650" width="220" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-r-03-gplx-rule" parent="1" style="shape=note;whiteSpace=wrap;html=1;size=16;fillColor=#f8fafc;strokeColor=#64748b;fontFamily=Arial;fontSize=12;fontColor=#334155;align=center;verticalAlign=middle;" value="UC-R-03: đã cung cấp ảnh GPLX" vertex="1">
+          <mxGeometry x="700" y="790" width="220" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-r-09-association" edge="1" parent="1" source="actor-4" target="uc-r-09" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#64748b;exitX=0;exitY=0.95;entryX=1;entryY=0.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1330" y="725" />
+              <mxPoint x="950" y="725" />
+            </Array>
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
@@ -586,4 +600,118 @@
       </root>
     </mxGraphModel>
   </diagram>
-</mxfile>
+<diagram name="UC05 - Base User" id="uc05-base-user">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1800" pageHeight="1200" background="light-dark(#ffffff, #121212)" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="uc05-boundary" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=1.5;fontFamily=Arial;fontSize=14;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=10;" value="Base User Use Cases" vertex="1">
+          <mxGeometry x="600" y="30" width="1120" height="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="uc05-user" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=13;fontColor=#1f2937;" value="User" vertex="1">
+          <mxGeometry x="220" y="430" width="70" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="uc05-renter" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=13;fontColor=#1f2937;" value="Renter" vertex="1">
+          <mxGeometry x="50" y="750" width="70" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="uc05-owner" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=13;fontColor=#1f2937;" value="Owner" vertex="1">
+          <mxGeometry x="220" y="750" width="70" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="uc05-staff" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=13;fontColor=#1f2937;" value="Staff" vertex="1">
+          <mxGeometry x="390" y="750" width="70" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="uc05-admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontFamily=Arial;fontSize=13;fontColor=#1f2937;" value="Admin" vertex="1">
+          <mxGeometry x="390" y="1010" width="70" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="gen-uc05-renter" edge="1" parent="1" source="uc05-renter" target="uc05-user" style="endArrow=block;endFill=0;html=1;rounded=0;strokeWidth=1.2;strokeColor=#475569;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gen-uc05-owner" edge="1" parent="1" source="uc05-owner" target="uc05-user" style="endArrow=block;endFill=0;html=1;rounded=0;strokeWidth=1.2;strokeColor=#475569;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gen-uc05-staff" edge="1" parent="1" source="uc05-staff" target="uc05-user" style="endArrow=block;endFill=0;html=1;rounded=0;strokeWidth=1.2;strokeColor=#475569;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="gen-uc05-admin" edge="1" parent="1" source="uc05-admin" target="uc05-staff" style="endArrow=block;endFill=0;html=1;rounded=0;strokeWidth=1.2;strokeColor=#475569;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc05-uc-u-01" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.4;strokeColor=#334155;fillColor=#ffffff;fontFamily=Arial;fontSize=13;fontColor=#111827;align=center;verticalAlign=middle;" value="UC-U-01&lt;br&gt;Đăng ký tài khoản" vertex="1">
+          <mxGeometry x="1000" y="70" width="390" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-uc-u-01" edge="1" parent="1" source="uc05-user" target="uc05-uc-u-01" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#64748b;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="495" />
+              <mxPoint x="850" y="115" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uc05-uc-u-02" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.4;strokeColor=#334155;fillColor=#ffffff;fontFamily=Arial;fontSize=13;fontColor=#111827;align=center;verticalAlign=middle;" value="UC-U-02&lt;br&gt;Đăng nhập" vertex="1">
+          <mxGeometry x="1000" y="210" width="390" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-uc-u-02" edge="1" parent="1" source="uc05-user" target="uc05-uc-u-02" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#64748b;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="495" />
+              <mxPoint x="850" y="255" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uc05-uc-u-03" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.4;strokeColor=#334155;fillColor=#ffffff;fontFamily=Arial;fontSize=13;fontColor=#111827;align=center;verticalAlign=middle;" value="UC-U-03&lt;br&gt;Đăng xuất" vertex="1">
+          <mxGeometry x="1000" y="350" width="390" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-uc-u-03" edge="1" parent="1" source="uc05-user" target="uc05-uc-u-03" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#64748b;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="495" />
+              <mxPoint x="850" y="395" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uc05-uc-u-04" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.4;strokeColor=#334155;fillColor=#ffffff;fontFamily=Arial;fontSize=13;fontColor=#111827;align=center;verticalAlign=middle;" value="UC-U-04&lt;br&gt;Xem thông tin cá nhân" vertex="1">
+          <mxGeometry x="1000" y="490" width="390" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-uc-u-04" edge="1" parent="1" source="uc05-user" target="uc05-uc-u-04" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#64748b;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="495" />
+              <mxPoint x="850" y="535" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uc05-uc-u-05" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.4;strokeColor=#334155;fillColor=#ffffff;fontFamily=Arial;fontSize=13;fontColor=#111827;align=center;verticalAlign=middle;" value="UC-U-05&lt;br&gt;Cập nhật thông tin cá nhân" vertex="1">
+          <mxGeometry x="1000" y="630" width="390" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-uc-u-05" edge="1" parent="1" source="uc05-user" target="uc05-uc-u-05" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#64748b;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="495" />
+              <mxPoint x="850" y="675" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uc05-uc-u-06" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.4;strokeColor=#334155;fillColor=#ffffff;fontFamily=Arial;fontSize=13;fontColor=#111827;align=center;verticalAlign=middle;" value="UC-U-06&lt;br&gt;Đổi mật khẩu" vertex="1">
+          <mxGeometry x="1000" y="770" width="390" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-uc-u-06" edge="1" parent="1" source="uc05-user" target="uc05-uc-u-06" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#64748b;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="495" />
+              <mxPoint x="850" y="815" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="uc05-uc-u-07" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;strokeWidth=1.4;strokeColor=#334155;fillColor=#ffffff;fontFamily=Arial;fontSize=13;fontColor=#111827;align=center;verticalAlign=middle;" value="UC-U-07&lt;br&gt;Đăng ký làm chủ xe" vertex="1">
+          <mxGeometry x="1000" y="910" width="390" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc-uc-u-07" edge="1" parent="1" source="uc05-user" target="uc05-uc-u-07" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;endArrow=none;html=1;rounded=0;strokeWidth=1.2;strokeColor=#64748b;entryX=0;entryY=0.5;exitX=1;exitY=0.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="850" y="495" />
+              <mxPoint x="850" y="955" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram></mxfile>

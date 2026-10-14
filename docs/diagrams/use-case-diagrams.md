@@ -21,3 +21,7 @@
 ## UC04 — Shared Interactions
 
 ![UC04 — Shared Interactions](uc04-shared-interactions.svg)
+
+## UC05 — Base User and Actor Hierarchy
+
+![UC05 — Base User and Actor Hierarchy](uc05-base-user.svg)

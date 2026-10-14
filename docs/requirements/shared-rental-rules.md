@@ -3,73 +3,82 @@ title: "PBL — Quy tắc thuê xe"
 project: PBL3
 category: documents
 type: specification
-status: working
-updated: 2026-09-09
+status: accepted
+updated: 2026-10-01
 tags: [project/pbl, type/specification]
 ---
 
 # PBL — Quy tắc thuê xe
 
-Đây là các quy tắc nghiệp vụ đã chốt cho hệ thống web trung gian cho thuê ô tô PBL3. Các đặc tả chức năng dùng chung quy tắc tại đây.
+Đây là các quy tắc nghiệp vụ đã chốt cho phạm vi chức năng v1 của hệ thống web trung gian cho thuê ô tô PBL3. Các đặc tả chức năng sử dụng chung nội dung này.
 
 ## 1. Người sử dụng
 
-- **Người thuê** (`Renter`): tìm xe và đặt thuê.
-- **Chủ xe** (`Owner`): đăng xe, duyệt đơn và bàn giao xe. Quyền chủ xe được bổ sung vào tài khoản người thuê sau khi được duyệt đơn đăng kí.
-- **Nhân viên** (`Staff`): quản lý người thuê, chủ xe và tin đăng; không được thay đổi tài khoản nhân viên hoặc quản trị viên.
-- **Quản trị viên** (`Admin`): có toàn quyền quản trị, gồm quản lý nhân viên, quản trị viên khác và cấu hình hoa hồng.
+- **Khách truy cập** (`Visitor`): người chưa đăng nhập, thực hiện đăng ký, đăng nhập và các chức năng công khai.
+- **Người dùng cơ sở** (`Base User`): người dùng đã xác thực, thực hiện các chức năng tài khoản chung sau đăng nhập và đăng ký làm chủ xe.
+- **Người thuê** (`Renter`): tạo và quản lý yêu cầu thuê. Tài khoản đăng ký công khai được cấp quyền này ngay khi tạo.
+- **Chủ xe** (`Owner`): đăng xe, quyết định yêu cầu thuê và bàn giao xe sau khi hồ sơ được chấp thuận; tài khoản vẫn giữ quyền `Renter`.
+- **Nhân viên** (`Staff`): xét duyệt hồ sơ, xe và xử lý người dùng, tin đăng, khiếu nại trong phạm vi được cấp.
+- **Quản trị viên** (`Admin`): có toàn bộ chức năng quản trị của `Staff`, đồng thời quản lý tài khoản vận hành và cấu hình toàn nền tảng.
 
-**Staff** và **Admin** dùng chung vai trò `Admin` trong ASP.NET Core Identity; quyền chi tiết được phân biệt bằng claims. Chi tiết kỹ thuật ở [PBL design notes](../architecture/technical-notes.md).
+`Renter`, `Owner`, `Staff` và `Admin` kế thừa `Base User`. `Admin` có toàn bộ chức năng quản trị của `Staff`. `Visitor` và `Base User` chỉ là tác nhân phân tích, không phải vai trò lưu trong cơ sở dữ liệu. Một tài khoản có thể đồng thời có quyền `Renter` và `Owner`. Tài khoản `Staff`/`Admin` được cấp riêng, không tạo bằng đăng ký công khai. Trong ASP.NET Core Identity, hệ thống chỉ dùng các vai trò `Renter`, `Owner` và `Admin`; hai nhóm vận hành cùng dùng vai trò `Admin` và được phân biệt bằng quyền chi tiết; xem [ghi chú kỹ thuật](../architecture/technical-notes.md).
 
-## 2. Quy trình thuê xe
+## 2. Hồ sơ và tin đăng
 
-1. Người thuê chọn xe và thời gian thuê. Hệ thống kiểm tra lịch, hiển thị giá và số tiền cọc.
-2. Người thuê đặt cọc trực tuyến qua mô phỏng. Khi cọc thành công, đơn chuyển sang **Chờ duyệt** (`Pending`) và giữ lịch xe.
-3. Chủ xe có **1–2 ngày** để duyệt hoặc từ chối. Nếu duyệt, đơn chuyển sang **Đã duyệt** (`Approved`). Nếu hết thời hạn mà chưa phản hồi, đơn chuyển sang **Hết hạn** (`Expired`) và lịch được giải phóng.
-4. Hai bên thực hiện bàn giao đầu chuyến, có ảnh và thời điểm xác nhận. Khi hoàn tất bàn giao, đơn chuyển sang **Đang thuê** (`InRental`).
-5. Khi kết thúc chuyến, **cả người thuê và chủ xe phải xác nhận trả xe**. Nếu mới một bên xác nhận, hệ thống lưu tiến độ và giữ trạng thái `InRental`. Khi đủ hai xác nhận, đơn chuyển sang **Đã trả xe** (`Returned`).
-6. Đơn chỉ chuyển sang **Hoàn tất** (`Completed`) sau khi đã trả xe và không còn vấn đề phát sinh, gồm khiếu nại đang mở. Đây là thời điểm ghi nhận doanh thu và cho phép đánh giá.
+`Visitor` và `Base User` được xem, tìm kiếm xe. Trước khi `Renter` tạo yêu cầu thuê, hồ sơ người dùng phải có số GPLX, hạng, ngày hết hạn và ảnh đã lưu; GPLX phải còn hiệu lực đến hết ngày trả xe của khoảng thuê. Điều kiện này được kiểm tra khi tạo hold và khi cọc. Hệ thống kiểm tra thông tin đã cung cấp và thời hạn, không xác minh tính xác thực của GPLX.
 
-Chuỗi trạng thái chính: `Pending → Approved → InRental → Returned → Completed`. Đơn bị hủy dùng `Cancelled`; đơn hết thời gian chờ duyệt dùng `Expired`. Trạng thái thanh toán `Paid` được lưu riêng, không phải một bước trong chuỗi trạng thái đơn thuê.
+`Base User` đăng ký làm chủ xe bằng hồ sơ có ảnh CCCD và tối thiểu một xe kèm giấy đăng ký xe, thông tin bảo hiểm và thời hạn bảo hiểm. `Staff`/`Admin` duyệt thủ công rồi chấp thuận hoặc từ chối kèm lý do. Trong phạm vi học tập, hệ thống chỉ kiểm tra các trường và ảnh bắt buộc, không xây bộ tiêu chí thẩm định và không xác minh giấy tờ hoặc danh tính với nguồn bên ngoài.
 
-Chủ xe có quyền từ chối đơn. Cách lưu trạng thái cho trường hợp này và cách xử lý cọc khi từ chối, hủy hoặc hết hạn được tập trung tại [PBL - Review Guide](open-decisions.md).
-## 3. Giữ lịch và giá thuê
+Chủ xe được thêm xe sau khi có quyền `Owner`. Xe phải có giấy đăng ký xe và bảo hiểm còn hạn, biển số không trùng xe khác, và chỉ hiển thị sau khi tin được xét duyệt. Sửa thông tin định danh của xe cần duyệt lại; sửa giá hoặc địa điểm không cần duyệt lại và không đổi giá của yêu cầu đã được chấp thuận. Bảo hiểm hết hạn làm xe ngừng hiển thị và không nhận yêu cầu mới cho đến khi giấy tờ được cập nhật, duyệt lại.
 
-- Đơn `Pending` đã đặt cọc giữ lịch ngay. Hệ thống kiểm tra lại lịch khi tạo đơn và khi duyệt; không cho hai đơn cùng xe, trùng thời gian được duyệt song song.
-- Khi hết hạn chờ duyệt, giải phóng lịch. Việc hủy hoặc từ chối phải thống nhất với cách xử lý cọc trước khi hoàn thiện luồng này.
-- Chủ xe sửa giá tin đăng không làm đổi giá của đơn `Approved`. Đơn đã duyệt giữ giá tại thời điểm xác nhận; giá mới chỉ áp dụng cho đơn mới tạo sau khi sửa.
+## 3. Yêu cầu thuê và giữ lịch
 
-## 4. Đặt cọc và tiền thuê còn lại
+1. Người thuê chọn xe, khoảng thời gian và xem giá. Giá tính theo ngày với công thức `số ngày = max(1, ceil((thời điểm trả - thời điểm nhận) / 24 giờ))`; phần ngày lẻ làm tròn lên và tối thiểu tính một ngày.
+2. Hệ thống tạo `DepositHold` ở trạng thái `AwaitingDeposit` để lưu xe, khoảng thời gian, tổng giá và số tiền cọc do phía máy chủ tính. `DepositHold` không khóa lịch, không có thời hạn tự hết hiệu lực; nhiều người thuê có thể có các hold giao nhau cho cùng một xe. Hold chuyển `Cancelled` khi người thuê chủ động bỏ hoặc không còn hợp lệ lúc cọc.
+3. Khi người thuê xác nhận cọc, hệ thống khóa hold và dữ liệu theo xe. Hệ thống kiểm tra hold thuộc `Renter` hiện tại và đang `AwaitingDeposit`; `start_date` còn ở tương lai; tin `Public`; xe `Approved`; bảo hiểm còn hạn; `Owner` còn `Active`; giá tin không đổi so với hold; GPLX còn hiệu lực đến hết `end_date`; `Renter` không có `account_sanction` còn hiệu lực; xe không giao với `vehicle_unavailability` hoặc booking `Pending`, `Accepted`, `Ongoing`. Số tiền cọc lấy từ hold phía máy chủ, không nhận từ client.
+4. Nếu các điều kiện hợp lệ, hệ thống ghi giao dịch cọc, tạo booking `Pending`, tạo dữ liệu thanh toán và chuyển hold sang `Converted` trong cùng một transaction. Nếu điều kiện không hợp lệ, xung đột lịch, giao dịch mô phỏng thất bại hoặc một bước bị lỗi thì rollback, chuyển hold sang `Cancelled` và trả lỗi phù hợp; xung đột lịch trả `409`. Hold không bị xóa và không tồn tại booking `Pending` tạo dở.
+5. Booking `Pending` được tạo sau khi cọc thành công, bắt đầu thời hạn phản hồi **1 ngày (24 giờ)** của chủ xe và khóa lịch ngay từ thời điểm đó. Các trạng thái khóa lịch là `Pending`, `Accepted`, `Ongoing`; `Rejected`, `Expired`, `Cancelled` không khóa lịch và `Completed` không ảnh hưởng lịch tương lai.
+6. Chủ xe chỉ chấp thuận hoặc từ chối booking `Pending` hiện tại. Chấp thuận chuyển booking sang `Accepted` và tiếp tục giữ lịch; từ chối chuyển sang `Rejected`, hoàn cọc và giải phóng lịch. Quyết định không tác động booking khác.
+7. Nếu hết 24 giờ mà chủ xe chưa phản hồi, booking chuyển `Expired`, được hoàn cọc và giải phóng lịch.
 
-Chỉ mô phỏng **đặt cọc**; không tích hợp cổng thanh toán thật ở bất kỳ giai đoạn nào. Toàn bộ khoản cọc phải được đặt trực tuyến qua mô phỏng. “100% trực tuyến” nói về cách đặt cọc, không có nghĩa tiền cọc bằng toàn bộ tiền thuê.
+Khả dụng phải được kiểm tra theo xe, không chỉ theo tin đăng. Một khoảng thời gian không còn trống nếu giao với `vehicle_unavailability` hoặc booking cùng xe ở trạng thái `Pending`, `Accepted`, `Ongoing`, theo điều kiện `new_start < existing_end` và `new_end > existing_start`. Việc khóa dữ liệu theo xe, kiểm tra lại khả dụng, ghi cọc, tạo booking/payment và chuyển hold sang `Converted` phải được thực hiện nguyên tử để hai hold giao nhau không cùng tạo booking khóa lịch.
 
-Tiền thuê còn lại được xử lý bằng chuyển khoản hoặc tiền mặt tùy trường hợp. Với tiền mặt, **chủ xe xác nhận đã nhận tiền khi bàn giao** thì khoản đó mới được ghi `Paid`. Người thuê không được tự xác nhận thay chủ xe. Cách ghi nhận chuyển khoản và mức cọc cụ thể chưa được xác định.
+## 4. Hủy, hoàn cọc và khoản phạt
 
-## 5. Bàn giao xe
+- Người thuê hủy khi yêu cầu còn `Pending`: hủy và hoàn toàn bộ cọc mô phỏng.
+- Người thuê hủy sau khi `Accepted` nhưng trước khi bắt đầu chuyến: hủy, giải phóng lịch và mất khoản cọc. Cọc được chuyển cho `Owner` sau khi trừ hoa hồng; trạng thái cọc là `Forfeited`.
+- Chủ xe tự hủy sau khi `Accepted`: hoàn cọc và thanh toán khoản phạt mô phỏng bằng **40% giá trị chuyến** từ `Owner` sang `Renter` trong cùng một transaction. Nếu thanh toán phạt thất bại thì rollback và booking giữ `Accepted`.
+- Chủ xe không giao xe: `Renter` gửi khiếu nại; `Staff`/`Admin` xử lý bằng `CancelOwnerFault` khi booking đang `Accepted`, đã đến `start_date` và xác định lỗi `Owner`. Hệ thống hủy booking, hoàn cọc, giải phóng lịch và tạo giao dịch phạt 40% ở trạng thái `Pending`. `Owner` thanh toán khoản phạt qua tài khoản ngân hàng giả lập; khoản phạt chưa thanh toán có thể là căn cứ tạm dừng quyền `Owner`.
+- Yêu cầu bị chủ xe từ chối, hết hạn hoặc bị hủy do chủ xe bị tạm dừng quyền: hoàn toàn bộ cọc mô phỏng.
+- Sau khi chuyến bắt đầu (`Ongoing`), hai bên không hủy yêu cầu; vấn đề phát sinh được gửi khiếu nại.
 
-Ảnh xác nhận và thời điểm chụp hoặc ghi nhận là yêu cầu bắt buộc ở cả lúc nhận xe đầu chuyến và trả xe cuối chuyến. Số công-tơ-mét và mức nhiên liệu là thông tin tùy chọn.
+Renter hoặc Owner tự hủy, và Owner từ chối booking, không bắt buộc nhập lý do. Khi `Staff`/`Admin` xử lý `CancelOwnerFault`, nội dung xử lý và `cancel_reason` là bắt buộc. Khiếu nại phải có mô tả; ảnh là tùy chọn. Hệ thống không thu khoản phạt hoặc thực hiện hoàn tiền thật.
 
-Không dùng OTP hoặc QR để xác thực bàn giao, kể cả trong phần mở rộng. Điều kiện xác nhận của từng bên ở đầu chuyến còn cần mô tả cụ thể; quy tắc hai bên bắt buộc xác nhận **trả xe** đã chốt.
+## 5. Cọc, thanh toán và doanh thu
 
-## 6. Đánh giá và khiếu nại
+Hệ thống ngân hàng giả lập gồm `mock_bank_accounts` và các giao dịch mô phỏng để nhận, tạm giữ, hoàn cọc, chuyển cọc và thanh toán khoản phạt. Mỗi tài khoản người dùng có một tài khoản ngân hàng giả lập; `PlatformEscrow` được tạo sẵn. Tài khoản không lưu giá trị tiền và không hỗ trợ bổ sung tiền; hệ thống không kiểm tra khả năng chi trả. Giao dịch mô phỏng có thể thất bại hoặc bị hủy thao tác. Không kết nối ngân hàng hoặc thực hiện chuyển tiền thật.
 
-- Mỗi bên được gửi một đánh giá cho bên còn lại sau khi đơn `Completed`.
-- Đánh giá được công khai khi cả hai bên đã gửi, hoặc sau **7 ngày tính từ lúc đơn hoàn tất**, tùy điều kiện nào đến trước.
-- Khiếu nại phải có bằng chứng, chẳng hạn ảnh hoặc mô tả cụ thể có thể đối chiếu. Thiếu bằng chứng thì từ chối ngay khi gửi.
-- Gửi khiếu nại chỉ tạo yêu cầu **chờ xử lý** (`pending`), không tự khóa xe, khóa tiền hoặc khóa tài khoản.
-- Khiếu nại và trạng thái đơn thuê được lưu riêng. Một khiếu nại đang mở ngăn đơn đã trả xe chuyển sang hoàn tất.
+Phần tiền thuê còn lại bằng `price_locked_total - deposit_amount` chỉ được hiển thị để tham khảo. `Renter` và `Owner` tự xử lý khoản này ngoài hệ thống; hệ thống không theo dõi trạng thái hoặc giao dịch của khoản tiền còn lại.
 
-## 7. Doanh thu và hoa hồng
+Khi booking chuyển `Completed`, hệ thống lấy tỷ lệ hoa hồng hiện tại từ `system_settings`, tính hoa hồng trên `price_locked_total` và tự động chuyển `deposit_amount - commission_amount` từ `PlatformEscrow` cho `Owner` trong cùng transaction. Hoa hồng được giữ lại tại `PlatformEscrow`; trạng thái cọc chuyển `Transferred` và ghi `revenue_recorded_at`. Với cọc bị mất do `Renter` hủy booking `Accepted`, hệ thống áp dụng cùng công thức, chuyển trạng thái cọc sang `Forfeited` và ghi nhận doanh thu. Chủ xe xem tổng tiền thuê, hoa hồng, phần nhận qua hệ thống và phần còn lại thu trực tiếp để tham khảo; dòng `Forfeited` được hiển thị riêng. Tỷ lệ hoa hồng mặc định là **5%**, nằm trong `[0; 0,25]`, có hiệu lực ngay khi lưu và không tính lại doanh thu đã ghi nhận. Giá trị tiền lưu với hai chữ số thập phân.
 
-Doanh thu được ghi nhận khi đơn `Completed`. Chủ xe chỉ xem doanh thu từ xe của mình, gồm tổng tiền thuê, hoa hồng nền tảng và phần còn lại sau hoa hồng.
+## 6. Giao và trả xe
 
-Hoa hồng = tổng tiền thuê được tính doanh thu × tỷ lệ hoa hồng. Doanh thu sau hoa hồng = tổng tiền thuê được tính doanh thu − hoa hồng. Tỷ lệ hoa hồng là một giá trị cấu hình do quản trị viên quản lý; giá trị cụ thể và cách áp dụng khi thay đổi cấu hình chưa được ấn định.
+Ở đầu chuyến, cả chủ xe và người thuê xác nhận giao, nhận xe trên hệ thống. Hệ thống lưu người và thời điểm xác nhận của từng bên; mới một bên xác nhận thì tiếp tục chờ, đủ hai xác nhận thì yêu cầu chuyển `Ongoing`. Xác nhận đầu tiên được giữ nguyên, không bị xóa hoặc đặt lại do thời gian chờ; xác nhận chỉ không còn được dùng để chuyển trạng thái khi booking đã chuyển sang trạng thái không còn hợp lệ. Không bắt buộc ảnh. Số công-tơ-mét và nhiên liệu do hai bên tự thỏa thuận, hệ thống không theo dõi.
 
-Không có ví, yêu cầu rút tiền hoặc luồng duyệt rút tiền, kể cả mô phỏng. Không xử lý thuế trong giá thuê, hoa hồng hay doanh thu.
+Khi trả xe, hai bên xác nhận riêng; mới một bên xác nhận thì tiếp tục chờ, đủ hai xác nhận thì yêu cầu chuyển `Completed` mà không phụ thuộc trạng thái khiếu nại. Xác nhận đã lưu không hết hạn và không bị xóa hoặc đặt lại do thời gian chờ. Nếu một bên không xác nhận hoặc có bất đồng, bên còn lại có thể gửi khiếu nại để `Staff`/`Admin` xử lý theo mục 7. Khiếu nại được theo dõi riêng và không tự đổi trạng thái yêu cầu thuê. Hệ thống không dùng OTP/QR, không xác minh hiện trạng xe hoặc giải quyết bồi thường thực tế.
 
-## 8. Xử lý vi phạm
+## 7. Đánh giá, báo cáo và khiếu nại
 
-Nhân viên được xử lý tài khoản người thuê, chủ xe và tin đăng trong phạm vi quyền được cấp. Nhân viên không được thay đổi tài khoản nhân viên khác hoặc quản trị viên.
+Mỗi bên được đánh giá bên còn lại một lần cho mỗi yêu cầu `Completed`. Đánh giá không được sửa hoặc xóa bởi người gửi. Đánh giá được công khai khi cả hai bên đã gửi hoặc sau 7 ngày từ lúc hoàn tất, tùy điều kiện nào đến trước. Người dùng có thể báo cáo đánh giá kèm thông tin để `Staff`/`Admin` xem xét.
+
+Người thuê hoặc chủ xe có thể gửi khiếu nại liên quan đến yêu cầu thuê. Nội dung phải có mô tả; người gửi có thể đính kèm ảnh nhưng không bắt buộc. Khiếu nại không được chỉnh sửa sau khi gửi và không có thời hạn gửi. Yêu cầu hợp lệ được lưu ở trạng thái chờ xử lý. Gửi khiếu nại không tự khóa xe, tài khoản hay khoản tiền, cũng không tự kết luận vi phạm hoặc đổi trạng thái booking.
+
+`Staff`/`Admin` chọn một kết quả xử lý: `None` để chỉ ghi chú; `CancelOwnerFault` khi dispute `Open`, booking `Accepted`, đã đến `start_date` và xác định `Owner` không giao xe; hoặc `ForceComplete` khi dispute `Open`, booking `Ongoing`, chuyến đã thực tế kết thúc nhưng thiếu xác nhận `Return`. `CancelOwnerFault` khóa dispute, booking và payment; trong cùng transaction chuyển booking sang `Cancelled`, ghi người, thời điểm, lý do bắt buộc, giải phóng lịch, hoàn cọc bằng `REFUND-{bookingId}`, tạo khoản phạt `PENALTY-{bookingId}` ở trạng thái `Pending` và resolve dispute. `ForceComplete` chuyển `Completed` và settlement trong cùng transaction. Lỗi thì rollback; thao tác lặp không tạo dòng tiền trùng. Khiếu nại gửi sau `Completed` chỉ dùng `None`. Xử lý tai nạn, định giá thiệt hại, bảo hiểm và phân xử pháp lý thực tế nằm ngoài phạm vi đồ án.
+
+## 8. Tạm dừng và xử lý vi phạm
+
+Nhân viên được xử lý tài khoản người thuê, quyền chủ xe và tin đăng trong phạm vi quyền được cấp; không được thay đổi tài khoản `Staff` hoặc `Admin`. Quản trị viên quản lý cả tài khoản vận hành. Quyết định tạm dừng hoặc khóa phải ghi lý do, người thực hiện và thời hạn.
 
 | Mức vi phạm | Thời hạn khóa tài khoản |
 | --- | --- |
@@ -77,23 +86,18 @@ Nhân viên được xử lý tài khoản người thuê, chủ xe và tin đă
 | Trung bình | 30 ngày |
 | Nặng | Vĩnh viễn |
 
-Gỡ tin vi phạm và khóa tài khoản là hai thao tác độc lập. Gỡ một tin không tự khóa chủ xe; gửi một khiếu nại không tự áp dụng các biện pháp này.
+Khi quyền `Owner` bị tạm dừng, mọi xe của chủ xe ngừng hiển thị và không nhận yêu cầu mới. Các yêu cầu `Pending` và `Accepted` được hệ thống hủy và hoàn cọc theo quy tắc tương ứng; chuyến `Ongoing` không tự hủy, `Staff`/`Admin` xử lý riêng nếu có vấn đề. Khoản phạt chưa thanh toán có thể là căn cứ để `Staff`/`Admin` tạm dừng quyền `Owner`; quyền bị tạm dừng không chặn `Owner` thanh toán khoản phạt mô phỏng. Gỡ một tin vi phạm không tự khóa tài khoản; xử lý đánh giá hoặc khiếu nại cũng không tự áp dụng hình phạt.
 
-## 9. Thông tin đăng xe
+`Staff`/`Admin` chỉ xem thông tin cần thiết và không sửa trực tiếp thông tin cá nhân của người dùng. Khóa tài khoản tạo `account_sanction`; mở khóa ghi `lifted_at`, `lifted_by`, không xóa lịch sử; mỗi tài khoản chỉ có một sanction còn hiệu lực. Chỉ `Admin` quản lý tài khoản vận hành và không được tạm dừng hoặc thu hồi quyền của Admin hoạt động cuối cùng có `CanManageAdminAccounts`.
 
-Danh mục dưới đây vẫn được nguồn ghi là **đề xuất**. Các con số về ảnh chưa được chuyển thành yêu cầu đã chốt.
+Gỡ tin vi phạm chuyển `vehicle_listings.moderation_status` sang `Hidden`, chặn hold mới, giữ listing, ảnh, lịch sử và booking đã tạo. Muốn hiển thị lại, `Owner` sửa thông tin và `Staff`/`Admin` duyệt lại tin.
 
-| Thông tin | Yêu cầu đề xuất |
-| --- | --- |
-| Hãng, mẫu xe, biển số, năm sản xuất | Bắt buộc; biển số dùng để kiểm tra đăng trùng xe |
-| Hộp số, nhiên liệu, số chỗ | Bắt buộc; dùng cho tìm kiếm và lọc |
-| Ảnh xe | Tối thiểu 3 ảnh, khoảng 5 MB mỗi ảnh |
-| Giá thuê theo ngày | Bắt buộc |
-| Địa điểm nhận xe và tọa độ | Bắt buộc; phục vụ bản đồ Leaflet.js và OpenStreetMap |
-| Giấy đăng ký xe | Không bắt buộc, khuyến khích cung cấp để xét duyệt |
-| Mô tả và điều khoản riêng | Không bắt buộc |
+## 9. Thông tin công khai và dữ liệu cá nhân
 
-## 10. Bảo vệ dữ liệu
+`Visitor` và `Base User` được xem tin xe của chủ xe và các đánh giá công khai. Mỗi `Base User` được xem, cập nhật thông tin của chính mình. Chỉ `Staff`/`Admin` được xem thông tin cá nhân của người khác trong phạm vi nhiệm vụ; giấy tờ và bằng chứng không hiển thị công khai.
 
-Mật khẩu được hash bằng ASP.NET Core Identity. Nếu thu thập số điện thoại, số CCCD hoặc dữ liệu nhạy cảm tương tự, phải mã hóa khi lưu và giới hạn người được truy cập; không lưu các trường này dưới dạng plain text.
+Mật khẩu được băm bằng ASP.NET Core Identity. Số điện thoại được chuẩn hóa, kiểm tra duy nhất và không mã hóa ở cấp trường dữ liệu trong phiên bản v1; hệ thống giới hạn quyền xem, không công khai và không ghi đầy đủ số điện thoại vào log. Số giấy tờ và dữ liệu nhạy cảm khác cần được bảo vệ khi lưu và giới hạn truy cập. Chức năng xóa tài khoản nằm ngoài phạm vi v1 để giữ thiết kế đơn giản và bảo toàn liên kết lịch sử giao dịch.
 
+## 10. Giới hạn phạm vi
+
+Đồ án mô phỏng nền tảng kết nối chủ xe và người thuê. Không thực hiện xác minh pháp lý thực tế về người, xe hoặc giấy tờ; không xử lý bảo hiểm, thu nợ, chuyển tiền thật, định giá thiệt hại, theo dõi GPS, khóa xe thông minh hoặc phân xử tranh chấp ngoài hệ thống.

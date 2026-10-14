@@ -92,3 +92,13 @@ node_modules/
 !/docs/.obsidian/app.json
 /docs/.trash/
 /docs/report/exports/
+# Code Runner temporary files
+tempCodeRunnerFile.*
+
+# Local uploaded images/documents (CCCD, GPLX, Vehicle Docs, Disputes)
+**/wwwroot/uploads/*
+!**/wwwroot/uploads/.gitkeep
+
+# Environment variables (API keys, secrets)
+.env
+*.env
