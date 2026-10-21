@@ -23,7 +23,7 @@ public class AccountSanction
     public string? LiftedBy { get; set; }
     public DateTime? LiftedAt { get; set; }
 
-    public ApplicationUser User { get; set; } = null!;
-    public ApplicationUser Issuer { get; set; } = null!;
-    public ApplicationUser? Lifter { get; set; }
+    public ApplicationUser User { get; set; } = null!; // suspended user ? 
+    public ApplicationUser Issuer { get; set; } = null!; // admin/staff who suspend the user 
+    public ApplicationUser? Lifter { get; set; } // admin/staff who lift the sanction 
 }
