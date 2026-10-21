@@ -11,22 +11,21 @@ public class OwnerProfile
     [Required, MaxLength(255)]
     public string UserId { get; set; } = string.Empty;
     [Required, MaxLength(255)]
-    public string CccdImageFront { get; set; } = string.Empty;
+    public string CccdImageFront { get; set; } = string.Empty; // url cccd img
     [Required, MaxLength(255)]
-    public string CccdImageBack { get; set; } = string.Empty;
+    public string CccdImageBack { get; set; } = string.Empty; // url cccd img 
     [Required, MaxLength(255)]
-    public string CccdNumber { get; set; } = string.Empty;
+    public string CccdNumber { get; set; } = string.Empty; 
     [Required, MaxLength(20)]
-    public string ApprovalStatus { get; set; } = OwnerApprovalStatuses.Pending;
+    public string ApprovalStatus { get; set; } = OwnerApprovalStatuses.Pending; // owner apply status
     [Required, MaxLength(20)]
-    public string AccessStatus { get; set; } = OwnerAccessStatuses.Inactive;
+    public string AccessStatus { get; set; } = OwnerAccessStatuses.Inactive; // owner account status 
     [MaxLength(255)]
-    public string? RejectReason { get; set; }
-    public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
+    public string? RejectReason { get; set; } // nullable -> owner apply rejected 
+    public DateTime SubmittedAt { get; set; } = DateTime.UtcNow; // apply info 
     [MaxLength(255)]
-    public string? ReviewedBy { get; set; }
-    public DateTime? ReviewedAt { get; set; }
-
-    public ApplicationUser User { get; set; } = null!;
-    public ApplicationUser? Reviewer { get; set; }
+    public string? ReviewedBy { get; set; } // staff/admin id 
+    public DateTime? ReviewedAt { get; set; } //review info 
+    public ApplicationUser User { get; set; } = null!; // existed user (base user)
+    public ApplicationUser? Reviewer { get; set; } // staff/admin 
 }

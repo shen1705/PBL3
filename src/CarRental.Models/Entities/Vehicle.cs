@@ -23,10 +23,10 @@ public class Vehicle
     [Required, MaxLength(20)]
     public string FuelType { get; set; } = string.Empty;
     [Required, MaxLength(20)]
-    public string Status { get; set; } = VehicleStatuses.PendingApproval;
+    public string Status { get; set; } = VehicleStatuses.PendingApproval; // approval status 
 
-    public ApplicationUser Owner { get; set; } = null!;
-    public VehicleDocument? Document { get; set; }
+    public ApplicationUser Owner { get; set; } = null!; // owner 
+    public VehicleDocument? Document { get; set; } // vehicle information 
     public ICollection<VehicleListing> Listings { get; set; } = new List<VehicleListing>();
     public ICollection<VehicleUnavailability> Unavailabilities { get; set; } = new List<VehicleUnavailability>();
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
