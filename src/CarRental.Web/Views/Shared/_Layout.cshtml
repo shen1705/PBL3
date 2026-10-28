@@ -1,50 +1,98 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="vi">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - CarRental.Web</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/CarRental.Web.styles.css" asp-append-version="true" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@(ViewData["Title"] ?? "AZU Car - Thuê xe tự lái")</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/index.css" asp-append-version="true">
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CarRental.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="/" class="logo" aria-label="AZU Car - Trang chủ">
+                <img src="~/images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+            </a>
+            
+            <nav class="nav-links" aria-label="Điều hướng chính">
+                <a href="/about" id="about-nav-link">Về AZU Car</a>
+                <a href="/become-owner" id="owner-nav-link">Trở thành chủ xe</a>
+                <a href="/my-trips" id="trips-nav-link">Chuyến của tôi</a>
+                <a href="/support" id="support-nav-link">Trợ giúp</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div id="guest-actions">
+                    <button type="button" class="btn-register-outline">Đăng ký</button>
+                    <button type="button" class="btn-slate">Đăng nhập</button>
+                </div>
+                <a id="account-display" class="account-display" href="/my-trips#account" aria-label="Thông tin tài khoản" hidden>
+                    <span class="account-avatar" id="account-avatar"></span>
+                    <span id="account-name"></span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    @RenderBody()
+
+    <!-- Footer -->
+    <footer class="footer" id="support">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <a href="/" class="logo footer-logo">
+                    <img src="~/images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+                </a>
+                <p class="footer-desc">Nền tảng chia sẻ và cho thuê ô tô tự lái hàng đầu Việt Nam. Mang lại những chuyến đi tự do và hạnh phúc cho triệu hành trình.</p>
+            </div>
+            <div class="footer-col">
+                <h4>VỀ AZU CAR</h4>
+                <ul>
+                    <li><a href="/about">Về chúng tôi</a></li>
+                    <li><a href="/about#features">Tính năng</a></li>
+                    <li><a href="/my-trips#privacy">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>DỊCH VỤ</h4>
+                <ul>
+                    <li><a href="/find">Thuê xe tự lái</a></li>
+                    <li><a href="/become-owner">Đăng ký chủ xe</a></li>
+                    <li><a href="/support">Hỗ trợ khách hàng</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>HỖ TRỢ &amp; LIÊN HỆ</h4>
+                <p><strong>Hotline:</strong> 1900 9217 (8:00 - 21:00)</p>
+                <p><strong>Email:</strong> support@azucar.vn</p>
+                <p><strong>Văn phòng:</strong> Phường Hải Châu, TP. Đà Nẵng</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-flex">
+                <p>2026 AZU Car Việt Nam. Bảo lưu mọi quyền lợi.</p>
+                <div class="footer-bottom-links">
+                    <a href="/my-trips#privacy">Điều khoản dịch vụ</a>
+                    <a href="/my-trips#privacy">Chính sách hoạt động</a>
+                    <a href="/my-trips#privacy">Quy chế hoạt động</a>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - CarRental.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Shared Modals -->
+    <partial name="_Modals" />
+
+    <!-- Scripts -->
+    <script src="~/js/azu-store.js" asp-append-version="true"></script>
+    <script src="~/js/index.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

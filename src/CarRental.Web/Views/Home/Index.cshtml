@@ -1,8 +1,587 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "AZU Car - Thuê xe tự lái";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<main class="main-wrapper">
+    <div class="container">
+        <!-- Hero Banner Box -->
+        <section class="hero-card">
+            <div class="hero-left">
+                <div class="hero-badge">
+                    <i class="fa-solid fa-car-side"></i> Hơn 10.000 xe khắp Việt Nam
+                </div>
+                
+                <h1>Thuê xe tự lái, <span class="underline-text">dễ như đặt</span> <br>phòng khách sạn</h1>
+                
+                <p class="hero-desc">
+                    Chỉ cần GPLX & CCCD, nhận xe trong 30 phút. Giá minh bạch từ 600K/ngày, miễn phí huỷ trước 6h chuyến đi.
+                </p>
+
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <h3>10.000+</h3>
+                        <p>XE TRÊN NỀN TẢNG</p>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <h3>63</h3>
+                        <p>TỈNH THÀNH TOÀN QUỐC</p>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <h3>4.8 <i class="fa-solid fa-star"></i></h3>
+                        <p>ĐÁNH GIÁ TRUNG BÌNH</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-right">
+                <div class="car-preview-card">
+                    <div class="car-preview-img">
+                        <span class="preview-badge"><i class="fa-solid fa-circle"></i> SUV điện hiện đại 2026</span>
+                        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800" alt="VinFast VF8">
+                        <div class="car-preview-overlay">
+                            <div class="car-info">
+                                <h4>VinFast VF8 Plus</h4>
+                                <p>Pin đầy 100% • Tự động</p>
+                            </div>
+                            <div class="car-price">
+                                <span class="price-val">1.100.000đ</span>
+                                <span class="price-unit">/ngày</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search Bar -->
+        <section class="search-bar-card">
+            <div class="search-col" id="openLocationModal" style="cursor: pointer;">
+                <div class="col-label"><i class="fa-solid fa-location-dot"></i> ĐỊA ĐIỂM</div>
+                <div class="col-value-row">
+                    <span class="val-text" id="selectedLocationText">TP. Đà Nẵng</span>
+                    <button class="btn-change" type="button">Thay đổi</button>
+                </div>
+            </div>
+
+            <div class="search-col" id="openTimeModal" style="cursor: pointer;">
+                <div class="col-label"><i class="fa-regular fa-calendar-days"></i> THỜI GIAN THUÊ</div>
+                <div class="rental-time-values">
+                    <span><strong>Nhận:</strong> <span class="val-text" id="pickupTimeText">09:00, 15/10/2026</span></span>
+                    <span class="rental-time-separator">–</span>
+                    <span><strong>Trả:</strong> <span class="val-text" id="returnTimeText">18:00, 18/10/2026</span></span>
+                </div>
+            </div>
+
+            <a href="/find" class="btn-search-main" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-magnifying-glass"></i> Tìm xe
+            </a>
+        </section>
+
+        <!-- Tại sao chọn AZU Car ? -->
+        <section class="section-why">
+            <h2 class="section-title">Tại sao chọn AZU Car ?</h2>
+            <p class="section-desc">Chúng tôi mang lại trải nghiệm thuê xe tự lái trọn vẹn, an tâm và tối ưu nhất cho mỗi chuyến hành trình của bạn.</p>
+            
+            <div class="why-grid">
+                <div class="why-card">
+                    <div class="why-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>An toàn & Bảo hiểm</h3>
+                    <p>Mọi chuyến đi đều được bảo vệ bởi gói bảo hiểm chuyến đi vững chắc từ MIC & VNI toàn diện.</p>
+                </div>
+                <div class="why-card">
+                    <div class="why-icon"><i class="fa-regular fa-clock"></i></div>
+                    <h3>Giao xe tận nơi 24/7</h3>
+                    <p>Nhận xe ngay tại sân bay, khách sạn hoặc tại nhà riêng bất kể khung giờ nào trong ngày.</p>
+                </div>
+                <div class="why-card">
+                    <div class="why-icon"><i class="fa-solid fa-tag"></i></div>
+                    <h3>Giá tốt, minh bạch</h3>
+                    <p>Thông tin chi phí rõ ràng, không phí ẩn. Cam kết hoàn tiền nếu khách hàng không hài lòng.</p>
+                </div>
+                <div class="why-card">
+                    <div class="why-icon"><i class="fa-solid fa-headset"></i></div>
+                    <h3>Hỗ trợ 24/7</h3>
+                    <p>Đội ngũ chăm sóc khách hàng luôn đồng hành cùng bạn trên mọi nẻo đường Việt Nam.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Xe phổ biến tại TP. Đà Nẵng -->
+        <section class="section-cars">
+            <h2 class="section-title">Xe phổ biến tại TP. Đà Nẵng</h2>
+            <p class="section-desc">Khám phá các mẫu xe chất lượng hàng đầu được nhiều người thuê nhất.</p>
+
+            <div class="car-filter-tabs">
+                <button class="filter-tab active" data-filter="all">Tất cả</button>
+                <button class="filter-tab" data-filter="4-seats">4 chỗ</button>
+                <button class="filter-tab" data-filter="7-seats">7 chỗ</button>
+                <button class="filter-tab" data-filter="suv">SUV</button>
+                <button class="filter-tab" data-filter="electric">Xe điện</button>
+            </div>
+
+            <div class="cars-grid" id="homeCarsGrid">
+                <!-- Xe 1: VinFast VF8 -->
+                <div class="car-item-card" data-category="all suv electric" data-seats="5">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">ĐẶT NHANH</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="VinFast VF8">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>VinFast VF8</h3>
+                            <span class="car-trans">Xe điện • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">1.100.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 2: Hyundai Tucson 2022 -->
+                <div class="car-item-card" data-category="all suv" data-seats="5">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">ĐẶT NHANH</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.8</span>
+                        <img src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=600" alt="Hyundai Tucson">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Hyundai Tucson 2022</h3>
+                            <span class="car-trans">SUV • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">950.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 3: Mazda CX-5 2023 -->
+                <div class="car-item-card" data-category="all suv" data-seats="5">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">ĐẶT NHANH</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                        <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600" alt="Mazda CX-5">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Mazda CX-5 2023</h3>
+                            <span class="car-trans">SUV • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Thanh Khê, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">900.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 4: Mitsubishi Xpander 2024 (7 chỗ) -->
+                <div class="car-item-card" data-category="all 7-seats" data-seats="7">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">7 CHỖ HOT</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                        <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600" alt="Mitsubishi Xpander 2024">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Mitsubishi Xpander 2024</h3>
+                            <span class="car-trans">7 chỗ • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường An Hải, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">765.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 5: Suzuki Ertiga Hybrid 2025 (7 chỗ) -->
+                <div class="car-item-card" data-category="all 7-seats" data-seats="7">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">7 CHỖ TIỆN NGHI</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                        <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600" alt="Suzuki Ertiga Hybrid 2025">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Suzuki Ertiga Hybrid 2025</h3>
+                            <span class="car-trans">7 chỗ • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hòa Cường, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">840.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 6: Honda BR-V 2024 (7 chỗ) -->
+                <div class="car-item-card" data-category="all 7-seats" data-seats="7">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">7 CHỖ RỘNG RÃI</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.8</span>
+                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="Honda BR-V 2024">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Honda BR-V 2024</h3>
+                            <span class="car-trans">7 chỗ • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">710.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 7: Toyota Innova Cross 2024 (7 chỗ, SUV) -->
+                <div class="car-item-card" data-category="all 7-seats suv" data-seats="7">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">XE GIA ĐÌNH</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                        <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600" alt="Toyota Innova Cross 2024">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Toyota Innova Cross 2024</h3>
+                            <span class="car-trans">7 chỗ • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">950.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 8: Toyota Vios G 2024 (4 chỗ) -->
+                <div class="car-item-card" data-category="all 4-seats" data-seats="5">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">TIẾT KIỆM</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                        <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&q=80&w=600" alt="Toyota Vios G 2024">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Toyota Vios G 2024</h3>
+                            <span class="car-trans">5 chỗ • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">688.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 9: Honda City RS 2023 (4 chỗ) -->
+                <div class="car-item-card" data-category="all 4-seats" data-seats="5">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">ĐẶT NHANH</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                        <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600" alt="Honda City RS 2023">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Honda City RS 2023</h3>
+                            <span class="car-trans">5 chỗ • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">625.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 10: Mazda 3 Luxury 2024 (4 chỗ) -->
+                <div class="car-item-card" data-category="all 4-seats" data-seats="5">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">SANG TRỌNG</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.8</span>
+                        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600" alt="Mazda 3 Luxury 2024">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Mazda 3 Luxury 2024</h3>
+                            <span class="car-trans">5 chỗ • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hòa Cường, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">782.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 11: VinFast VF3 2026 (Xe điện, 4 chỗ) -->
+                <div class="car-item-card" data-category="all 4-seats electric" data-seats="4">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">XE ĐIỆN MINI</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                        <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800" alt="VinFast VF3 2026">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>VinFast VF3 2026</h3>
+                            <span class="car-trans">Xe điện • 4 chỗ</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hòa Thuận Tây, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">524.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 12: Ford Territory Trend 2025 (SUV) -->
+                <div class="car-item-card" data-category="all suv" data-seats="5">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">THỂ THAO</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                        <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600" alt="Ford Territory Trend 2025">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Ford Territory Trend 2025</h3>
+                            <span class="car-trans">SUV • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Cẩm Lệ, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">888.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 13: Kia Sonet Luxury 2023 (SUV) -->
+                <div class="car-item-card" data-category="all suv" data-seats="5">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">GẦM CAO</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="Kia Sonet Luxury 2023">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>Kia Sonet Luxury 2023</h3>
+                            <span class="car-trans">SUV • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">648.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 14: VinFast VF e34 2024 (Xe điện, SUV) -->
+                <div class="car-item-card" data-category="all suv electric" data-seats="5">
+                    <div class="car-img-box">
+                        <span class="car-badge-top">XE XANH</span>
+                        <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="VinFast VF e34 2024">
+                    </div>
+                    <div class="car-info-box">
+                        <div class="car-name-row">
+                            <h3>VinFast VF e34 2024</h3>
+                            <span class="car-trans">Xe điện • Tự động</span>
+                        </div>
+                        <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Thanh Khê, TP. Đà Nẵng</p>
+                        <div class="car-bottom-row">
+                            <div class="car-price-box">
+                                <span class="lbl">ĐƠN GIÁ</span>
+                                <div class="val">750.000đ<span> / ngày</span></div>
+                            </div>
+                            <a href="/find" class="btn-detail">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-all-container">
+                <a href="/find" class="btn-view-all" style="text-decoration: none; display: inline-block;">Xem tất cả xe</a>
+            </div>
+        </section>
+
+        <!-- Chỉ 3 bước để có xe -->
+        <section class="section-steps-box">
+            <h2>Chỉ 3 bước để có xe</h2>
+            <p>Hệ thống quy trình đơn giản, nhanh chóng giúp bạn bắt đầu chuyến đi ngay lập tức.</p>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">01</div>
+                    <div class="step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                    <h4>Bước 1: Tìm & đặt xe</h4>
+                    <p>Tìm chiếc xe bạn ưng ý nhất trên website hoặc ứng dụng, kiểm tra thông tin chi tiết và chọn đặt nhanh.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">02</div>
+                    <div class="step-icon"><i class="fa-solid fa-car-side"></i></div>
+                    <h4>Bước 2: Nhận xe</h4>
+                    <p>Bàn giao giấy tờ cần thiết, nhận xe tận nơi hoặc đến trực tiếp bãi đỗ của chủ xe đã hẹn trước.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">03</div>
+                    <div class="step-icon"><i class="fa-solid fa-thumbs-up"></i></div>
+                    <h4>Bước 3: Trả xe & đánh giá</h4>
+                    <p>Hoàn trả xe đúng hạn và tình trạng ban đầu, gửi đánh giá 5 sao cho chủ xe nhiệt tình và uy tín.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Khách hàng nói gì về AZU Car? -->
+        <section class="section-testimonials">
+            <h2 class="section-title">Khách hàng nói gì về AZU Car?</h2>
+            <p class="section-desc">Đã có hàng vạn chuyến đi an toàn cùng những phản hồi chân thực từ cộng đồng người dùng.</p>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <i class="fa-solid fa-quote-left quote-icon"></i>
+                    <p>"Thuê chiếc VinFast VF8 ở đây siêu tiện lợi, xe còn mới nguyên và sạc đầy pin. Chủ xe rất chu đáo hướng dẫn nhiệt tình."</p>
+                    <div class="user-info">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200" alt="User">
+                        <div>
+                            <h4>Nguyễn Minh Tuấn</h4>
+                            <p>Du khách Hà Nội</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <i class="fa-solid fa-quote-left quote-icon"></i>
+                    <p>"Lần đầu tiên trải nghiệm tự lái đi Đà Lạt cùng gia đình. Thủ tục nhận xe nhanh chóng chỉ mất 15 phút là lăn bánh."</p>
+                    <div class="user-info">
+                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200" alt="User">
+                        <div>
+                            <h4>Trần Thị Nụ</h4>
+                            <p>Nhà thiết kế đồ họa</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <i class="fa-solid fa-quote-left quote-icon"></i>
+                    <p>"Giá cả cực kỳ minh bạch và bảo hiểm đầy đủ làm mình rất yên tâm khi di chuyển trên quãng đường dài miền Trung."</p>
+                    <div class="user-info">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200" alt="User">
+                        <div>
+                            <h4>Phạm Hoàng Nam</h4>
+                            <p>Nhiếp ảnh gia tự do</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bạn có xe nhàn rỗi? -->
+        <section class="section-owner-banner">
+            <div class="owner-text">
+                <h2>Bạn có xe nhàn rỗi? Cho thuê & kiếm thêm thu nhập</h2>
+                <p>Gia nhập cộng đồng chủ xe AZU Car để tối ưu hoá chi phí vận hành xe và tạo ra nguồn lợi nhuận thụ động vững chắc mỗi tháng.</p>
+                <ul class="owner-list">
+                    <li><i class="fa-solid fa-check"></i> Thu nhập từ 10 - 15 triệu đồng hàng tháng đơn giản</li>
+                    <li><i class="fa-solid fa-check"></i> Hệ thống bảo hiểm toàn diện bảo vệ tài sản của bạn</li>
+                    <li><i class="fa-solid fa-check"></i> Công cụ định giá tự động và hỗ trợ vận hành 24/7</li>
+                </ul>
+                <button class="btn-owner-reg" id="openOwnerModalBtn">Đăng ký ngay</button>
+            </div>
+            <div class="owner-img">
+                <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=800" alt="Chủ xe AZU Car">
+            </div>
+        </section>
+
+        <!-- Thuê xe tại các thành phố lớn -->
+        <section class="section-cities">
+            <h2 class="section-title">Thuê xe tại các thành phố lớn</h2>
+            <p class="section-desc">Tìm kiếm những hành trình tuyệt vời tại những địa điểm du lịch hàng đầu Việt Nam.</p>
+            
+            <div class="cities-grid">
+                <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&q=80&w=600')">
+                    <div class="city-overlay">
+                        <h3>TP. Hồ Chí Minh</h3>
+                        <p>3.200+ xe đang sẵn sàng</p>
+                    </div>
+                </div>
+                <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=600')">
+                    <div class="city-overlay">
+                        <h3>Hà Nội</h3>
+                        <p>2.400+ xe đang sẵn sàng</p>
+                    </div>
+                </div>
+                <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&q=80&w=600')">
+                    <div class="city-overlay">
+                        <h3>Đà Nẵng</h3>
+                        <p>1.100+ xe đang sẵn sàng</p>
+                    </div>
+                </div>
+                <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=600')">
+                    <div class="city-overlay">
+                        <h3>Nha Trang</h3>
+                        <p>800+ xe đang sẵn sàng</p>
+                    </div>
+                </div>
+                <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600')">
+                    <div class="city-overlay">
+                        <h3>Đà Lạt</h3>
+                        <p>950+ xe đang sẵn sàng</p>
+                    </div>
+                </div>
+                <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=600')">
+                    <div class="city-overlay">
+                        <h3>Phú Quốc</h3>
+                        <p>600+ xe đang sẵn sàng</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+@section Scripts {
+    <script src="~/js/find.js" asp-append-version="true"></script>
+}

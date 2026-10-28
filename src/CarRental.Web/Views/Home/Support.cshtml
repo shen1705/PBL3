@@ -1,0 +1,75 @@
+@{
+    ViewData["Title"] = "Trò chuyện & Hỗ trợ";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/support.css" asp-append-version="true">
+}
+
+<main class="support-shell">
+    <div class="container support-container">
+        <!-- Page Heading -->
+        <div class="support-page-heading">
+            <a href="/" class="btn-back" aria-label="Quay lại trang chủ" title="Quay lại">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h1 class="page-title">Trò chuyện</h1>
+        </div>
+
+        <!-- Main White Card -->
+        <div class="support-main-card">
+            <!-- Màn hình trạng thái trống -->
+            <div class="chat-empty-state" id="chatEmptyState">
+                <div class="empty-illustration" aria-hidden="true">
+                    <svg width="240" height="200" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="42" y="16" width="168" height="150" rx="36" transform="rotate(-6 42 16)" fill="#faf4eb"/>
+                        <path d="M126 102C126 84.3269 140.327 70 158 70C175.673 70 190 84.3269 190 102C190 119.673 175.673 134 158 134C151.782 134 145.981 132.227 141.082 129.155L127 135L130.643 121.725C127.702 116.147 126 109.313 126 102Z" fill="#dfb76c"/>
+                        <g filter="drop-shadow(0 4px 12px rgba(28, 38, 53, 0.15))">
+                            <rect x="94" y="24" width="94" height="64" rx="14" fill="#1c2635"/>
+                            <rect x="108" y="38" width="66" height="5" rx="2.5" fill="#ffffff"/>
+                            <rect x="108" y="49" width="66" height="5" rx="2.5" fill="#ffffff"/>
+                            <rect x="108" y="60" width="40" height="5" rx="2.5" fill="#d1a34b"/>
+                            <path d="M106 88L96 102L116 88H106Z" fill="#1c2635"/>
+                        </g>
+                        <circle cx="168" cy="116" r="11" fill="#d1a34b"/>
+                        <path d="M168 120.5L163.5 116C162.2 114.7 162.2 112.5 163.5 111.2C164.8 109.9 167 109.9 168 111.2C169 109.9 171.2 109.9 172.5 111.2C173.8 112.5 173.8 114.7 172.5 116L168 120.5Z" fill="#ffffff"/>
+                        <circle cx="188" cy="148" r="14" fill="#b88a32"/>
+                        <path d="M188 153.8L182.2 148C180.5 146.3 180.5 143.5 182.2 141.8C183.9 140.1 186.7 140.1 188 141.8C189.3 140.1 192.1 140.1 193.8 141.8C195.5 143.5 195.5 146.3 193.8 148L188 153.8Z" fill="#ffffff"/>
+                        <g>
+                            <circle cx="86" cy="132" r="48" fill="#ffffff"/>
+                            <path d="M46 172C46 148.8 63.9 130 86 130C108.1 130 126 148.8 126 172H46Z" fill="#1c2635"/>
+                            <path d="M80 130L86 140L92 130" stroke="#d1a34b" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M78 126H94V138H78V126Z" fill="#fbd2b3"/>
+                            <path d="M71 106C71 96 78 88 86 88C94 88 101 96 101 106V114C101 122 94 128 86 128C78 128 71 122 71 114V106Z" fill="#fedcc2"/>
+                            <path d="M68 102C68 90 76 83 87 83C96 83 103 89 104 98L97 97C90 97 86 100 81 105L76 106C71 106 68 104 68 102Z" fill="#0f172a"/>
+                            <circle cx="91" cy="108" r="1.8" fill="#0f172a"/>
+                            <path d="M88 116C90 117.5 93 117.5 95 116" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round"/>
+                            <path d="M72 108C70 108 68 104 70 100C72 90 78 86 86 86" stroke="#1c2635" stroke-width="3" stroke-linecap="round" fill="none"/>
+                            <rect x="67" y="103" width="6" height="12" rx="3" fill="#d1a34b"/>
+                            <path d="M72 112C72 119 79 122 88 122" stroke="#1c2635" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                            <circle cx="88" cy="122" r="2.8" fill="#d1a34b"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <h2 class="empty-title">Bạn chưa có tin nhắn nào.</h2>
+                <p class="empty-desc">Trò chuyện trực tiếp cùng Trợ lý ảo AZU Car để được giải đáp mọi thắc mắc về chuyến đi 24/7.</p>
+
+                <a href="/chatbot" class="btn-start-chat" id="btnStartChat">
+                    <i class="fa-solid fa-robot"></i>
+                    <span>Chat với AZU - Chatbot AZU Car</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Hotline Support Footer Note -->
+        <div class="support-footer-note">
+            <i class="fa-solid fa-phone"></i>
+            <span>Cần hỗ trợ khẩn cấp trên đường? Hotline 24/7: <a href="tel:19009217"><strong>1900 9217</strong></a> • Email: <a href="mailto:support@azucar.vn">support@azucar.vn</a></span>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script src="~/js/support.js" asp-append-version="true"></script>
+}
