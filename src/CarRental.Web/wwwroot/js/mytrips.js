@@ -644,9 +644,13 @@ logoutModal?.addEventListener('click', (e) => {
     }
 });
 
-confirmLogoutBtn?.addEventListener('click', () => {
-    sessionStorage.clear();
-    window.location.href = 'index.html';
+confirmLogoutBtn?.addEventListener('click', async () => {
+    if (window.AzuStore?.logout) {
+        await window.AzuStore.logout();
+    } else {
+        sessionStorage.clear();
+        window.location.href = '/';
+    }
 });
 
 // address management
