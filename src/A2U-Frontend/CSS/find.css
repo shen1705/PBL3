@@ -1949,18 +1949,32 @@ body {
 }
 
 .report-car-row {
-    margin-top: 12px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
     text-align: center;
 }
 
 .report-link {
-    font-size: 13px;
-    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #ef4444;
     text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.report-link i {
+    font-size: 13px;
 }
 
 .report-link:hover {
-    color: #ef4444;
+    color: #dc2626;
+    text-decoration: underline;
 }
 
 /* Responsive */
@@ -2490,4 +2504,356 @@ body {
     .form-row-2 {
         grid-template-columns: 1fr;
     }
+}
+
+
+/* ========================================================
+   MODAL BÁO CÁO XE (REPORT CAR MODAL)
+   ======================================================== */
+.report-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10060;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 16px;
+    box-sizing: border-box;
+    opacity: 1;
+    transition: opacity 0.25s ease;
+}
+
+.report-modal-overlay[hidden] {
+    display: none !important;
+}
+
+.report-modal-dialog {
+    background: #ffffff;
+    width: 100%;
+    max-width: 520px;
+    border-radius: 20px;
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.35);
+    position: relative;
+    padding: 28px 28px 24px;
+    box-sizing: border-box;
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: reportModalFadeIn 0.25s ease-out;
+}
+
+@keyframes reportModalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.report-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.report-modal-close:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+.report-modal-header {
+    margin-bottom: 16px;
+    padding-right: 32px;
+}
+
+.report-modal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.report-modal-header h3 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.3;
+}
+
+.report-modal-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.45;
+}
+
+/* Mini Car Preview */
+.report-car-preview {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 18px;
+}
+
+.report-car-thumb {
+    width: 64px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #e2e8f0;
+    flex-shrink: 0;
+}
+
+.report-car-meta h4 {
+    margin: 0 0 3px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.report-car-location {
+    font-size: 12.5px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.report-car-location i {
+    color: #ef4444;
+    font-size: 11px;
+}
+
+/* Form controls */
+.report-car-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.report-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.report-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.report-label .req {
+    color: #ef4444;
+}
+
+.report-select,
+.report-input,
+.report-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: #1e293b;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.report-select:focus,
+.report-input:focus,
+.report-textarea:focus {
+    outline: none;
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.report-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.report-input-hint {
+    font-size: 11.5px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.report-checkbox-wrap {
+    padding: 4px 0;
+}
+
+.report-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: #475569;
+    cursor: pointer;
+    line-height: 1.45;
+}
+
+.report-checkbox-label input[type="checkbox"] {
+    margin-top: 2px;
+    accent-color: #ef4444;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Actions */
+.report-modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.btn-report-cancel {
+    flex: 1;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-report-cancel:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+}
+
+.btn-report-submit {
+    flex: 1.5;
+    padding: 11px;
+    border-radius: 10px;
+    border: none;
+    background: #ef4444;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.btn-report-submit:hover {
+    background: #dc2626;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.35);
+}
+
+/* Success State */
+.report-success-state {
+    text-align: center;
+    padding: 20px 12px 10px;
+    animation: reportModalFadeIn 0.3s ease;
+}
+
+.report-success-state[hidden] {
+    display: none !important;
+}
+
+.report-success-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: #dcfce7;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+.report-success-state h3 {
+    margin: 0 0 8px;
+    font-size: 19px;
+    color: #0f172a;
+}
+
+.report-success-state p {
+    font-size: 13.5px;
+    color: #64748b;
+    margin: 0 0 14px;
+    line-height: 1.5;
+}
+
+.report-success-ticket {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #334155;
+    margin-bottom: 12px;
+}
+
+.report-success-ticket strong {
+    color: #0f172a;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.report-success-note {
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+    margin-bottom: 16px !important;
+}
+
+.btn-report-done {
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: none;
+    background: #1c2635;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-report-done:hover {
+    background: #0f172a;
 }
