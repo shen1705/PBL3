@@ -151,7 +151,6 @@ public static class ReferenceCodes
 }
 
 // dispute status 
-
 public static class DisputeStatuses
 {
     public const string Open = "Open";
@@ -181,4 +180,29 @@ public static class BusinessRules
     public const decimal OwnerCancelPenaltyRate = 0.40m;  // Owner penalty 40% price_locked_total
     public const decimal DefaultCommissionRate = 0.05m;   // commission 
     public const int ResponseDeadlineHours = 24;          // owner response time 
+}
+
+// error 
+public static class ErrorCodes
+{
+    public const string NotFound = "NotFound";         // 404
+    public const string Forbidden = "Forbidden";       // tu choi truy cap
+    public const string Unauthorized = "Unauthorized"; // chua dang nhap
+    public const string Validation = "Validation";     // loi form
+    public const string Conflict = "Conflict";         // trung lich / email
+    public const string InvalidState = "InvalidState"; // sai trang thai
+    public const string Expired = "Expired";           // het han giu cho / duyet
+    public const string Unexpected = "Unexpected";     // loi he thong
+
+    public static readonly IReadOnlyList<string> All =
+    [
+        NotFound,
+        Forbidden,
+        Unauthorized,
+        Validation,
+        Conflict,
+        InvalidState,
+        Expired,
+        Unexpected
+    ];
 }

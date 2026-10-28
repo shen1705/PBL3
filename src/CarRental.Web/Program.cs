@@ -1,23 +1,20 @@
 using CarRental.Data;
 using CarRental.Models.Entities;
+using CarRental.Services;
 using CarRental.Services.Availability;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36))));
+builder.Services.AddData(builder.Configuration);
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o => o.User.RequireUniqueEmail = true)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<IVehicleAvailabilityService, VehicleAvailabilityService>();
+builder.Services.AddServices();
 
 var app = builder.Build();
 
@@ -39,7 +36,7 @@ app.MapControllerRoute(
 
 if (app.Environment.IsDevelopment())
 {
-    // Đường dẫn thử tạm thời, xóa khi đã có controller thật
+    // test endpoint
     app.MapGet("/dev/availability", async (
         int vehicleId, DateTime start, DateTime end, int? excludeBookingId,
         IVehicleAvailabilityService svc) =>
