@@ -1,26 +1,28 @@
 # Bảng Dữ Liệu Mẫu Hệ Thống (Seed Data Reference)
 
 Tất cả dữ liệu mẫu được khởi tạo tự động trong môi trường Development thông qua [`DbInitializer.SeedAsync`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Data/DbInitializer.cs).  
-Mật khẩu mặc định cho tất cả tài khoản thử nghiệm: **`Test@12345`**
+- **Mật khẩu mặc định:** **`Test@12345`** áp dụng cho tất cả tài khoản.
+- **Phương thức đăng nhập:** Có thể sử dụng **Username**, **Email** hoặc **Số điện thoại**.
+- **Cơ chế chặn vi phạm:** Tài khoản `renter4` đang chịu án phạt (`Suspend7d`), hệ thống sẽ từ chối đăng nhập và trả về lý do cụ thể kèm hạn phạt.
 
 ---
 
 ## 1. Danh sách tài khoản người dùng (`users`, `roles`, `claims`)
 
-| Username | Họ và tên | Email | Vai trò (`Roles`) | Giấy tờ / Trạng thái đặc biệt | Mục đích kiểm thử |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `renter1` | Nguyễn Văn An | `renter1@carrental.test` | Renter | GPLX Hạng B2 | Khách thuê thường, có đơn đã hoàn thành và đơn đang thuê |
-| `renter2` | Trần Thị Bình | `renter2@carrental.test` | Renter | GPLX Hạng B2 | Khách thuê thường, có đơn chờ duyệt |
-| `renter3` | Lê Minh Cường | `renter3@carrental.test` | Renter | GPLX Hạng B2 | Khách thuê đã có đánh giá và khiếu nại đã giải quyết |
-| `renter4` | Đỗ Thị Mai | `renter4@carrental.test` | Renter | GPLX Hạng B2 · **Bị phạt (Suspend7d)** | Kiểm thử chặn truy cập tài khoản vi phạm bị tạm khóa |
-| `owner1` | Phạm Quốc Dũng | `owner1@carrental.test` | Renter, Owner | CCCD Đã duyệt · Tài khoản Active | Chủ xe cá nhân tại Hà Nội & Đà Nẵng |
-| `owner2` | Hoàng Thị Em | `owner2@carrental.test` | Renter, Owner | CCCD Đã duyệt · Tài khoản Active | Chủ xe điện & xe crossover |
-| `owner3` | Võ Văn Phúc | `owner3@carrental.test` | Renter, Owner | CCCD Đã duyệt · Tài khoản Active | Chủ xe du lịch 7 - 16 chỗ |
-| `owner4` | Lê Hoàng Duy | `owner4@carrental.test` | Renter, Owner | CCCD **Chờ duyệt (Pending)** · Inactive | Kiểm thử quy trình Staff/Admin xét duyệt chủ xe |
-| `staff1` | Đặng Thu Hà | `staff1@carrental.test` | Admin | Nhân viên vận hành (Staff) | Kiểm thử duyệt hồ sơ, xử lý tranh chấp, duyệt tin xe |
-| `staff2` | Bùi Văn Khoa | `staff2@carrental.test` | Admin | Nhân viên hỗ trợ (Staff) | Kiểm thử nghiệp vụ đối soát |
-| `admin1` | Quản trị Một | `admin1@carrental.test` | Admin | Quyền: `CanManageSystemConfig`, `CanManageAdminAccounts` | Quản trị viên cấp cao |
-| `admin2` | Quản trị Hai | `admin2@carrental.test` | Admin | Quyền: `CanManageSystemConfig`, `CanManageAdminAccounts` | Quản trị viên cấp cao |
+| Username | Họ và tên | Số điện thoại | Email | Vai trò (`Roles`) | Giấy tờ / Trạng thái đặc biệt | Mục đích kiểm thử |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `renter1` | Nguyễn Văn An | `0900000001` | `renter1@carrental.test` | Renter | GPLX Hạng B2 | Khách thuê thường, có đơn đã hoàn thành và đơn đang thuê |
+| `renter2` | Trần Thị Bình | `0900000002` | `renter2@carrental.test` | Renter | GPLX Hạng B2 | Khách thuê thường, có đơn chờ duyệt |
+| `renter3` | Lê Minh Cường | `0900000003` | `renter3@carrental.test` | Renter | GPLX Hạng B2 | Khách thuê đã có đánh giá và khiếu nại đã giải quyết |
+| `renter4` | Đỗ Thị Mai | `0900000011` | `renter4@carrental.test` | Renter | GPLX Hạng B2 · **Bị phạt (Suspend7d)** | Kiểm thử chặn truy cập tài khoản vi phạm bị tạm khóa |
+| `owner1` | Phạm Quốc Dũng | `0900000004` | `owner1@carrental.test` | Renter, Owner | CCCD Đã duyệt · Tài khoản Active | Chủ xe cá nhân tại Hà Nội & Đà Nẵng |
+| `owner2` | Hoàng Thị Em | `0900000005` | `owner2@carrental.test` | Renter, Owner | CCCD Đã duyệt · Tài khoản Active | Chủ xe điện & xe crossover |
+| `owner3` | Võ Văn Phúc | `0900000006` | `owner3@carrental.test` | Renter, Owner | CCCD Đã duyệt · Tài khoản Active | Chủ xe du lịch 7 - 16 chỗ |
+| `owner4` | Lê Hoàng Duy | `0900000012` | `owner4@carrental.test` | Renter, Owner | CCCD **Chờ duyệt (Pending)** · Inactive | Kiểm thử quy trình Staff/Admin xét duyệt chủ xe |
+| `staff1` | Đặng Thu Hà | `0900000007` | `staff1@carrental.test` | Admin | Nhân viên vận hành (Staff) | Kiểm thử duyệt hồ sơ, xử lý tranh chấp, duyệt tin xe |
+| `staff2` | Bùi Văn Khoa | `0900000008` | `staff2@carrental.test` | Admin | Nhân viên hỗ trợ (Staff) | Kiểm thử nghiệp vụ đối soát |
+| `admin1` | Quản trị Một | `0900000009` | `admin1@carrental.test` | Admin | Quyền: `CanManageSystemConfig`, `CanManageAdminAccounts` | Quản trị viên cấp cao |
+| `admin2` | Quản trị Hai | `0900000010` | `admin2@carrental.test` | Admin | Quyền: `CanManageSystemConfig`, `CanManageAdminAccounts` | Quản trị viên cấp cao |
 
 ---
 

@@ -10,9 +10,46 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddData(builder.Configuration);
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o => o.User.RequireUniqueEmail = true)
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o =>
+{
+    o.User.RequireUniqueEmail = true;
+    o.Password.RequireDigit = false;
+    o.Password.RequireLowercase = false;
+    o.Password.RequireUppercase = false;
+    o.Password.RequireNonAlphanumeric = false;
+    o.Password.RequiredLength = 6;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/";
+    options.LogoutPath = "/logout";
+    options.AccessDeniedPath = "/";
+    options.ExpireTimeSpan = TimeSpan.FromDays(14);
+    options.SlidingExpiration = true;
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+});
 
 builder.Services.AddServices();
 
@@ -65,6 +102,19 @@ if (app.Environment.IsDevelopment())
     {
         var r = await svc.CheckAsync(vehicleId, start, end, excludeBookingId);
         return Results.Ok(new { r.IsAvailable, Reason = r.Reason.ToString(), r.Message });
+    });
+
+    app.MapGet("/dev/auth-test", async (CarRental.Services.Auth.IAuthService auth) =>
+    {
+        var loginRenter1 = await auth.LoginAsync(new CarRental.Models.DTOs.Auth.LoginRequest { Identifier = "renter1", Password = "Test@12345" });
+        var loginRenter4 = await auth.LoginAsync(new CarRental.Models.DTOs.Auth.LoginRequest { Identifier = "renter4", Password = "Test@12345" });
+        var loginBad = await auth.LoginAsync(new CarRental.Models.DTOs.Auth.LoginRequest { Identifier = "renter1", Password = "WrongPassword" });
+        return Results.Ok(new
+        {
+            ValidLogin = new { loginRenter1.IsSuccess, loginRenter1.Message, User = loginRenter1.Data?.UserName, Roles = loginRenter1.Data?.Roles },
+            SuspendedLogin = new { loginRenter4.IsSuccess, loginRenter4.Message, loginRenter4.ErrorCode },
+            InvalidLogin = new { loginBad.IsSuccess, loginBad.Message, loginBad.ErrorCode }
+        });
     });
 
     using var scope = app.Services.CreateScope();
