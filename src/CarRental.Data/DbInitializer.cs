@@ -41,28 +41,31 @@ public static class DbInitializer
     private static async Task<Dictionary<string, ApplicationUser>> SeedUsersAsync(
         ApplicationDbContext db, UserManager<ApplicationUser> um)
     {
-        var specs = new (string Key, string Name, bool Female, string[] Roles)[]
+        var specs = new (string Key, string Name, bool Female, string Phone, string[] Roles)[]
         {
-            ("renter1", "Nguyễn Văn An",   false, new[] { RoleNames.Renter }),
-            ("renter2", "Trần Thị Bình",   true,  new[] { RoleNames.Renter }),
-            ("renter3", "Lê Minh Cường",   false, new[] { RoleNames.Renter }),
-            ("renter4", "Đỗ Thị Mai",      true,  new[] { RoleNames.Renter }),
-            ("owner1",  "Phạm Quốc Dũng",  false, new[] { RoleNames.Renter, RoleNames.Owner }),
-            ("owner2",  "Hoàng Thị Em",    true,  new[] { RoleNames.Renter, RoleNames.Owner }),
-            ("owner3",  "Võ Văn Phúc",     false, new[] { RoleNames.Renter, RoleNames.Owner }),
-            ("owner4",  "Lê Hoàng Duy",    false, new[] { RoleNames.Renter, RoleNames.Owner }),
-            ("staff1",  "Đặng Thu Hà",     true,  new[] { RoleNames.Admin }),
-            ("staff2",  "Bùi Văn Khoa",    false, new[] { RoleNames.Admin }),
-            ("admin1",  "Quản trị Một",    false, new[] { RoleNames.Admin }),
-            ("admin2",  "Quản trị Hai",    true,  new[] { RoleNames.Admin }),
+            ("renter1", "Nguyễn Văn An",   false, "0900000001", new[] { RoleNames.Renter }),
+            ("renter2", "Trần Thị Bình",   true,  "0900000002", new[] { RoleNames.Renter }),
+            ("renter3", "Lê Minh Cường",   false, "0900000003", new[] { RoleNames.Renter }),
+            ("renter4", "Đỗ Thị Mai",      true,  "0900000011", new[] { RoleNames.Renter }),
+            ("owner1",  "Phạm Quốc Dũng",  false, "0900000004", new[] { RoleNames.Renter, RoleNames.Owner }),
+            ("owner2",  "Hoàng Thị Em",    true,  "0900000005", new[] { RoleNames.Renter, RoleNames.Owner }),
+            ("owner3",  "Võ Văn Phúc",     false, "0900000006", new[] { RoleNames.Renter, RoleNames.Owner }),
+            ("owner4",  "Lê Hoàng Duy",    false, "0900000012", new[] { RoleNames.Renter, RoleNames.Owner }),
+            ("staff1",  "Đặng Thu Hà",     true,  "0900000007", new[] { RoleNames.Admin }),
+            ("staff2",  "Bùi Văn Khoa",    false, "0900000008", new[] { RoleNames.Admin }),
+            ("admin1",  "Quản trị Một",    false, "0900000009", new[] { RoleNames.Admin }),
+            ("admin2",  "Quản trị Hai",    true,  "0900000010", new[] { RoleNames.Admin }),
         };
 
         var result = new Dictionary<string, ApplicationUser>();
-        for (var i = 0; i < specs.Length; i++)
+        foreach (var s in specs)
         {
-            var s = specs[i];
             var email = $"{s.Key}@carrental.test";
             var user = await um.FindByEmailAsync(email);
+            if (user == null)
+            {
+                user = await um.FindByNameAsync(s.Key);
+            }
             if (user == null)
             {
                 user = new ApplicationUser
@@ -72,7 +75,7 @@ public static class DbInitializer
                     EmailConfirmed = true,
                     FullName = s.Name,
                     Gender = s.Female,
-                    PhoneNumber = $"090000{i + 1:0000}"
+                    PhoneNumber = s.Phone
                 };
                 Check(await um.CreateAsync(user, SeedPassword));
                 Check(await um.AddToRolesAsync(user, s.Roles));
