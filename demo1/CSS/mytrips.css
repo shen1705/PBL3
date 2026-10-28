@@ -1,0 +1,2253 @@
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f1f5f9;
+    color: #1f2937;
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.trips-shell {
+    display: flex;
+    flex: 1 0 auto;
+    min-height: max(520px, calc(100vh - 280px));
+    background: #f1f5f9;
+}
+
+.header .nav-links a[aria-current="page"],
+.top-nav a.active {
+    color: #d1a34b;
+}
+
+.top-nav a:hover {
+    color: #d1a34b;
+}
+
+/* Sidebar đồng bộ với become-owner */
+.trips-sidebar {
+    flex: 0 0 250px;
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 12px;
+    border-right: 1px solid #edf0f3;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.trips-profile {
+    display: flex;
+    flex-direction: column;
+    margin: 4px 0 16px;
+    padding: 0 12px 14px;
+    border-bottom: 1px solid #edf0f3;
+    color: #1c2635;
+}
+
+.sidebar-greeting {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 700;
+    color: #17191c;
+    letter-spacing: -0.5px;
+}
+
+.trips-profile-avatar,
+.trips-profile p,
+.trips-profile strong {
+    display: none;
+}
+
+.trips-side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.trips-side-link,
+.trips-logout {
+    position: relative;
+    display: flex;
+    min-height: 38px;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    border-radius: 9px;
+    color: #21252d;
+    font-size: 14px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.trips-side-link i,
+.trips-logout i {
+    width: 16px;
+    color: #374151;
+    font-size: 14px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+}
+
+.trips-side-link:hover {
+    background: #fff8e9;
+    color: #b88a32;
+}
+
+.trips-side-link:hover i {
+    color: #c49a49;
+}
+
+.trips-side-link.active {
+    background: #fff8e9;
+    color: #b88a32;
+    font-weight: 600;
+}
+
+.trips-side-link.active i {
+    color: #c49a49;
+}
+
+.trips-side-link.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 6px;
+    bottom: 6px;
+    width: 3.5px;
+    background: #b88a32;
+    border-radius: 0 3px 3px 0;
+}
+
+.trips-logout {
+    margin-top: 4px;
+    color: #cb5852;
+}
+
+.trips-logout i {
+    color: #cb5852;
+}
+
+.trips-logout:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.trips-logout:hover i {
+    color: #dc2626;
+}
+
+/* Khu vực nội dung chính */
+.trips-main {
+    flex: 1;
+    min-width: 0;
+    padding: 24px 28px;
+    background: #f1f5f9;
+}
+
+.trips-shell + .footer {
+    margin-top: 0;
+}
+
+/* Tiêu đề trang có nút quay lại đồng bộ với become-owner */
+.section-page-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto 18px auto;
+    padding: 0;
+}
+
+.section-page-heading h1 {
+    margin: 0;
+    color: #1c2635;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #1c2635;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-back:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: translateX(-3px);
+}
+
+.btn-back:active {
+    transform: translateX(-1px);
+}
+
+/* Khung card màu trắng đồng bộ với become-owner */
+.management-card,
+.trips-card {
+    position: relative;
+    max-width: 850px;
+    width: 100%;
+    margin: 0 auto;
+    min-height: 420px;
+    padding: 24px;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 8px 22px rgba(26, 38, 53, 0.07);
+    box-sizing: border-box;
+}
+
+/* Tabs chuyển đổi Chuyến hiện tại / Lịch sử */
+.trips-tabs {
+    display: flex;
+    gap: 28px;
+    border-bottom: 1px solid #edf0f3;
+    margin-bottom: 24px;
+    padding-bottom: 0;
+}
+
+.trip-tab {
+    position: relative;
+    min-height: 38px;
+    padding: 0 4px 10px;
+    border: 0;
+    background: transparent;
+    color: #8b95a5;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.trip-tab:hover {
+    color: #1c2635;
+}
+
+.trip-tab.active {
+    color: #b88a32;
+    font-weight: 700;
+}
+
+.trip-tab.active::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2.5px;
+    background: #b88a32;
+    border-radius: 2px 2px 0 0;
+    content: "";
+}
+
+/* Danh sách chuyến đi */
+.trips-list[hidden],
+.trips-empty-state[hidden] {
+    display: none;
+}
+
+.trips-list {
+    display: grid;
+    gap: 16px;
+}
+
+.trip-card {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 18px;
+    overflow: hidden;
+    border: 1px solid #edf0f3;
+    border-radius: 12px;
+    background: #fff;
+    transition: box-shadow 0.2s ease;
+}
+
+.trip-card:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.trip-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+.trip-card div {
+    padding: 16px 16px 16px 0;
+}
+
+.trip-card h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    color: #1c2635;
+}
+
+.trip-card p {
+    margin: 0 0 10px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.trip-status {
+    display: inline-flex;
+    margin-right: 10px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #ecfdf3;
+    color: #15803d;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.trip-card strong {
+    color: #1c2635;
+    font-size: 16px;
+}
+
+/* Trạng thái trống bên trong card */
+.trips-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 36px 20px 48px;
+    text-align: center;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+.empty-art {
+    position: relative;
+    display: grid;
+    width: 104px;
+    height: 104px;
+    margin-bottom: 18px;
+    place-items: center;
+    border: 1.5px dashed #d1a34b;
+    border-radius: 50%;
+    background: #fdfaf3;
+    color: #24363c;
+    font-size: 42px;
+}
+
+.empty-sparkle {
+    position: absolute;
+    color: #c89a44;
+    font-size: 12px;
+}
+
+.sparkle-left {
+    top: 2px;
+    left: -5px;
+}
+
+.sparkle-right {
+    right: -6px;
+    bottom: 24px;
+}
+
+.trips-empty-state h2 {
+    margin: 0 0 8px;
+    color: #1c2635;
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.trips-empty-state p {
+    max-width: 460px;
+    margin: 0 0 24px;
+    color: #64748b;
+    font-size: 13.5px;
+    line-height: 1.6;
+}
+
+/* Nút khám phá xe đồng bộ với nút slate của trang index */
+.trips-primary-link {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 26px;
+    border-radius: 21px;
+    background: #212529;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(33, 37, 41, 0.2);
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.trips-primary-link:hover {
+    background: #111827;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+    .header .nav-links {
+        display: none;
+    }
+
+    .header .nav-container {
+        gap: 12px;
+    }
+
+    .header .nav-actions {
+        margin-left: auto;
+    }
+
+    .trips-sidebar {
+        flex-basis: 58px;
+        width: 58px;
+        padding: 12px 6px;
+        align-items: center;
+    }
+
+    .trips-profile {
+        padding: 0 0 10px;
+        align-items: center;
+    }
+
+    .trips-profile p,
+    .trips-profile strong,
+    .trips-side-link span,
+    .trips-logout span {
+        display: none;
+    }
+
+    .trips-profile-avatar {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 50%;
+        background: #d1a34b;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .trips-side-nav {
+        width: 100%;
+        gap: 6px;
+    }
+
+    .trips-side-link,
+    .trips-logout {
+        justify-content: center;
+        padding: 0;
+        min-height: 38px;
+    }
+
+    .trips-side-link.active::before {
+        left: -6px;
+    }
+
+    .trips-logout i {
+        width: auto;
+    }
+
+    .trips-main {
+        padding: 18px 14px;
+    }
+
+    .management-card,
+    .trips-card {
+        padding: 18px 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    .trips-main {
+        padding: 16px 10px;
+    }
+
+    .trip-card {
+        grid-template-columns: 1fr;
+    }
+
+    .trip-card div {
+        padding: 0 16px 16px;
+    }
+}
+
+/* Modal Popup Đăng xuất */
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(17, 24, 39, 0.65);
+    backdrop-filter: blur(2px);
+    box-sizing: border-box;
+}
+
+.dialog-backdrop[hidden] {
+    display: none;
+}
+
+.register-dialog {
+    position: relative;
+    width: min(100% - 32px, 450px);
+    padding: 36px 32px 32px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    text-align: center;
+}
+
+.register-dialog h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1c2635;
+}
+
+.register-dialog p {
+    margin: 0 0 28px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dialog-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #4b5563;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.dialog-close:hover {
+    background: #e5e7eb;
+}
+
+.register-dialog .primary-button {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 12px;
+    background: #212529;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: none;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.register-dialog .primary-button:hover {
+    background: #111827;
+}
+
+/* ==========================================================================
+   TÀI KHOẢN CỦA TÔI (Tích hợp trọn gói từ account.css)
+   ========================================================================== */
+
+.account-main {
+    min-width: 0;
+}
+
+.account-content {
+    display: grid;
+    min-width: 0;
+    gap: 20px;
+    max-width: 850px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.panel {
+    border-radius: 14px;
+    background: #fff;
+    border: 1px solid #edf0f3;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+}
+
+.profile-panel {
+    padding: 24px;
+}
+
+.panel-heading,
+.heading-title,
+.license-heading,
+.license-heading > div,
+.security-panel {
+    display: flex;
+    align-items: center;
+}
+
+.panel-heading,
+.license-heading,
+.security-panel {
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.heading-title {
+    gap: 12px;
+}
+
+.panel h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: #17191c;
+}
+
+.edit-icon {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    place-items: center;
+    border: 1px solid #e2e4e6;
+    border-radius: 50%;
+    background: #fff;
+    color: #4c5358;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.edit-icon:hover,
+.outline-button:hover {
+    border-color: #374151;
+    color: #111827;
+    background-color: #f9fafb;
+}
+
+.trip-count {
+    display: flex;
+    min-width: 124px;
+    min-height: 58px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 13px;
+    border: 1px solid #e5e7e9;
+    border-radius: 10px;
+    color: #747b80;
+    font-size: 14px;
+    text-decoration: none;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.trip-count:hover {
+    border-color: #51c982;
+    background-color: #f6fcf8;
+}
+
+.trip-count i,
+.trip-count strong {
+    color: #51c982;
+}
+
+.trip-count strong {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: minmax(190px, 0.72fr) minmax(0, 1.6fr);
+    align-items: center;
+    gap: 34px;
+    margin-top: 24px;
+}
+
+.identity-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.large-avatar {
+    width: 138px;
+    height: 138px;
+    border-radius: 50%;
+    background: #8aa3af;
+    color: #fff;
+    font-size: 42px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.identity-card h3 {
+    max-width: 100%;
+    margin: 17px 0 0;
+    overflow: hidden;
+    font-size: 18px;
+    font-weight: 600;
+    color: #17191c;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.joined-date {
+    margin: 10px 0 0;
+    color: #777e83;
+    font-size: 14px;
+}
+
+.profile-details {
+    display: grid;
+    min-width: 0;
+    gap: 5px;
+}
+
+.personal-details {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding: 17px 20px;
+    border-radius: 10px;
+    background: #f6f7f8;
+}
+
+.detail-row {
+    display: flex;
+    min-height: 34px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    color: #737a7f;
+    font-size: 14px;
+}
+
+.detail-row strong {
+    overflow-wrap: anywhere;
+    color: #17191c;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+}
+
+.contact-row {
+    min-height: 39px;
+    padding: 0 4px;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #fff0d8;
+    color: #bd7313;
+}
+
+.status-verified {
+    background: #dff7e9;
+    color: #1a9e5a;
+}
+
+.status-unverified {
+    background: #ffe6e3;
+    color: #d84c42;
+}
+
+/* Phần Giấy phép lái xe */
+.license-panel {
+    padding: 24px;
+}
+
+.license-heading {
+    margin-bottom: 24px;
+}
+
+.license-heading > div {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.license-heading h2 {
+    font-size: 18px;
+}
+
+.outline-button {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 9px;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.license-notice {
+    margin: 0 0 16px;
+    padding: 11px 12px;
+    border-radius: 6px;
+    color: #34383b;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.license-notice i {
+    margin-left: 3px;
+}
+
+.notice-warning {
+    background: #fff0e9;
+    border-left: 3px solid #f97316;
+}
+
+.notice-success {
+    background: #def5e8;
+    border-left: 3px solid #10b981;
+}
+
+.license-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 1fr);
+    gap: 28px;
+    margin-top: 24px;
+}
+
+.license-upload-column,
+.license-fields {
+    min-width: 0;
+}
+
+.license-upload-column h3,
+.license-fields h3 {
+    margin: 0 0 18px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.license-upload {
+    display: grid;
+    min-height: 300px;
+    place-items: center;
+    overflow: hidden;
+    border: 1px dashed #d2d9d5;
+    border-radius: 9px;
+    background: #fbfdfc;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.license-upload:focus-within,
+.license-upload:hover {
+    border-color: #50c982;
+}
+
+.license-upload.is-disabled {
+    cursor: default;
+}
+
+.upload-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: #737b80;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+}
+
+.upload-prompt > i {
+    color: #58ce8b;
+    font-size: 38px;
+}
+
+.upload-prompt small {
+    color: #969da1;
+}
+
+#license-image-preview {
+    display: block;
+    width: 100%;
+    max-height: 390px;
+    object-fit: contain;
+}
+
+.license-fields {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.license-fields label {
+    margin: 0 0 7px;
+    color: #687178;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.license-fields input {
+    width: 100%;
+    min-height: 50px;
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    background: #f4f5f6;
+    color: #1e2428;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.license-fields input:focus:not(:disabled) {
+    border-color: #4dc782;
+    background: #fff;
+    outline: 2px solid rgba(77, 199, 130, 0.14);
+}
+
+.license-fields input:disabled {
+    color: #4c5358;
+    opacity: 1;
+}
+
+.license-save-button {
+    width: 100%;
+}
+
+/* Các panel Địa chỉ, Bảo mật, Chính sách */
+.address-panel,
+.policy-panel,
+.security-panel {
+    padding: 22px 30px;
+}
+
+.address-panel,
+.security-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.address-panel p,
+.policy-panel p,
+.security-panel p {
+    margin: 8px 0 0;
+    color: #737a7f;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Popup / Dialog chuẩn hóa rộng rãi & hiện đại cho toàn bộ My-Trips */
+.account-dialog {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    max-height: min(90vh, 840px);
+    overflow-y: auto;
+    padding: 38px 36px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-sizing: border-box;
+}
+
+.account-dialog h2 {
+    margin: 0 0 24px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #17191c;
+    text-align: center;
+}
+
+.account-dialog form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.account-dialog .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.account-dialog .form-row-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+@media (max-width: 480px) {
+    .account-dialog .form-row-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.account-dialog label {
+    margin: 0;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.account-dialog input,
+.account-dialog select {
+    width: 100%;
+    min-height: 50px;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #fff;
+    color: #0f172a;
+    font-size: 15px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.account-dialog input:focus,
+.account-dialog select:focus {
+    border-color: #1e293b;
+    box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.08);
+}
+
+.account-dialog .primary-button {
+    width: 100%;
+    min-height: 50px;
+    margin-top: 14px;
+    border: 0;
+    border-radius: 10px;
+    background: #212529;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease;
+}
+
+.account-dialog .primary-button:hover {
+    background: #0f172a;
+}
+
+/* Responsive cho Account trong My-Trips */
+@media (max-width: 920px) {
+    .profile-panel,
+    .license-panel {
+        padding: 22px 18px;
+    }
+
+    .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .identity-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .large-avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 36px;
+    }
+
+    .license-form {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+}
+
+@media (max-width: 680px) {
+    .account-content {
+        gap: 16px;
+    }
+
+    .profile-panel,
+    .license-panel {
+        padding: 18px 14px;
+    }
+
+    .panel h2 {
+        font-size: 18px;
+    }
+
+    .trip-count {
+        min-width: auto;
+        min-height: 46px;
+        gap: 5px;
+        padding: 7px 9px;
+        font-size: 14px;
+    }
+
+    .trip-count strong {
+        font-size: 20px;
+    }
+
+    .personal-details {
+        padding: 14px;
+    }
+
+    .detail-row {
+        gap: 10px;
+        font-size: 14px;
+    }
+
+    .contact-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .contact-row strong {
+        text-align: left;
+    }
+
+    .license-heading {
+        align-items: flex-start;
+    }
+
+    .license-heading > div {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .license-upload {
+        min-height: 200px;
+    }
+
+    .security-panel,
+    .address-panel,
+    .policy-panel {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 18px 16px;
+    }
+
+    .account-dialog {
+        padding: 28px 20px;
+        border-radius: 16px;
+    }
+}
+
+/* ==========================================================================
+   GIAO DIỆN ĐỊA CHỈ ĐÃ LƯU & THÊM ĐỊA CHỈ MỚI (Khớp 100% Ảnh mẫu)
+   ========================================================================== */
+
+/* Khung card Địa chỉ đã lưu (Ảnh 1) */
+.address-card {
+    padding: 0;
+    overflow: hidden;
+    min-height: 480px;
+}
+
+.address-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 28px;
+    border-bottom: 1px solid #edf0f3;
+}
+
+.address-card-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #17191c;
+}
+
+.btn-add-address {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border: 1.5px solid #1c2635;
+    border-radius: 8px;
+    background: transparent;
+    color: #1c2635;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-add-address:hover {
+    background: #1c2635;
+    color: #fff;
+}
+
+/* Khối trạng thái trống (Ảnh 1) */
+.address-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 24px 80px;
+}
+
+.address-empty-icon {
+    width: 140px;
+    height: 120px;
+    border-radius: 24px;
+    background: #faf4eb;
+    margin: 0 auto 24px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.address-empty-state h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #17191c;
+}
+
+.address-empty-state p {
+    margin: 0 auto;
+    max-width: 460px;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* Danh sách địa chỉ đã lưu */
+.address-list {
+    padding: 20px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.address-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 22px;
+    border-radius: 14px;
+    border: 1px solid #edf0f3;
+    background: #fbfbfc;
+    transition: all 0.2s ease;
+}
+
+.address-item:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    background: #fff;
+}
+
+.address-item-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.address-item-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fdf8ee;
+    color: #b88a32;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.address-item-info {
+    min-width: 0;
+}
+
+.address-item-info h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #17191c;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.address-badge-default {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #fdf8ee;
+    color: #b88a32;
+    border: 1px solid #d1a34b;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.address-item-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+    overflow-wrap: anywhere;
+}
+
+.btn-delete-addr {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid #fee2e2;
+    border-radius: 8px;
+    background: #fff;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-delete-addr:hover {
+    background: #fef2f2;
+    border-color: #f87171;
+}
+
+/* Modal Popup Thêm địa chỉ mới (Ảnh 2) */
+.add-address-dialog {
+    max-width: 640px !important;
+    padding: 36px 36px 32px !important;
+}
+
+.add-address-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-right: 32px;
+}
+
+.add-address-header h2 {
+    margin: 0 !important;
+    text-align: left !important;
+    font-size: 24px !important;
+    font-weight: 700;
+    color: #17191c;
+}
+
+.default-address-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.default-address-toggle span {
+    font-size: 14px;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+/* Toggle Switch kiểu iOS */
+.switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.switch-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-toggle .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #d1d5db;
+    transition: .25s ease;
+    border-radius: 26px;
+}
+
+.switch-toggle .slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    transition: .25s ease;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.switch-toggle input:checked + .slider {
+    background-color: #c59b27;
+}
+
+.switch-toggle input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+/* Nhóm nút Loại địa điểm */
+.place-type-group {
+    display: flex;
+    gap: 12px;
+}
+
+.place-type-btn {
+    flex: 1;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 22px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.place-type-btn:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.place-type-btn.active {
+    background: #fdf8ee;
+    border-color: #d1a34b;
+    color: #b88a32;
+    font-weight: 600;
+}
+
+.place-type-btn i {
+    font-size: 14px;
+}
+
+/* Grid 3 cột dropdown tỉnh / huyện / xã */
+.address-select-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 640px) {
+    .address-select-grid {
+        grid-template-columns: 1fr;
+    }
+    .place-type-group {
+        flex-direction: column;
+    }
+    .add-address-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-right: 0;
+    }
+}
+
+/* Nút hành động modal (Huỷ & Xác nhận) */
+.address-modal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 24px;
+    padding-top: 8px;
+}
+
+.btn-address-cancel {
+    background: none;
+    border: none;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #4b5563;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: color 0.15s ease;
+}
+
+.btn-address-cancel:hover {
+    color: #111827;
+}
+
+.btn-address-confirm {
+    min-height: 44px;
+    padding: 10px 28px;
+    border: none;
+    border-radius: 10px;
+    background: #c5bba8;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-address-confirm:hover {
+    background: #b88a32;
+}
+
+/* ==========================================================================
+   MỤC CHÍNH SÁCH BẢO VỆ DỮ LIỆU (IN-PAGE VIEW)
+   ========================================================================== */
+.privacy-card {
+    padding: 30px 32px 36px;
+}
+
+.privacy-banner {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 24px;
+    background: linear-gradient(135deg, #fdfbf7 0%, #f7f3eb 100%);
+    border: 1px solid #ebdcc5;
+    border-radius: 12px;
+    margin-bottom: 26px;
+}
+
+.privacy-banner-icon {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #b88a32;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 12px rgba(184, 138, 50, 0.16);
+}
+
+.privacy-banner-text h2 {
+    margin: 0 0 6px 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: #17191c;
+}
+
+.privacy-banner-text p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #4b5563;
+}
+
+.privacy-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.privacy-clause {
+    padding: 20px 24px;
+    border-radius: 12px;
+    background: #fafbfc;
+    border: 1px solid #edf0f3;
+    transition: all 0.2s ease;
+}
+
+.privacy-clause:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+.clause-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.clause-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #fdf8ee;
+    color: #b88a32;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: inherit;
+    border: 1px solid #ebdcc5;
+}
+
+.clause-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.privacy-clause p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #475569;
+}
+
+.privacy-check-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.privacy-check-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #334155;
+}
+
+.privacy-check-list li i {
+    color: #10b981;
+    font-size: 14px;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.privacy-support-box {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 24px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    margin-top: 10px;
+}
+
+.support-box-icon {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    border-radius: 12px;
+    background: #1c2635;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.support-box-info h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.support-box-info p {
+    margin: 0 0 8px;
+    font-size: 13.5px;
+    color: #64748b;
+}
+
+.support-box-contacts {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    font-size: 13.5px;
+    color: #334155;
+}
+
+.support-box-contacts strong {
+    color: #0f172a;
+}
+
+.support-box-contacts i {
+    color: #b88a32;
+    margin-right: 5px;
+}
+
+/* ==========================================================================
+   MỤC ĐỔI MẬT KHẨU (IN-PAGE VIEW)
+   ========================================================================== */
+.password-card {
+    padding: 30px 32px 36px;
+}
+
+.password-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid #edf0f3;
+    margin-bottom: 28px;
+}
+
+.password-card-text h2 {
+    margin: 0 0 6px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #17191c;
+}
+
+.password-card-text p {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.password-security-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 15px;
+    border-radius: 20px;
+    background: #fdf8ee;
+    color: #b88a32;
+    border: 1px solid #ebdcc5;
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.password-card-body {
+    max-width: 540px;
+    margin: 0 auto;
+}
+
+.password-page-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.password-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.password-field-group label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.required-star {
+    color: #ef4444;
+    margin-left: 2px;
+}
+
+.password-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.pass-icon-left {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 15px;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.password-input-wrap input {
+    width: 100%;
+    height: 48px;
+    padding: 0 46px 0 42px;
+    border-radius: 11px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    font-family: inherit;
+    font-size: 14.5px;
+    color: #0f172a;
+    box-sizing: border-box;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.password-input-wrap input:focus {
+    outline: none;
+    border-color: #d1a34b;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(209, 163, 75, 0.15);
+}
+
+.password-input-wrap:focus-within .pass-icon-left {
+    color: #d1a34b;
+}
+
+.btn-toggle-eye {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.btn-toggle-eye:hover {
+    color: #1e293b;
+    background: #e2e8f0;
+}
+
+.password-rules-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.rule-item {
+    font-size: 12.5px;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rule-item i {
+    font-size: 12px;
+    color: #10b981;
+}
+
+.password-msg-alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+}
+
+.password-msg-alert.error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.password-msg-alert.success {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.password-actions {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-save-password {
+    min-height: 48px;
+    padding: 0 30px;
+    border-radius: 11px;
+    background: #1c2635;
+    color: #ffffff;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(28, 38, 53, 0.15);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-save-password:hover {
+    background: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(28, 38, 53, 0.24);
+}
+
+.btn-save-password:active {
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .privacy-card,
+    .password-card {
+        padding: 20px 16px 28px;
+    }
+
+    .privacy-banner,
+    .password-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .password-card-body {
+        max-width: 100%;
+    }
+
+    .password-actions {
+        justify-content: stretch;
+    }
+
+    .btn-save-password {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ===================================================
+   Chính sách bảo vệ dạng thẻ chuẩn theo become-owner.html
+   =================================================== */
+.simple-doc-card {
+    position: relative;
+    max-width: 850px;
+    width: 100%;
+    margin: 0 auto;
+    min-height: 380px;
+    padding: 32px 36px 44px 36px;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(26, 38, 53, 0.06);
+    box-sizing: border-box;
+}
+
+.doc-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.doc-sec-title {
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.3;
+}
+
+.doc-sec-sub {
+    margin: 0 0 20px 0;
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.4;
+}
+
+.doc-btn-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.doc-green-btn,
+.doc-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: #212529;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(33, 37, 41, 0.18);
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.doc-green-btn:hover,
+.doc-action-btn:hover {
+    background: #111827;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(17, 24, 39, 0.25);
+}
+
+.doc-green-btn:active {
+    transform: translateY(0);
+}
+
+.doc-green-btn i {
+    font-size: 16px;
+}
+
+.doc-divider {
+    border: 0;
+    border-top: 1px solid #edf2f7;
+    margin: 26px 0;
+}
+
+.doc-links-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.doc-link-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    color: #1f2937;
+    font-size: 14.5px;
+    font-weight: 500;
+    width: fit-content;
+    padding: 3px 0;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.doc-link-item:hover {
+    color: #111827;
+}
+
+.doc-link-item i {
+    font-size: 17px;
+    color: #1f2937;
+    transition: color 0.15s ease;
+}
+
+.doc-link-item:hover i {
+    color: #111827;
+}
+
+.doc-link-item .chevron {
+    font-size: 16px;
+    font-weight: 600;
+    color: #4b5563;
+    margin-left: 1px;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.doc-link-item:hover .chevron {
+    color: #111827;
+    transform: translateX(3px);
+}
+
+/* Modal Xem Văn Bản / Chính Sách Chi Tiết */
+.contract-modal-view {
+    position: relative;
+    width: min(100%, 640px);
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 30px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+    text-align: left;
+}
+
+.contract-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 2px dashed #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.contract-modal-header h2 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.contract-modal-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #93c5fd;
+}
+
+.badge-status i {
+    color: #2563eb;
+}
+
+.contract-preview-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.contract-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.info-block {
+    padding: 12px 14px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #edf2f7;
+}
+
+.info-block h4 {
+    margin: 0 0 8px 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-block p {
+    margin: 0 0 4px 0;
+    font-size: 13px;
+    color: #1e293b;
+}
+
+.contract-terms-box {
+    padding: 14px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #edf2f7;
+    font-size: 12.5px;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.btn-download-contract {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1.5px solid #d1d5db;
+    background: #ffffff;
+    color: #374151;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.2s ease;
+}
+
+.btn-download-contract:hover {
+    border-color: #374151;
+    background-color: #f9fafb;
+    color: #111827;
+}
+
+.contract-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #f1f3f5;
+}
+
+@media (max-width: 640px) {
+    .simple-doc-card {
+        padding: 22px 20px 32px 20px;
+    }
+    
+    .doc-btn-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .doc-green-btn {
+        justify-content: center;
+    }
+
+    .contract-info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+

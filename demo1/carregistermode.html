@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký xe - AZU Car</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="CSS/index.css">
+    <link rel="stylesheet" href="CSS/carregistermode.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" aria-label="AZU Car - Trang chủ">
+                <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+            </a>
+            
+            <nav class="nav-links" aria-label="Điều hướng chính">
+                <a href="about.html" id="about-nav-link">Về AZU Car</a>
+                <a href="become-owner.html" class="active">Trở thành chủ xe</a>
+                <a href="my-trips.html" id="trips-nav-link">Chuyến của tôi</a>
+                <a href="support.html" id="support-nav-link">Trợ giúp</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div id="guest-actions">
+                    <button type="button" class="btn-register-outline">Đăng ký</button>
+                    <button type="button" class="btn-slate">Đăng nhập</button>
+                </div>
+                <a id="account-display" class="account-display" href="my-trips.html#account" aria-label="Thông tin tài khoản" hidden>
+                    <span class="account-avatar" id="account-avatar"></span>
+                    <span id="account-name"></span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="owner-register-main">
+        <section class="owner-intro">
+            <p class="intro-eyebrow">TRỞ THÀNH CHỦ XE CÙNG AZU CAR</p>
+            <h1>Tối ưu thu nhập từ chiếc xe nhàn rỗi của bạn</h1>
+            <p class="intro-description">AZU Car giúp bạn kết nối với hàng ngàn khách hàng uy tín tại Việt Nam. Quy trình đăng ký nhanh chóng, bảo hiểm chuyến đi toàn diện và an toàn tuyệt đối.</p>
+
+            <ol class="owner-steps">
+                <li>
+                    <span class="step-number">1</span>
+                    <div><strong>Điền thông tin xe</strong><p>Cung cấp các thông số chính xác gồm hãng xe, mẫu xe, biển số và mức giá cho thuê mong muốn.</p></div>
+                </li>
+                <li>
+                    <span class="step-number">2</span>
+                    <div><strong>Đăng tải hình ảnh xe</strong><p>Tải ảnh thực tế ngoại thất, nội thất và giấy tờ xe để kiểm định chất lượng.</p></div>
+                </li>
+                <li>
+                    <span class="step-number">3</span>
+                    <div><strong>AZU Car tư vấn chủ xe và duyệt xe</strong><p>Đội ngũ chuyên viên AZU Car liên hệ tư vấn hợp đồng, thẩm định hồ sơ và hỗ trợ kích hoạt.</p></div>
+                </li>
+                <li>
+                    <span class="step-number">4</span>
+                    <div><strong>Bắt đầu cho thuê</strong><p>Xe sẵn sàng đón khách, chủ xe toàn quyền quản lý lịch trình và nhận thu nhập tự động.</p></div>
+                </li>
+            </ol>
+
+            <aside class="insurance-note">
+                <span class="insurance-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                <div><strong>Bảo hiểm chuyến đi MIC</strong><p>Mọi chuyến thuê qua AZU Car đều được bảo hiểm tự nguyện xe ô tô bảo vệ toàn diện.</p></div>
+            </aside>
+        </section>
+
+        <section class="register-card" aria-labelledby="register-title">
+            <a class="back-link" href="become-owner.html#danh-sach-xe-content" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></a>
+            <h2 id="register-title">Đăng ký xe</h2>
+            <div class="register-illustration" aria-hidden="true">
+                <div class="illustration-orbit"></div>
+                <div class="document-art">
+                    <span class="document-mark"></span>
+                    <span></span><span></span><span></span>
+                    <div><i class="fa-regular fa-square-check"></i><i class="fa-regular fa-square-check"></i></div>
+                </div>
+                <div class="car-art"><i class="fa-solid fa-car-side"></i><span class="wheel wheel-left"></span><span class="wheel wheel-right"></span></div>
+                <div class="person-art"><i class="fa-solid fa-circle-question"></i><span class="person-head"></span><span class="person-body"></span><span class="person-leg"></span></div>
+            </div>
+            <p class="register-disclaimer">Bằng việc đăng ký, bạn đồng ý với chính sách chia sẻ xe và điều khoản vận hành minh bạch của hệ thống AZU Car Việt Nam.</p>
+            <button class="register-cta" id="start-registration" type="button">Đăng ký xe tự lái</button>
+        </section>
+    </main>
+
+    <footer class="footer" id="support">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <a href="index.html" class="logo footer-logo">
+                    <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+                </a>
+                <p class="footer-desc">Nền tảng chia sẻ và cho thuê ô tô tự lái hàng đầu Việt Nam. Mang lại những chuyến đi tự do và hạnh phúc cho triệu hành trình.</p>
+            </div>
+            <div class="footer-col">
+                <h4>VỀ AZU CAR</h4>
+                <ul>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="about.html#features">Tính năng</a></li>
+                    <li><a href="become-owner.html#bao-mat">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>DỊCH VỤ</h4>
+                <ul>
+                    <li><a href="#">Thuê xe tự lái</a></li>
+                    <li><a href="#">Thuê xe cưới hỏi</a></li>
+                    <li><a href="#">Hợp đồng dài hạn</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>HỖ TRỢ & LIÊN HỆ</h4>
+                <p><strong>Hotline:</strong> 1900 9217 (8:00 - 21:00)</p>
+                <p><strong>Email:</strong> support@azucar.vn</p>
+                <p><strong>Văn phòng:</strong> Phường Hải Châu, TP. Đà Nẵng</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-flex">
+                <p>2026 AZU Car Việt Nam. Bảo lưu mọi quyền lợi.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Điều khoản dịch vụ</a>
+                    <a href="#">Chính sách hoạt động</a>
+                    <a href="#">Quy chế hoạt động</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Modal Đăng Ký Xe Tự Lái Nhiều Bước (Multi-step Wizard) -->
+    <div class="registration-overlay" id="registration-overlay" hidden>
+        <div class="registration-modal-card" role="dialog" aria-modal="true" aria-labelledby="reg-modal-title">
+            <button class="registration-close" id="close-registration" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="registration-wizard-grid">
+                <!-- Cột trái: Stepper hiển thị quy trình 4 bước đúng theo thiết kế -->
+                <aside class="reg-stepper-sidebar">
+                    <div class="reg-stepper-header">
+                        <span class="reg-badge-tag">QUY TRÌNH ĐĂNG KÝ</span>
+                        <h3 id="reg-modal-title">Đăng ký xe cho thuê</h3>
+                    </div>
+                    
+                    <nav class="reg-steps-list" aria-label="Các bước đăng ký">
+                        <!-- Bước 1 -->
+                        <div class="reg-step-item active" data-step="1" role="button" tabindex="0">
+                            <div class="reg-step-badge">
+                                <i class="fa-regular fa-rectangle-list"></i>
+                            </div>
+                            <span class="reg-step-label">Điền thông tin xe</span>
+                        </div>
+
+                        <!-- Bước 2 -->
+                        <div class="reg-step-item" data-step="2" role="button" tabindex="0">
+                            <div class="reg-step-badge">
+                                <i class="fa-regular fa-image"></i>
+                            </div>
+                            <span class="reg-step-label">Đăng tải hình ảnh xe</span>
+                        </div>
+
+                        <!-- Bước 3 -->
+                        <div class="reg-step-item" data-step="3" role="button" tabindex="0">
+                            <div class="reg-step-badge">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </div>
+                            <span class="reg-step-label">AZU Car tư vấn chủ xe và duyệt xe</span>
+                        </div>
+
+                        <!-- Bước 4 -->
+                        <div class="reg-step-item" data-step="4" role="button" tabindex="0">
+                            <div class="reg-step-badge">
+                                <i class="fa-solid fa-car-side"></i>
+                            </div>
+                            <span class="reg-step-label">Bắt đầu cho thuê</span>
+                        </div>
+                    </nav>
+
+                    <div class="reg-sidebar-support">
+                        <i class="fa-solid fa-headset"></i>
+                        <div>
+                            <strong>Cần hỗ trợ đăng ký?</strong>
+                            <p>Hotline: 1900 9217 (8:00 - 21:00)</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Cột phải: Nội dung chi tiết từng bước -->
+                <main class="reg-wizard-main">
+                    <!-- BƯỚC 1: Điền thông tin xe -->
+                    <div class="reg-step-pane active" id="pane-step-1">
+                        <div class="pane-header">
+                            <h4>Bước 1: Điền thông tin xe</h4>
+                            <p>Cung cấp các thông số chính xác để khách hàng dễ dàng tìm kiếm và thuê xe của bạn.</p>
+                        </div>
+                        <form id="form-step-1">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="reg-owner-name">Họ và tên chủ xe <span class="required">*</span></label>
+                                    <input id="reg-owner-name" type="text" placeholder="Nguyễn Văn A" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg-owner-phone">Số điện thoại liên hệ <span class="required">*</span></label>
+                                    <input id="reg-owner-phone" type="tel" placeholder="0905 123 456" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="reg-car-brand">Hãng xe <span class="required">*</span></label>
+                                    <select id="reg-car-brand" required>
+                                        <option value="" disabled selected>Chọn hãng xe</option>
+                                        <option value="Toyota">Toyota</option>
+                                        <option value="Hyundai">Hyundai</option>
+                                        <option value="VinFast">VinFast</option>
+                                        <option value="Mazda">Mazda</option>
+                                        <option value="Honda">Honda</option>
+                                        <option value="Kia">Kia</option>
+                                        <option value="Ford">Ford</option>
+                                        <option value="Mitsubishi">Mitsubishi</option>
+                                        <option value="Khác">Hãng khác...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg-car-model">Mẫu xe &amp; Phiên bản <span class="required">*</span></label>
+                                    <input id="reg-car-model" type="text" placeholder="Ví dụ: Mazda 3 Luxury" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row-3">
+                                <div class="form-group">
+                                    <label for="reg-car-plate">Biển số xe <span class="required">*</span></label>
+                                    <input id="reg-car-plate" type="text" placeholder="43A-123.45" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg-car-year">Năm sản xuất</label>
+                                    <select id="reg-car-year">
+                                        <option value="2026">2026</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2024" selected>2024</option>
+                                        <option value="2023">2023</option>
+                                        <option value="2022">2022</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2020">2020</option>
+                                        <option value="2019">Trước 2020</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg-car-seats">Số chỗ ngồi</label>
+                                    <select id="reg-car-seats">
+                                        <option value="4 chỗ">4 chỗ</option>
+                                        <option value="5 chỗ" selected>5 chỗ</option>
+                                        <option value="7 chỗ">7 chỗ</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="reg-car-price">Giá thuê đề xuất (VNĐ / ngày) <span class="required">*</span></label>
+                                    <input id="reg-car-price" type="number" min="300000" step="50000" placeholder="600000" value="600000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reg-car-location">Khu vực bàn giao xe <span class="required">*</span></label>
+                                    <select id="reg-car-location">
+                                        <option value="Hải Châu, TP. Đà Nẵng" selected>Quận Hải Châu, TP. Đà Nẵng</option>
+                                        <option value="Sơn Trà, TP. Đà Nẵng">Quận Sơn Trà, TP. Đà Nẵng</option>
+                                        <option value="Ngũ Hành Sơn, TP. Đà Nẵng">Quận Ngũ Hành Sơn, TP. Đà Nẵng</option>
+                                        <option value="Thanh Khê, TP. Đà Nẵng">Quận Thanh Khê, TP. Đà Nẵng</option>
+                                        <option value="Liên Chiểu, TP. Đà Nẵng">Quận Liên Chiểu, TP. Đà Nẵng</option>
+                                        <option value="Cẩm Lệ, TP. Đà Nẵng">Quận Cẩm Lệ, TP. Đà Nẵng</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="pane-actions">
+                                <div></div>
+                                <button class="btn-step-next" type="submit">
+                                    Tiếp tục: Tải hình ảnh <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- BƯỚC 2: Đăng tải hình ảnh xe -->
+                    <div class="reg-step-pane" id="pane-step-2" hidden>
+                        <div class="pane-header">
+                            <h4>Bước 2: Đăng tải hình ảnh xe</h4>
+                            <p>Đăng tải tối thiểu ảnh ngoại thất và nội thất để AZU Car tiến hành kiểm định hồ sơ.</p>
+                        </div>
+
+                        <div class="photo-upload-grid">
+                            <div class="photo-card" id="slot-front">
+                                <div class="photo-preview">
+                                    <i class="fa-regular fa-image"></i>
+                                    <span>Mặt trước xe</span>
+                                </div>
+                                <label class="btn-upload">
+                                    <i class="fa-solid fa-camera"></i> Chọn ảnh
+                                    <input type="file" accept="image/*" class="photo-file-input">
+                                </label>
+                            </div>
+                            <div class="photo-card" id="slot-back">
+                                <div class="photo-preview">
+                                    <i class="fa-regular fa-image"></i>
+                                    <span>Mặt sau xe</span>
+                                </div>
+                                <label class="btn-upload">
+                                    <i class="fa-solid fa-camera"></i> Chọn ảnh
+                                    <input type="file" accept="image/*" class="photo-file-input">
+                                </label>
+                            </div>
+                            <div class="photo-card" id="slot-interior">
+                                <div class="photo-preview">
+                                    <i class="fa-solid fa-gauge-high"></i>
+                                    <span>Khoang lái &amp; Ghế ngồi</span>
+                                </div>
+                                <label class="btn-upload">
+                                    <i class="fa-solid fa-camera"></i> Chọn ảnh
+                                    <input type="file" accept="image/*" class="photo-file-input">
+                                </label>
+                            </div>
+                            <div class="photo-card" id="slot-doc">
+                                <div class="photo-preview">
+                                    <i class="fa-regular fa-id-card"></i>
+                                    <span>Giấy tờ xe (Đăng kiểm)</span>
+                                </div>
+                                <label class="btn-upload">
+                                    <i class="fa-solid fa-camera"></i> Chọn ảnh
+                                    <input type="file" accept="image/*" class="photo-file-input">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="photo-tips">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            <span>Mẹo: Hình ảnh rõ nét chụp ban ngày, xe sạch sẽ giúp hồ sơ duyệt nhanh và tăng 40% tỉ lệ khách thuê.</span>
+                        </div>
+
+                        <div class="pane-actions">
+                            <button class="btn-step-prev" type="button" data-prev="1">
+                                <i class="fa-solid fa-arrow-left"></i> Quay lại
+                            </button>
+                            <button class="btn-step-next" type="button" id="btn-submit-registration">
+                                Gửi hồ sơ đăng ký xe <i class="fa-solid fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- BƯỚC 3: AZU Car tư vấn chủ xe và duyệt xe -->
+                    <div class="reg-step-pane" id="pane-step-3" hidden>
+                        <div class="review-status-card">
+                            <div class="status-pulse-circle">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                            <h4>Hồ sơ đăng ký xe đã được gửi thành công!</h4>
+                            <p class="review-lead">Đội ngũ AZU Car đang tiến hành thẩm định và sẽ sớm liên hệ hỗ trợ bạn.</p>
+
+                            <div class="review-summary-box">
+                                <div class="summary-item">
+                                    <span class="summary-label">Mẫu xe đăng ký:</span>
+                                    <strong id="summary-car-name">Mazda 3 Luxury 2024</strong>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Biển số:</span>
+                                    <strong id="summary-car-plate">43A-123.45</strong>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Chủ xe:</span>
+                                    <strong id="summary-owner-name">Nguyễn Văn A</strong>
+                                </div>
+                                <div class="summary-item">
+                                    <span class="summary-label">Trạng thái hồ sơ:</span>
+                                    <span class="status-badge-pending"><i class="fa-solid fa-spinner fa-spin"></i> Chờ duyệt (Pending)</span>
+                                </div>
+                            </div>
+
+                            <div class="review-checklist">
+                                <div class="check-row done">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Tiếp nhận thông tin xe &amp; hình ảnh kiểm định</span>
+                                </div>
+                                <div class="check-row pending">
+                                    <i class="fa-regular fa-clock"></i>
+                                    <span>Chuyên viên AZU Car liên hệ tư vấn hợp đồng &amp; thiết bị định vị trong 24h</span>
+                                </div>
+                                <div class="check-row">
+                                    <i class="fa-regular fa-circle"></i>
+                                    <span>Kích hoạt gói bảo hiểm chuyến đi MIC toàn diện</span>
+                                </div>
+                            </div>
+
+                            <div class="pane-actions center-actions">
+                                <button class="btn-step-next" type="button" id="btn-to-step-4">
+                                    Xem bước tiếp theo <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BƯỚC 4: Bắt đầu cho thuê -->
+                    <div class="reg-step-pane" id="pane-step-4" hidden>
+                        <div class="ready-status-card">
+                            <div class="ready-icon-circle">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <h4>Chào mừng bạn đến với cộng đồng chủ xe AZU Car!</h4>
+                            <p class="ready-lead">Xe của bạn đã sẵn sàng được niêm yết đón những hành khách đầu tiên.</p>
+
+                            <div class="benefits-grid">
+                                <div class="benefit-card">
+                                    <i class="fa-solid fa-calendar-check"></i>
+                                    <h5>Chủ động lịch xe</h5>
+                                    <p>Bật/tắt lịch cho thuê linh hoạt theo thời gian rảnh rỗi của bạn.</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <h5>Bảo vệ toàn diện</h5>
+                                    <p>100% chuyến xe được định vị GPS và bảo hiểm vật chất chuyến đi.</p>
+                                </div>
+                                <div class="benefit-card">
+                                    <i class="fa-solid fa-wallet"></i>
+                                    <h5>Thu nhập minh bạch</h5>
+                                    <p>Tiền thuê chuyển trực tiếp vào tài khoản ngân hàng sau mỗi chuyến.</p>
+                                </div>
+                            </div>
+
+                            <div class="pane-actions center-actions">
+                                <a href="become-owner.html#danh-sach-xe-content" class="btn-finish-reg">
+                                    <i class="fa-solid fa-car"></i> Đến trang Quản lý xe
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script src="JS/azu-store.js"></script>
+    <script src="JS/carregistermode.js"></script>
+    
+</body>
+</html>
