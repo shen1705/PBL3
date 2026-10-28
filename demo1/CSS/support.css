@@ -1,0 +1,616 @@
+/* ==========================================================================
+   AZU CAR - TRÒ CHUYỆN & TRỢ LÝ ẢO CHATBOT (support.css)
+   Đồng bộ 100% bảng màu & Layout thương hiệu AZU Car:
+   - Primary Dark: #1c2635 / #0f172a (Navy / Dark Slate)
+   - Primary Accent: #d1a34b / #b88a32 (Gold / Hổ phách)
+   - Pastel Cream: #faf4eb / #fdf8ee
+   ========================================================================== */
+
+/* --- SHELL & CONTAINER --- */
+.support-shell {
+    padding: 32px 0 60px;
+    min-height: calc(100vh - 420px);
+    background-color: #f8fafc;
+}
+
+.support-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* --- PAGE HEADING --- */
+.support-page-heading {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.support-page-heading .btn-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    text-decoration: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.support-page-heading .btn-back:hover {
+    background: #1c2635;
+    color: #ffffff;
+    border-color: #1c2635;
+    transform: translateX(-3px);
+}
+
+.support-page-heading .page-title {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.5px;
+}
+
+/* --- MAIN CARD --- */
+.support-main-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #edf0f3;
+    box-shadow: 0 8px 24px rgba(26, 38, 53, 0.06);
+    min-height: 520px;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* ==========================================================================
+   STATE 1: EMPTY STATE TRÊN TRANG SUPPORT.HTML (MÀU CHUẨN AZU CAR)
+   ========================================================================== */
+.chat-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 65px 24px 75px;
+    animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.empty-illustration {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.empty-illustration svg {
+    max-width: 100%;
+    height: auto;
+    filter: drop-shadow(0 8px 20px rgba(28, 38, 53, 0.06));
+}
+
+.empty-title {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1c2635;
+    line-height: 1.4;
+}
+
+.empty-desc {
+    margin: 0 auto 30px auto;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #64748b;
+    max-width: 440px;
+}
+
+/* Nút bắt đầu chat phối màu chuẩn AZU Car (#1c2635 & #d1a34b) */
+.btn-start-chat {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #1c2635;
+    color: #ffffff;
+    padding: 13px 28px;
+    border-radius: 11px;
+    border: 1.5px solid #1c2635;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(28, 38, 53, 0.2);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-start-chat i {
+    font-size: 16px;
+    color: #d1a34b;
+    transition: transform 0.2s ease;
+}
+
+.btn-start-chat:hover {
+    background: #0f172a;
+    border-color: #d1a34b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(28, 38, 53, 0.28);
+}
+
+.btn-start-chat:hover i {
+    transform: scale(1.15) rotate(6deg);
+}
+
+.btn-start-chat:active {
+    transform: translateY(0);
+}
+
+/* ==========================================================================
+   STATE 2: TRANG CHATBOT (CHATBOT.HTML)
+   ========================================================================== */
+.chatbot-page-card {
+    height: 640px;
+}
+
+/* Chat Header */
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #edf0f3;
+    box-sizing: border-box;
+}
+
+.btn-reset-chat {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-reset-chat:hover {
+    background: #1c2635;
+    color: #ffffff;
+    border-color: #1c2635;
+}
+
+.bot-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.bot-avatar {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #0f172a;
+    color: #d1a34b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.12);
+}
+
+.status-dot.online {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #10b981;
+    border: 2px solid #ffffff;
+}
+
+.bot-text {
+    text-align: left;
+}
+
+.bot-name {
+    margin: 0 0 2px 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-badge {
+    background: #d1a34b;
+    color: #1c2635;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 7px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+.bot-status {
+    margin: 0;
+    font-size: 12.5px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.bot-status i {
+    font-size: 6px;
+    color: #10b981;
+}
+
+/* Message Stream */
+.chat-messages-stream {
+    flex: 1;
+    padding: 24px 28px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: #fbfbfc;
+    scroll-behavior: smooth;
+    box-sizing: border-box;
+}
+
+.chat-messages-stream::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages-stream::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 6px;
+}
+
+.message-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    max-width: 82%;
+    animation: fadeInMsg 0.2s ease-out;
+}
+
+@keyframes fadeInMsg {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bot-row {
+    align-self: flex-start;
+}
+
+.user-row {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.bot-avatar-mini {
+    background: #0f172a;
+    color: #d1a34b;
+}
+
+.user-row .msg-avatar {
+    background: #d1a34b;
+    color: #ffffff;
+}
+
+.msg-bubble {
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-size: 14.5px;
+    line-height: 1.65;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    word-break: break-word;
+}
+
+.bot-bubble {
+    background: #ffffff;
+    border: 1.5px solid #edf0f3;
+    color: #1e293b;
+    border-bottom-left-radius: 4px;
+}
+
+.user-bubble {
+    background: #1c2635;
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+}
+
+.msg-bubble p {
+    margin: 0 0 6px 0;
+}
+
+.msg-bubble p:last-child {
+    margin-bottom: 0;
+}
+
+.msg-bubble ul,
+.msg-bubble ol {
+    margin: 6px 0 8px 18px;
+    padding: 0;
+}
+
+.msg-bubble li {
+    margin-bottom: 4px;
+}
+
+.msg-highlight-box {
+    background: #fdf8ee;
+    border: 1px solid #ebdcc5;
+    color: #926618;
+    padding: 9px 13px;
+    border-radius: 8px;
+    margin-top: 8px;
+    font-size: 13.5px;
+    font-weight: 500;
+}
+
+/* Prompt Chips */
+.chat-prompt-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+    padding-left: 44px;
+}
+
+.prompt-chip {
+    text-align: left;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 11px;
+    padding: 9px 16px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #334155;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+}
+
+.prompt-chip i {
+    color: #d1a34b;
+    font-size: 14px;
+}
+
+.prompt-chip:hover {
+    border-color: #d1a34b;
+    background: #fdfbf7;
+    color: #0f172a;
+    transform: translateX(4px);
+    box-shadow: 0 3px 8px rgba(209, 163, 75, 0.12);
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 28px;
+    background: #fbfbfc;
+}
+
+.typing-dots {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #ffffff;
+    border: 1px solid #edf0f3;
+    padding: 6px 12px;
+    border-radius: 12px;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    background: #94a3b8;
+    border-radius: 50%;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+.typing-dots span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); background: #d1a34b; }
+}
+
+.typing-label {
+    font-size: 12.5px;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* Chat Input Bar */
+.chat-input-area {
+    padding: 16px 24px;
+    background: #ffffff;
+    border-top: 1px solid #edf0f3;
+    box-sizing: border-box;
+}
+
+.input-box-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 5px 6px 5px 18px;
+    transition: all 0.2s ease;
+}
+
+.input-box-wrapper:focus-within {
+    border-color: #d1a34b;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(209, 163, 75, 0.14);
+}
+
+.input-box-wrapper input {
+    flex: 1;
+    height: 42px;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14.5px;
+    color: #0f172a;
+    box-sizing: border-box;
+}
+
+.input-box-wrapper input::placeholder {
+    color: #94a3b8;
+}
+
+.btn-send-msg {
+    width: 40px;
+    height: 40px;
+    border-radius: 9px;
+    background: #1c2635;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.btn-send-msg:hover {
+    background: #0f172a;
+    color: #d1a34b;
+    transform: scale(1.05);
+}
+
+/* --- FOOTER NOTE --- */
+.support-footer-note {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13.5px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.support-footer-note i {
+    color: #d1a34b;
+}
+
+.support-footer-note a {
+    color: #0f172a;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.support-footer-note a:hover {
+    color: #d1a34b;
+    text-decoration: underline;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .support-shell {
+        padding: 20px 0 40px;
+    }
+
+    .support-page-heading .page-title {
+        font-size: 22px;
+    }
+
+    .chat-empty-state {
+        padding: 45px 18px 55px;
+    }
+
+    .empty-illustration svg {
+        width: 190px;
+        height: auto;
+    }
+
+    .empty-title {
+        font-size: 18px;
+    }
+
+    .btn-start-chat {
+        width: 100%;
+        max-width: 320px;
+        font-size: 14.5px;
+    }
+
+    .chatbot-page-card {
+        height: 540px;
+    }
+
+    .chat-messages-stream {
+        padding: 16px;
+    }
+
+    .message-row {
+        max-width: 95%;
+    }
+
+    .chat-prompt-chips {
+        padding-left: 0;
+    }
+}
