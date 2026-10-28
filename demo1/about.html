@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giới thiệu về AZU Car - Nền tảng thuê xe tự lái</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="CSS/index.css">
+    <link rel="stylesheet" href="CSS/about.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" aria-label="AZU Car - Trang chủ">
+                <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+            </a>
+            
+            <nav class="nav-links" aria-label="Điều hướng chính">
+                <a href="about.html" id="about-nav-link" class="active">Về AZU Car</a>
+                <a href="become-owner.html">Trở thành chủ xe</a>
+                <a href="my-trips.html" id="trips-nav-link">Chuyến của tôi</a>
+                <a href="support.html" id="support-nav-link">Trợ giúp</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div id="guest-actions">
+                    <button type="button" class="btn-register-outline">Đăng ký</button>
+                    <button type="button" class="btn-slate">Đăng nhập</button>
+                </div>
+                <a id="account-display" class="account-display" href="my-trips.html#account" aria-label="Thông tin tài khoản" hidden>
+                    <span class="account-avatar" id="account-avatar"></span>
+                    <span id="account-name"></span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="about-page-bg">
+        <div class="about-container">
+            
+            <!-- Nút quay lại trang chủ -->
+            <div class="about-top-bar">
+                <a href="index.html" class="btn-back-home">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </div>
+
+            <!-- Thẻ bài viết chính -->
+            <article class="about-card">
+                
+                <header class="about-header">
+                    <h1>Giới thiệu về AZU Car</h1>
+                    <p>Nền tảng kết nối chia sẻ và cho thuê ô tô tự lái</p>
+                </header>
+
+                <!-- Thanh nhảy nhanh 3 mục -->
+                <nav class="about-quick-tabs" aria-label="Mục lục trang">
+                    <a href="#about-us" class="about-tab-link">
+                        <i class="fa-regular fa-building"></i>
+                        <span>Về chúng tôi</span>
+                    </a>
+                    <a href="#features" class="about-tab-link">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Tính năng</span>
+                    </a>
+                    <a href="#privacy" class="about-tab-link">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Chính sách bảo mật</span>
+                    </a>
+                </nav>
+
+                <!-- 1. Về chúng tôi -->
+                <section class="about-block" id="about-us">
+                    <h2 class="about-block-title">
+                        <i class="fa-regular fa-circle-question"></i>
+                        <span>1. Về chúng tôi</span>
+                    </h2>
+                    <p class="about-text">
+                        <strong>AZU Car</strong> là nền tảng kết nối trực tiếp giữa chủ xe cá nhân có xe nhàn rỗi và những khách hàng đang có nhu cầu thuê xe tự lái để phục vụ cho các chuyến du lịch, công tác hoặc về quê thăm gia đình.
+                    </p>
+                    <p class="about-text">
+                        Mục tiêu của AZU Car là đơn giản hóa toàn bộ quy trình thuê xe truyền thống: không còn thủ tục rườm rà, giá cả được niêm yết công khai theo ngày và khách hàng có thể chủ động chọn đúng chiếc xe mình ưng ý nhất qua hình ảnh và thông số thực tế.
+                    </p>
+                    <p class="about-text">
+                        Chúng tôi cam kết mang lại sự minh bạch, an toàn và mức giá hợp lý cho mọi chuyến hành trình của bạn.
+                    </p>
+                </section>
+
+                <!-- 2. Tính năng -->
+                <section class="about-block" id="features">
+                    <h2 class="about-block-title">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>2. Tính năng chính trên hệ thống</span>
+                    </h2>
+                    <p class="about-text">
+                        Hệ thống AZU Car được thiết kế trực quan, dễ sử dụng với các tiện ích thiết thực:
+                    </p>
+
+                    <ul class="about-feature-list">
+                        <li class="about-feature-item">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <div class="about-feature-content">
+                                <h4>Tìm kiếm và lọc xe theo nhu cầu</h4>
+                                <p>Dễ dàng lọc xe theo quận huyện tại Đà Nẵng (Hải Châu, Liên Chiểu, Thanh Khê...), số chỗ (4 - 5 chỗ, 7 chỗ), hãng xe (Toyota, Hyundai, VinFast, Mazda...) và tầm giá phù hợp.</p>
+                            </div>
+                        </li>
+
+                        <li class="about-feature-item">
+                            <i class="fa-solid fa-bolt"></i>
+                            <div class="about-feature-content">
+                                <h4>Đặt xe nhanh chóng</h4>
+                                <p>Các dòng xe có nhãn "Đặt nhanh" cho phép bạn xác nhận lịch trình ngay tức thì mà không cần mất thời gian chờ chủ xe xét duyệt thủ công.</p>
+                            </div>
+                        </li>
+
+                        <li class="about-feature-item">
+                            <i class="fa-regular fa-image"></i>
+                            <div class="about-feature-content">
+                                <h4>Xem xe chi tiết & Đánh giá thực tế</h4>
+                                <p>Mỗi mẫu xe đều hiển thị ảnh chụp thực tế các góc, thông tin năm sản xuất, số chuyến đã hoàn thành và nhận xét chân thật từ những người thuê trước.</p>
+                            </div>
+                        </li>
+
+                        <li class="about-feature-item">
+                            <i class="fa-solid fa-file-contract"></i>
+                            <div class="about-feature-content">
+                                <h4>Hợp đồng điện tử & Biên bản bàn giao</h4>
+                                <p>Quy trình giao nhận xe được ghi nhận rõ ràng (số km ODO, tình trạng thân vỏ và mức nhiên liệu) để đảm bảo quyền lợi minh bạch cho cả khách thuê và chủ xe.</p>
+                            </div>
+                        </li>
+
+                        <li class="about-feature-item">
+                            <i class="fa-solid fa-headset"></i>
+                            <div class="about-feature-content">
+                                <h4>Hỗ trợ xuyên suốt 24/7</h4>
+                                <p>Đường dây nóng 1900 9217 và Trợ lý ảo giải đáp thắc mắc luôn sẵn sàng hỗ trợ bạn khi phát sinh câu hỏi hoặc sự cố kỹ thuật trên đường.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- 3. Chính sách bảo mật -->
+                <section class="about-block" id="privacy">
+                    <h2 class="about-block-title">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>3. Chính sách bảo mật & An toàn</span>
+                    </h2>
+                    <p class="about-text">
+                        Chúng tôi hiểu rằng sự an tâm và riêng tư là yếu tố quan trọng hàng đầu khi tham gia thuê xe tự lái:
+                    </p>
+                    <p class="about-text">
+                        • <strong>Bảo mật thông tin cá nhân:</strong> Thông tin CCCD, giấy phép lái xe (GPLX) và số điện thoại của bạn chỉ được dùng cho mục đích xác minh người lái hợp pháp và làm thủ tục nhận xe. Chúng tôi tuyệt đối không chia sẻ thông tin cho bên thứ ba vì mục đích thương mại.
+                    </p>
+                    <p class="about-text">
+                        • <strong>Bảo vệ chuyến đi:</strong> Toàn bộ quy trình hoàn cọc sau chuyến đi đều được thực hiện minh bạch, xe được kiểm tra tình trạng kỹ thuật trước khi bàn giao.
+                    </p>
+
+                    <div class="about-policy-box">
+                        <p>Bạn có thể tham khảo toàn văn các quy định và điều khoản bảo mật chi tiết tại đây:</p>
+                        <div class="about-policy-links">
+                            <a href="my-trips.html#privacy" class="btn-simple-policy">
+                                <i class="fa-regular fa-file-lines"></i>
+                                <span>Chính sách bảo vệ chuyến đi (Khách thuê)</span>
+                            </a>
+                            <a href="become-owner.html#bao-mat" class="btn-simple-policy">
+                                <i class="fa-regular fa-file-lines"></i>
+                                <span>Chính sách bảo vệ dữ liệu (Chủ xe)</span>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Nút điều hướng nhanh cuối trang -->
+                <div class="about-bottom-actions">
+                    <a href="become-owner.html" class="btn-secondary-action">
+                        <i class="fa-solid fa-key"></i>
+                        <span>Đăng ký cho thuê xe</span>
+                    </a>
+                    <a href="find.html" class="btn-primary-action">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <span>Tìm xe ngay</span>
+                    </a>
+                </div>
+
+            </article>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <a href="index.html" class="logo footer-logo">
+                    <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+                </a>
+                <p class="footer-desc">Nền tảng chia sẻ và cho thuê ô tô tự lái hàng đầu Việt Nam. Mang lại những chuyến đi tự do và hạnh phúc cho triệu hành trình.</p>
+            </div>
+            <div class="footer-col">
+                <h4>VỀ AZU CAR</h4>
+                <ul>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="about.html#features">Tính năng</a></li>
+                    <li><a href="my-trips.html#privacy">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>DỊCH VỤ</h4>
+                <ul>
+                    <li><a href="find.html">Thuê xe tự lái</a></li>
+                    <li><a href="find.html">Thuê xe cưới hỏi</a></li>
+                    <li><a href="become-owner.html">Hợp tác cho thuê</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>HỖ TRỢ & LIÊN HỆ</h4>
+                <p><strong>Hotline:</strong> 1900 9217 (8:00 - 21:00)</p>
+                <p><strong>Email:</strong> support@azucar.vn</p>
+                <p><strong>Văn phòng:</strong> Phường Hải Châu, TP. Đà Nẵng</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-flex">
+                <p>© 2026 AZU Car Việt Nam. Bảo lưu mọi quyền lợi.</p>
+                <div class="footer-bottom-links">
+                    <a href="about.html">Về chúng tôi</a>
+                    <a href="about.html#privacy">Chính sách bảo mật</a>
+                    <a href="support.html">Trợ giúp</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal Đăng nhập / Đăng ký dùng chung -->
+    <div id="loginModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="modal-close-btn" data-modal="loginModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <h2>Đăng nhập</h2>
+                <p>Chào mừng quý khách quay lại với AZU Car</p>
+            </div>
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label for="login-identity">Tên hoặc số điện thoại</label>
+                    <div class="input-wrapper">
+                        <input id="login-identity" name="identity" type="text" placeholder="Nhập tên hoặc số điện thoại" autocomplete="username" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Mật khẩu</label>
+                    <div class="input-wrapper password-box">
+                        <input id="login-password" name="password" type="password" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                    <div class="forgot-password-row">
+                        <a href="#" class="forgot-link" id="openForgotModal">Quên mật khẩu?</a>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit-auth">Đăng nhập</button>
+                <p class="switch-auth-text">Bạn chưa là thành viên? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Quên mật khẩu -->
+    <div id="forgotModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="modal-close-btn" data-modal="forgotModal"><i class="fa-solid fa-xmark"></i></button>
+            
+            <!-- Bước 1: Nhập Số điện thoại / Email -->
+            <div id="forgotStep1">
+                <div class="modal-header">
+                    <h2>Khôi phục mật khẩu</h2>
+                    <p>Nhập số điện thoại hoặc email liên kết để nhận mã xác thực OTP</p>
+                </div>
+                <form class="auth-form" id="forgot-form-step1">
+                    <div class="form-group">
+                        <label for="forgot-identity">Số điện thoại hoặc Email</label>
+                        <div class="input-wrapper">
+                            <input id="forgot-identity" name="identity" type="text" placeholder="Ví dụ: 0905 123 456 hoặc email@gmail.com" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit-auth">Gửi mã xác thực OTP</button>
+                    <p class="switch-auth-text">Nhớ mật khẩu? <a href="#" class="back-to-login-link">Đăng nhập ngay</a></p>
+                </form>
+            </div>
+
+            <!-- Bước 2: Nhập OTP & Mật khẩu mới -->
+            <div id="forgotStep2" hidden>
+                <div class="modal-header">
+                    <h2>Đặt lại mật khẩu</h2>
+                    <p>Mã OTP 6 số đã được gửi tới <strong id="forgotTargetText" style="color: #1c2635;">0905***456</strong></p>
+                </div>
+                <form class="auth-form" id="forgot-form-step2">
+                    <div class="form-group">
+                        <label for="forgot-otp">Mã xác thực OTP</label>
+                        <div class="input-wrapper">
+                            <input id="forgot-otp" name="otp" type="text" maxlength="6" placeholder="Nhập 6 số OTP (mặc định: 123456)" required style="letter-spacing: 4px; font-weight: 700; text-align: center; font-size: 16px;">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px;">
+                            <span style="color: #64748b;">Chưa nhận được mã?</span>
+                            <button type="button" id="btnResendOtp" style="background: none; border: none; color: #d1a34b; font-weight: 600; cursor: pointer; padding: 0;">Gửi lại mã (<span id="otpCountdown">59</span>s)</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="forgot-new-password">Mật khẩu mới</label>
+                        <div class="input-wrapper password-box">
+                            <input id="forgot-new-password" name="newPassword" type="password" placeholder="Tạo mật khẩu mới (ít nhất 6 ký tự)" autocomplete="new-password" required>
+                            <i class="fa-regular fa-eye-slash toggle-password"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="forgot-confirm-password">Xác nhận mật khẩu mới</label>
+                        <div class="input-wrapper password-box">
+                            <input id="forgot-confirm-password" name="confirmPassword" type="password" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required>
+                            <i class="fa-regular fa-eye-slash toggle-password"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit-auth">Xác nhận &amp; Đăng nhập</button>
+                    <p class="switch-auth-text"><a href="#" id="backToStep1Forgot">← Thay đổi số điện thoại / email</a></p>
+                </form>
+            </div>
+
+            <!-- Bước 3: Thông báo thành công -->
+            <div id="forgotStepSuccess" hidden style="text-align: center; padding: 16px 0 8px;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: #eef4fa; color: #1c2635; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px; border: 2px solid #b8cce4;">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3 style="font-size: 18px; color: #1c2635; margin: 0 0 8px;">Đổi mật khẩu thành công!</h3>
+                <p style="font-size: 13.5px; color: #64748b; margin: 0 0 20px; line-height: 1.5;">Mật khẩu mới của bạn đã được cập nhật an toàn vào hệ thống AZU Car.</p>
+                <button type="button" class="btn-submit-auth" id="btnGoToLoginAfterReset" style="margin: 0 auto; width: 100%;">Đăng nhập ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="registerModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="modal-close-btn" data-modal="registerModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <h2>Đăng ký</h2>
+                <p>Chào mừng quý khách đến với AZU Car</p>
+            </div>
+            <form class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label for="register-name">Họ và tên</label>
+                    <div class="input-wrapper">
+                        <input id="register-name" name="name" type="text" placeholder="Nhập họ và tên của bạn" autocomplete="name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-phone">Số điện thoại</label>
+                    <div class="input-wrapper">
+                        <input id="register-phone" name="phone" type="tel" placeholder="Nhập số điện thoại" autocomplete="tel" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Mật khẩu</label>
+                    <div class="input-wrapper password-box">
+                        <input id="register-password" name="password" type="password" placeholder="Tạo mật khẩu ít nhất 6 ký tự" autocomplete="new-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+                <p class="terms-text">Tôi đã đọc và đồng ý với <a href="my-trips.html#privacy" class="open-policy-link" data-policy="terms">Chính sách & Quy định</a> và <a href="my-trips.html#privacy" class="open-policy-link" data-policy="privacy">Chính sách Bảo vệ dữ liệu cá nhân</a></p>
+                <button type="submit" class="btn-submit-auth">Tạo tài khoản</button>
+                <p class="switch-auth-text">Đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Xem Chính Sách & Quy Định / Bảo Vệ Dữ Liệu Cá Nhân -->
+    <div id="policyPreviewModal" class="auth-modal-overlay policy-modal-overlay" style="z-index: 100000;" hidden>
+        <div class="auth-modal-card policy-modal-card" role="dialog" aria-modal="true" aria-labelledby="policyModalTitle">
+            <button class="modal-close-btn" id="closePolicyModalBtn" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="policy-modal-header">
+                <span class="policy-modal-badge" id="policyModalBadge"><i class="fa-solid fa-shield-halved"></i> QUY CHUẨN AN TOÀN</span>
+                <h2 id="policyModalTitle">CHÍNH SÁCH & QUY ĐỊNH</h2>
+                <p id="policyModalSubtitle">Điều khoản sử dụng dịch vụ và quy chế vận hành AZU Car Việt Nam</p>
+                
+                <!-- Tab chuyển nhanh giữa 2 chính sách -->
+                <div class="policy-modal-tabs" role="tablist">
+                    <button type="button" class="policy-tab-btn active" id="tabBtnTerms" data-policy="terms">
+                        <i class="fa-solid fa-file-contract"></i> Chính sách & Quy định
+                    </button>
+                    <button type="button" class="policy-tab-btn" id="tabBtnPrivacy" data-policy="privacy">
+                        <i class="fa-solid fa-user-shield"></i> Bảo vệ dữ liệu cá nhân
+                    </button>
+                </div>
+            </div>
+
+            <div class="policy-modal-body" id="policyModalBody">
+                <!-- Nội dung được nạp động từ JS -->
+            </div>
+
+            <div class="policy-modal-footer">
+                <button type="button" class="policy-btn-print" id="btnPrintPolicy" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> In / Tải PDF
+                </button>
+                <button type="button" class="btn-submit-auth policy-btn-agree" id="btnAcceptPolicy">
+                    <i class="fa-solid fa-circle-check"></i> Đã hiểu & Đồng ý
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="JS/azu-store.js"></script>
+    <script src="JS/index.js"></script>
+</body>
+</html>

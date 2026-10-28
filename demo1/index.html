@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AZU Car - Thuê xe tự lái</title>
+    <link rel="stylesheet" href="CSS/index.css">
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+            </a>
+            
+            <nav class="nav-links" aria-label="Điều hướng chính">
+                <a href="about.html" id="about-nav-link">Về AZU Car</a>
+                <a href="become-owner.html">Trở thành chủ xe</a>
+                <a href="my-trips.html" id="trips-nav-link">Chuyến của tôi</a>
+                <a href="support.html" id="support-nav-link">Trợ giúp</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div id="guest-actions">
+                    <button type="button" class="btn-register-outline">Đăng ký</button>
+                    <button type="button" class="btn-slate">Đăng nhập</button>
+                </div>
+                <a id="account-display" class="account-display" href="my-trips.html#account" aria-label="Thông tin tài khoản" hidden>
+                    <span class="account-avatar" id="account-avatar"></span>
+                    <span id="account-name"></span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Wrapper -->
+    <main class="main-wrapper">
+        <div class="container">
+            <!-- Hero Banner Box -->
+            <section class="hero-card">
+                <div class="hero-left">
+                    <div class="hero-badge">
+                        <i class="fa-solid fa-car-side"></i> Hơn 10.000 xe khắp Việt Nam
+                    </div>
+                    
+                    <h1>Thuê xe tự lái, <span class="underline-text">dễ như đặt</span> <br>phòng khách sạn</h1>
+                    
+                    <p class="hero-desc">
+                        Chỉ cần GPLX & CCCD, nhận xe trong 30 phút. Giá minh bạch từ 600K/ngày, miễn phí huỷ trước 6h chuyến đi.
+                    </p>
+
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <h3>10.000+</h3>
+                            <p>XE TRÊN NỀN TẢNG</p>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <h3>63</h3>
+                            <p>TỈNH THÀNH TOÀN QUỐC</p>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item">
+                            <h3>4.8 <i class="fa-solid fa-star"></i></h3>
+                            <p>ĐÁNH GIÁ TRUNG BÌNH</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-right">
+                    <div class="car-preview-card">
+                        <div class="car-preview-img">
+                            <span class="preview-badge"><i class="fa-solid fa-circle"></i> SUV điện hiện đại 2026</span>
+                            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800" alt="VinFast VF8">
+                            <div class="car-preview-overlay">
+                                <div class="car-info">
+                                    <h4>VinFast VF8 Plus</h4>
+                                    <p>Pin đầy 100% • Tự động</p>
+                                </div>
+                                <div class="car-price">
+                                    <span class="price-val">1.100.000đ</span>
+                                    <span class="price-unit">/ngày</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search Bar -->
+            <section class="search-bar-card">
+                <div class="search-col" id="openLocationModal" style="cursor: pointer;">
+                    <div class="col-label"><i class="fa-solid fa-location-dot"></i> ĐỊA ĐIỂM</div>
+                    <div class="col-value-row">
+                        <span class="val-text" id="selectedLocationText">TP. Đà Nẵng</span>
+                        <button class="btn-change" type="button">Thay đổi</button>
+                    </div>
+                </div>
+
+                <div class="search-col" id="openTimeModal" style="cursor: pointer;">
+                    <div class="col-label"><i class="fa-regular fa-calendar-days"></i> THỜI GIAN THUÊ</div>
+                    <div class="rental-time-values">
+                        <span><strong>Nhận:</strong> <span class="val-text" id="pickupTimeText">09:00, 15/10/2026</span></span>
+                        <span class="rental-time-separator">–</span>
+                        <span><strong>Trả:</strong> <span class="val-text" id="returnTimeText">18:00, 18/10/2026</span></span>
+                    </div>
+                </div>
+
+                <button class="btn-search-main">
+                    <i class="fa-solid fa-magnifying-glass"></i> Tìm xe
+                </button>
+            </section>
+
+            <!-- Tại sao chọn AZU Car ? -->
+            <section class="section-why">
+                <h2 class="section-title">Tại sao chọn AZU Car ?</h2>
+                <p class="section-desc">Chúng tôi mang lại trải nghiệm thuê xe tự lái trọn vẹn, an tâm và tối ưu nhất cho mỗi chuyến hành trình của bạn.</p>
+                
+                <div class="why-grid">
+                    <div class="why-card">
+                        <div class="why-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h3>An toàn & Bảo hiểm</h3>
+                        <p>Mọi chuyến đi đều được bảo vệ bởi gói bảo hiểm chuyến đi vững chắc từ MIC & VNI toàn diện.</p>
+                    </div>
+                    <div class="why-card">
+                        <div class="why-icon"><i class="fa-regular fa-clock"></i></div>
+                        <h3>Giao xe tận nơi 24/7</h3>
+                        <p>Nhận xe ngay tại sân bay, khách sạn hoặc tại nhà riêng bất kể khung giờ nào trong ngày.</p>
+                    </div>
+                    <div class="why-card">
+                        <div class="why-icon"><i class="fa-solid fa-tag"></i></div>
+                        <h3>Giá tốt, minh bạch</h3>
+                        <p>Thông tin chi phí rõ ràng, không phí ẩn. Cam kết hoàn tiền nếu khách hàng không hài lòng.</p>
+                    </div>
+                    <div class="why-card">
+                        <div class="why-icon"><i class="fa-solid fa-headset"></i></div>
+                        <h3>Hỗ trợ 24/7</h3>
+                        <p>Đội ngũ chăm sóc khách hàng luôn đồng hành cùng bạn trên mọi nẻo đường Việt Nam.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Xe phổ biến tại TP. Đà Nẵng -->
+            <section class="section-cars">
+                <h2 class="section-title">Xe phổ biến tại TP. Đà Nẵng</h2>
+                <p class="section-desc">Khám phá các mẫu xe chất lượng hàng đầu được nhiều người thuê nhất.</p>
+
+                <div class="car-filter-tabs">
+                    <button class="filter-tab active" data-filter="all">Tất cả</button>
+                    <button class="filter-tab" data-filter="4-seats">4 chỗ</button>
+                    <button class="filter-tab" data-filter="7-seats">7 chỗ</button>
+                    <button class="filter-tab" data-filter="suv">SUV</button>
+                    <button class="filter-tab" data-filter="electric">Xe điện</button>
+                </div>
+
+                <div class="cars-grid" id="homeCarsGrid">
+                    <!-- Xe 1: VinFast VF8 -->
+                    <div class="car-item-card" data-category="all suv electric" data-seats="5">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">ĐẶT NHANH</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="VinFast VF8">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>VinFast VF8</h3>
+                                <span class="car-trans">Xe điện • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">1.100.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 2: Hyundai Tucson 2022 -->
+                    <div class="car-item-card" data-category="all suv" data-seats="5">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">ĐẶT NHANH</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.8</span>
+                            <img src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=600" alt="Hyundai Tucson">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Hyundai Tucson 2022</h3>
+                                <span class="car-trans">SUV • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">950.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 3: Mazda CX-5 2023 -->
+                    <div class="car-item-card" data-category="all suv" data-seats="5">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">ĐẶT NHANH</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                            <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600" alt="Mazda CX-5">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Mazda CX-5 2023</h3>
+                                <span class="car-trans">SUV • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Thanh Khê, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">900.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 4: Mitsubishi Xpander 2024 (7 chỗ) -->
+                    <div class="car-item-card" data-category="all 7-seats" data-seats="7">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">7 CHỖ HOT</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                            <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600" alt="Mitsubishi Xpander 2024">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Mitsubishi Xpander 2024</h3>
+                                <span class="car-trans">7 chỗ • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường An Hải, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">765.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 5: Suzuki Ertiga Hybrid 2025 (7 chỗ) -->
+                    <div class="car-item-card" data-category="all 7-seats" data-seats="7">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">7 CHỖ TIỆN NGHI</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                            <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600" alt="Suzuki Ertiga Hybrid 2025">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Suzuki Ertiga Hybrid 2025</h3>
+                                <span class="car-trans">7 chỗ • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hòa Cường, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">840.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 6: Honda BR-V 2024 (7 chỗ) -->
+                    <div class="car-item-card" data-category="all 7-seats" data-seats="7">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">7 CHỖ RỘNG RÃI</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.8</span>
+                            <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="Honda BR-V 2024">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Honda BR-V 2024</h3>
+                                <span class="car-trans">7 chỗ • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">710.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 7: Toyota Innova Cross 2024 (7 chỗ, SUV) -->
+                    <div class="car-item-card" data-category="all 7-seats suv" data-seats="7">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">XE GIA ĐÌNH</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                            <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600" alt="Toyota Innova Cross 2024">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Toyota Innova Cross 2024</h3>
+                                <span class="car-trans">7 chỗ • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">950.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 8: Toyota Vios G 2024 (4 chỗ) -->
+                    <div class="car-item-card" data-category="all 4-seats" data-seats="5">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">TIẾT KIỆM</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                            <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&q=80&w=600" alt="Toyota Vios G 2024">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Toyota Vios G 2024</h3>
+                                <span class="car-trans">5 chỗ • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">688.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 9: Honda City RS 2023 (4 chỗ) -->
+                    <div class="car-item-card" data-category="all 4-seats" data-seats="5">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">ĐẶT NHANH</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                            <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600" alt="Honda City RS 2023">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Honda City RS 2023</h3>
+                                <span class="car-trans">5 chỗ • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">625.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 10: Mazda 3 Luxury 2024 (4 chỗ) -->
+                    <div class="car-item-card" data-category="all 4-seats" data-seats="5">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">SANG TRỌNG</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.8</span>
+                            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600" alt="Mazda 3 Luxury 2024">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Mazda 3 Luxury 2024</h3>
+                                <span class="car-trans">5 chỗ • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hòa Cường, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">782.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 11: VinFast VF3 2026 (Xe điện, 4 chỗ) -->
+                    <div class="car-item-card" data-category="all 4-seats electric" data-seats="4">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">XE ĐIỆN MINI</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                            <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800" alt="VinFast VF3 2026">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>VinFast VF3 2026</h3>
+                                <span class="car-trans">Xe điện • 4 chỗ</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hòa Thuận Tây, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">524.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 12: Ford Territory Trend 2025 (SUV) -->
+                    <div class="car-item-card" data-category="all suv" data-seats="5">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">THỂ THAO</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 5.0</span>
+                            <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600" alt="Ford Territory Trend 2025">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Ford Territory Trend 2025</h3>
+                                <span class="car-trans">SUV • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Cẩm Lệ, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">888.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 13: Kia Sonet Luxury 2023 (SUV) -->
+                    <div class="car-item-card" data-category="all suv" data-seats="5">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">GẦM CAO</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="Kia Sonet Luxury 2023">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>Kia Sonet Luxury 2023</h3>
+                                <span class="car-trans">SUV • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">648.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Xe 14: VinFast VF e34 2024 (Xe điện, SUV) -->
+                    <div class="car-item-card" data-category="all suv electric" data-seats="5">
+                        <div class="car-img-box">
+                            <span class="car-badge-top">XE XANH</span>
+                            <span class="car-badge-rate"><i class="fa-solid fa-star"></i> 4.9</span>
+                            <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="VinFast VF e34 2024">
+                        </div>
+                        <div class="car-info-box">
+                            <div class="car-name-row">
+                                <h3>VinFast VF e34 2024</h3>
+                                <span class="car-trans">Xe điện • Tự động</span>
+                            </div>
+                            <p class="car-loc"><i class="fa-solid fa-location-dot"></i> Phường Thanh Khê, TP. Đà Nẵng</p>
+                            <div class="car-bottom-row">
+                                <div class="car-price-box">
+                                    <span class="lbl">ĐƠN GIÁ</span>
+                                    <div class="val">750.000đ<span> / ngày</span></div>
+                                </div>
+                                <a href="find.html" class="btn-detail">Xem chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view-all-container">
+                    <button class="btn-view-all">Xem tất cả xe</button>
+                </div>
+            </section>
+
+            <!-- Chỉ 3 bước để có xe -->
+            <section class="section-steps-box">
+                <h2>Chỉ 3 bước để có xe</h2>
+                <p>Hệ thống quy trình đơn giản, nhanh chóng giúp bạn bắt đầu chuyến đi ngay lập tức.</p>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-num">01</div>
+                        <div class="step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                        <h4>Bước 1: Tìm & đặt xe</h4>
+                        <p>Tìm chiếc xe bạn ưng ý nhất trên website hoặc ứng dụng, kiểm tra thông tin chi tiết và chọn đặt nhanh.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">02</div>
+                        <div class="step-icon"><i class="fa-solid fa-car-side"></i></div>
+                        <h4>Bước 2: Nhận xe</h4>
+                        <p>Bàn giao giấy tờ cần thiết, nhận xe tận nơi hoặc đến trực tiếp bãi đỗ của chủ xe đã hẹn trước.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-num">03</div>
+                        <div class="step-icon"><i class="fa-solid fa-thumbs-up"></i></div>
+                        <h4>Bước 3: Trả xe & đánh giá</h4>
+                        <p>Hoàn trả xe đúng hạn và tình trạng ban đầu, gửi đánh giá 5 sao cho chủ xe nhiệt tình và uy tín.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Khách hàng nói gì về AZU Car? -->
+            <section class="section-testimonials">
+                <h2 class="section-title">Khách hàng nói gì về AZU Car?</h2>
+                <p class="section-desc">Đã có hàng vạn chuyến đi an toàn cùng những phản hồi chân thực từ cộng đồng người dùng.</p>
+                
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <i class="fa-solid fa-quote-left quote-icon"></i>
+                        <p>"Thuê chiếc VinFast VF8 ở đây siêu tiện lợi, xe còn mới nguyên và sạc đầy pin. Chủ xe rất chu đáo hướng dẫn nhiệt tình."</p>
+                        <div class="user-info">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200" alt="User">
+                            <div>
+                                <h4>Nguyễn Minh Tuấn</h4>
+                                <p>Du khách Hà Nội</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <i class="fa-solid fa-quote-left quote-icon"></i>
+                        <p>"Lần đầu tiên trải nghiệm tự lái đi Đà Lạt cùng gia đình. Thủ tục nhận xe nhanh chóng chỉ mất 15 phút là lăn bánh."</p>
+                        <div class="user-info">
+                            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200" alt="User">
+                            <div>
+                                <h4>Trần Thị Nụ</h4>
+                                <p>Nhà thiết kế đồ họa</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <i class="fa-solid fa-quote-left quote-icon"></i>
+                        <p>"Giá cả cực kỳ minh bạch và bảo hiểm đầy đủ làm mình rất yên tâm khi di chuyển trên quãng đường dài miền Trung."</p>
+                        <div class="user-info">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200" alt="User">
+                            <div>
+                                <h4>Phạm Hoàng Nam</h4>
+                                <p>Nhiếp ảnh gia tự do</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bạn có xe nhàn rỗi? -->
+            <section class="section-owner-banner">
+                <div class="owner-text">
+                    <h2>Bạn có xe nhàn rỗi? Cho thuê & kiếm thêm thu nhập</h2>
+                    <p>Gia nhập cộng đồng chủ xe AZU Car để tối ưu hoá chi phí vận hành xe và tạo ra nguồn lợi nhuận thụ động vững chắc mỗi tháng.</p>
+                    <ul class="owner-list">
+                        <li><i class="fa-solid fa-check"></i> Thu nhập từ 10 - 15 triệu đồng hàng tháng đơn giản</li>
+                        <li><i class="fa-solid fa-check"></i> Hệ thống bảo hiểm toàn diện bảo vệ tài sản của bạn</li>
+                        <li><i class="fa-solid fa-check"></i> Công cụ định giá tự động và hỗ trợ vận hành 24/7</li>
+                    </ul>
+                    <button class="btn-owner-reg" id="openOwnerModalBtn">Đăng ký ngay</button>
+                </div>
+                <div class="owner-img">
+                    <img src="https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=800" alt="Chủ xe AZU Car">
+                </div>
+            </section>
+
+            <!-- Thuê xe tại các thành phố lớn -->
+            <section class="section-cities">
+                <h2 class="section-title">Thuê xe tại các thành phố lớn</h2>
+                <p class="section-desc">Tìm kiếm những hành trình tuyệt vời tại những địa điểm du lịch hàng đầu Việt Nam.</p>
+                
+                <div class="cities-grid">
+                    <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&q=80&w=600')">
+                        <div class="city-overlay">
+                            <h3>TP. Hồ Chí Minh</h3>
+                            <p>3.200+ xe đang sẵn sàng</p>
+                        </div>
+                    </div>
+                    <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=600')">
+                        <div class="city-overlay">
+                            <h3>Hà Nội</h3>
+                            <p>2.400+ xe đang sẵn sàng</p>
+                        </div>
+                    </div>
+                    <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&q=80&w=600')">
+                        <div class="city-overlay">
+                            <h3>Đà Nẵng</h3>
+                            <p>1.100+ xe đang sẵn sàng</p>
+                        </div>
+                    </div>
+                    <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=600')">
+                        <div class="city-overlay">
+                            <h3>Nha Trang</h3>
+                            <p>800+ xe đang sẵn sàng</p>
+                        </div>
+                    </div>
+                    <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600')">
+                        <div class="city-overlay">
+                            <h3>Đà Lạt</h3>
+                            <p>950+ xe đang sẵn sàng</p>
+                        </div>
+                    </div>
+                    <div class="city-card" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=600')">
+                        <div class="city-overlay">
+                            <h3>Phú Quốc</h3>
+                            <p>600+ xe đang sẵn sàng</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" id="support">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <a href="index.html" class="logo footer-logo">
+                    <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+                </a>
+                <p class="footer-desc">Nền tảng chia sẻ và cho thuê ô tô tự lái hàng đầu Việt Nam. Mang lại những chuyến đi tự do và hạnh phúc cho triệu hành trình.</p>
+            </div>
+            <div class="footer-col">
+                <h4>VỀ AZU CAR</h4>
+                <ul>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="about.html#features">Tính năng</a></li>
+                    <li><a href="my-trips.html#privacy">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>DỊCH VỤ</h4>
+                <ul>
+                    <li><a href="#">Thuê xe tự lái</a></li>
+                    <li><a href="#">Thuê xe cưới hỏi</a></li>
+                    <li><a href="#">Hợp đồng dài hạn</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>HỖ TRỢ & LIÊN HỆ</h4>
+                <p><strong>Hotline:</strong> 1900 9217 (8:00 - 21:00)</p>
+                <p><strong>Email:</strong> support@azucar.vn</p>
+                <p><strong>Văn phòng:</strong> Phường Hải Châu, TP. Đà Nẵng</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-flex">
+                <p>2026 AZU Car Việt Nam. Bảo lưu mọi quyền lợi.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Điều khoản dịch vụ</a>
+                    <a href="#">Chính sách hoạt động</a>
+                    <a href="#">Quy chế hoạt động</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal Đăng nhập -->
+    <div id="loginModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="modal-close-btn" data-modal="loginModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <h2>Đăng nhập</h2>
+                <p>Chào mừng quý khách quay lại với AZUCar</p>
+            </div>
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label for="login-identity">Tên hoặc số điện thoại</label>
+                    <div class="input-wrapper">
+                        <input id="login-identity" name="identity" type="text" placeholder="Nhập tên hoặc số điện thoại" autocomplete="username" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Mật khẩu</label>
+                    <div class="input-wrapper password-box">
+                        <input id="login-password" name="password" type="password" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                    <div class="forgot-password-row">
+                        <a href="#" class="forgot-link" id="openForgotModal">Quên mật khẩu?</a>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit-auth">Đăng nhập</button>
+                <p class="switch-auth-text">Bạn chưa là thành viên? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Quên mật khẩu -->
+    <div id="forgotModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="modal-close-btn" data-modal="forgotModal"><i class="fa-solid fa-xmark"></i></button>
+            
+            <!-- Bước 1: Nhập Số điện thoại / Email -->
+            <div id="forgotStep1">
+                <div class="modal-header">
+                    <h2>Khôi phục mật khẩu</h2>
+                    <p>Nhập số điện thoại hoặc email liên kết để nhận mã xác thực OTP</p>
+                </div>
+                <form class="auth-form" id="forgot-form-step1">
+                    <div class="form-group">
+                        <label for="forgot-identity">Số điện thoại hoặc Email</label>
+                        <div class="input-wrapper">
+                            <input id="forgot-identity" name="identity" type="text" placeholder="Ví dụ: 0905 123 456 hoặc email@gmail.com" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit-auth">Gửi mã xác thực OTP</button>
+                    <p class="switch-auth-text">Nhớ mật khẩu? <a href="#" class="back-to-login-link">Đăng nhập ngay</a></p>
+                </form>
+            </div>
+
+            <!-- Bước 2: Nhập OTP & Mật khẩu mới -->
+            <div id="forgotStep2" hidden>
+                <div class="modal-header">
+                    <h2>Đặt lại mật khẩu</h2>
+                    <p>Mã OTP 6 số đã được gửi tới <strong id="forgotTargetText" style="color: #1c2635;">0905***456</strong></p>
+                </div>
+                <form class="auth-form" id="forgot-form-step2">
+                    <div class="form-group">
+                        <label for="forgot-otp">Mã xác thực OTP</label>
+                        <div class="input-wrapper">
+                            <input id="forgot-otp" name="otp" type="text" maxlength="6" placeholder="Nhập 6 số OTP (mặc định: 123456)" required style="letter-spacing: 4px; font-weight: 700; text-align: center; font-size: 16px;">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px;">
+                            <span style="color: #64748b;">Chưa nhận được mã?</span>
+                            <button type="button" id="btnResendOtp" style="background: none; border: none; color: #d1a34b; font-weight: 600; cursor: pointer; padding: 0;">Gửi lại mã (<span id="otpCountdown">59</span>s)</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="forgot-new-password">Mật khẩu mới</label>
+                        <div class="input-wrapper password-box">
+                            <input id="forgot-new-password" name="newPassword" type="password" placeholder="Tạo mật khẩu mới (ít nhất 6 ký tự)" autocomplete="new-password" required>
+                            <i class="fa-regular fa-eye-slash toggle-password"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="forgot-confirm-password">Xác nhận mật khẩu mới</label>
+                        <div class="input-wrapper password-box">
+                            <input id="forgot-confirm-password" name="confirmPassword" type="password" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required>
+                            <i class="fa-regular fa-eye-slash toggle-password"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit-auth">Xác nhận &amp; Đăng nhập</button>
+                    <p class="switch-auth-text"><a href="#" id="backToStep1Forgot">← Thay đổi số điện thoại / email</a></p>
+                </form>
+            </div>
+
+            <!-- Bước 3: Thông báo thành công -->
+            <div id="forgotStepSuccess" hidden style="text-align: center; padding: 16px 0 8px;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: #eef4fa; color: #1c2635; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px; border: 2px solid #b8cce4;">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3 style="font-size: 18px; color: #1c2635; margin: 0 0 8px;">Đổi mật khẩu thành công!</h3>
+                <p style="font-size: 13.5px; color: #64748b; margin: 0 0 20px; line-height: 1.5;">Mật khẩu mới của bạn đã được cập nhật an toàn vào hệ thống AZU Car.</p>
+                <button type="button" class="btn-submit-auth" id="btnGoToLoginAfterReset" style="margin: 0 auto; width: 100%;">Đăng nhập ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Đăng ký -->
+    <div id="registerModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="modal-close-btn" data-modal="registerModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <h2>Đăng ký</h2>
+                <p>Chào mừng quý khách đến với AZUCar</p>
+            </div>
+            <form class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label for="register-name">Tên tài khoản</label>
+                    <div class="input-wrapper">
+                        <input id="register-name" name="name" type="text" placeholder="Nhập tên tài khoản" autocomplete="name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-phone">Số điện thoại</label>
+                    <div class="input-wrapper">
+                        <input id="register-phone" name="phone" type="tel" placeholder="Nhập số điện thoại của bạn" autocomplete="tel" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Mật khẩu</label>
+                    <div class="input-wrapper password-box">
+                        <input id="register-password" name="password" type="password" placeholder="Nhập mật khẩu" autocomplete="new-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-password-confirm">Nhập lại mật khẩu</label>
+                    <div class="input-wrapper password-box">
+                        <input id="register-password-confirm" name="passwordConfirm" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nhập mã giới thiệu (nếu có)</label>
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="Nhập mã">
+                    </div>
+                </div>
+                
+                <p class="terms-text">Tôi đã đọc và đồng ý với <a href="my-trips.html#privacy" class="open-policy-link" data-policy="terms">Chính sách & Quy định</a> và <a href="my-trips.html#privacy" class="open-policy-link" data-policy="privacy">Chính sách Bảo vệ dữ liệu cá nhân</a></p>
+                
+                <button type="submit" class="btn-submit-auth">Đăng ký</button>
+                <p class="switch-auth-text">Bạn đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Xem Chính Sách & Quy Định / Bảo Vệ Dữ Liệu Cá Nhân -->
+    <div id="policyPreviewModal" class="auth-modal-overlay policy-modal-overlay" style="z-index: 100000;" hidden>
+        <div class="auth-modal-card policy-modal-card" role="dialog" aria-modal="true" aria-labelledby="policyModalTitle">
+            <button class="modal-close-btn" id="closePolicyModalBtn" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="policy-modal-header">
+                <span class="policy-modal-badge" id="policyModalBadge"><i class="fa-solid fa-shield-halved"></i> QUY CHUẨN AN TOÀN</span>
+                <h2 id="policyModalTitle">CHÍNH SÁCH & QUY ĐỊNH</h2>
+                <p id="policyModalSubtitle">Điều khoản sử dụng dịch vụ và quy chế vận hành AZU Car Việt Nam</p>
+                
+                <!-- Tab chuyển nhanh giữa 2 chính sách -->
+                <div class="policy-modal-tabs" role="tablist">
+                    <button type="button" class="policy-tab-btn active" id="tabBtnTerms" data-policy="terms">
+                        <i class="fa-solid fa-file-contract"></i> Chính sách & Quy định
+                    </button>
+                    <button type="button" class="policy-tab-btn" id="tabBtnPrivacy" data-policy="privacy">
+                        <i class="fa-solid fa-user-shield"></i> Bảo vệ dữ liệu cá nhân
+                    </button>
+                </div>
+            </div>
+
+            <div class="policy-modal-body" id="policyModalBody">
+                <!-- Nội dung được nạp động từ JS -->
+            </div>
+
+            <div class="policy-modal-footer">
+                <button type="button" class="policy-btn-print" id="btnPrintPolicy" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> In / Tải PDF
+                </button>
+                <button type="button" class="btn-submit-auth policy-btn-agree" id="btnAcceptPolicy">
+                    <i class="fa-solid fa-circle-check"></i> Đã hiểu & Đồng ý
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Đăng ký xe cho thuê (Chủ xe) -->
+    <div id="registerCarModal" class="auth-modal-overlay">
+        <div class="auth-modal-card" style="max-width: 540px;">
+            <button class="modal-close-btn" data-modal="registerCarModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <h2 style="color: #024064;">Đăng ký xe cho thuê</h2>
+                <p>Bạn vui lòng điền đầy đủ thông tin, AZU Car sẽ liên hệ với bạn trong vòng một ngày làm việc.</p>
+            </div>
+            <form class="auth-form" onsubmit="event.preventDefault(); alert('Gửi thông tin thành công! Chúng tôi sẽ liên hệ lại với bạn.'); document.getElementById('registerCarModal').classList.remove('active');">
+                <div class="form-group">
+                    <label>Khu vực cho thuê</label>
+                    <div class="input-wrapper">
+                        <select class="custom-select-input" required>
+                            <option value="" disabled selected>Chọn khu vực</option>
+                            <option value="danang">TP. Đà Nẵng</option>
+                            <option value="hcm">TP. Hồ Chí Minh</option>
+                            <option value="hanoi">Hà Nội</option>
+                            <option value="nhatrang">Nha Trang</option>
+                            <option value="dalat">Đà Lạt</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-group">
+                        <label>Tên chủ xe*</label>
+                        <div class="input-wrapper">
+                            <input type="text" placeholder="Tên của bạn" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Số di động*</label>
+                        <div class="input-wrapper">
+                            <input type="tel" placeholder="Số của bạn" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Xe cho thuê</label>
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="Loại xe của bạn (VD: VinFast VF8, Mazda CX-5...)" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit-auth" style="background-color: #0b2c46; margin-top: 10px;">Gửi thông tin đến AZU Car</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Popup chọn địa điểm -->
+    <div id="locationModal" class="location-picker-overlay">
+        <div class="location-picker-panel" role="dialog" aria-modal="true" aria-labelledby="locationModalTitle">
+            <div class="location-picker-header">
+                <div>
+                    <h2 id="locationModalTitle">Chọn địa điểm</h2>
+                    <p>Chọn nơi bạn muốn nhận xe</p>
+                </div>
+                <button class="location-picker-close" data-modal="locationModal" type="button" aria-label="Đóng">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="location-current">
+                <i class="fa-solid fa-location-dot"></i>
+                <div>
+                    <span>Địa điểm hiện tại</span>
+                    <strong id="locationCurrentText">TP. Đà Nẵng</strong>
+                </div>
+            </div>
+            <label class="location-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="locationInput" type="text" placeholder="Tìm thành phố hoặc khu vực">
+            </label>
+            <div class="location-list-title">Địa điểm phổ biến</div>
+            <div id="locationOptions" class="location-options">
+                <button class="location-option" type="button" data-location="TP. Hồ Chí Minh">
+                    <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                    <span><strong>TP. Hồ Chí Minh</strong><small>Thành phố</small></span>
+                </button>
+                <button class="location-option" type="button" data-location="Hà Nội">
+                    <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                    <span><strong>Hà Nội</strong><small>Thành phố</small></span>
+                </button>
+                <button class="location-option" type="button" data-location="TP. Đà Nẵng">
+                    <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                    <span><strong>TP. Đà Nẵng</strong><small>Thành phố</small></span>
+                </button>
+                <button class="location-option" type="button" data-location="Nha Trang">
+                    <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                    <span><strong>Nha Trang</strong><small>Thành phố</small></span>
+                </button>
+                <button class="location-option" type="button" data-location="Đà Lạt">
+                    <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                    <span><strong>Đà Lạt</strong><small>Thành phố</small></span>
+                </button>
+            </div>
+            <button id="confirmLocationBtn" class="location-custom-confirm" type="button" hidden>
+                Dùng địa điểm đã nhập
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Chọn Thời Gian / Lịch Thuê Xe (Thuê ngày & Thuê giờ) -->
+    <div id="timeModal" class="auth-modal-overlay">
+        <div class="auth-modal-card" style="max-width: 540px; padding: 24px;">
+            <button class="modal-close-btn" data-modal="timeModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header" style="margin-bottom: 16px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: #1e293b;">Thời gian thuê</h2>
+            </div>
+            
+            <!-- Tab Thuê ngày / Thuê giờ -->
+            <div style="display: flex; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; text-align: center;">
+                <div id="tabDaily" style="flex: 1; padding-bottom: 10px; font-weight: 700; color: #4e6fca; border-bottom: 2px solid #1d5194; cursor: pointer;">Thuê ngày</div>
+                <div id="tabHourly" style="flex: 1; padding-bottom: 10px; font-weight: 600; color: #94a3b8; cursor: pointer;">Thuê giờ</div>
+            </div>
+
+            <!-- PHẦN 1: NỘI DUNG TAB THUÊ NGÀY -->
+            <div id="dailyContent">
+                <p class="rental-date-hint">Chọn ngày nhận xe, sau đó chọn ngày trả xe.</p>
+                <div class="rental-date-selection">
+                    <button id="selectPickupDate" class="rental-date-choice active" type="button">
+                        <span>Ngày nhận xe</span>
+                        <strong id="selectedPickupDate">Chọn ngày</strong>
+                    </button>
+                    <button id="selectReturnDate" class="rental-date-choice" type="button">
+                        <span>Ngày trả xe</span>
+                        <strong id="selectedReturnDate">Chọn ngày</strong>
+                    </button>
+                </div>
+
+                <!-- Điều hướng Tháng & Năm Động -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <button id="prevMonthBtn" style="background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="currentMonthYearLabel" style="font-weight: 700; font-size: 16px; color: #1e293b;">Tháng 10, 2026</span>
+                    <button id="nextMonthBtn" style="background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+
+                <!-- Khung Lịch Động -->
+                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 8px;">
+                        <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                    </div>
+                    <div id="dynamicCalendarDays" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; gap: 8px; color: #334155; cursor: pointer;"></div>
+                </div>
+
+                <!-- Khung chọn giờ nhận & trả xe -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Giờ nhận xe</label>
+                        <select id="pickupTimeSelect" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                            <option value="09:00" selected>09:00</option>
+                            <option value="12:00">12:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="18:00">18:00</option>
+                            <option value="21:00">21:00</option>
+                        </select>
+                    </div>
+                    <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Giờ trả xe</label>
+                        <select id="returnTimeSelect" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                            <option value="09:00">09:00</option>
+                            <option value="12:00">12:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="18:00" selected>18:00</option>
+                            <option value="20:00">20:00</option>
+                            <option value="21:00">21:00</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHẦN 2: NỘI DUNG TAB THUÊ GIỜ -->
+            <div id="hourlyContent" style="display: none;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Ngày bắt đầu</label>
+                        <input type="date" id="hourlyDateInput" value="2026-10-14" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                    </div>
+                    <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Giờ nhận xe</label>
+                        <select id="hourlyPickupTime" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                            <option value="14:00">14:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="16:00" selected>16:00</option>
+                            <option value="17:00">17:00</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; margin-bottom: 16px;">
+                    <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Thời gian thuê</label>
+                    <select id="hourlyDuration" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                        <option value="2">2 giờ</option>
+                        <option value="4" selected>4 giờ</option>
+                        <option value="6">6 giờ</option>
+                        <option value="8">8 giờ</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Footer Popup -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+                <div>
+                    <div id="modalPreviewText" style="font-weight: 700; font-size: 14px; color: #1e293b;">16:00, 14/10 - 20:00, 14/10</div>
+                    <div id="modalSubPreviewText" style="font-size: 12px; color: #64748b; margin-top: 2px;">Thời gian thuê: <span style="color: #021254; font-weight: 700;">4 giờ</span></div>
+                </div>
+                <button id="btnConfirmTime" style="background-color: #021843; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">Tiếp tục</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="JS/azu-store.js"></script>
+    <script src="JS/index.js"></script>
+    <script src="JS/find.js"></script>
+</body>
+</html>

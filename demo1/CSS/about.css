@@ -1,0 +1,322 @@
+/* ==========================================================================
+   AZU CAR - TRANG GIỚI THIỆU ĐƠN GIẢN, TINH TẾ (ABOUT.CSS)
+   Phong cách gọn gàng, tự nhiên, không phô trương
+   ========================================================================== */
+
+.about-page-bg {
+    background-color: #f3f5f8;
+    min-height: calc(100vh - 70px);
+    padding: 32px 16px 64px;
+}
+
+.about-container {
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+/* Thanh điều hướng quay lại */
+.about-top-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.btn-back-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #4b5563;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    background: #ffffff;
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.btn-back-home:hover {
+    color: #111827;
+    border-color: #d1d5db;
+    background: #f9fafb;
+}
+
+/* Thẻ nội dung chính */
+.about-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 36px 40px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+    border: 1px solid #eef2f6;
+}
+
+.about-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 22px;
+    margin-bottom: 26px;
+}
+
+.about-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1c2635;
+    margin-bottom: 8px;
+}
+
+.about-header p {
+    font-size: 14.5px;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Thanh điều hướng 3 mục */
+.about-quick-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    background: #f8fafc;
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid #edf2f7;
+}
+
+.about-tab-link {
+    text-decoration: none;
+    color: #475569;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.about-tab-link i {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.about-tab-link:hover {
+    background: #ffffff;
+    color: #1c2635;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.about-tab-link:hover i {
+    color: #d1a34b;
+}
+
+/* Từng khối nội dung */
+.about-block {
+    padding-bottom: 32px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.about-block:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.about-block-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: #1c2635;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.about-block-title i {
+    color: #d1a34b;
+    font-size: 17px;
+}
+
+.about-text {
+    font-size: 14.5px;
+    color: #374151;
+    line-height: 1.7;
+    margin-bottom: 14px;
+}
+
+.about-text:last-child {
+    margin-bottom: 0;
+}
+
+/* Danh sách tính năng */
+.about-feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 18px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.about-feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #fafbfc;
+    border: 1px solid #edf2f7;
+    border-radius: 12px;
+    padding: 16px 18px;
+}
+
+.about-feature-item i {
+    font-size: 17px;
+    color: #d1a34b;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.about-feature-content h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.about-feature-content p {
+    font-size: 13.5px;
+    color: #64748b;
+    line-height: 1.55;
+    margin: 0;
+}
+
+/* Hộp liên kết chính sách */
+.about-policy-box {
+    background: #fafbfc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-top: 16px;
+}
+
+.about-policy-box p {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.65;
+    margin-bottom: 16px;
+}
+
+.about-policy-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-simple-policy {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #1f2937;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-simple-policy:hover {
+    background: #1c2635;
+    color: #ffffff;
+    border-color: #1c2635;
+}
+
+.btn-simple-policy i {
+    color: #d1a34b;
+}
+
+/* Khối nút hành động cuối trang */
+.about-bottom-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-primary-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1c2635;
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: 20px;
+    font-size: 13.5px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-primary-action:hover {
+    background: #0f172a;
+    color: #d1a34b;
+}
+
+.btn-secondary-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f3f4f6;
+    color: #374151;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-secondary-action:hover {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .about-card {
+        padding: 24px 18px;
+    }
+
+    .about-header h1 {
+        font-size: 22px;
+    }
+
+    .about-quick-tabs {
+        flex-direction: column;
+    }
+
+    .about-policy-links {
+        flex-direction: column;
+    }
+
+    .btn-simple-policy {
+        justify-content: center;
+    }
+
+    .about-bottom-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-primary-action,
+    .btn-secondary-action {
+        justify-content: center;
+    }
+}

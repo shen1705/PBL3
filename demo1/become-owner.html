@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý cho thuê - AZU Car</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="CSS/become-owner.css">
+    <link rel="stylesheet" href="CSS/index.css">
+    <script>
+        if (!sessionStorage.getItem('azuCarDisplayName')) {
+            sessionStorage.removeItem('azuCarReturnTo');
+            sessionStorage.setItem('azuCarPromptLogin', '1');
+            window.location.replace('index.html');
+        }
+    </script>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" aria-label="AZU Car - Trang chủ">
+                <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+            </a>
+            
+            <nav class="nav-links" aria-label="Điều hướng chính">
+                <a href="about.html" id="about-nav-link">Về AZU Car</a>
+                <a href="become-owner.html" class="active">Trở thành chủ xe</a>
+                <a href="my-trips.html" id="trips-nav-link">Chuyến của tôi</a>
+                <a href="support.html" id="support-nav-link">Trợ giúp</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div id="guest-actions">
+                    <button type="button" class="btn-register-outline">Đăng ký</button>
+                    <button type="button" class="btn-slate">Đăng nhập</button>
+                </div>
+                <a id="account-display" class="account-display" href="my-trips.html#account" aria-label="Thông tin tài khoản" hidden>
+                    <span class="account-avatar" id="account-avatar"></span>
+                    <span id="account-name"></span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <aside class="sidebar" aria-label="Danh mục quản lý chủ xe">
+            <nav class="side-nav">
+                <a class="side-link" href="#danh-sach-xe-content"><i class="fa-solid fa-car"></i><span>Danh sách xe</span></a>
+                <a class="side-link" href="#lich-xe"><i class="fa-regular fa-calendar"></i><span>Lịch xe</span></a>
+                <a class="side-link active" href="#cam-nang"><i class="fa-solid fa-book-open"></i><span>Cẩm nang cho thuê xe</span></a>
+                <a class="side-link" href="#hop-dong"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
+                <a class="side-link" href="#bao-mat"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
+            </nav>
+        </aside>
+
+        <main class="main-area">
+            <!-- Section 1: Danh sách xe -->
+            <section class="content-section" id="danh-sach-xe-content" aria-labelledby="page-title" hidden>
+                <div class="section-page-heading">
+                    <button class="btn-back btn-back-home" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h1 id="page-title">Quản lý cho thuê</h1>
+                </div>
+
+                <div class="management-card">
+                    <div class="management-top">
+                        <div class="vehicle-tabs" role="tablist" aria-label="Loại xe">
+                            <button class="vehicle-tab active" type="button" role="tab" aria-selected="true" data-kind="self-drive">Xe tự lái</button>
+                        </div>
+                        <div class="card-actions">
+                            <div class="filter-wrap">
+                                <button class="small-button filter-trigger" type="button" aria-expanded="false">
+                                    <span id="filter-label">Tất cả</span><i class="fa-solid fa-chevron-down"></i>
+                                </button>
+                                <div class="filter-menu" hidden>
+                                    <button type="button" data-filter="all">Tất cả</button>
+                                    <button type="button" data-filter="approved">Đang hoạt động</button>
+                                    <button type="button" data-filter="pending">Chờ duyệt</button>
+                                    <button type="button" data-filter="rejected">Bị từ chối</button>
+                                    <button type="button" data-filter="inactive">Dừng hoạt động</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="empty-state" id="empty-state">
+                        <div class="empty-car-art" aria-hidden="true">
+                            <span class="sparkle sparkle-one"><i class="fa-solid fa-sparkles"></i></span>
+                            <span class="sparkle sparkle-two"><i class="fa-solid fa-sparkles"></i></span>
+                            <span class="car-circle"><i class="fa-solid fa-car-side"></i></span>
+                        </div>
+                        <h2>Không tìm thấy xe nào.</h2>
+                        <p>Hãy đăng ký xe để bắt đầu cho thuê trên AZU Car</p>
+                        <a href="carregistermode.html" class="primary-button register-trigger">
+                            <i class="fa-solid fa-plus"></i> Đăng ký xe ngay
+                        </a>
+                    </div>
+                    <div class="owner-vehicle-list" id="owner-vehicle-list" hidden></div>
+                </div>
+            </section>
+
+            <!-- Section 2: Lịch xe -->
+            <section class="content-section calendar-content" id="lich-xe-content" aria-labelledby="calendar-page-title" hidden>
+                <div class="calendar-page-heading">
+                    <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h1 id="calendar-page-title">Lịch xe</h1>
+                </div>
+
+                <div class="calendar-layout">
+                    <aside class="calendar-sidebar">
+                        <section class="calendar-panel calendar-date-panel" aria-labelledby="calendar-date-title">
+                            <h2 id="calendar-date-title">Thời gian</h2>
+                            <label for="calendarFrom">Từ ngày</label>
+                            <input id="calendarFrom" type="date">
+                            <label for="calendarTo">Đến ngày</label>
+                            <input id="calendarTo" type="date">
+                        </section>
+
+                        <section class="calendar-panel calendar-legend" aria-labelledby="calendar-legend-title">
+                            <h2 id="calendar-legend-title">Trạng thái lịch</h2>
+                            <ul>
+                                <li><span class="legend-dot is-payment"></span>Chờ thanh toán</li>
+                                <li><span class="legend-dot is-pending"></span>Chờ duyệt</li>
+                                <li><span class="legend-dot is-free"></span>Trống lịch</li>
+                                <li><span class="legend-dot is-busy"></span>Bận lịch</li>
+                                <li><span class="legend-dot is-trip"></span>Chuyến AZU Car</li>
+                            </ul>
+                        </section>
+                    </aside>
+
+                    <div class="calendar-main">
+                        <div class="calendar-filters" aria-label="Bộ lọc lịch xe">
+                            <label>Sắp xếp
+                                <select id="calendarSort">
+                                    <option>Trống lịch (Mặc định)</option>
+                                    <option>Lịch bận trước</option>
+                                </select>
+                            </label>
+                            <label>Truyền động
+                                <select id="calendarTransmission">
+                                    <option>Tất cả</option>
+                                    <option>Tự động</option>
+                                    <option>Số sàn</option>
+                                </select>
+                            </label>
+                            <label>Dòng xe
+                                <select id="calendarCategory">
+                                    <option>Tất cả</option>
+                                    <option>Xe 4 chỗ</option>
+                                    <option>Xe 7 chỗ</option>
+                                    <option>SUV</option>
+                                </select>
+                            </label>
+                            <label>Hãng xe
+                                <select id="calendarBrand">
+                                    <option>Tất cả</option>
+                                    <option>Toyota</option>
+                                    <option>Honda</option>
+                                    <option>VinFast</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <section class="calendar-panel calendar-schedule" aria-label="Lịch trống xe">
+                            <div class="calendar-empty-summary">
+                                <span class="calendar-empty-icon"><i class="fa-regular fa-calendar"></i></span>
+                                <h2>Không có lịch bận nào</h2>
+                                <p>Tất cả các ngày trong khoảng thời gian này đều trống lịch và sẵn sàng cho thuê.</p>
+                            </div>
+
+                            <div class="calendar-month-controls">
+                                <button type="button" id="previousMonth" aria-label="Tháng trước"><i class="fa-solid fa-chevron-left"></i></button>
+                                <h3 id="calendarMonthLabel"></h3>
+                                <button type="button" id="nextMonth" aria-label="Tháng sau"><i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                            <div class="calendar-weekdays" aria-hidden="true">
+                                <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                            </div>
+                            <div class="calendar-days" id="calendarDays" role="grid" aria-label="Các ngày trong tháng"></div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Cẩm nang cho thuê xe -->
+            <section class="content-section" id="cam-nang-content" aria-labelledby="guide-title">
+                <div class="section-page-heading">
+                    <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h1 id="guide-title">Cẩm nang cho thuê xe</h1>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-decor" aria-hidden="true">
+                        <div class="guide-decor-circle"></div>
+                        <svg class="guide-decor-star star-top" width="13" height="13" viewBox="0 0 24 24" fill="#c49a49">
+                            <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z"/>
+                        </svg>
+                        <svg class="guide-decor-star star-bottom" width="9" height="9" viewBox="0 0 24 24" fill="#c49a49">
+                            <path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z"/>
+                        </svg>
+                    </div>
+
+                    <div class="guide-list">
+                        <!-- Item 1: Quy trình cho thuê xe -->
+                        <article class="guide-item">
+                            <div class="guide-icon-box badge-gold">
+                                <i class="fa-regular fa-file-lines"></i>
+                            </div>
+                            <div class="guide-info">
+                                <a href="javascript:void(0)" class="guide-link-title" id="open-process-modal">
+                                    Quy trình cho thuê xe <span class="guide-chevron">›</span>
+                                </a>
+                                <p class="guide-sub-gold">Cẩm nang cho thuê xe an toàn</p>
+                            </div>
+                        </article>
+
+                        <div class="guide-divider"></div>
+
+                        <!-- Item 2: Cập nhật thông tin mới -->
+                        <article class="guide-item">
+                            <div class="guide-icon-box badge-red">
+                                <i class="fa-regular fa-bell"></i>
+                            </div>
+                            <div class="guide-info">
+                                <h2 class="guide-news-heading">Cập nhật thông tin mới</h2>
+                                <a href="javascript:void(0)" class="guide-news-link" id="open-decree-modal">
+                                    <span class="news-bullet">•</span>
+                                    <span class="news-text">Nghị định 336/2025/NĐ-CP (Hiệu lực từ 01/03/2026)</span>
+                                    <span class="guide-chevron">›</span>
+                                </a>
+                                <p class="guide-news-desc">Quy định mới khi cho thuê xe tự lái</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Hợp đồng -->
+            <section class="content-section" id="hop-dong-content" aria-labelledby="hop-dong-title" hidden>
+                <div class="section-page-heading">
+                    <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h1 id="hop-dong-title">Hợp đồng</h1>
+                </div>
+
+                <div class="simple-doc-card">
+                    <!-- Hợp đồng mẫu -->
+                    <div class="doc-section">
+                        <h2 class="doc-sec-title">Hợp đồng mẫu</h2>
+                        <p class="doc-sec-sub">Chọn loại hợp đồng bạn muốn xem</p>
+                        <div class="doc-btn-row">
+                            <button class="doc-green-btn" type="button" id="openRentalContractBtn">
+                                <i class="fa-regular fa-file-lines"></i>
+                                <span>Hợp đồng cho thuê</span>
+                            </button>
+                            <button class="doc-green-btn" type="button" id="openHandoverContractBtn">
+                                <i class="fa-solid fa-car-side"></i>
+                                <span>Biên bản bàn giao xe</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Chính sách bảo vệ dữ liệu -->
+            <section class="content-section" id="bao-mat-content" aria-labelledby="bao-mat-title" hidden>
+                <div class="section-page-heading">
+                    <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h1 id="bao-mat-title">Chính sách bảo vệ dữ liệu</h1>
+                </div>
+
+                <div class="simple-doc-card">
+                    <!-- Điều khoản chính sách bảo mật -->
+                    <div class="doc-section">
+                        <h2 class="doc-sec-title">Chính sách & Quy định bảo mật</h2>
+                        <div class="doc-links-list">
+                            <a href="javascript:void(0)" class="doc-link-item" id="openDataCollectionPolicyBtn">
+                                <i class="fa-regular fa-file-lines"></i>
+                                <span>Quy định thu thập và xử lý dữ liệu cá nhân</span>
+                                <span class="chevron">›</span>
+                            </a>
+                            <a href="javascript:void(0)" class="doc-link-item" id="openContractSecurityPolicyBtn">
+                                <i class="fa-regular fa-file-lines"></i>
+                                <span>Quy chế bảo mật hợp đồng & thông tin tài khoản</span>
+                                <span class="chevron">›</span>
+                            </a>
+                            <a href="javascript:void(0)" class="doc-link-item" id="openDataRightsPolicyBtn">
+                                <i class="fa-regular fa-file-lines"></i>
+                                <span>Quyền kiểm soát và yêu cầu xóa thông tin của Chủ xe</span>
+                                <span class="chevron">›</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <a href="index.html" class="logo footer-logo">
+                    <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+                </a>
+                <p class="footer-desc">Nền tảng chia sẻ và cho thuê ô tô tự lái hàng đầu Việt Nam. Mang lại những chuyến đi tự do và hạnh phúc cho triệu hành trình.</p>
+            </div>
+            <div class="footer-col">
+                <h4>VỀ AZU CAR</h4>
+                <ul>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="about.html#features">Tính năng</a></li>
+                    <li><a href="become-owner.html#bao-mat">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>DỊCH VỤ</h4>
+                <ul>
+                    <li><a href="#">Thuê xe tự lái</a></li>
+                    <li><a href="#">Thuê xe cưới hỏi</a></li>
+                    <li><a href="#">Hợp đồng dài hạn</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>HỖ TRỢ & LIÊN HỆ</h4>
+                <p><strong>Hotline:</strong> 1900 9217 (8:00 - 21:00)</p>
+                <p><strong>Email:</strong> support@azucar.vn</p>
+                <p><strong>Văn phòng:</strong> Phường Hải Châu, TP. Đà Nẵng</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-flex">
+                <p>© 2026 AZU Car Việt Nam. Bảo lưu mọi quyền lợi.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Điều khoản dịch vụ</a>
+                    <a href="#">Chính sách hoạt động</a>
+                    <a href="#">Quy chế hoạt động</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Modal Quy trình cho thuê xe an toàn -->
+    <div class="dialog-backdrop" id="processModal" hidden>
+        <div class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="processModalTitle">
+            <button class="dialog-close" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            <div class="guide-modal-header">
+                <div class="guide-icon-box badge-gold">
+                    <i class="fa-regular fa-file-lines"></i>
+                </div>
+                <div>
+                    <h2 id="processModalTitle">Quy trình cho thuê xe an toàn</h2>
+                    <p class="guide-modal-subtitle">Cẩm nang chuẩn dành cho Chủ xe trên AZU Car</p>
+                </div>
+            </div>
+            <div class="guide-modal-body">
+                <div class="guide-step">
+                    <div class="step-num">1</div>
+                    <div class="step-content">
+                        <h3>Tiếp nhận và kiểm tra yêu cầu</h3>
+                        <p>Kiểm tra thời gian thuê, lịch trống của xe và thông tin người thuê (điểm đánh giá, lịch sử thuê xe trước đó).</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">2</div>
+                    <div class="step-content">
+                        <h3>Xác thực thông tin khách thuê</h3>
+                        <p>Đối chiếu CCCD gắn chip / Hộ chiếu gốc và Giấy phép lái xe hợp lệ (hạng B1/B2 trở lên). Kiểm tra tài sản thế chấp hoặc tiền cọc theo quy định.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">3</div>
+                    <div class="step-content">
+                        <h3>Bàn giao xe & Ký biên bản kiểm tra</h3>
+                        <p>Chụp ảnh 4 góc ngoại thất, nội thất, số km đồng hồ (ODO) và mức nhiên liệu thực tế. Ký biên bản bàn giao xe điện tử ngay trên ứng dụng.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">4</div>
+                    <div class="step-content">
+                        <h3>Theo dõi hành trình trong chuyến đi</h3>
+                        <p>Hệ thống tự động đồng bộ vị trí xe qua thiết bị định vị GPS. Nhận cảnh báo tức thời nếu xe vượt quá tốc độ hoặc ra khỏi địa bàn đăng ký.</p>
+                    </div>
+                </div>
+                <div class="guide-step">
+                    <div class="step-num">5</div>
+                    <div class="step-content">
+                        <h3>Nhận xe, đối soát & Quyết toán</h3>
+                        <p>Kiểm tra hiện trạng xe khi nhận lại, đối chiếu số km và nhiên liệu. Tra cứu phạt nguội trong thời hạn quy định và hoàn trả tiền cọc cho khách hàng.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nghị định 336/2025/NĐ-CP -->
+    <div class="dialog-backdrop" id="decreeModal" hidden>
+        <div class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="decreeModalTitle">
+            <button class="dialog-close" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            <div class="guide-modal-header">
+                <div class="guide-icon-box badge-red">
+                    <i class="fa-regular fa-bell"></i>
+                </div>
+                <div>
+                    <h2 id="decreeModalTitle">Nghị định 336/2025/NĐ-CP</h2>
+                    <p class="guide-modal-subtitle">Hiệu lực thi hành từ ngày 01/03/2026 - Quy định mới khi cho thuê xe tự lái</p>
+                </div>
+            </div>
+            <div class="guide-modal-body">
+                <div class="decree-card">
+                    <div class="decree-tag"><i class="fa-solid fa-satellite-dish"></i> Bắt buộc lắp thiết bị GSHT (GPS)</div>
+                    <p>Mọi phương tiện tham gia hoạt động cho thuê tự lái phải được lắp đặt thiết bị giám sát hành trình hợp chuẩn, truyền dữ liệu liên tục về hệ thống quản lý.</p>
+                </div>
+                <div class="decree-card">
+                    <div class="decree-tag"><i class="fa-solid fa-file-contract"></i> Hợp đồng điện tử xác thực</div>
+                    <p>Bắt buộc giao kết hợp đồng cho thuê xe bằng văn bản hoặc hợp đồng điện tử có định danh điện tử cấp độ 2 (VNeID) của cả chủ xe và khách thuê.</p>
+                </div>
+                <div class="decree-card">
+                    <div class="decree-tag"><i class="fa-solid fa-shield-halved"></i> Trách nhiệm xử lý vi phạm giao thông & Phạt nguội</div>
+                    <p>Quy định rõ ràng về cơ chế tạm giữ tiền đặt cọc trong thời gian tối đa để chủ xe tra cứu biên bản vi phạm giao thông điện tử của cơ quan CSGT.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Modal Xem Chi Tiết Văn Bản / Hợp Đồng -->
+    <div class="dialog-backdrop" id="docPreviewModal" hidden>
+        <div class="contract-modal-view" role="dialog" aria-modal="true" aria-labelledby="docModalTitle">
+            <button class="dialog-close" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            <div class="contract-modal-header">
+                <div>
+                    <h2 id="docModalTitle">HỢP ĐỒNG CHO THUÊ XE TỰ LÁI</h2>
+                    <p id="docModalSubtitle">Mẫu số 01/HĐ-AZU • Xác thực điện tử VNeID</p>
+                </div>
+                <span class="badge-status active" id="docModalBadge"><i class="fa-solid fa-circle-check"></i> Văn bản chuẩn</span>
+            </div>
+
+            <div class="contract-preview-body" id="docModalBody">
+                <!-- Nội dung tài liệu -->
+            </div>
+
+            <div class="contract-modal-actions">
+                <button class="btn-download-contract" type="button" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> In / Tải PDF
+                </button>
+                <button class="primary-button" type="button" id="closeDocModalBtn">
+                    Đóng lại
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="JS/azu-store.js"></script>
+    <script src="JS/become-owner.js"></script>
+    
+</body>
+</html>
