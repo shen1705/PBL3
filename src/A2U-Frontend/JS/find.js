@@ -1000,7 +1000,7 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
     const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked')?.value || 'host';
     const deliveryAddress = document.getElementById('bookDeliveryAddress')?.value.trim();
     const notes = document.getElementById('bookRenterNotes')?.value.trim();
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'qr';
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'cash';
 
     const pickupTime = document.getElementById('bookPickupTime')?.textContent.trim() || '21:00, 15/10/2026';
     const returnTime = document.getElementById('bookReturnTime')?.textContent.trim() || '21:00, 16/10/2026';
