@@ -1,0 +1,392 @@
+<!-- Modal Đăng nhập -->
+<div id="loginModal" class="auth-modal-overlay">
+    <div class="auth-modal-card">
+        <button class="modal-close-btn" data-modal="loginModal"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-header">
+            <h2>Đăng nhập</h2>
+            <p>Chào mừng quý khách quay lại với AZUCar</p>
+        </div>
+        <form class="auth-form" id="login-form">
+            <div class="form-group">
+                <label for="login-identity">Tên hoặc số điện thoại</label>
+                <div class="input-wrapper">
+                    <input id="login-identity" name="identity" type="text" placeholder="Nhập tên hoặc số điện thoại" autocomplete="username" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Mật khẩu</label>
+                <div class="input-wrapper password-box">
+                    <input id="login-password" name="password" type="password" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
+                    <i class="fa-regular fa-eye-slash toggle-password"></i>
+                </div>
+                <div class="forgot-password-row">
+                    <a href="#" class="forgot-link" id="openForgotModal">Quên mật khẩu?</a>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit-auth">Đăng nhập</button>
+            <p class="switch-auth-text">Bạn chưa là thành viên? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Quên mật khẩu -->
+<div id="forgotModal" class="auth-modal-overlay">
+    <div class="auth-modal-card">
+        <button class="modal-close-btn" data-modal="forgotModal"><i class="fa-solid fa-xmark"></i></button>
+        
+        <!-- Bước 1: Nhập Số điện thoại / Email -->
+        <div id="forgotStep1">
+            <div class="modal-header">
+                <h2>Khôi phục mật khẩu</h2>
+                <p>Nhập số điện thoại hoặc email liên kết để nhận mã xác thực OTP</p>
+            </div>
+            <form class="auth-form" id="forgot-form-step1">
+                <div class="form-group">
+                    <label for="forgot-identity">Số điện thoại hoặc Email</label>
+                    <div class="input-wrapper">
+                        <input id="forgot-identity" name="identity" type="text" placeholder="Ví dụ: 0905 123 456 hoặc email@gmail.com" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit-auth">Gửi mã xác thực OTP</button>
+                <p class="switch-auth-text">Nhớ mật khẩu? <a href="#" class="back-to-login-link">Đăng nhập ngay</a></p>
+            </form>
+        </div>
+
+        <!-- Bước 2: Nhập OTP & Mật khẩu mới -->
+        <div id="forgotStep2" hidden>
+            <div class="modal-header">
+                <h2>Đặt lại mật khẩu</h2>
+                <p>Mã OTP 6 số đã được gửi tới <strong id="forgotTargetText" style="color: #1c2635;">0905***456</strong></p>
+            </div>
+            <form class="auth-form" id="forgot-form-step2">
+                <div class="form-group">
+                    <label for="forgot-otp">Mã xác thực OTP</label>
+                    <div class="input-wrapper">
+                        <input id="forgot-otp" name="otp" type="text" maxlength="6" placeholder="Nhập 6 số OTP (mặc định: 123456)" required style="letter-spacing: 4px; font-weight: 700; text-align: center; font-size: 16px;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px;">
+                        <span style="color: #64748b;">Chưa nhận được mã?</span>
+                        <button type="button" id="btnResendOtp" style="background: none; border: none; color: #d1a34b; font-weight: 600; cursor: pointer; padding: 0;">Gửi lại mã (<span id="otpCountdown">59</span>s)</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="forgot-new-password">Mật khẩu mới</label>
+                    <div class="input-wrapper password-box">
+                        <input id="forgot-new-password" name="newPassword" type="password" placeholder="Tạo mật khẩu mới (ít nhất 6 ký tự)" autocomplete="new-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="forgot-confirm-password">Xác nhận mật khẩu mới</label>
+                    <div class="input-wrapper password-box">
+                        <input id="forgot-confirm-password" name="confirmPassword" type="password" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit-auth">Xác nhận &amp; Đăng nhập</button>
+                <p class="switch-auth-text"><a href="#" id="backToStep1Forgot">← Thay đổi số điện thoại / email</a></p>
+            </form>
+        </div>
+
+        <!-- Bước 3: Thông báo thành công -->
+        <div id="forgotStepSuccess" hidden style="text-align: center; padding: 16px 0 8px;">
+            <div style="width: 60px; height: 60px; border-radius: 50%; background: #eef4fa; color: #1c2635; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px; border: 2px solid #b8cce4;">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 style="font-size: 18px; color: #1c2635; margin: 0 0 8px;">Đổi mật khẩu thành công!</h3>
+            <p style="font-size: 13.5px; color: #64748b; margin: 0 0 20px; line-height: 1.5;">Mật khẩu mới của bạn đã được cập nhật an toàn vào hệ thống AZU Car.</p>
+            <button type="button" class="btn-submit-auth" id="btnGoToLoginAfterReset" style="margin: 0 auto; width: 100%;">Đăng nhập ngay</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Đăng ký -->
+<div id="registerModal" class="auth-modal-overlay">
+    <div class="auth-modal-card">
+        <button class="modal-close-btn" data-modal="registerModal"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-header">
+            <h2>Đăng ký</h2>
+            <p>Chào mừng quý khách đến với AZUCar</p>
+        </div>
+        <form class="auth-form" id="register-form">
+            <div class="form-group">
+                <label for="register-name">Tên tài khoản</label>
+                <div class="input-wrapper">
+                    <input id="register-name" name="name" type="text" placeholder="Nhập tên tài khoản" autocomplete="name" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="register-phone">Số điện thoại</label>
+                <div class="input-wrapper">
+                    <input id="register-phone" name="phone" type="tel" placeholder="Nhập số điện thoại của bạn" autocomplete="tel" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="register-password">Mật khẩu</label>
+                <div class="input-wrapper password-box">
+                    <input id="register-password" name="password" type="password" placeholder="Nhập mật khẩu" autocomplete="new-password" required>
+                    <i class="fa-regular fa-eye-slash toggle-password"></i>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="register-password-confirm">Nhập lại mật khẩu</label>
+                <div class="input-wrapper password-box">
+                    <input id="register-password-confirm" name="passwordConfirm" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required>
+                    <i class="fa-regular fa-eye-slash toggle-password"></i>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Nhập mã giới thiệu (nếu có)</label>
+                <div class="input-wrapper">
+                    <input type="text" placeholder="Nhập mã">
+                </div>
+            </div>
+            
+            <p class="terms-text">Tôi đã đọc và đồng ý với <a href="/my-trips#privacy" class="open-policy-link" data-policy="terms">Chính sách & Quy định</a> và <a href="/my-trips#privacy" class="open-policy-link" data-policy="privacy">Chính sách Bảo vệ dữ liệu cá nhân</a></p>
+            
+            <button type="submit" class="btn-submit-auth">Đăng ký</button>
+            <p class="switch-auth-text">Bạn đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập ngay</a></p>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Xem Chính Sách & Quy Định / Bảo Vệ Dữ Liệu Cá Nhân -->
+<div id="policyPreviewModal" class="auth-modal-overlay policy-modal-overlay" style="z-index: 100000;" hidden>
+    <div class="auth-modal-card policy-modal-card" role="dialog" aria-modal="true" aria-labelledby="policyModalTitle">
+        <button class="modal-close-btn" id="closePolicyModalBtn" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+        
+        <div class="policy-modal-header">
+            <span class="policy-modal-badge" id="policyModalBadge"><i class="fa-solid fa-shield-halved"></i> QUY CHUẨN AN TOÀN</span>
+            <h2 id="policyModalTitle">CHÍNH SÁCH & QUY ĐỊNH</h2>
+            <p id="policyModalSubtitle">Điều khoản sử dụng dịch vụ và quy chế vận hành AZU Car Việt Nam</p>
+            
+            <div class="policy-modal-tabs" role="tablist">
+                <button type="button" class="policy-tab-btn active" id="tabBtnTerms" data-policy="terms">
+                    <i class="fa-solid fa-file-contract"></i> Chính sách & Quy định
+                </button>
+                <button type="button" class="policy-tab-btn" id="tabBtnPrivacy" data-policy="privacy">
+                    <i class="fa-solid fa-user-shield"></i> Bảo vệ dữ liệu cá nhân
+                </button>
+            </div>
+        </div>
+
+        <div class="policy-modal-body" id="policyModalBody">
+            <!-- Nạp động từ JS -->
+        </div>
+
+        <div class="policy-modal-footer">
+            <button type="button" class="policy-btn-print" id="btnPrintPolicy" onclick="window.print()">
+                <i class="fa-solid fa-print"></i> In / Tải PDF
+            </button>
+            <button type="button" class="btn-submit-auth policy-btn-agree" id="btnAcceptPolicy">
+                <i class="fa-solid fa-circle-check"></i> Đã hiểu & Đồng ý
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Đăng ký xe cho thuê (Chủ xe) -->
+<div id="registerCarModal" class="auth-modal-overlay">
+    <div class="auth-modal-card" style="max-width: 540px;">
+        <button class="modal-close-btn" data-modal="registerCarModal"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-header">
+            <h2 style="color: #024064;">Đăng ký xe cho thuê</h2>
+            <p>Bạn vui lòng điền đầy đủ thông tin, AZU Car sẽ liên hệ với bạn trong vòng một ngày làm việc.</p>
+        </div>
+        <form class="auth-form" onsubmit="event.preventDefault(); alert('Gửi thông tin thành công! Chúng tôi sẽ liên hệ lại với bạn.'); document.getElementById('registerCarModal').classList.remove('active');">
+            <div class="form-group">
+                <label>Khu vực cho thuê</label>
+                <div class="input-wrapper">
+                    <select class="custom-select-input" required>
+                        <option value="" disabled selected>Chọn khu vực</option>
+                        <option value="danang">TP. Đà Nẵng</option>
+                        <option value="hcm">TP. Hồ Chí Minh</option>
+                        <option value="hanoi">Hà Nội</option>
+                        <option value="nhatrang">Nha Trang</option>
+                        <option value="dalat">Đà Lạt</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label>Tên chủ xe*</label>
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="Tên của bạn" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Số di động*</label>
+                    <div class="input-wrapper">
+                        <input type="tel" placeholder="Số của bạn" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Xe cho thuê</label>
+                <div class="input-wrapper">
+                    <input type="text" placeholder="Loại xe của bạn (VD: VinFast VF8, Mazda CX-5...)" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit-auth" style="background-color: #0b2c46; margin-top: 10px;">Gửi thông tin đến AZU Car</button>
+        </form>
+    </div>
+</div>
+
+<!-- Popup chọn địa điểm -->
+<div id="locationModal" class="location-picker-overlay">
+    <div class="location-picker-panel" role="dialog" aria-modal="true" aria-labelledby="locationModalTitle">
+        <div class="location-picker-header">
+            <div>
+                <h2 id="locationModalTitle">Chọn địa điểm</h2>
+                <p>Chọn nơi bạn muốn nhận xe</p>
+            </div>
+            <button class="location-picker-close" data-modal="locationModal" type="button" aria-label="Đóng">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="location-current">
+            <i class="fa-solid fa-location-dot"></i>
+            <div>
+                <span>Địa điểm hiện tại</span>
+                <strong id="locationCurrentText">TP. Đà Nẵng</strong>
+            </div>
+        </div>
+        <label class="location-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="locationInput" type="text" placeholder="Tìm thành phố hoặc khu vực">
+        </label>
+        <div class="location-list-title">Địa điểm phổ biến</div>
+        <div id="locationOptions" class="location-options">
+            <button class="location-option" type="button" data-location="TP. Hồ Chí Minh">
+                <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                <span><strong>TP. Hồ Chí Minh</strong><small>Thành phố</small></span>
+            </button>
+            <button class="location-option" type="button" data-location="Hà Nội">
+                <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                <span><strong>Hà Nội</strong><small>Thành phố</small></span>
+            </button>
+            <button class="location-option" type="button" data-location="TP. Đà Nẵng">
+                <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                <span><strong>TP. Đà Nẵng</strong><small>Thành phố</small></span>
+            </button>
+            <button class="location-option" type="button" data-location="Nha Trang">
+                <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                <span><strong>Nha Trang</strong><small>Thành phố</small></span>
+            </button>
+            <button class="location-option" type="button" data-location="Đà Lạt">
+                <span class="location-option-icon"><i class="fa-solid fa-location-dot"></i></span>
+                <span><strong>Đà Lạt</strong><small>Thành phố</small></span>
+            </button>
+        </div>
+        <button id="confirmLocationBtn" class="location-custom-confirm" type="button" hidden>
+            Dùng địa điểm đã nhập
+        </button>
+    </div>
+</div>
+
+<!-- Modal Chọn Thời Gian / Lịch Thuê Xe -->
+<div id="timeModal" class="auth-modal-overlay">
+    <div class="auth-modal-card" style="max-width: 540px; padding: 24px;">
+        <button class="modal-close-btn" data-modal="timeModal"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-header" style="margin-bottom: 16px;">
+            <h2 style="font-size: 20px; font-weight: 700; color: #1e293b;">Thời gian thuê</h2>
+        </div>
+        
+        <div style="display: flex; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; text-align: center;">
+            <div id="tabDaily" style="flex: 1; padding-bottom: 10px; font-weight: 700; color: #4e6fca; border-bottom: 2px solid #1d5194; cursor: pointer;">Thuê ngày</div>
+            <div id="tabHourly" style="flex: 1; padding-bottom: 10px; font-weight: 600; color: #94a3b8; cursor: pointer;">Thuê giờ</div>
+        </div>
+
+        <div id="dailyContent">
+            <p class="rental-date-hint">Chọn ngày nhận xe, sau đó chọn ngày trả xe.</p>
+            <div class="rental-date-selection">
+                <button id="selectPickupDate" class="rental-date-choice active" type="button">
+                    <span>Ngày nhận xe</span>
+                    <strong id="selectedPickupDate">Chọn ngày</strong>
+                </button>
+                <button id="selectReturnDate" class="rental-date-choice" type="button">
+                    <span>Ngày trả xe</span>
+                    <strong id="selectedReturnDate">Chọn ngày</strong>
+                </button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <button id="prevMonthBtn" style="background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="currentMonthYearLabel" style="font-weight: 700; font-size: 16px; color: #1e293b;">Tháng 10, 2026</span>
+                <button id="nextMonthBtn" style="background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+
+            <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 8px;">
+                    <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                </div>
+                <div id="dynamicCalendarDays" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; gap: 8px; color: #334155; cursor: pointer;"></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                    <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Giờ nhận xe</label>
+                    <select id="pickupTimeSelect" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                        <option value="09:00" selected>09:00</option>
+                        <option value="12:00">12:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="18:00">18:00</option>
+                        <option value="21:00">21:00</option>
+                    </select>
+                </div>
+                <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                    <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Giờ trả xe</label>
+                    <select id="returnTimeSelect" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                        <option value="09:00">09:00</option>
+                        <option value="12:00">12:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="18:00" selected>18:00</option>
+                        <option value="20:00">20:00</option>
+                        <option value="21:00">21:00</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="hourlyContent" style="display: none;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                    <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Ngày bắt đầu</label>
+                    <input type="date" id="hourlyDateInput" value="2026-10-14" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                </div>
+                <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                    <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Giờ nhận xe</label>
+                    <select id="hourlyPickupTime" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00" selected>16:00</option>
+                        <option value="17:00">17:00</option>
+                    </select>
+                </div>
+            </div>
+            <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; margin-bottom: 16px;">
+                <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Thời gian thuê</label>
+                <select id="hourlyDuration" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                    <option value="2">2 giờ</option>
+                    <option value="4" selected>4 giờ</option>
+                    <option value="6">6 giờ</option>
+                    <option value="8">8 giờ</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+            <div>
+                <div id="modalPreviewText" style="font-weight: 700; font-size: 14px; color: #1e293b;">16:00, 14/10 - 20:00, 14/10</div>
+                <div id="modalSubPreviewText" style="font-size: 12px; color: #64748b; margin-top: 2px;">Thời gian thuê: <span style="color: #021254; font-weight: 700;">4 giờ</span></div>
+            </div>
+            <button id="btnConfirmTime" style="background-color: #021843; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">Tiếp tục</button>
+        </div>
+    </div>
+</div>

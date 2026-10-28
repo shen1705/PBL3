@@ -1,0 +1,1316 @@
+﻿@{
+    ViewData["Title"] = "Tìm kiếm xe tự lái - AZU Car";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/find.css" asp-append-version="true">
+}
+
+    <!-- Sub-header Search & Filter Bar -->
+    <section class="search-filter-bar">
+        <div class="container bar-content">
+            <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+            
+            <div class="filter-location-box" id="openLocationModal" role="button" tabindex="0">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="filter-label">Địa điểm</span>
+                <strong id="filterLocationText">TP. Đà Nẵng</strong>
+            </div>
+
+            <div class="filter-time-box" id="openTimeModal" role="button" tabindex="0">
+                <i class="fa-regular fa-calendar-days"></i>
+                <span class="filter-label">Thời gian thuê</span>
+                <strong id="filterTimeText">21:00, 27/3/2025 – 21:00, 29/3/2025</strong>
+                <span id="pickupTimeText" hidden>21:00, 27/03/2025</span>
+                <span id="returnTimeText" hidden>21:00, 29/03/2025</span>
+            </div>
+
+            <button class="btn-search-action" id="btnSearchAction" type="button"><i class="fa-solid fa-magnifying-glass"></i> <span>Tìm kiếm</span></button>
+            <button class="btn-filter-action" id="openFilterModalBtn" type="button"><i class="fa-solid fa-sliders"></i> <span>Bộ lọc</span></button>
+        </div>
+    </section>
+
+    <!-- Quick Category Badges Bar -->
+    <section class="category-pills-bar">
+        <div class="container pills-content">
+            <!-- Dropdown Loại xe -->
+            <div class="pill-dropdown-wrap" id="pillCarTypeWrap">
+                <button class="pill-btn" id="pillBtnCarType" type="button" aria-expanded="false">
+                    <i class="fa-solid fa-car"></i>
+                    <span id="pillCarTypeText">Loại xe</span>
+                    <i class="fa-solid fa-chevron-down pill-chevron"></i>
+                </button>
+                <div class="pill-dropdown-menu" id="pillCarTypeMenu" hidden>
+                    <button type="button" class="pill-dropdown-item active" data-type="all">Tất cả loại xe</button>
+                    <button type="button" class="pill-dropdown-item" data-type="4-seats">4 - 5 chỗ</button>
+                    <button type="button" class="pill-dropdown-item" data-type="7-seats">7 chỗ</button>
+                    <button type="button" class="pill-dropdown-item" data-type="sedan">Sedan</button>
+                    <button type="button" class="pill-dropdown-item" data-type="suv">SUV </button>
+                    <button type="button" class="pill-dropdown-item" data-type="mpv">MPV đa dụng</button>
+                    <button type="button" class="pill-dropdown-item" data-type="pickup">Bán tải</button>
+                    <button type="button" class="pill-dropdown-item" data-type="electric">Xe điện</button>
+                </div>
+            </div>
+
+            <!-- Dropdown Hãng xe -->
+            <div class="pill-dropdown-wrap" id="pillCarBrandWrap">
+                <button class="pill-btn" id="pillBtnCarBrand" type="button" aria-expanded="false">
+                    <i class="fa-solid fa-tag"></i>
+                    <span id="pillCarBrandText">Hãng xe</span>
+                    <i class="fa-solid fa-chevron-down pill-chevron"></i>
+                </button>
+                <div class="pill-dropdown-menu" id="pillCarBrandMenu" hidden>
+                    <button type="button" class="pill-dropdown-item active" data-brand="all">Tất cả hãng</button>
+                    <button type="button" class="pill-dropdown-item" data-brand="toyota">Toyota</button>
+                    <button type="button" class="pill-dropdown-item" data-brand="hyundai">Hyundai</button>
+                    <button type="button" class="pill-dropdown-item" data-brand="vinfast">VinFast</button>
+                    <button type="button" class="pill-dropdown-item" data-brand="mazda">Mazda</button>
+                    <button type="button" class="pill-dropdown-item" data-brand="honda">Honda</button>
+                    <button type="button" class="pill-dropdown-item" data-brand="kia">Kia</button>
+                    <button type="button" class="pill-dropdown-item" data-brand="ford">Ford</button>
+                    <button type="button" class="pill-dropdown-item" data-brand="mitsubishi">Mitsubishi</button>
+                    <button type="button" class="pill-dropdown-item" data-brand="other">Khác (Suzuki, Nissan...)</button>
+                </div>
+            </div>
+
+            <!-- Nút Toggle Đặt xe nhanh -->
+            <button class="pill-btn" id="pillBtnInstant" type="button">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Đặt xe nhanh</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Main Results Section -->
+    <main class="main-results-section">
+        <div class="container">
+            <div class="results-header">
+                <h2 id="resultsLocationHeading">Xe tự lái tại TP. Đà Nẵng</h2>
+                <div class="results-meta">
+                    <span class="count-text" id="carCountText">Tìm thấy 17 xe phù hợp với chuyến đi của bạn</span>
+                    <span id="sampleDataNote" class="sample-data-note" hidden>Dữ liệu xe ở Hà Nội và TP. Hồ Chí Minh là dữ liệu minh họa.</span>
+                    <div class="sort-dropdown-box">
+                        <span>Sắp xếp:</span>
+                        <select id="sortSelect">
+                            <option value="best">Giá tốt nhất</option>
+                            <option value="popular">Phổ biến nhất</option>
+                            <option value="price-asc">Giá thấp đến cao</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Thẻ Xe (16 xe mẫu) -->
+            <div class="cars-grid" id="carsGrid">
+
+                <!-- Xe 1: VinFast VF3 2026 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800" alt="VINFAST VF3 2026">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">4 CHỖ</span>
+                        </div>
+                        <h3>VINFAST VF3 2026</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 24 chuyến • <b>Đời 2026</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Hòa Thuận Tây, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="car-price">524K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Xe 2: Honda City RS 2022 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600" alt="HONDA CITY RS 2022">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>HONDA CITY RS 2022</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 12 chuyến • <b>Đời 2022</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="car-price">625K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 3: Kia Sonet Luxury 2022 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+            
+                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="KIA SONET LUXURY 2022">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>KIA SONET LUXURY 2022</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 4.9 • 24 chuyến • <b>Đời 2022</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                        
+                            <span class="car-price">648K<span>/ngày</span></span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 4: Toyota Vios 2026 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                
+                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="TOYOTA VIOS 2026">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>TOYOTA VIOS 2026</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 8 chuyến • <b>Đời 2026</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Thanh Khê, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="car-price">778K<span>/ngày</span></span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 5: Toyota Vios 2024 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&q=80&w=600" alt="TOYOTA VIOS 2024">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>TOYOTA VIOS 2024</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 4.9 • 18 chuyến • <b>Đời 2024</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="delivery-note"><i class="fa-solid fa-check"></i> Giao xe tận nơi</span>
+                            <span class="car-price">688K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 6: Mitsubishi Xpander 2024 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600" alt="MITSUBISHI XPANDER 2024">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">7 CHỖ</span>
+                        </div>
+                        <h3>MITSUBISHI XPANDER 2024</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 7 chuyến • <b>Đời 2024</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường An Hải, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="car-price">765K<span>/ngày</span></span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 7: Hyundai Elantra 2024 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                        
+                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="HYUNDAI ELANTRA 2024">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>HYUNDAI ELANTRA 2024</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 4.7 • 11 chuyến • <b>Đời 2024</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            
+                            <span class="car-price">720K<span>/ngày</span></span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 8: Mazda 3 Luxury 2024 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+            
+                        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600" alt="MAZDA 3 LUXURY 2024">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>MAZDA 3 LUXURY 2024</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 4.8 • 20 chuyến • <b>Đời 2024</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Hòa Cường, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            
+                            <span class="car-price">782K<span>/ngày</span></span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 9: Ford Territory Trend 2025 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                
+                        <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600" alt="FORD TERRITORY TREND 2025">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>FORD TERRITORY TREND 2025</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 15 chuyến • <b>Đời 2025</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Cẩm Lệ, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="car-price">888K<span>/ngày</span></span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 10: Toyota Corolla Cross 2023 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=600" alt="TOYOTA COROLLA CROSS 2023">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>TOYOTA COROLLA CROSS 2023</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 4.9 • 9 chuyến • <b>Đời 2023</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Thanh Khê, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="car-price">620K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 11: Hyundai Kona 2024 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+    
+                        <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600" alt="HYUNDAI KONA 2024">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>HYUNDAI KONA 2024</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 4.7 • 10 chuyến • <b>Đời 2024</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                        
+                            <span class="car-price">690K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 12: Mitsubishi Xforce 2024 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                    
+                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="MITSUBISHI XFORCE 2024">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>MITSUBISHI XFORCE 2024</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 14 chuyến • <b>Đời 2024</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                    
+                            <span class="car-price">748K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 13: Suzuki Ertiga 2025 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600" alt="SUZUKI ERTIGA 2025">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">7 CHỖ</span>
+                        </div>
+                        <h3>SUZUKI ERTIGA 2025</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 10 chuyến • <b>Đời 2025</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Hòa Cường, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="car-price">840K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 14: Honda BR-V 2024 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                    
+                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="HONDA BR-V 2024">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">7 CHỖ</span>
+                        </div>
+                        <h3>HONDA BR-V 2024</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 4.8 • 13 chuyến • <b>Đời 2024</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+        
+                            <span class="car-price">710K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 15: Nissan Kicks 2024 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                
+                        <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600" alt="NISSAN KICKS 2024">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>NISSAN KICKS 2024</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 4.9 • 13 chuyến • <b>Đời 2024</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="car-price">770K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 16: Ford Ranger 2025 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+            
+                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="FORD RANGER 2025">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">5 CHỖ</span>
+                        </div>
+                        <h3>FORD RANGER 2025</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 6 chuyến • <b>Đời 2025</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường Cẩm Lệ, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            
+                            <span class="car-price">945K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Xe 17: Isuzu Mu-X 2024 -->
+                <div class="car-card">
+                    <div class="car-img-wrapper">
+                    
+                        <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600" alt="ISUZU MU-X 2024">
+                    </div>
+                    <div class="car-info">
+                        <div class="car-tags-top">
+                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
+                            <span class="tag-seats">7 CHỖ</span>
+                        </div>
+                        <h3>ISUZU MU-X 2024</h3>
+                        <p class="car-rating-loc">
+                            <i class="fa-solid fa-star text-warning"></i> 4.8 • 11 chuyến • <b>Đời 2024</b><br>
+                            <i class="fa-solid fa-location-dot"></i> Phường An Hải, TP. Đà Nẵng
+                        </p>
+                        <div class="car-footer">
+                            <span class="car-price">860K<span>/ngày</span></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <p id="noCarsMessage" class="no-cars-message" hidden>Hiện chưa có xe tại địa điểm này.</p>
+        </div>
+    </main>
+
+    <!-- Modal Đăng nhập -->
+    <div id="loginModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="modal-close-btn" data-modal="loginModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <h2>Đăng nhập</h2>
+                <p>Chào mừng quý khách quay lại với AZUCar</p>
+            </div>
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label for="login-identity">Tên hoặc số điện thoại</label>
+                    <div class="input-wrapper">
+                        <input id="login-identity" name="identity" type="text" placeholder="Nhập tên hoặc số điện thoại" autocomplete="username" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Mật khẩu</label>
+                    <div class="input-wrapper password-box">
+                        <input id="login-password" name="password" type="password" placeholder="Nhập mật khẩu" autocomplete="current-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                    <div class="forgot-password-row">
+                        <a href="#" class="forgot-link" id="openForgotModal">Quên mật khẩu?</a>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit-auth">Đăng nhập</button>
+                <p class="switch-auth-text">Bạn chưa là thành viên? <a href="#" id="switchToRegister">Đăng ký ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Quên mật khẩu -->
+    <div id="forgotModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="modal-close-btn" data-modal="forgotModal"><i class="fa-solid fa-xmark"></i></button>
+            
+            <!-- Bước 1: Nhập Số điện thoại / Email -->
+            <div id="forgotStep1">
+                <div class="modal-header">
+                    <h2>Khôi phục mật khẩu</h2>
+                    <p>Nhập số điện thoại hoặc email liên kết để nhận mã xác thực OTP</p>
+                </div>
+                <form class="auth-form" id="forgot-form-step1">
+                    <div class="form-group">
+                        <label for="forgot-identity">Số điện thoại hoặc Email</label>
+                        <div class="input-wrapper">
+                            <input id="forgot-identity" name="identity" type="text" placeholder="Ví dụ: 0905 123 456 hoặc email@gmail.com" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit-auth">Gửi mã xác thực OTP</button>
+                    <p class="switch-auth-text">Nhớ mật khẩu? <a href="#" class="back-to-login-link">Đăng nhập ngay</a></p>
+                </form>
+            </div>
+
+            <!-- Bước 2: Nhập OTP & Mật khẩu mới -->
+            <div id="forgotStep2" hidden>
+                <div class="modal-header">
+                    <h2>Đặt lại mật khẩu</h2>
+                    <p>Mã OTP 6 số đã được gửi tới <strong id="forgotTargetText" style="color: #1c2635;">0905***456</strong></p>
+                </div>
+                <form class="auth-form" id="forgot-form-step2">
+                    <div class="form-group">
+                        <label for="forgot-otp">Mã xác thực OTP</label>
+                        <div class="input-wrapper">
+                            <input id="forgot-otp" name="otp" type="text" maxlength="6" placeholder="Nhập 6 số OTP (mặc định: 123456)" required style="letter-spacing: 4px; font-weight: 700; text-align: center; font-size: 16px;">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 12px;">
+                            <span style="color: #64748b;">Chưa nhận được mã?</span>
+                            <button type="button" id="btnResendOtp" style="background: none; border: none; color: #d1a34b; font-weight: 600; cursor: pointer; padding: 0;">Gửi lại mã (<span id="otpCountdown">59</span>s)</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="forgot-new-password">Mật khẩu mới</label>
+                        <div class="input-wrapper password-box">
+                            <input id="forgot-new-password" name="newPassword" type="password" placeholder="Tạo mật khẩu mới (ít nhất 6 ký tự)" autocomplete="new-password" required>
+                            <i class="fa-regular fa-eye-slash toggle-password"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="forgot-confirm-password">Xác nhận mật khẩu mới</label>
+                        <div class="input-wrapper password-box">
+                            <input id="forgot-confirm-password" name="confirmPassword" type="password" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password" required>
+                            <i class="fa-regular fa-eye-slash toggle-password"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit-auth">Xác nhận &amp; Đăng nhập</button>
+                    <p class="switch-auth-text"><a href="#" id="backToStep1Forgot">← Thay đổi số điện thoại / email</a></p>
+                </form>
+            </div>
+
+            <!-- Bước 3: Thông báo thành công -->
+            <div id="forgotStepSuccess" hidden style="text-align: center; padding: 16px 0 8px;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: #eef4fa; color: #1c2635; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px; border: 2px solid #b8cce4;">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3 style="font-size: 18px; color: #1c2635; margin: 0 0 8px;">Đổi mật khẩu thành công!</h3>
+                <p style="font-size: 13.5px; color: #64748b; margin: 0 0 20px; line-height: 1.5;">Mật khẩu mới của bạn đã được cập nhật an toàn vào hệ thống AZU Car.</p>
+                <button type="button" class="btn-submit-auth" id="btnGoToLoginAfterReset" style="margin: 0 auto; width: 100%;">Đăng nhập ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Đăng ký -->
+    <div id="registerModal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <button class="modal-close-btn" data-modal="registerModal"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header">
+                <h2>Đăng ký</h2>
+                <p>Chào mừng quý khách đến với AZUCar</p>
+            </div>
+            <form class="auth-form" id="register-form">
+                <div class="form-group">
+                    <label for="register-name">Tên tài khoản</label>
+                    <div class="input-wrapper">
+                        <input id="register-name" name="name" type="text" placeholder="Nhập tên tài khoản" autocomplete="name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-phone">Số điện thoại</label>
+                    <div class="input-wrapper">
+                        <input id="register-phone" name="phone" type="tel" placeholder="Nhập số điện thoại của bạn" autocomplete="tel" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Mật khẩu</label>
+                    <div class="input-wrapper password-box">
+                        <input id="register-password" name="password" type="password" placeholder="Nhập mật khẩu" autocomplete="new-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-password-confirm">Nhập lại mật khẩu</label>
+                    <div class="input-wrapper password-box">
+                        <input id="register-password-confirm" name="passwordConfirm" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required>
+                        <i class="fa-regular fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Nhập mã giới thiệu (nếu có)</label>
+                    <div class="input-wrapper">
+                        <input type="text" placeholder="Nhập mã">
+                    </div>
+                </div>
+                <p class="terms-text">Tôi đã đọc và đồng ý với <a href="my-trips.html#privacy" class="open-policy-link" data-policy="terms">Chính sách & Quy định</a> và <a href="my-trips.html#privacy" class="open-policy-link" data-policy="privacy">Chính sách Bảo vệ dữ liệu cá nhân</a></p>
+                <button type="submit" class="btn-submit-auth">Đăng ký</button>
+                <p class="switch-auth-text">Bạn đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập ngay</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Xem Chính Sách & Quy Định / Bảo Vệ Dữ Liệu Cá Nhân -->
+    <div id="policyPreviewModal" class="auth-modal-overlay policy-modal-overlay" style="z-index: 100000;" hidden>
+        <div class="auth-modal-card policy-modal-card" role="dialog" aria-modal="true" aria-labelledby="policyModalTitle">
+            <button class="modal-close-btn" id="closePolicyModalBtn" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="policy-modal-header">
+                <span class="policy-modal-badge" id="policyModalBadge"><i class="fa-solid fa-shield-halved"></i> QUY CHUẨN AN TOÀN</span>
+                <h2 id="policyModalTitle">CHÍNH SÁCH & QUY ĐỊNH</h2>
+                <p id="policyModalSubtitle">Điều khoản sử dụng dịch vụ và quy chế vận hành AZU Car Việt Nam</p>
+                
+                <!-- Tab chuyển nhanh giữa 2 chính sách -->
+                <div class="policy-modal-tabs" role="tablist">
+                    <button type="button" class="policy-tab-btn active" id="tabBtnTerms" data-policy="terms">
+                        <i class="fa-solid fa-file-contract"></i> Chính sách & Quy định
+                    </button>
+                    <button type="button" class="policy-tab-btn" id="tabBtnPrivacy" data-policy="privacy">
+                        <i class="fa-solid fa-user-shield"></i> Bảo vệ dữ liệu cá nhân
+                    </button>
+                </div>
+            </div>
+
+            <div class="policy-modal-body" id="policyModalBody">
+                <!-- Nội dung được nạp động từ JS -->
+            </div>
+
+            <div class="policy-modal-footer">
+                <button type="button" class="policy-btn-print" id="btnPrintPolicy" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> In / Tải PDF
+                </button>
+                <button type="button" class="btn-submit-auth policy-btn-agree" id="btnAcceptPolicy">
+                    <i class="fa-solid fa-circle-check"></i> Đã hiểu & Đồng ý
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Bộ lọc nâng cao -->
+    <div id="filterModal" class="auth-modal-overlay">
+        <div class="auth-modal-card filter-modal-card">
+            <div class="filter-modal-header">
+                <div class="filter-modal-title-group">
+                    <h3>Bộ lọc tìm kiếm</h3>
+                    <p>Tùy chỉnh tiêu chí để tìm chiếc xe ưng ý nhất</p>
+                </div>
+                <button class="modal-close-btn" data-modal="filterModal" type="button" aria-label="Đóng">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="filter-modal-body">
+                <!-- Mức giá thuê -->
+                <div class="filter-group">
+                    <label class="filter-group-title">Mức giá thuê (1 ngày)</label>
+                    <div class="filter-chips-grid">
+                        <button type="button" class="filter-chip active" data-filter="price" data-value="all">Tất cả</button>
+                        <button type="button" class="filter-chip" data-filter="price" data-value="under-800">Dưới 800K</button>
+                        <button type="button" class="filter-chip" data-filter="price" data-value="800-1200">800K – 1.200K</button>
+                        <button type="button" class="filter-chip" data-filter="price" data-value="above-1200">Trên 1.200K</button>
+                    </div>
+                </div>
+
+                <!-- Số chỗ ngồi -->
+                <div class="filter-group">
+                    <label class="filter-group-title">Số chỗ ngồi</label>
+                    <div class="filter-chips-grid" id="seatsFilterGroup">
+                        <button type="button" class="filter-chip active" data-filter="seats" data-value="all">Tất cả</button>
+                        <button type="button" class="filter-chip" data-filter="seats" data-value="4">4 - 5 chỗ</button>
+                        <button type="button" class="filter-chip" data-filter="seats" data-value="7">7 chỗ</button>
+                    </div>
+                </div>
+
+                <!-- Truyền động -->
+                <div class="filter-group">
+                    <label class="filter-group-title">Truyền động</label>
+                    <div class="filter-chips-grid">
+                        <button type="button" class="filter-chip active" data-filter="trans" data-value="all">Tất cả</button>
+                        <button type="button" class="filter-chip" data-filter="trans" data-value="auto">Số tự động</button>
+                        <button type="button" class="filter-chip" data-filter="trans" data-value="manual">Số sàn</button>
+                    </div>
+                </div>
+
+                <!-- Loại nhiên liệu -->
+                <div class="filter-group">
+                    <label class="filter-group-title">Nhiên liệu</label>
+                    <div class="filter-chips-grid">
+                        <button type="button" class="filter-chip active" data-filter="fuel" data-value="all">Tất cả</button>
+                        <button type="button" class="filter-chip" data-filter="fuel" data-value="gas">Xăng</button>
+                        <button type="button" class="filter-chip" data-filter="fuel" data-value="electric">Điện</button>
+                        <button type="button" class="filter-chip" data-filter="fuel" data-value="diesel">Dầu</button>
+                    </div>
+                </div>
+
+                <!-- Tiện ích & Dịch vụ -->
+                <div class="filter-group">
+                    <label class="filter-group-title">Tính năng & Tiện ích</label>
+                    <div class="filter-checkbox-list">
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" id="filterFeatureInstant" value="instant">
+                            <span class="custom-check"><i class="fa-solid fa-check"></i></span>
+                            <div class="check-info">
+                                <strong>Đặt xe nhanh</strong>
+                                <small>Xác nhận ngay không cần chờ chủ xe duyệt</small>
+                            </div>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" id="filterFeatureDelivery" value="delivery">
+                            <span class="custom-check"><i class="fa-solid fa-check"></i></span>
+                            <div class="check-info">
+                                <strong>Giao xe tận nơi</strong>
+                                <small>Chủ xe hỗ trợ mang xe đến tận điểm đón</small>
+                            </div>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" id="filterFeatureDeposit" value="deposit">
+                            <span class="custom-check"><i class="fa-solid fa-check"></i></span>
+                            <div class="check-info">
+                                <strong>Miễn thế chấp tiền mặt</strong>
+                                <small>Thủ tục đơn giản qua CCCD/GPLX</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-modal-footer">
+                <button type="button" class="btn-filter-reset" id="btnResetFilter">
+                    <i class="fa-solid fa-rotate-left"></i> Thiết lập lại
+                </button>
+                <button type="button" class="btn-filter-apply" id="btnApplyFilter">
+                    Áp dụng bộ lọc
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Popup Chi tiết xe (Khớp 100% Ảnh mẫu) -->
+    <div class="car-popup-overlay" id="carDetailModal" hidden>
+        <div class="car-popup-dialog" role="dialog" aria-modal="true" aria-labelledby="popupCarTitle">
+            <button class="car-popup-close" id="closeCarPopup" type="button" aria-label="Đóng popup">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Bộ sưu tập ảnh xe (1 ảnh lớn + 3 ảnh nhỏ) -->
+            <div class="car-gallery-grid">
+                <div class="gallery-main-img">
+                    <img id="popupMainImg" src="" alt="Ảnh xe chính">
+                </div>
+                <div class="gallery-thumb-stack">
+                    <div class="gallery-thumb">
+                        <img id="popupThumb1" src="" alt="Góc chụp xe 1">
+                    </div>
+                    <div class="gallery-thumb">
+                        <img id="popupThumb2" src="" alt="Góc chụp xe 2">
+                    </div>
+                    <div class="gallery-thumb has-view-more">
+                        <img id="popupThumb3" src="" alt="Góc chụp xe 3">
+                        <button type="button" class="btn-gallery-more" id="btnViewAllPhotos">
+                            <i class="fa-regular fa-images"></i> Xem tất cả ảnh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nội dung chi tiết 2 cột -->
+            <div class="car-popup-body">
+                <!-- Cột trái: Thông tin chi tiết -->
+                <div class="car-popup-left">
+                    <div class="car-popup-header">
+                        <h1 class="car-popup-title" id="popupCarTitle">VINFAST VF3 2026</h1>
+                        <p class="car-popup-meta" id="popupCarMeta">
+                            <i class="fa-solid fa-star star-gold"></i> <span id="popupCarRating">5.0</span> • <span id="popupCarTrips">24 chuyến</span> • <span id="popupCarLoc">Phường Hòa Thuận Tây, Quận Hải Châu</span>
+                        </p>
+                        <div class="car-badges-row">
+                            <span class="badge-pill badge-safe"><i class="fa-solid fa-shield-halved"></i> Miễn thế chấp</span>
+                            <span class="badge-pill badge-delivery"><i class="fa-solid fa-location-dot"></i> Giao xe tận nơi</span>
+                        </div>
+                    </div>
+
+                    <!-- Đặc điểm -->
+                    <div class="car-popup-section">
+                        <h2 class="section-subheading">Đặc điểm</h2>
+                        <div class="car-specs-grid">
+                            <div class="spec-card">
+                                <i class="fa-solid fa-code-branch spec-icon"></i>
+                                <div class="spec-info">
+                                    <span class="spec-label">Truyền động</span>
+                                    <strong class="spec-value" id="popupCarTrans">Số tự động</strong>
+                                </div>
+                            </div>
+                            <div class="spec-card">
+                                <i class="fa-solid fa-couch spec-icon"></i>
+                                <div class="spec-info">
+                                    <span class="spec-label">Số ghế</span>
+                                    <strong class="spec-value" id="popupCarSeats">4 chỗ</strong>
+                                </div>
+                            </div>
+                            <div class="spec-card">
+                                <i class="fa-solid fa-bolt-lightning spec-icon" id="popupFuelIcon"></i>
+                                <div class="spec-info">
+                                    <span class="spec-label">Nhiên liệu</span>
+                                    <strong class="spec-value" id="popupCarFuel">Điện</strong>
+                                </div>
+                            </div>
+                            <div class="spec-card">
+                                <i class="fa-solid fa-gauge-high spec-icon"></i>
+                                <div class="spec-info">
+                                    <span class="spec-label">Tiêu hao</span>
+                                    <strong class="spec-value" id="popupCarConsumption">210km</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="car-popup-section">
+                        <h2 class="section-subheading">Mô tả</h2>
+                        <div class="car-description-content" id="popupCarDescription">
+                            <p><i class="fa-solid fa-car-side"></i> Xe đời mới, sạch sẽ, bảo dưỡng định kỳ chính hãng.</p>
+                            <p><i class="fa-solid fa-charging-station"></i> Miễn phí sạc tại các trạm sạc đối với xe điện hoặc giao nhận xe sạch sẽ đầy nhiên liệu.</p>
+                            <p><i class="fa-solid fa-camera"></i> Trang bị camera lùi và camera hành trình góc rộng sắc nét.</p>
+                            <p><i class="fa-solid fa-shield-halved"></i> Dán phim cách nhiệt cao cấp Ceramax, giảm nóng hiệu quả khi đi đường dài.</p>
+                            <p>Ghế da êm ái, máy lạnh sâu thơm tho, mang lại cảm giác thoải mái suốt chuyến đi.</p>
+                        </div>
+                    </div>
+
+                    <!-- Các tiện nghi khác -->
+                    <div class="car-popup-section">
+                        <h2 class="section-subheading">Các tiện nghi khác</h2>
+                        <div class="car-amenities-grid">
+                            <div class="amenity-item"><i class="fa-solid fa-map-location-dot"></i> <span>Bản đồ</span></div>
+                            <div class="amenity-item"><i class="fa-brands fa-bluetooth-b"></i> <span>Bluetooth</span></div>
+                            <div class="amenity-item"><i class="fa-solid fa-video"></i> <span>Camera hành trình</span></div>
+                            <div class="amenity-item"><i class="fa-solid fa-camera"></i> <span>Camera lùi</span></div>
+                            <div class="amenity-item"><i class="fa-solid fa-satellite-dish"></i> <span>Cảm biến va chạm</span></div>
+                            <div class="amenity-item"><i class="fa-solid fa-location-crosshairs"></i> <span>Định vị GPS</span></div>
+                            <div class="amenity-item"><i class="fa-solid fa-child"></i> <span>Ghế trẻ em</span></div>
+                            <div class="amenity-item"><i class="fa-solid fa-usb"></i> <span>Khe cắm USB</span></div>
+                            <div class="amenity-item"><i class="fa-solid fa-shield-heart"></i> <span>Túi khí an toàn</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Giấy tờ thuê xe -->
+                    <div class="car-popup-section">
+                        <div class="section-header-inline">
+                            <h2 class="section-subheading">Giấy tờ thuê xe</h2>
+                            <i class="fa-regular fa-circle-question info-icon"></i>
+                        </div>
+                        <p class="section-note">• Chọn 1 trong 2 hình thức:</p>
+                        <div class="doc-requirements-list">
+                            <div class="doc-requirement-item">
+                                <i class="fa-solid fa-id-card"></i>
+                                <span>GPLX (đối chiếu) & CCCD (đối chiếu VNeID)</span>
+                            </div>
+                            <div class="doc-requirement-item">
+                                <i class="fa-solid fa-passport"></i>
+                                <span>GPLX (đối chiếu) & Passport (giữ lại)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tài sản thế chấp -->
+                    <div class="car-popup-section">
+                        <div class="section-header-inline">
+                            <h2 class="section-subheading">Tài sản thế chấp</h2>
+                            <i class="fa-regular fa-circle-question info-icon"></i>
+                        </div>
+                        <p class="section-plain-text">Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.</p>
+                    </div>
+
+                    <!-- Điều khoản -->
+                    <div class="car-popup-section">
+                        <h2 class="section-subheading">Điều khoản</h2>
+                        <div class="terms-content">
+                            <p><strong>Quy định chung:</strong></p>
+                            <ul>
+                                <li>Sử dụng xe đúng mục đích di chuyển an toàn.</li>
+                                <li>Không sử dụng xe vào mục đích phi pháp, vi phạm pháp luật.</li>
+                                <li>Không sử dụng xe thuê để cầm cố, thế chấp hoặc chuyển giao bên thứ ba.</li>
+                                <li>Không hút thuốc, nhả kẹo cao su, xả rác bừa bãi trong xe.</li>
+                                <li>Không chở hoa quả, thực phẩm tươi sống nặng mùi trong khoang xe.</li>
+                            </ul>
+                            <a href="#" class="link-expand">Xem thêm <i class="fa-solid fa-chevron-right"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Chính sách huỷ chuyến -->
+                    <div class="car-popup-section">
+                        <h2 class="section-subheading">Chính sách huỷ chuyến</h2>
+                        <p class="section-plain-text">An tâm thuê xe, không lo bị huỷ chuyến với chính sách huỷ chuyến linh hoạt của AZU Car!</p>
+                        <a href="#" class="link-expand">Xem thêm <i class="fa-solid fa-chevron-right"></i></a>
+                    </div>
+
+                    <!-- Vị trí xe -->
+                    <div class="car-popup-section">
+                        <h2 class="section-subheading">Vị trí xe</h2>
+                        <p class="location-exact">
+                            <i class="fa-solid fa-location-dot"></i> <strong id="popupCarSpecificLoc">Phường Hòa Thuận Tây, Quận Hải Châu</strong>
+                        </p>
+                        <small class="location-hint">Địa chỉ cụ thể sẽ được hiển thị sau khi thanh toán giữ chỗ thành công.</small>
+                    </div>
+
+                    <!-- Chủ xe -->
+                    <div class="car-popup-section">
+                        <h2 class="section-subheading">Chủ xe</h2>
+                        <div class="owner-profile-card">
+                            <div class="owner-main-info">
+                                <img class="owner-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" alt="Chủ xe Linh">
+                                <div>
+                                    <h3 class="owner-name" id="popupOwnerName">Linh</h3>
+                                    <p class="owner-rating"><i class="fa-solid fa-star star-gold"></i> 5.0 • 24 chuyến</p>
+                                </div>
+                            </div>
+                            <div class="owner-stats-grid">
+                                <div class="owner-stat">
+                                    <span class="stat-label">Tỉ lệ phản hồi</span>
+                                    <strong class="stat-value">100%</strong>
+                                </div>
+                                <div class="owner-stat">
+                                    <span class="stat-label">Phản hồi trong</span>
+                                    <strong class="stat-value">5 phút</strong>
+                                </div>
+                                <div class="owner-stat">
+                                    <span class="stat-label">Tỉ lệ đồng ý</span>
+                                    <strong class="stat-value">100%</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="owner-super-badge">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Chủ xe 5★ có thời gian phản hồi nhanh chóng, tỉ lệ đồng ý cao, mức giá cạnh tranh &amp; dịch vụ nhận được nhiều đánh giá tốt từ khách hàng.</span>
+                        </div>
+                    </div>
+
+                    <!-- Đánh giá khách hàng -->
+                    <div class="car-popup-section">
+                        <div class="section-header-inline">
+                            <h2 class="section-subheading"><i class="fa-solid fa-star star-gold"></i> 5.0 • 24 đánh giá</h2>
+                        </div>
+                        <div class="reviews-grid">
+                            <div class="review-card">
+                                <div class="review-user">
+                                    <div class="review-avatar">PN</div>
+                                    <div class="review-user-info">
+                                        <h4>Phan Nguyễn Hoàng Nam</h4>
+                                        <div class="review-stars">
+                                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <span class="review-date">12/10/2026</span>
+                                </div>
+                                <p class="review-text">Xe mới tinh, chạy cực kỳ êm ái và thơm tho. Chủ xe nhiệt tình giao nhận đúng hẹn. Lần sau đến Đà Nẵng nhất định sẽ tiếp tục thuê lại!</p>
+                            </div>
+                            <div class="review-card">
+                                <div class="review-user">
+                                    <div class="review-avatar">VK</div>
+                                    <div class="review-user-info">
+                                        <h4>Vũ Khoa</h4>
+                                        <div class="review-stars">
+                                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                        </div>
+                                    </div>
+                                    <span class="review-date">08/10/2026</span>
+                                </div>
+                                <p class="review-text">Trải nghiệm tuyệt vời, xe vận hành trơn tru và rất tiết kiệm pin. Thủ tục nhận xe nhanh gọn, đối chiếu CCCD và GPLX là xong ngay.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-more-reviews">Xem thêm</button>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Widget đặt xe và Báo giá Sticky -->
+                <div class="car-popup-right">
+                    <!-- Box Bảo hiểm thuê xe -->
+                    <div class="side-panel-box insurance-box">
+                        <div class="panel-box-header">
+                            <i class="fa-solid fa-shield-halved icon-blue"></i>
+                            <div>
+                                <h4>Bảo hiểm thuê xe</h4>
+                                <p>Chuyến đi có mua bảo hiểm. Khách thuê bồi thường tối đa 2.000.000 VNĐ trong trường hợp có sự cố ngoài ý muốn.</p>
+                                <a href="#" class="panel-link">Xem thêm &gt;</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Box Tiện ích bổ sung -->
+                    <div class="side-panel-box addon-box">
+                        <h4>Tiện ích bổ sung</h4>
+                        <label class="addon-checkbox-label">
+                            <input type="checkbox" id="passengerInsuranceCheck" checked>
+                            <div class="addon-info">
+                                <span><i class="fa-solid fa-user-shield"></i> Bảo hiểm người trên xe <i class="fa-regular fa-circle-question"></i></span>
+                                <small>Hành khách &amp; tài xế được bảo hiểm cho sự cố ngoài ý muốn với giá trị tối đa 100 triệu/người.</small>
+                                <strong class="addon-price">30.000đ /ngày</strong>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Box Đặt xe & Tính tiền chính -->
+                    <div class="booking-widget-card">
+                        <div class="widget-price-head">
+                            <span class="widget-price-big" id="widgetPriceBig">524K</span>
+                            <span class="widget-price-period">/ngày</span>
+                        </div>
+
+                        <!-- Khung thời gian -->
+                        <div class="time-select-card">
+                            <div class="time-col">
+                                <span class="time-label">NHẬN XE</span>
+                                <strong class="time-val" id="widgetPickupTime">21:00, 15/10/2026</strong>
+                            </div>
+                            <div class="time-col">
+                                <span class="time-label">TRẢ XE</span>
+                                <strong class="time-val" id="widgetReturnTime">21:00, 16/10/2026</strong>
+                            </div>
+                        </div>
+                        <p class="hourly-support-text"><i class="fa-solid fa-bolt"></i> Chủ xe hỗ trợ thuê xe theo giờ. <a href="#">Tìm hiểu thêm</a></p>
+
+                        <!-- Địa điểm giao nhận xe -->
+                        <div class="delivery-options-group">
+                            <label class="delivery-radio-label">
+                                <input type="radio" name="deliveryOption" value="pickup" checked>
+                                <div class="delivery-radio-content">
+                                    <div class="delivery-row">
+                                        <span>Tự đến lấy xe</span>
+                                        <strong class="text-free">Miễn phí</strong>
+                                    </div>
+                                    <small id="widgetCarLocShort">Phường Hòa Thuận Tây, Quận Hải Châu</small>
+                                </div>
+                            </label>
+
+                            <label class="delivery-radio-label">
+                                <input type="radio" name="deliveryOption" value="delivery">
+                                <div class="delivery-radio-content">
+                                    <div class="delivery-row">
+                                        <span>Nhận &amp; trả xe tận nơi</span>
+                                        <strong class="delivery-fee-val">15.000đ</strong>
+                                    </div>
+                                    <small id="widgetDeliveryAddr">Đà Nẵng • 1km &gt;</small>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Bảng chi tiết giá -->
+                        <div class="pricing-breakdown">
+                            <div class="price-row">
+                                <span>Đơn giá thuê <i class="fa-regular fa-circle-question"></i></span>
+                                <strong id="calcBasePrice">524.000đ /ngày</strong>
+                            </div>
+                            <div class="price-row">
+                                <span>Bảo hiểm thuê xe <i class="fa-regular fa-circle-question"></i></span>
+                                <strong id="calcInsurancePrice">66.501đ /ngày</strong>
+                            </div>
+                            <div class="price-row" id="rowPassengerInsurance">
+                                <span>Bảo hiểm người trên xe</span>
+                                <strong>30.000đ /ngày</strong>
+                            </div>
+                            <div class="price-row">
+                                <span>Phí giao nhận xe <i class="fa-regular fa-circle-question"></i></span>
+                                <strong id="calcDeliveryFee">Miễn phí</strong>
+                            </div>
+                            <div class="price-divider"></div>
+                            <div class="price-total-row">
+                                <span>Thành tiền</span>
+                                <strong class="total-number" id="calcTotalPrice">620.501đ</strong>
+                            </div>
+                        </div>
+
+                        <!-- Nút Chọn thuê -->
+                        <button type="button" class="btn-rent-now" id="btnRentCarSubmit">CHỌN THUÊ</button>
+                    </div>
+
+                    <!-- Box Phụ phí có thể phát sinh -->
+                    <div class="side-panel-box extra-fees-box">
+                        <h4>Phụ phí có thể phát sinh</h4>
+                        <div class="extra-fee-item">
+                            <div class="fee-name">Phí vượt giới hạn <i class="fa-regular fa-circle-question"></i></div>
+                            <div class="fee-desc">Phụ phí phát sinh nếu lộ trình di chuyển vượt quá 300km/ngày.</div>
+                            <strong class="fee-cost">3.000đ/km</strong>
+                        </div>
+                        <div class="extra-fee-item">
+                            <div class="fee-name">Phí quá giờ <i class="fa-regular fa-circle-question"></i></div>
+                            <div class="fee-desc">Phụ phí phát sinh khi hoàn trả xe trễ giờ. Thuê thêm 1 ngày nếu trễ quá 5 giờ.</div>
+                            <strong class="fee-cost">70.000đ/giờ</strong>
+                        </div>
+                        <div class="extra-fee-item">
+                            <div class="fee-name">Phí vệ sinh <i class="fa-regular fa-circle-question"></i></div>
+                            <div class="fee-desc">Phụ phí phát sinh khi xe không được vệ sinh sạch sẽ khi hoàn trả.</div>
+                            <strong class="fee-cost">80.000đ</strong>
+                        </div>
+                        <div class="extra-fee-item">
+                            <div class="fee-name">Phí khử mùi <i class="fa-regular fa-circle-question"></i></div>
+                            <div class="fee-desc">Phụ phí phát sinh khi xe có mùi khó chịu do hút thuốc, thực phẩm nặng mùi.</div>
+                            <strong class="fee-cost">500.000đ</strong>
+                        </div>
+                        <div class="extra-fee-item">
+                            <div class="fee-name">Phí sạc pin / xăng</div>
+                            <div class="fee-desc">Khách thuê vui lòng hoàn trả xe với mức pin/xăng tương đương khi nhận xe.</div>
+                            <strong class="fee-cost">Đơn giá sạc + 20.000đ/lần</strong>
+                        </div>
+
+                        <div class="report-car-row">
+                            <a href="#" class="report-link"><i class="fa-regular fa-flag"></i> Báo cáo xe này</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Điền Thông Tin Đặt Xe (Booking Checkout Form) -->
+    <div class="booking-overlay" id="bookingModal" hidden>
+        <div class="booking-dialog" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle">
+            <button class="booking-close" id="closeBookingModal" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="booking-header">
+                <span class="booking-tag"><i class="fa-solid fa-file-signature"></i> THỦ TỤC THUÊ XE</span>
+                <h3 id="bookingModalTitle">Xác nhận thông tin đặt xe</h3>
+                <p>Vui lòng điền thông tin liên hệ và hình thức nhận xe để chủ xe chuẩn bị bàn giao.</p>
+            </div>
+
+            <form id="bookingCheckoutForm" class="booking-form-grid">
+                <!-- Cột trái: Nhập thông tin -->
+                <div class="booking-fields-col">
+                    <!-- Phần 1: Thông tin người thuê -->
+                    <div class="booking-section-card">
+                        <h4 class="section-card-title"><i class="fa-solid fa-user-check"></i> Thông tin khách thuê</h4>
+                        <div class="form-row-2">
+                            <div class="booking-group">
+                                <label for="bookRenterName">Họ và tên khách thuê <span class="req">*</span></label>
+                                <input id="bookRenterName" type="text" placeholder="Nguyễn Văn A" required>
+                            </div>
+                            <div class="booking-group">
+                                <label for="bookRenterPhone">Số điện thoại liên hệ <span class="req">*</span></label>
+                                <input id="bookRenterPhone" type="tel" placeholder="0905 123 456" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row-2">
+                            <div class="booking-group">
+                                <label for="bookRenterEmail">Email nhận vé &amp; hợp đồng <span class="req">*</span></label>
+                                <input id="bookRenterEmail" type="email" placeholder="example@email.com" required>
+                            </div>
+                            <div class="booking-group">
+                                <label for="bookRenterId">Số CCCD / Hộ chiếu <span class="req">*</span></label>
+                                <input id="bookRenterId" type="text" placeholder="048202001234" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phần 2: Hình thức nhận xe -->
+                    <div class="booking-section-card">
+                        <h4 class="section-card-title"><i class="fa-solid fa-location-dot"></i> Hình thức &amp; Địa điểm nhận xe</h4>
+                        <div class="delivery-options">
+                            <label class="delivery-radio-label active" id="labelPickHost">
+                                <input type="radio" name="deliveryMethod" value="host" checked>
+                                <div class="radio-content">
+                                    <div class="radio-title"><i class="fa-solid fa-store"></i> Nhận xe tại vị trí của chủ xe</div>
+                                    <div class="radio-desc" id="bookHostLocation">Phường Hải Châu, TP. Đà Nẵng (Miễn phí)</div>
+                                </div>
+                            </label>
+                            <label class="delivery-radio-label" id="labelPickDelivery">
+                                <input type="radio" name="deliveryMethod" value="delivery">
+                                <div class="radio-content">
+                                    <div class="radio-title"><i class="fa-solid fa-truck-ramp-box"></i> Giao xe tận nơi</div>
+                                    <div class="radio-desc">Giao tại sân bay, khách sạn hoặc địa chỉ riêng</div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="booking-group delivery-address-wrap" id="deliveryAddressGroup" hidden>
+                            <label for="bookDeliveryAddress">Địa chỉ bạn muốn nhận xe <span class="req">*</span></label>
+                            <input id="bookDeliveryAddress" type="text" placeholder="Ví dụ: Sân bay Đà Nẵng, Khách sạn Novotel...">
+                        </div>
+
+                        <div class="booking-group">
+                            <label for="bookRenterNotes">Ghi chú cho chủ xe (Tùy chọn)</label>
+                            <textarea id="bookRenterNotes" rows="2" placeholder="Ví dụ: Hạ cánh lúc 9h30, cần hỗ trợ thêm ghế trẻ em..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Phần 3: Phương thức thanh toán -->
+                    <div class="booking-section-card">
+                        <h4 class="section-card-title"><i class="fa-solid fa-credit-card"></i> Phương thức thanh toán</h4>
+                        <div class="payment-methods-grid">
+                            <label class="payment-radio-label active">
+                                <input type="radio" name="paymentMethod" value="qr" checked>
+                                <span><i class="fa-solid fa-qrcode"></i> Chuyển khoản QR / VNPAY</span>
+                            </label>
+                            <label class="payment-radio-label">
+                                <input type="radio" name="paymentMethod" value="card">
+                                <span><i class="fa-solid fa-credit-card"></i> Thẻ Visa / Mastercard</span>
+                            </label>
+                            <label class="payment-radio-label">
+                                <input type="radio" name="paymentMethod" value="cash">
+                                <span><i class="fa-solid fa-hand-holding-dollar"></i> Thanh toán khi nhận bàn giao xe</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Tóm tắt đơn đặt xe -->
+                <div class="booking-summary-col">
+                    <div class="booking-car-summary-box">
+                        <div class="summary-car-card">
+                            <img id="bookCarThumb" src="" alt="Xe đã chọn">
+                            <div class="summary-car-info">
+                                <span class="car-badge-pill">ĐẶT NHANH</span>
+                                <h4 id="bookCarTitle">Tên xe</h4>
+                                <p id="bookCarLocation"><i class="fa-solid fa-location-dot"></i> Địa chỉ xe</p>
+                            </div>
+                        </div>
+
+                        <div class="summary-divider"></div>
+
+                        <div class="summary-time-block">
+                            <div class="time-col">
+                                <span class="time-lbl">NHẬN XE</span>
+                                <strong id="bookPickupTime">09:00, 15/10/2026</strong>
+                            </div>
+                            <div class="time-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                            <div class="time-col">
+                                <span class="time-lbl">TRẢ XE</span>
+                                <strong id="bookReturnTime">18:00, 18/10/2026</strong>
+                            </div>
+                        </div>
+
+                        <div class="summary-divider"></div>
+
+                        <div class="summary-price-table">
+                            <div class="sum-row">
+                                <span>Đơn giá thuê</span>
+                                <strong id="bookBasePrice">0đ</strong>
+                            </div>
+                            <div class="sum-row">
+                                <span>Bảo hiểm thuê xe</span>
+                                <strong id="bookInsurancePrice">0đ</strong>
+                            </div>
+                            <div class="sum-row">
+                                <span>Bảo hiểm người trên xe</span>
+                                <strong id="bookPassengerInsurance">30.000đ/ngày</strong>
+                            </div>
+                            <div class="sum-row">
+                                <span>Phí giao nhận</span>
+                                <strong id="bookDeliveryFee">Miễn phí</strong>
+                            </div>
+                            <div class="summary-divider"></div>
+                            <div class="sum-total-row">
+                                <span>Thành tiền</span>
+                                <strong class="total-number" id="bookTotalPrice">0đ</strong>
+                            </div>
+                        </div>
+
+                        <div class="summary-shield-note">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <div>
+                                <strong>Bảo hiểm tự nguyện MIC</strong>
+                                <p>Bảo vệ toàn diện trước sự cố trong suốt hành trình.</p>
+                            </div>
+                        </div>
+
+                        <div class="booking-actions-wrap">
+                            <button type="submit" class="btn-confirm-booking" id="btnConfirmBooking">
+                                <i class="fa-solid fa-circle-check"></i> Xác nhận đặt xe
+                            </button>
+                            <button type="button" class="btn-back-to-car" id="btnBackToCar">
+                                <i class="fa-solid fa-arrow-left"></i> Quay lại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+@section Scripts {
+    <script src="~/js/find.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,160 @@
+@{
+    ViewData["Title"] = "Giới thiệu về AZU Car";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/about.css" asp-append-version="true">
+}
+
+<main class="about-page-bg">
+    <div class="about-container">
+        
+        <!-- Nút quay lại trang chủ -->
+        <div class="about-top-bar">
+            <a href="/" class="btn-back-home">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Trang chủ</span>
+            </a>
+        </div>
+
+        <!-- Thẻ bài viết chính -->
+        <article class="about-card">
+            
+            <header class="about-header">
+                <h1>Giới thiệu về AZU Car</h1>
+                <p>Nền tảng kết nối chia sẻ và cho thuê ô tô tự lái</p>
+            </header>
+
+            <!-- Thanh nhảy nhanh 3 mục -->
+            <nav class="about-quick-tabs" aria-label="Mục lục trang">
+                <a href="#about-us" class="about-tab-link">
+                    <i class="fa-regular fa-building"></i>
+                    <span>Về chúng tôi</span>
+                </a>
+                <a href="#features" class="about-tab-link">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Tính năng</span>
+                </a>
+                <a href="#privacy" class="about-tab-link">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Chính sách bảo mật</span>
+                </a>
+            </nav>
+
+            <!-- 1. Về chúng tôi -->
+            <section class="about-block" id="about-us">
+                <h2 class="about-block-title">
+                    <i class="fa-regular fa-circle-question"></i>
+                    <span>1. Về chúng tôi</span>
+                </h2>
+                <p class="about-text">
+                    <strong>AZU Car</strong> là nền tảng kết nối trực tiếp giữa chủ xe cá nhân có xe nhàn rỗi và những khách hàng đang có nhu cầu thuê xe tự lái để phục vụ cho các chuyến du lịch, công tác hoặc về quê thăm gia đình.
+                </p>
+                <p class="about-text">
+                    Mục tiêu của AZU Car là đơn giản hóa toàn bộ quy trình thuê xe truyền thống: không còn thủ tục rườm rà, giá cả được niêm yết công khai theo ngày và khách hàng có thể chủ động chọn đúng chiếc xe mình ưng ý nhất qua hình ảnh và thông số thực tế.
+                </p>
+                <p class="about-text">
+                    Chúng tôi cam kết mang lại sự minh bạch, an toàn và mức giá hợp lý cho mọi chuyến hành trình của bạn.
+                </p>
+            </section>
+
+            <!-- 2. Tính năng -->
+            <section class="about-block" id="features">
+                <h2 class="about-block-title">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>2. Tính năng chính trên hệ thống</span>
+                </h2>
+                <p class="about-text">
+                    Hệ thống AZU Car được thiết kế trực quan, dễ sử dụng với các tiện ích thiết thực:
+                </p>
+
+                <ul class="about-feature-list">
+                    <li class="about-feature-item">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <div class="about-feature-content">
+                            <h4>Tìm kiếm và lọc xe theo nhu cầu</h4>
+                            <p>Dễ dàng lọc xe theo quận huyện tại Đà Nẵng (Hải Châu, Liên Chiểu, Thanh Khê...), số chỗ (4 - 5 chỗ, 7 chỗ), hãng xe (Toyota, Hyundai, VinFast, Mazda...) và tầm giá phù hợp.</p>
+                        </div>
+                    </li>
+
+                    <li class="about-feature-item">
+                        <i class="fa-solid fa-bolt"></i>
+                        <div class="about-feature-content">
+                            <h4>Đặt xe nhanh chóng</h4>
+                            <p>Các dòng xe có nhãn "Đặt nhanh" cho phép bạn xác nhận lịch trình ngay tức thì mà không cần mất thời gian chờ chủ xe xét duyệt thủ công.</p>
+                        </div>
+                    </li>
+
+                    <li class="about-feature-item">
+                        <i class="fa-regular fa-image"></i>
+                        <div class="about-feature-content">
+                            <h4>Xem xe chi tiết &amp; Đánh giá thực tế</h4>
+                            <p>Mỗi mẫu xe đều hiển thị ảnh chụp thực tế các góc, thông tin năm sản xuất, số chuyến đã hoàn thành và nhận xét chân thật từ những người thuê trước.</p>
+                        </div>
+                    </li>
+
+                    <li class="about-feature-item">
+                        <i class="fa-solid fa-file-contract"></i>
+                        <div class="about-feature-content">
+                            <h4>Hợp đồng điện tử &amp; Biên bản bàn giao</h4>
+                            <p>Quy trình giao nhận xe được ghi nhận rõ ràng (số km ODO, tình trạng thân vỏ và mức nhiên liệu) để đảm bảo quyền lợi minh bạch cho cả khách thuê và chủ xe.</p>
+                        </div>
+                    </li>
+
+                    <li class="about-feature-item">
+                        <i class="fa-solid fa-headset"></i>
+                        <div class="about-feature-content">
+                            <h4>Hỗ trợ xuyên suốt 24/7</h4>
+                            <p>Đường dây nóng 1900 9217 và Trợ lý ảo giải đáp thắc mắc luôn sẵn sàng hỗ trợ bạn khi phát sinh câu hỏi hoặc sự cố kỹ thuật trên đường.</p>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- 3. Chính sách bảo mật -->
+            <section class="about-block" id="privacy">
+                <h2 class="about-block-title">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>3. Chính sách bảo mật &amp; An toàn</span>
+                </h2>
+                <p class="about-text">
+                    Chúng tôi hiểu rằng sự an tâm và riêng tư là yếu tố quan trọng hàng đầu khi tham gia thuê xe tự lái:
+                </p>
+                <p class="about-text">
+                    • <strong>Bảo mật thông tin cá nhân:</strong> Thông tin CCCD, giấy phép lái xe (GPLX) và số điện thoại của bạn chỉ được dùng cho mục đích xác minh người lái hợp pháp và làm thủ tục nhận xe. Chúng tôi tuyệt đối không chia sẻ thông tin cho bên thứ ba vì mục đích thương mại.
+                </p>
+                <p class="about-text">
+                    • <strong>Bảo vệ chuyến đi:</strong> Toàn bộ quy trình hoàn cọc sau chuyến đi đều được thực hiện minh bạch, xe được kiểm tra tình trạng kỹ thuật trước khi bàn giao.
+                </p>
+
+                <div class="about-policy-box">
+                    <p>Bạn có thể tham khảo toàn văn các quy định và điều khoản bảo mật chi tiết tại đây:</p>
+                    <div class="about-policy-links">
+                        <a href="/my-trips#privacy" class="btn-simple-policy">
+                            <i class="fa-regular fa-file-lines"></i>
+                            <span>Chính sách bảo vệ chuyến đi (Khách thuê)</span>
+                        </a>
+                        <a href="/become-owner#bao-mat" class="btn-simple-policy">
+                            <i class="fa-regular fa-file-lines"></i>
+                            <span>Chính sách bảo vệ dữ liệu (Chủ xe)</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Nút điều hướng nhanh cuối trang -->
+            <div class="about-bottom-actions">
+                <a href="/become-owner" class="btn-secondary-action">
+                    <i class="fa-solid fa-key"></i>
+                    <span>Đăng ký cho thuê xe</span>
+                </a>
+                <a href="/find" class="btn-primary-action">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Tìm xe ngay</span>
+                </a>
+            </div>
+
+        </article>
+
+    </div>
+</main>
