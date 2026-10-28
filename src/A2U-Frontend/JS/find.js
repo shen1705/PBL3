@@ -859,8 +859,15 @@ carDetailModal?.addEventListener('click', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && carDetailModal && !carDetailModal.hidden) {
-        closeCarModal();
+    if (e.key === 'Escape') {
+        const reportModal = document.getElementById('reportCarModal');
+        if (reportModal && !reportModal.hidden) {
+            reportModal.hidden = true;
+            return;
+        }
+        if (carDetailModal && !carDetailModal.hidden) {
+            closeCarModal();
+        }
     }
 });
 
@@ -1047,4 +1054,93 @@ carsGrid?.addEventListener('click', event => {
     const car = carFromCard(card);
     window.AzuStore.setSelectedCar(car);
     openCarPopup(car);
+});
+
+
+// ========================================================
+// XỬ LÝ BÁO CÁO XE (REPORT CAR MODAL)
+// ========================================================
+const reportCarModal = document.getElementById('reportCarModal');
+const reportCarLink = document.getElementById('reportCarLink');
+const closeReportModalBtn = document.getElementById('closeReportModalBtn');
+const btnCancelReport = document.getElementById('btnCancelReport');
+const reportCarForm = document.getElementById('reportCarForm');
+const reportSuccessState = document.getElementById('reportSuccessState');
+const btnCloseReportSuccess = document.getElementById('btnCloseReportSuccess');
+
+function openReportCarModal() {
+    if (!reportCarModal) return;
+
+    const carName = currentPopupCar?.name || 'xe';
+    const carImage = currentPopupCar?.image || '';
+    const carLocation = currentPopupCar?.location || 'TP. Đà Nẵng';
+
+    const targetNameEl = document.getElementById('reportCarTargetName');
+    const previewTitleEl = document.getElementById('reportCarPreviewTitle');
+    const thumbEl = document.getElementById('reportCarThumb');
+    const locEl = document.getElementById('reportCarPreviewLoc');
+    const contactInput = document.getElementById('reportContactInput');
+
+    if (targetNameEl) targetNameEl.textContent = carName;
+    if (previewTitleEl) previewTitleEl.textContent = carName;
+    if (thumbEl) thumbEl.src = carImage;
+    if (locEl) locEl.innerHTML = '<i class="fa-solid fa-location-dot"></i> ' + carLocation;
+
+    // Pre-fill user contact if available
+    if (contactInput && !contactInput.value) {
+        const savedPhone = sessionStorage.getItem('azuCarPhone') || '';
+        const savedEmail = sessionStorage.getItem('azuCarEmail') || '';
+        contactInput.value = savedPhone || savedEmail || '';
+    }
+
+    // Reset form & state
+    if (reportCarForm) {
+        reportCarForm.reset();
+        reportCarForm.hidden = false;
+    }
+    if (reportSuccessState) {
+        reportSuccessState.hidden = true;
+    }
+
+    reportCarModal.hidden = false;
+}
+
+function closeReportCarModal() {
+    if (reportCarModal) {
+        reportCarModal.hidden = true;
+    }
+}
+
+// Open on clicking report link
+reportCarLink?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openReportCarModal();
+});
+
+// Close buttons
+closeReportModalBtn?.addEventListener('click', closeReportCarModal);
+btnCancelReport?.addEventListener('click', closeReportCarModal);
+btnCloseReportSuccess?.addEventListener('click', closeReportCarModal);
+
+// Close on backdrop click
+reportCarModal?.addEventListener('click', (e) => {
+    if (e.target === reportCarModal) {
+        closeReportCarModal();
+    }
+});
+
+// Submit form
+reportCarForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!reportCarForm.reportValidity()) return;
+
+    const ticketCode = '#BC-' + Math.floor(10000 + Math.random() * 90000);
+    const ticketCodeEl = document.getElementById('reportTicketCode');
+    const successCarNameEl = document.getElementById('successCarName');
+    if (ticketCodeEl) ticketCodeEl.textContent = ticketCode;
+    if (successCarNameEl) successCarNameEl.textContent = currentPopupCar?.name || 'xe';
+
+    // Show success view
+    reportCarForm.hidden = true;
+    if (reportSuccessState) reportSuccessState.hidden = false;
 });

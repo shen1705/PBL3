@@ -1283,7 +1283,7 @@
                         </div>
 
                         <div class="report-car-row">
-                            <a href="#" class="report-link"><i class="fa-regular fa-flag"></i> Báo cáo xe này</a>
+                            <a href="#" class="report-link" id="reportCarLink"><i class="fa-regular fa-flag"></i> Báo cáo xe này</a>
                         </div>
                     </div>
                 </div>
@@ -1445,6 +1445,82 @@
                     </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Báo cáo xe (Report Car Modal) -->
+    <div id="reportCarModal" class="report-modal-overlay" hidden>
+        <div class="report-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+            <button class="report-modal-close" id="closeReportModalBtn" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="report-modal-header">
+                <span class="report-modal-badge"><i class="fa-solid fa-flag"></i> BÁO CÁO VI PHẠM</span>
+                <h3 id="reportModalTitle">Báo cáo xe <span id="reportCarTargetName">...</span></h3>
+                <p>Thông tin báo cáo của bạn sẽ được bảo mật và giúp cộng đồng AZU Car an toàn, minh bạch hơn.</p>
+            </div>
+
+            <!-- Mini Car Summary -->
+            <div class="report-car-preview">
+                <img id="reportCarThumb" src="" alt="Hình ảnh xe" class="report-car-thumb">
+                <div class="report-car-meta">
+                    <h4 id="reportCarPreviewTitle">VinFast VF8 Plus</h4>
+                    <div class="report-car-location" id="reportCarPreviewLoc"><i class="fa-solid fa-location-dot"></i> TP. Đà Nẵng</div>
+                </div>
+            </div>
+
+            <form id="reportCarForm" class="report-car-form">
+                <div class="report-form-group">
+                    <label class="report-label" for="reportReasonSelect">Lý do báo cáo vi phạm <span class="req">*</span></label>
+                    <select id="reportReasonSelect" class="report-select" required>
+                        <option value="" disabled selected>-- Chọn lý do phản ánh --</option>
+                        <option value="false_info">Thông tin xe hoặc hình ảnh không đúng thực tế</option>
+                        <option value="extra_fee">Yêu cầu thu thêm tiền ngoài ứng dụng / giá không đúng</option>
+                        <option value="scam">Có dấu hiệu lừa đảo / yêu cầu chuyển cọc ngoài hệ thống</option>
+                        <option value="unsafe">Xe không đảm bảo an toàn kỹ thuật / hỏng hóc nghiêm trọng</option>
+                        <option value="unresponsive">Chủ xe không phản hồi / từ chối giao dịch bất thường</option>
+                        <option value="unpolite">Thái độ phục vụ của chủ xe không chuẩn mực</option>
+                        <option value="other">Lý do khác</option>
+                    </select>
+                </div>
+
+                <div class="report-form-group">
+                    <label class="report-label" for="reportCarDesc">Mô tả chi tiết nội dung vi phạm <span class="req">*</span></label>
+                    <textarea id="reportCarDesc" class="report-textarea" rows="3" placeholder="Vui lòng cung cấp thêm thông tin chi tiết (thời điểm, tin nhắn, hành vi hoặc vấn đề phát sinh)..." required></textarea>
+                </div>
+
+                <div class="report-form-group">
+                    <label class="report-label" for="reportContactInput">Thông tin liên hệ nhận kết quả (Tùy chọn)</label>
+                    <input type="text" id="reportContactInput" class="report-input" placeholder="Số điện thoại hoặc Email để nhận kết quả xử lý">
+                    <span class="report-input-hint">Ban quản trị AZU Car sẽ gửi thông báo xử lý cho bạn trong vòng 24 giờ.</span>
+                </div>
+
+                <div class="report-checkbox-wrap">
+                    <label class="report-checkbox-label">
+                        <input type="checkbox" id="reportCarCommit" required>
+                        <span>Tôi cam kết các thông tin phản ánh trên là đúng sự thật và chịu trách nhiệm về nội dung này.</span>
+                    </label>
+                </div>
+
+                <div class="report-modal-actions">
+                    <button type="button" class="btn-report-cancel" id="btnCancelReport">Hủy bỏ</button>
+                    <button type="submit" class="btn-report-submit" id="btnSubmitReport">
+                        <i class="fa-solid fa-paper-plane"></i> Gửi báo cáo
+                    </button>
+                </div>
+            </form>
+
+            <!-- Success State inside Modal (hidden initially) -->
+            <div id="reportSuccessState" class="report-success-state" hidden>
+                <div class="report-success-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <h3>Gửi báo cáo thành công!</h3>
+                <p>Cảm ơn bạn đã đóng góp phản ánh. Hệ thống kiểm duyệt AZU Car đã tiếp nhận hồ sơ vi phạm của xe <strong id="successCarName">VinFast VF8 Plus</strong>.</p>
+                <div class="report-success-ticket">
+                    <span>Mã tiếp nhận:</span>
+                    <strong id="reportTicketCode">#BC-84920</strong>
+                </div>
+                <p class="report-success-note">Đội ngũ an toàn thông tin sẽ thẩm định và phản hồi trong vòng 24 giờ.</p>
+                <button type="button" class="btn-report-done" id="btnCloseReportSuccess">Hoàn tất & Đóng</button>
+            </div>
         </div>
     </div>
 
