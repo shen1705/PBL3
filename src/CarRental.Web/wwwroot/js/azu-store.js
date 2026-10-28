@@ -168,6 +168,18 @@
         window.location.assign('/');
     }
 
+    async function changePassword(currentPassword, newPassword, confirmPassword) {
+        const res = await fetch('/api/auth/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+        });
+        return await res.json();
+    }
+
     if (typeof document !== 'undefined') {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
@@ -211,6 +223,7 @@
         login,
         register,
         logout,
+        changePassword,
         getTrips() {
             return readJson(KEYS.trips, []);
         },

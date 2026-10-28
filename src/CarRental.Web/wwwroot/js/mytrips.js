@@ -289,8 +289,14 @@ document.querySelectorAll('.btn-toggle-eye').forEach(btn => {
 });
 
 // Handle Password Form Submission
-passwordPageForm?.addEventListener('submit', (e) => {
+passwordPageForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (passwordMsgAlert) {
+        passwordMsgAlert.hidden = true;
+        passwordMsgAlert.className = 'password-msg-alert';
+        passwordMsgAlert.textContent = '';
+    }
+
     const currentPass = passwordPageForm.elements.currentPassword.value;
     const newPass = passwordPageForm.elements.newPassword.value;
     const confirm = passwordPageForm.elements.confirmPassword.value;
@@ -328,18 +334,52 @@ passwordPageForm?.addEventListener('submit', (e) => {
         return;
     }
 
-    passwordPageForm.reset();
-    passwordPageForm.querySelectorAll('input').forEach(inp => inp.type = 'password');
-    passwordPageForm.querySelectorAll('.btn-toggle-eye i').forEach(icon => {
-        icon.className = 'fa-regular fa-eye';
-    });
+    const submitBtn = passwordPageForm.querySelector('#btn-save-password');
+    const origText = submitBtn ? submitBtn.textContent : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang cập nhật...';
+    }
 
-    if (passwordMsgAlert) {
-        passwordMsgAlert.className = 'password-msg-alert success';
-        passwordMsgAlert.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đổi mật khẩu thành công! Thông tin đăng nhập đã được cập nhật an toàn.';
-        passwordMsgAlert.hidden = false;
-    } else {
-        alert('Đổi mật khẩu thành công!');
+    try {
+        const res = await window.AzuStore.changePassword(currentPass, newPass, confirm);
+        if (res && res.isSuccess) {
+            passwordPageForm.reset();
+            passwordPageForm.querySelectorAll('input').forEach(inp => inp.type = 'password');
+            passwordPageForm.querySelectorAll('.btn-toggle-eye i').forEach(icon => {
+                icon.className = 'fa-regular fa-eye';
+            });
+
+            if (passwordMsgAlert) {
+                passwordMsgAlert.className = 'password-msg-alert success';
+                passwordMsgAlert.innerHTML = '<i class="fa-solid fa-circle-check"></i> ' + (res.message || 'Đổi mật khẩu thành công! Thông tin đăng nhập đã được cập nhật an toàn.');
+                passwordMsgAlert.hidden = false;
+            } else {
+                alert('Đổi mật khẩu thành công!');
+            }
+        } else {
+            const errorMsg = res?.message || 'Không thể đổi mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.';
+            if (passwordMsgAlert) {
+                passwordMsgAlert.className = 'password-msg-alert error';
+                passwordMsgAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + errorMsg;
+                passwordMsgAlert.hidden = false;
+            } else {
+                alert(errorMsg);
+            }
+        }
+    } catch (err) {
+        if (passwordMsgAlert) {
+            passwordMsgAlert.className = 'password-msg-alert error';
+            passwordMsgAlert.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Lỗi kết nối máy chủ. Vui lòng thử lại sau.';
+            passwordMsgAlert.hidden = false;
+        } else {
+            alert('Lỗi kết nối máy chủ.');
+        }
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = origText;
+        }
     }
 });
 
