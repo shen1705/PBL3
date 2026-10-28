@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trợ lý ảo AZU Car - Chatbot 24/7</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="CSS/index.css">
+    <link rel="stylesheet" href="CSS/support.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo" aria-label="AZU Car - Trang chủ">
+                <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+            </a>
+            
+            <nav class="nav-links" aria-label="Điều hướng chính">
+                <a href="about.html" id="about-nav-link">Về AZU Car</a>
+                <a href="become-owner.html">Trở thành chủ xe</a>
+                <a href="my-trips.html" id="trips-nav-link">Chuyến của tôi</a>
+                <a href="support.html" id="support-nav-link" class="active">Trợ giúp</a>
+            </nav>
+
+            <div class="nav-actions">
+                <div id="guest-actions">
+                    <button type="button" class="btn-register-outline">Đăng ký</button>
+                    <button type="button" class="btn-slate">Đăng nhập</button>
+                </div>
+                <a id="account-display" class="account-display" href="my-trips.html#account" aria-label="Thông tin tài khoản" hidden>
+                    <span class="account-avatar" id="account-avatar"></span>
+                    <span id="account-name"></span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="support-shell">
+        <div class="container support-container">
+            <!-- Page Heading with Back Arrow -->
+            <div class="support-page-heading">
+                <a href="support.html" class="btn-back" aria-label="Quay lại mục Trò chuyện" title="Quay lại">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <h1 class="page-title">Trợ lý ảo AZU Car</h1>
+            </div>
+
+            <!-- Chatbot Card -->
+            <div class="support-main-card chatbot-page-card">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="bot-info">
+                        <div class="bot-avatar">
+                            <i class="fa-solid fa-robot"></i>
+                            <span class="status-dot online" title="Trực tuyến 24/7"></span>
+                        </div>
+                        <div class="bot-text">
+                            <h2 class="bot-name">AZU Assistant <span class="ai-badge">AI 24/7</span></h2>
+                            <p class="bot-status"><i class="fa-solid fa-circle"></i> Trực tuyến 24/7 • Sẵn sàng giải đáp</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-reset-chat" id="btnResetChat" title="Làm mới cuộc trò chuyện" aria-label="Làm mới cuộc trò chuyện">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Làm mới</span>
+                    </button>
+                </div>
+
+                <!-- Chat Messages Stream -->
+                <div class="chat-messages-stream" id="chatMessagesStream" aria-live="polite">
+                    <!-- Bot Greeting Message -->
+                    <div class="message-row bot-row">
+                        <div class="msg-avatar bot-avatar-mini">
+                            <i class="fa-solid fa-robot"></i>
+                        </div>
+                        <div class="msg-bubble bot-bubble">
+                            <p><strong>Xin chào! Tôi là Trợ lý ảo AZU Car 🚗</strong></p>
+                            <p>Tôi có thể giúp bạn giải đáp ngay mọi thông tin về:</p>
+                            <ul>
+                                <li>Thủ tục & giấy tờ nhận xe tự lái (GPLX, CCCD/VNeID)</li>
+                                <li>Tiền cọc thế chấp & các phương thức thanh toán</li>
+                                <li>Chính sách bảo hiểm vật chất & quy trình xử lý va chạm</li>
+                                <li>Chính sách hủy chuyến & đăng ký xe cho thuê</li>
+                            </ul>
+                            <p>Hãy chọn nhanh câu hỏi gợi ý bên dưới hoặc gửi thắc mắc của bạn nhé!</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Prompt Suggestion Chips -->
+                    <div class="chat-prompt-chips" id="chatPromptChips">
+                        <button type="button" class="prompt-chip" data-prompt="Thủ tục thuê xe cần những giấy tờ gì?">
+                            <i class="fa-solid fa-id-card"></i> Thủ tục thuê xe gồm những gì?
+                        </button>
+                        <button type="button" class="prompt-chip" data-prompt="Thuê xe có cần đặt cọc tiền mặt hoặc xe máy không?">
+                            <i class="fa-solid fa-money-bill-wave"></i> Có cần đặt cọc tiền mặt không?
+                        </button>
+                        <button type="button" class="prompt-chip" data-prompt="Chính sách hủy chuyến và hoàn tiền cọc ra sao?">
+                            <i class="fa-solid fa-calendar-xmark"></i> Chính sách hủy chuyến & hoàn cọc?
+                        </button>
+                        <button type="button" class="prompt-chip" data-prompt="Nếu xảy ra va chạm hoặc tai nạn thì xử lý thế nào?">
+                            <i class="fa-solid fa-shield-halved"></i> Xử lý khi có va chạm/sự cố?
+                        </button>
+                        <button type="button" class="prompt-chip" data-prompt="Làm thế nào để đăng ký xe của tôi cho thuê trên AZU Car?">
+                            <i class="fa-solid fa-key"></i> Đăng ký xe cho thuê như thế nào?
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Typing Indicator -->
+                <div class="typing-indicator" id="typingIndicator" hidden>
+                    <div class="msg-avatar bot-avatar-mini">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span class="typing-label">AZU Assistant đang soạn câu trả lời...</span>
+                </div>
+
+                <!-- Chat Input Bar -->
+                <form class="chat-input-area" id="chatForm" autocomplete="off">
+                    <div class="input-box-wrapper">
+                        <input type="text" id="chatInputText" placeholder="Nhập câu hỏi của bạn (ví dụ: Giấy tờ thuê xe gồm những gì?)..." required>
+                        <button type="submit" class="btn-send-msg" id="btnSendMsg" aria-label="Gửi tin nhắn">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Hotline Support Footer Note -->
+            <div class="support-footer-note">
+                <i class="fa-solid fa-phone"></i>
+                <span>Cần hỗ trợ khẩn cấp trên đường? Hotline 24/7: <a href="tel:19009217"><strong>1900 9217</strong></a> • Email: <a href="mailto:support@azucar.vn">support@azucar.vn</a></span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <a href="index.html" class="logo footer-logo">
+                    <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+                </a>
+                <p class="footer-desc">Nền tảng chia sẻ và cho thuê ô tô tự lái hàng đầu Việt Nam. Mang lại những chuyến đi tự do và hạnh phúc cho triệu hành trình.</p>
+            </div>
+            <div class="footer-col">
+                <h4>VỀ AZU CAR</h4>
+                <ul>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="about.html#features">Tính năng</a></li>
+                    <li><a href="find.html">Tìm kiếm xe</a></li>
+                    <li><a href="become-owner.html">Trở thành chủ xe</a></li>
+                    <li><a href="my-trips.html#privacy">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>DỊCH VỤ</h4>
+                <ul>
+                    <li><a href="find.html">Thuê xe tự lái</a></li>
+                    <li><a href="find.html">Giao xe tận nơi</a></li>
+                    <li><a href="find.html">Thuê xe du lịch</a></li>
+                    <li><a href="become-owner.html">Hợp tác chủ xe</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>HỖ TRỢ & LIÊN HỆ</h4>
+                <p><strong>Hotline:</strong> 1900 9217 (24/7)</p>
+                <p><strong>Email:</strong> support@azucar.vn</p>
+                <p><strong>Văn phòng:</strong> Phường Hải Châu, TP. Đà Nẵng</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-flex">
+                <p>© 2026 AZU Car Việt Nam. Bảo lưu mọi quyền lợi.</p>
+                <div class="footer-bottom-links">
+                    <a href="my-trips.html#privacy">Chính sách bảo vệ dữ liệu</a>
+                    <a href="support.html">Trò chuyện</a>
+                    <a href="my-trips.html#account">Tài khoản</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="JS/azu-store.js"></script>
+    <script src="JS/chatbot.js"></script>
+</body>
+</html>
