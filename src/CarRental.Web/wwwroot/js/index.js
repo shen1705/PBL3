@@ -157,13 +157,56 @@ document.addEventListener('DOMContentLoaded', function() {
         history.replaceState(null, '', window.location.pathname + window.location.search);
     }
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            const identityInput = loginForm.elements.namedItem('identity');
-            const identity = identityInput instanceof HTMLInputElement ? identityInput.value.trim() : '';
+    const loginErrorBanner = document.getElementById('login-error-banner');
+    const registerErrorBanner = document.getElementById('register-error-banner');
 
-            completeAuthentication(identity);
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            if (loginErrorBanner) {
+                loginErrorBanner.style.display = 'none';
+                loginErrorBanner.textContent = '';
+            }
+
+            const identityInput = loginForm.elements.namedItem('identity');
+            const passwordInput = loginForm.elements.namedItem('password');
+            const identity = identityInput instanceof HTMLInputElement ? identityInput.value.trim() : '';
+            const password = passwordInput instanceof HTMLInputElement ? passwordInput.value : '';
+
+            if (!identity || !password) return;
+
+            const submitBtn = loginForm.querySelector('.btn-submit-auth');
+            const origText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Đang đăng nhập...';
+            }
+
+            try {
+                const res = await window.AzuStore.login(identity, password, true);
+                if (res && res.isSuccess) {
+                    const displayName = res.data?.fullName || res.data?.userName || identity;
+                    completeAuthentication(displayName);
+                    loginForm.reset();
+                } else {
+                    if (loginErrorBanner) {
+                        loginErrorBanner.textContent = res?.message || 'Đăng nhập không thành công. Vui lòng thử lại.';
+                        loginErrorBanner.style.display = 'block';
+                    } else {
+                        alert(res?.message || 'Đăng nhập không thành công.');
+                    }
+                }
+            } catch (err) {
+                if (loginErrorBanner) {
+                    loginErrorBanner.textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại.';
+                    loginErrorBanner.style.display = 'block';
+                }
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = origText;
+                }
+            }
         });
     }
 
@@ -187,8 +230,13 @@ document.addEventListener('DOMContentLoaded', function() {
             passwordConfirmInput.addEventListener('input', validatePasswordMatch);
         }
 
-        registerForm.addEventListener('submit', function(event) {
+        registerForm.addEventListener('submit', async function(event) {
             event.preventDefault();
+            if (registerErrorBanner) {
+                registerErrorBanner.style.display = 'none';
+                registerErrorBanner.textContent = '';
+            }
+
             const nameInput = registerForm.elements.namedItem('name');
             const phoneInput = registerForm.elements.namedItem('phone');
             if (!(nameInput instanceof HTMLInputElement)
@@ -198,12 +246,46 @@ document.addEventListener('DOMContentLoaded', function() {
             validatePasswordMatch();
             if (!registerForm.reportValidity()) return;
 
-            if (phoneInput instanceof HTMLInputElement) {
-                sessionStorage.setItem('azuCarPhone', phoneInput.value.trim());
+            const submitBtn = registerForm.querySelector('.btn-submit-auth');
+            const origText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Đang xử lý đăng ký...';
             }
-            completeAuthentication(nameInput.value);
-            passwordConfirmInput.setCustomValidity('');
-            registerForm.reset();
+
+            try {
+                const res = await window.AzuStore.register({
+                    userName: nameInput.value.trim(),
+                    fullName: nameInput.value.trim(),
+                    phoneNumber: phoneInput instanceof HTMLInputElement ? phoneInput.value.trim() : '',
+                    password: passwordInput.value,
+                    confirmPassword: passwordConfirmInput.value
+                });
+
+                if (res && res.isSuccess) {
+                    const displayName = res.data?.fullName || res.data?.userName || nameInput.value.trim();
+                    completeAuthentication(displayName);
+                    passwordConfirmInput.setCustomValidity('');
+                    registerForm.reset();
+                } else {
+                    if (registerErrorBanner) {
+                        registerErrorBanner.textContent = res?.message || 'Đăng ký không thành công. Vui lòng kiểm tra lại.';
+                        registerErrorBanner.style.display = 'block';
+                    } else {
+                        alert(res?.message || 'Đăng ký không thành công.');
+                    }
+                }
+            } catch (err) {
+                if (registerErrorBanner) {
+                    registerErrorBanner.textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại sau.';
+                    registerErrorBanner.style.display = 'block';
+                }
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = origText;
+                }
+            }
         });
     }
 
@@ -634,13 +716,63 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmPasswordInput.addEventListener('input', validatePasswordsMatch);
         }
 
-        forgotFormStep2.addEventListener('submit', function(e) {
+        forgotFormStep2.addEventListener('submit', async function(e) {
             e.preventDefault();
             validatePasswordsMatch();
             if (!forgotFormStep2.reportValidity()) return;
 
-            if (forgotStep2) forgotStep2.hidden = true;
-            if (forgotStepSuccess) forgotStepSuccess.hidden = false;
+            const forgotErrorBanner2 = document.getElementById('forgot-error-banner-2');
+            if (forgotErrorBanner2) {
+                forgotErrorBanner2.style.display = 'none';
+                forgotErrorBanner2.textContent = '';
+            }
+
+            const identity = forgotIdentityInput ? forgotIdentityInput.value.trim() : '';
+            const otp = forgotOtpInput ? forgotOtpInput.value.trim() : '';
+            const newPassword = newPasswordInput ? newPasswordInput.value : '';
+            const confirmPassword = confirmPasswordInput ? confirmPasswordInput.value : '';
+
+            const submitBtn = forgotFormStep2.querySelector('.btn-submit-auth');
+            const origText = submitBtn ? submitBtn.textContent : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Đang xử lý...';
+            }
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        identifier: identity,
+                        otp: otp,
+                        newPassword: newPassword,
+                        confirmPassword: confirmPassword
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.isSuccess) {
+                    if (forgotStep2) forgotStep2.hidden = true;
+                    if (forgotStepSuccess) forgotStepSuccess.hidden = false;
+                } else {
+                    if (forgotErrorBanner2) {
+                        forgotErrorBanner2.textContent = data.message || 'Không thể đặt lại mật khẩu. Vui lòng thử lại.';
+                        forgotErrorBanner2.style.display = 'block';
+                    } else {
+                        alert(data.message || 'Không thể đặt lại mật khẩu.');
+                    }
+                }
+            } catch (err) {
+                if (forgotErrorBanner2) {
+                    forgotErrorBanner2.textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại.';
+                    forgotErrorBanner2.style.display = 'block';
+                }
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = origText;
+                }
+            }
         });
     }
 
