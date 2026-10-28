@@ -1,16 +1,12 @@
 using CarRental.Data;
-using Microsoft.EntityFrameworkCore;
+using CarRental.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 36))));
+builder.Services.AddData(builder.Configuration);
+builder.Services.AddServices();
 
 var app = builder.Build();
 
