@@ -17,18 +17,27 @@ if (profileName && profileAvatar && profileLink) {
     if (displayName) {
         profileName.textContent = displayName;
         profileAvatar.textContent = Array.from(displayName)[0].toLocaleUpperCase('vi');
-        profileLink.href = 'my-trips.html#account';
+        profileLink.href = '/account';
         profileLink.setAttribute('aria-label', `Tài khoản ${displayName}`);
     } else {
         profileName.textContent = 'Đăng nhập';
         profileAvatar.textContent = '?';
-        profileLink.href = 'index.html';
+        profileLink.href = '/';
         profileLink.addEventListener('click', (e) => {
             e.preventDefault();
             sessionStorage.removeItem('azuCarReturnTo');
             sessionStorage.setItem('azuCarPromptLogin', '1');
-            window.location.href = 'index.html';
+            window.location.href = '/';
         });
+    }
+}
+
+const tripSidebarName = document.getElementById('trip-sidebar-name');
+if (tripSidebarName) {
+    const userGreetingName = displayName || sessionStorage.getItem('azuCarAccountName');
+    if (userGreetingName) {
+        tripSidebarName.textContent = userGreetingName;
+        tripSidebarName.style.display = 'block';
     }
 }
 

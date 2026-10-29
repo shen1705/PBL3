@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    document.querySelectorAll('a[href="my-trips.html"]').forEach(link => {
+    document.querySelectorAll('a[href="my-trips.html"], a[href^="/account"], a[href^="/my-trips"]').forEach(link => {
         link.addEventListener('click', function(e) {
             if (!window.AzuStore.isLoggedIn()) {
                 e.preventDefault();

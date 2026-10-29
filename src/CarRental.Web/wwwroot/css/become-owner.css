@@ -147,6 +147,52 @@ a {
     background: #f1f5f9;
 }
 
+.account-sidebar-group {
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.account-sidebar-group .trips-sidebar {
+    flex: 0 0 240px;
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 12px;
+    border-right: 1px solid #edf0f3;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.account-sidebar-group .sidebar.become-owner-panel {
+    flex: 0 0 230px;
+    width: 230px;
+    min-width: 230px;
+    max-width: 230px;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 12px;
+    border-right: 1px solid #edf0f3;
+    background: #fbfcfd;
+    box-sizing: border-box;
+}
+
+@media (max-width: 992px) {
+    .account-sidebar-group {
+        flex-direction: column;
+    }
+    .account-sidebar-group .trips-sidebar,
+    .account-sidebar-group .sidebar.become-owner-panel {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 auto;
+        border-right: none;
+        border-bottom: 1px solid #edf0f3;
+    }
+}
+
 .workspace + .footer,
 .workspace ~ .footer,
 .footer {
