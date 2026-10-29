@@ -73,6 +73,7 @@ app.MapControllerRoute("about", "about", new { controller = "Home", action = "Ab
 app.MapControllerRoute("find", "find", new { controller = "Home", action = "Find" });
 app.MapControllerRoute("become-owner", "become-owner", new { controller = "Home", action = "BecomeOwner" });
 app.MapControllerRoute("carregistermode", "carregistermode", new { controller = "Home", action = "CarRegisterMode" });
+app.MapControllerRoute("account", "account", new { controller = "Home", action = "Account" });
 app.MapControllerRoute("my-trips", "my-trips", new { controller = "Home", action = "MyTrips" });
 app.MapControllerRoute("support", "support", new { controller = "Home", action = "Support" });
 app.MapControllerRoute("chatbot", "chatbot", new { controller = "Home", action = "Chatbot" });
@@ -83,7 +84,9 @@ app.MapGet("/about.html", () => Results.Redirect("/about", permanent: true));
 app.MapGet("/find.html", () => Results.Redirect("/find", permanent: true));
 app.MapGet("/become-owner.html", () => Results.Redirect("/become-owner", permanent: true));
 app.MapGet("/carregistermode.html", () => Results.Redirect("/carregistermode", permanent: true));
-app.MapGet("/my-trips.html", () => Results.Redirect("/my-trips", permanent: true));
+app.MapGet("/account.html", () => Results.Redirect("/account", permanent: true));
+app.MapGet("/my-trips", () => Results.Redirect("/account#trips", permanent: true));
+app.MapGet("/my-trips.html", () => Results.Redirect("/account#trips", permanent: true));
 app.MapGet("/support.html", () => Results.Redirect("/support", permanent: true));
 app.MapGet("/chatbot.html", () => Results.Redirect("/chatbot", permanent: true));
 app.MapGet("/admin", () => Results.Redirect("/admin/index.html"));
@@ -114,6 +117,20 @@ if (app.Environment.IsDevelopment())
             ValidLogin = new { loginRenter1.IsSuccess, loginRenter1.Message, User = loginRenter1.Data?.UserName, Roles = loginRenter1.Data?.Roles },
             SuspendedLogin = new { loginRenter4.IsSuccess, loginRenter4.Message, loginRenter4.ErrorCode },
             InvalidLogin = new { loginBad.IsSuccess, loginBad.Message, loginBad.ErrorCode }
+        });
+    });
+
+    app.MapGet("/dev/vehicles-test", async (CarRental.Services.Vehicles.IVehicleService vehicles) =>
+    {
+        var all = await vehicles.SearchVehiclesAsync(new CarRental.Models.DTOs.Vehicles.VehicleSearchFilter());
+        var daNang = await vehicles.SearchVehiclesAsync(new CarRental.Models.DTOs.Vehicles.VehicleSearchFilter { City = "TP. Đà Nẵng" });
+        var cities = await vehicles.GetAvailableCitiesAsync();
+        return Results.Ok(new
+        {
+            TotalPublic = all.Data?.TotalCount,
+            SampleNames = all.Data?.Items.Select(x => $"{x.Name} ({x.City})").Take(5),
+            DaNangCars = daNang.Data?.TotalCount,
+            Cities = cities.Data
         });
     });
 

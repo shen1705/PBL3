@@ -3,19 +3,41 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="~/css/mytrips.css" asp-append-version="true">
     <link rel="stylesheet" href="~/css/become-owner.css" asp-append-version="true">
 }
 
     <div class="workspace">
-        <aside class="sidebar" aria-label="Danh mục quản lý chủ xe">
-            <nav class="side-nav">
-                <a class="side-link" href="#danh-sach-xe-content"><i class="fa-solid fa-car"></i><span>Danh sách xe</span></a>
-                <a class="side-link" href="#lich-xe"><i class="fa-regular fa-calendar"></i><span>Lịch xe</span></a>
-                <a class="side-link active" href="#cam-nang"><i class="fa-solid fa-book-open"></i><span>Cẩm nang cho thuê xe</span></a>
-                <a class="side-link" href="#hop-dong"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
-                <a class="side-link" href="#bao-mat"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
-            </nav>
-        </aside>
+        <!-- Hai panel bên trái song song: Panel 1 (Tài khoản) + Panel 2 (Quản lý chủ xe) -->
+        <div class="account-sidebar-group">
+            <!-- Panel 1: Personal Account navigation -->
+            <aside class="trips-sidebar" aria-label="Danh mục tài khoản">
+                <div class="trips-profile">
+                    <h2 class="sidebar-greeting">Xin chào bạn!</h2>
+                    <strong id="trip-sidebar-name" style="display:none;"></strong>
+                </div>
+                <nav class="trips-side-nav">
+                    <a class="trips-side-link" href="/account" id="nav-account"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
+                    <a class="trips-side-link active" href="/become-owner" id="nav-become-owner" aria-current="page"><i class="fa-solid fa-key"></i><span>Trở thành chủ xe</span></a>
+                    <a class="trips-side-link" href="/account#trips" id="nav-trips"><i class="fa-regular fa-calendar-days"></i><span>Chuyến của tôi</span></a>
+                    <a class="trips-side-link" href="/account#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
+                    <a class="trips-side-link" href="/account#privacy" id="nav-privacy"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
+                    <a class="trips-side-link" href="/account#password" id="nav-password"><i class="fa-solid fa-lock"></i><span>Đổi mật khẩu</span></a>
+                    <a class="trips-side-link trips-logout" id="trip-logout" href="/"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Đăng xuất</span></a>
+                </nav>
+            </aside>
+
+            <!-- Panel 2: BecomeOwner management sub-panel -->
+            <aside class="sidebar become-owner-panel" aria-label="Danh mục quản lý chủ xe">
+                <nav class="side-nav">
+                    <a class="side-link" href="#danh-sach-xe-content"><i class="fa-solid fa-car"></i><span>Danh sách xe</span></a>
+                    <a class="side-link" href="#lich-xe"><i class="fa-regular fa-calendar"></i><span>Lịch xe</span></a>
+                    <a class="side-link active" href="#cam-nang"><i class="fa-solid fa-book-open"></i><span>Cẩm nang cho thuê xe</span></a>
+                    <a class="side-link" href="#hop-dong"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
+                    <a class="side-link" href="#bao-mat"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
+                </nav>
+            </aside>
+        </div>
 
         <main class="main-area">
             <!-- Section 1: Danh sách xe -->

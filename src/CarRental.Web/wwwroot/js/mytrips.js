@@ -1,5 +1,5 @@
 if (!window.AzuStore.isLoggedIn()) {
-    window.AzuStore.requireLogin('my-trips.html');
+    window.AzuStore.requireLogin('account.html');
 }
 
 const accountKeys = {
@@ -118,8 +118,8 @@ function showView(viewName) {
 
 function handleHashNavigation() {
     const hash = window.location.hash;
-    if (hash === '#account') {
-        showView('account');
+    if (hash === '#trips' || hash === '#orders') {
+        showView('trips');
     } else if (hash === '#address') {
         showView('address');
     } else if (hash === '#privacy') {
@@ -127,7 +127,7 @@ function handleHashNavigation() {
     } else if (hash === '#password') {
         showView('password');
     } else {
-        showView('trips');
+        showView('account');
     }
 }
 
