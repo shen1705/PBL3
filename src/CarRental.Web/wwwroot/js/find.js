@@ -28,6 +28,17 @@ function createSampleCarCard(car) {
     const card = document.createElement('div');
     card.className = 'car-card';
     card.dataset.sampleListing = 'true';
+    card.dataset.city = car.city;
+    card.dataset.seats = car.seats || 5;
+    const priceKNum = parseInt((car.price || '650').replace(/[^\d]/g, ''), 10) || 650;
+    card.dataset.priceK = priceKNum;
+    card.dataset.rawPrice = priceKNum * 1000;
+    card.dataset.trans = 'auto';
+    card.dataset.fuel = (car.name || '').toLowerCase().includes('vf') ? 'electric' : 'gas';
+    card.dataset.brand = getCarBrand(car.name);
+    card.dataset.carType = getCarBodyType(car.name, car.seats);
+    card.dataset.delivery = 'true';
+    card.dataset.deposit = 'true';
 
     const imageWrapper = document.createElement('div');
     imageWrapper.className = 'car-img-wrapper';
@@ -67,7 +78,7 @@ function createSampleCarCard(car) {
     );
     const locationIcon = document.createElement('i');
     locationIcon.className = 'fa-solid fa-location-dot';
-    details.append(locationIcon, document.createTextNode(` ${car.district}, ${car.city}`));
+    details.append(locationIcon, document.createTextNode(` ${car.city}`));
 
     const footer = document.createElement('div');
     footer.className = 'car-footer';
@@ -81,18 +92,149 @@ function createSampleCarCard(car) {
     return card;
 }
 
-if (carsGrid) {
-    sampleCars.forEach(car => carsGrid.appendChild(createSampleCarCard(car)));
+let carCards = [];
+let initialOrder = [];
+
+function refreshCarCards() {
+    carCards = carsGrid ? Array.from(carsGrid.querySelectorAll('.car-card')) : [];
+    initialOrder = [...carCards];
 }
 
-const carCards = carsGrid ? Array.from(carsGrid.querySelectorAll('.car-card')) : [];
+function createCarCardFromApi(car) {
+    const card = document.createElement('div');
+    card.className = 'car-card';
+    card.dataset.vehicleId = car.vehicleId;
+    card.dataset.listingId = car.listingId;
+    card.dataset.rawPrice = car.pricePerDay;
+    card.dataset.priceK = Math.round(Number(car.pricePerDay) / 1000);
+    card.dataset.city = (car.city || '').trim();
+    card.dataset.district = (car.district || '').trim();
+    card.dataset.seats = car.seats || 5;
+    card.dataset.trans = (car.transmission === 'Manual' || car.transmission === 'Số sàn') ? 'manual' : 'auto';
+
+    const rawFuel = (car.fuelType || '').toLowerCase();
+    const rawName = (car.name || '').toLowerCase();
+    let fuelKey = 'gas';
+    if (rawFuel.includes('elec') || rawFuel.includes('điện') || rawName.includes('điện') || rawName.includes('vf')) {
+        fuelKey = 'electric';
+    } else if (rawFuel.includes('dies') || rawFuel.includes('dầu')) {
+        fuelKey = 'diesel';
+    }
+    card.dataset.fuel = fuelKey;
+
+    const brandKey = (car.brand || getCarBrand(car.name) || '').toLowerCase().trim();
+    card.dataset.brand = brandKey;
+    card.dataset.carType = getCarBodyType(car.name, car.seats);
+
+    if (car.vehicleId % 2 === 0 || car.vehicleId % 3 === 0) {
+        card.dataset.delivery = 'true';
+    }
+    if (car.vehicleId % 2 === 1 || Number(car.pricePerDay) <= 1000000) {
+        card.dataset.deposit = 'true';
+    }
+
+    const imageWrapper = document.createElement('div');
+    imageWrapper.className = 'car-img-wrapper';
+
+    const carUpper = (car.name || '').toUpperCase();
+    if (['VIOS', 'CITY', 'XPANDER', 'VF', 'CR-V', 'CROSS', 'ACCENT', 'SANTA', 'CARNIVAL'].some(m => carUpper.includes(m))) {
+        card.dataset.instant = 'true';
+        const badge = document.createElement('span');
+        badge.className = 'badge-fast';
+        badge.innerHTML = '<i class="fa-solid fa-bolt"></i> ĐẶT NHANH';
+        imageWrapper.appendChild(badge);
+    }
+
+    const image = document.createElement('img');
+    image.src = car.coverImageUrl || 'images/car-default.png';
+    image.alt = car.name;
+    imageWrapper.appendChild(image);
+
+    const info = document.createElement('div');
+    info.className = 'car-info';
+
+    const tags = document.createElement('div');
+    tags.className = 'car-tags-top';
+    const transSpan = document.createElement('span');
+    transSpan.className = 'tag-trans';
+    transSpan.textContent = (car.transmission === 'Manual' || car.transmission === 'Số sàn') ? 'SỐ SÀN' : 'SỐ TỰ ĐỘNG';
+
+    const seatsSpan = document.createElement('span');
+    seatsSpan.className = 'tag-seats';
+    seatsSpan.textContent = `${car.seats} CHỖ`;
+    tags.append(transSpan, seatsSpan);
+
+    const h3 = document.createElement('h3');
+    h3.textContent = car.name;
+
+    const details = document.createElement('p');
+    details.className = 'car-rating-loc';
+    const starIcon = document.createElement('i');
+    starIcon.className = 'fa-solid fa-star text-warning';
+    
+    const ratingVal = (typeof car.rating === 'number' ? car.rating : 5.0).toFixed(1);
+    const tripsVal = car.totalTrips || 0;
+    const yearVal = car.year || 2023;
+
+    details.append(
+        starIcon,
+        document.createTextNode(` ${ratingVal} • ${tripsVal} chuyến • `)
+    );
+    const bYear = document.createElement('b');
+    bYear.textContent = `Đời ${yearVal}`;
+    details.appendChild(bYear);
+    details.appendChild(document.createElement('br'));
+
+    const locIcon = document.createElement('i');
+    locIcon.className = 'fa-solid fa-location-dot';
+    details.append(locIcon, document.createTextNode(` ${car.city}`));
+
+    const footer = document.createElement('div');
+    footer.className = 'car-footer';
+    const priceSpan = document.createElement('span');
+    priceSpan.className = 'car-price';
+    const priceK = Math.round(car.pricePerDay / 1000).toLocaleString('vi-VN') + 'K';
+    priceSpan.append(document.createTextNode(priceK), document.createElement('span'));
+    priceSpan.lastElementChild.textContent = '/ngày';
+    footer.appendChild(priceSpan);
+
+    info.append(tags, h3, details, footer);
+    card.append(imageWrapper, info);
+    return card;
+}
+
+async function loadVehiclesFromApi() {
+    if (!carsGrid) return;
+    try {
+        const response = await fetch('/api/vehicles?pageSize=100');
+        if (!response.ok) throw new Error('API error: ' + response.status);
+        const resData = await response.json();
+        const items = resData?.data?.items || [];
+        if (items.length > 0) {
+            carsGrid.replaceChildren();
+            items.forEach(v => {
+                carsGrid.appendChild(createCarCardFromApi(v));
+            });
+        } else {
+            carsGrid.replaceChildren();
+            sampleCars.forEach(car => carsGrid.appendChild(createSampleCarCard(car)));
+        }
+    } catch (err) {
+        console.warn('Lỗi khi tải dữ liệu xe từ backend API, sử dụng dữ liệu dự phòng:', err);
+        if (carsGrid && carsGrid.querySelectorAll('.car-card').length === 0) {
+            carsGrid.replaceChildren();
+            sampleCars.forEach(car => carsGrid.appendChild(createSampleCarCard(car)));
+        }
+    } finally {
+        refreshCarCards();
+        initCarBadges();
+        buildLocationOptions();
+        applyLocationFilter(selectedLocation || document.getElementById('filterLocationText')?.textContent);
+    }
+}
 
 function getCarLocation(card) {
-    const locationLines = card.querySelector('.car-rating-loc')?.innerText
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(Boolean);
-    return locationLines?.[locationLines.length - 1] || '';
+    return card.dataset.city || '';
 }
 
 function normalizeLocation(location) {
@@ -108,11 +250,11 @@ function normalizeLocation(location) {
         .trim();
 }
 
-function addLocationOption(label, description, count) {
+function addLocationOption(city, count) {
     const button = document.createElement('button');
     button.className = 'location-option';
     button.type = 'button';
-    button.dataset.location = label;
+    button.dataset.location = city;
 
     const icon = document.createElement('span');
     icon.className = 'location-option-icon';
@@ -120,36 +262,66 @@ function addLocationOption(label, description, count) {
 
     const details = document.createElement('span');
     const name = document.createElement('strong');
-    name.textContent = label;
+    name.textContent = city;
     const meta = document.createElement('small');
-    meta.textContent = `${description} · ${count} xe`;
+    meta.textContent = `${count} xe có sẵn`;
     details.append(name, meta);
     button.append(icon, details);
+
+    button.addEventListener('click', () => {
+        selectLocation(city);
+    });
+
     locationOptions.appendChild(button);
 }
 
-function buildLocationOptions() {
+async function buildLocationOptions() {
     if (!locationOptions) return;
+    locationOptions.replaceChildren();
 
     const cityCounts = new Map();
-    const addressCounts = new Map();
-    const knownCities = ['TP. Đà Nẵng', 'Hà Nội', 'TP. Hồ Chí Minh'];
-    carCards.forEach(card => {
-        const address = getCarLocation(card);
-        if (!address) return;
 
-        addressCounts.set(address, (addressCounts.get(address) || 0) + 1);
-        const parts = address.split(',').map(part => part.trim());
-        const city = parts[parts.length - 1];
-        if (city) cityCounts.set(city, (cityCounts.get(city) || 0) + 1);
-    });
+    try {
+        const resp = await fetch('/api/vehicles/cities');
+        if (resp.ok) {
+            const apiRes = await resp.json();
+            if (apiRes && apiRes.isSuccess && Array.isArray(apiRes.data)) {
+                apiRes.data.forEach(item => {
+                    if (item.city) cityCounts.set(item.city.trim(), item.carCount || 0);
+                });
+            }
+        }
+    } catch (e) {
+        console.warn('Could not fetch cities from API:', e);
+    }
 
-    locationOptions.replaceChildren();
-    knownCities.forEach(city => {
+    const defaultCities = ['TP. Đà Nẵng', 'Hà Nội', 'TP. Hồ Chí Minh'];
+    defaultCities.forEach(city => {
         if (!cityCounts.has(city)) cityCounts.set(city, 0);
     });
-    cityCounts.forEach((count, city) => addLocationOption(city, 'Toàn thành phố', count));
-    addressCounts.forEach((count, address) => addLocationOption(address, 'Khu vực', count));
+
+    carCards.forEach(card => {
+        const city = (card.dataset.city || '').trim();
+        if (city && !cityCounts.has(city)) {
+            cityCounts.set(city, 1);
+        }
+    });
+
+    // CHỈ hiển thị danh sách thành phố, KHÔNG hiển thị khu vực/quận huyện
+    cityCounts.forEach((count, city) => {
+        addLocationOption(city, count);
+    });
+}
+
+function selectLocation(location) {
+    const chosen = (location || '').trim();
+    if (!chosen) return;
+
+    selectedLocation = chosen;
+    applyLocationFilter(chosen);
+
+    const locationModal = document.getElementById('locationModal');
+    if (locationModal) locationModal.classList.remove('active');
 }
 
 function applyLocationFilter(location) {
@@ -164,10 +336,8 @@ function applyLocationFilter(location) {
     if (heading) heading.textContent = `Xe tự lái tại ${chosenLocation}`;
     if (sampleDataNote) sampleDataNote.hidden = !isSampleCity;
 
-    // 1. Lưu lại địa điểm đang chọn vào sessionStorage để khi chuyển trang hoặc F5 luôn giữ nguyên
     sessionStorage.setItem('azuCarSelectedLocation', chosenLocation);
 
-    // 2. Cập nhật thanh địa chỉ URL (replaceState) để URL đồng bộ đúng địa điểm, không bị dính Hà Nội cũ
     try {
         const url = new URL(window.location.href);
         url.searchParams.set('location', chosenLocation);
@@ -176,6 +346,331 @@ function applyLocationFilter(location) {
 
     applyAllFilters();
 }
+
+// Location Modal Event Handlers
+const openLocationModal = document.getElementById('openLocationModal');
+const locationModal = document.getElementById('locationModal');
+const locationInput = document.getElementById('locationInput');
+const locationCurrentText = document.getElementById('locationCurrentText');
+const confirmLocationBtn = document.getElementById('confirmLocationBtn');
+const closeLocationModalBtn = locationModal?.querySelector('.location-picker-close');
+
+function showLocationModal() {
+    if (!locationModal) return;
+    if (locationInput) locationInput.value = '';
+    const currentLoc = document.getElementById('filterLocationText')?.textContent.trim() || selectedLocation || 'TP. Đà Nẵng';
+    if (locationCurrentText) locationCurrentText.textContent = currentLoc;
+
+    document.querySelectorAll('#locationOptions .location-option').forEach(option => {
+        option.hidden = false;
+    });
+    if (confirmLocationBtn) confirmLocationBtn.hidden = true;
+
+    locationModal.classList.add('active');
+    setTimeout(() => locationInput?.focus(), 60);
+}
+
+openLocationModal?.addEventListener('click', showLocationModal);
+openLocationModal?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        showLocationModal();
+    }
+});
+
+closeLocationModalBtn?.addEventListener('click', () => {
+    if (locationModal) locationModal.classList.remove('active');
+});
+
+locationModal?.addEventListener('click', (e) => {
+    if (e.target === locationModal) {
+        locationModal.classList.remove('active');
+    }
+});
+
+locationInput?.addEventListener('input', function() {
+    const query = this.value.trim().toLocaleLowerCase('vi');
+    let hasExactMatch = false;
+    document.querySelectorAll('#locationOptions .location-option').forEach(option => {
+        const loc = option.dataset.location || '';
+        const matches = loc.toLocaleLowerCase('vi').includes(query);
+        option.hidden = !matches;
+        if (loc.toLocaleLowerCase('vi') === query) hasExactMatch = true;
+    });
+    if (confirmLocationBtn) confirmLocationBtn.hidden = !query || hasExactMatch;
+});
+
+locationInput?.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const visibleOption = Array.from(document.querySelectorAll('#locationOptions .location-option')).find(option => !option.hidden);
+        if (visibleOption && visibleOption.dataset.location.toLocaleLowerCase('vi') === this.value.trim().toLocaleLowerCase('vi')) {
+            selectLocation(visibleOption.dataset.location);
+        } else if (this.value.trim()) {
+            selectLocation(this.value.trim());
+        }
+    }
+});
+
+confirmLocationBtn?.addEventListener('click', () => {
+    if (locationInput?.value.trim()) {
+        selectLocation(locationInput.value.trim());
+    }
+});
+
+// Time Modal Event Handlers
+const openTimeModal = document.getElementById('openTimeModal');
+const timeModal = document.getElementById('timeModal');
+const closeTimeModalBtn = timeModal?.querySelector('[data-modal="timeModal"]');
+const btnConfirmTime = document.getElementById('btnConfirmTime');
+const selectPickupDate = document.getElementById('selectPickupDate');
+const selectReturnDate = document.getElementById('selectReturnDate');
+const selectedPickupDate = document.getElementById('selectedPickupDate');
+const selectedReturnDate = document.getElementById('selectedReturnDate');
+const currentMonthYearLabel = document.getElementById('currentMonthYearLabel');
+const dynamicCalendarDays = document.getElementById('dynamicCalendarDays');
+const prevMonthBtn = document.getElementById('prevMonthBtn');
+const nextMonthBtn = document.getElementById('nextMonthBtn');
+const pickupTimeSelect = document.getElementById('pickupTimeSelect');
+const returnTimeSelect = document.getElementById('returnTimeSelect');
+const tabDaily = document.getElementById('tabDaily');
+const tabHourly = document.getElementById('tabHourly');
+const dailyContent = document.getElementById('dailyContent');
+const hourlyContent = document.getElementById('hourlyContent');
+const modalPreviewText = document.getElementById('modalPreviewText');
+const modalSubPreviewText = document.getElementById('modalSubPreviewText');
+
+let timeModalSelectionTarget = 'start';
+let timeModalCurrentMode = 'daily';
+let todayDate = new Date();
+let viewingYear = todayDate.getFullYear();
+let viewingMonth = todayDate.getMonth();
+let startDateObj = new Date();
+let endDateObj = new Date();
+endDateObj.setDate(startDateObj.getDate() + 2);
+
+function formatVnDate(date) {
+    if (!date) return '';
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    return `${d}/${m}/${y}`;
+}
+
+function updateRentalSummary() {
+    const timeSummary = document.getElementById('filterTimeText');
+    const pickupText = document.getElementById('pickupTimeText')?.textContent.trim();
+    const returnText = document.getElementById('returnTimeText')?.textContent.trim();
+    if (timeSummary && pickupText && returnText) {
+        timeSummary.innerText = `${pickupText} – ${returnText}`;
+    }
+}
+
+function updateDateSelection() {
+    if (selectedPickupDate) selectedPickupDate.innerText = startDateObj ? formatVnDate(startDateObj) : 'Chọn ngày';
+    if (selectedReturnDate) selectedReturnDate.innerText = endDateObj ? formatVnDate(endDateObj) : 'Chọn ngày';
+    if (selectPickupDate) selectPickupDate.classList.toggle('active', timeModalSelectionTarget === 'start');
+    if (selectReturnDate) selectReturnDate.classList.toggle('active', timeModalSelectionTarget === 'end');
+    if (btnConfirmTime) {
+        btnConfirmTime.disabled = timeModalCurrentMode === 'daily' && (!startDateObj || !endDateObj);
+    }
+}
+
+function renderTimeModalCalendar() {
+    if (!dynamicCalendarDays) return;
+    dynamicCalendarDays.innerHTML = '';
+    const monthNames = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+    if (currentMonthYearLabel) currentMonthYearLabel.innerText = `${monthNames[viewingMonth]}, ${viewingYear}`;
+
+    const firstDayIndex = (new Date(viewingYear, viewingMonth, 1).getDay() + 6) % 7;
+    const totalDays = new Date(viewingYear, viewingMonth + 1, 0).getDate();
+
+    for (let i = 0; i < firstDayIndex; i++) {
+        dynamicCalendarDays.appendChild(document.createElement('div'));
+    }
+
+    for (let day = 1; day <= totalDays; day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.innerText = day;
+        dayDiv.style.padding = '8px 0';
+        dayDiv.style.borderRadius = '6px';
+        dayDiv.style.cursor = 'pointer';
+
+        const currentObj = new Date(viewingYear, viewingMonth, day);
+
+        if (startDateObj && currentObj.toDateString() === startDateObj.toDateString()) {
+            dayDiv.style.background = '#00a550';
+            dayDiv.style.color = '#fff';
+            dayDiv.style.fontWeight = '700';
+        } else if (endDateObj && currentObj.toDateString() === endDateObj.toDateString()) {
+            dayDiv.style.background = '#dcfce7';
+            dayDiv.style.color = '#15803d';
+            dayDiv.style.fontWeight = '700';
+        } else if (endDateObj && currentObj > startDateObj && currentObj < endDateObj) {
+            dayDiv.style.background = '#f0fdf4';
+        }
+
+        dayDiv.addEventListener('click', () => {
+            if (timeModalSelectionTarget === 'start') {
+                startDateObj = currentObj;
+                endDateObj = null;
+                timeModalSelectionTarget = 'end';
+            } else if (timeModalSelectionTarget === 'end') {
+                if (!startDateObj || currentObj < startDateObj) {
+                    startDateObj = currentObj;
+                    endDateObj = null;
+                } else {
+                    endDateObj = currentObj;
+                    timeModalSelectionTarget = null;
+                }
+            } else if (!startDateObj || (startDateObj && endDateObj)) {
+                startDateObj = currentObj;
+                endDateObj = null;
+                timeModalSelectionTarget = 'end';
+            } else if (startDateObj && !endDateObj) {
+                if (currentObj < startDateObj) {
+                    startDateObj = currentObj;
+                } else {
+                    endDateObj = currentObj;
+                    timeModalSelectionTarget = null;
+                }
+            }
+            renderTimeModalCalendar();
+            updateDateSelection();
+            updateTimePreview();
+        });
+
+        dynamicCalendarDays.appendChild(dayDiv);
+    }
+}
+
+function updateTimePreview() {
+    if (!modalPreviewText) return;
+    if (timeModalCurrentMode === 'hourly') {
+        const hourlyDateInput = document.getElementById('hourlyDateInput');
+        const hourlyPickupTime = document.getElementById('hourlyPickupTime');
+        const hourlyDuration = document.getElementById('hourlyDuration');
+        const rawDate = hourlyDateInput ? hourlyDateInput.value : '';
+        let formattedDate = '14/10/2026';
+        if (rawDate) {
+            const parts = rawDate.split('-');
+            if (parts.length === 3) formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        const time = hourlyPickupTime ? hourlyPickupTime.value : '14:00';
+        const hours = parseInt(hourlyDuration ? hourlyDuration.value : '2', 10);
+        let [h, m] = time.split(':').map(Number);
+        let endH = (h + hours) % 24;
+        let endTimeStr = String(endH).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+
+        modalPreviewText.innerText = `${time}, ${formattedDate} - ${endTimeStr}, ${formattedDate}`;
+        if (modalSubPreviewText) modalSubPreviewText.innerHTML = `Thời gian thuê: <span style="color: #00a550; font-weight: 700;">${hours} giờ</span>`;
+    } else {
+        if (!startDateObj) return;
+        let startStr = formatVnDate(startDateObj);
+        let endStr = endDateObj ? formatVnDate(endDateObj) : startStr;
+        let pTime = pickupTimeSelect ? pickupTimeSelect.value : '21:00';
+        let rTime = returnTimeSelect ? returnTimeSelect.value : '21:00';
+
+        modalPreviewText.innerText = `${pTime}, ${startStr} - ${rTime}, ${endStr}`;
+        if (modalSubPreviewText) modalSubPreviewText.innerHTML = `Thời gian thuê: <span style="color: #00a550; font-weight: 700;">Nhiều ngày</span>`;
+    }
+}
+
+if (openTimeModal && timeModal) {
+    openTimeModal.addEventListener('click', () => {
+        timeModalSelectionTarget = 'start';
+        timeModal.classList.add('active');
+        renderTimeModalCalendar();
+        updateDateSelection();
+        updateTimePreview();
+    });
+
+    closeTimeModalBtn?.addEventListener('click', () => {
+        timeModal.classList.remove('active');
+    });
+
+    timeModal.addEventListener('click', (e) => {
+        if (e.target === timeModal) timeModal.classList.remove('active');
+    });
+
+    prevMonthBtn?.addEventListener('click', () => {
+        viewingMonth--;
+        if (viewingMonth < 0) { viewingMonth = 11; viewingYear--; }
+        renderTimeModalCalendar();
+    });
+
+    nextMonthBtn?.addEventListener('click', () => {
+        viewingMonth++;
+        if (viewingMonth > 11) { viewingMonth = 0; viewingYear++; }
+        renderTimeModalCalendar();
+    });
+
+    selectPickupDate?.addEventListener('click', () => {
+        timeModalSelectionTarget = 'start';
+        updateDateSelection();
+    });
+
+    selectReturnDate?.addEventListener('click', () => {
+        timeModalSelectionTarget = startDateObj ? 'end' : 'start';
+        updateDateSelection();
+    });
+
+    tabDaily?.addEventListener('click', () => {
+        timeModalCurrentMode = 'daily';
+        tabDaily.style.color = '#00a550'; tabDaily.style.borderBottom = '2px solid #00a550';
+        tabHourly.style.color = '#94a3b8'; tabHourly.style.borderBottom = 'none';
+        if (dailyContent) dailyContent.style.display = 'block';
+        if (hourlyContent) hourlyContent.style.display = 'none';
+        updateDateSelection();
+        updateTimePreview();
+    });
+
+    tabHourly?.addEventListener('click', () => {
+        timeModalCurrentMode = 'hourly';
+        tabHourly.style.color = '#00a550'; tabHourly.style.borderBottom = '2px solid #00a550';
+        tabDaily.style.color = '#94a3b8'; tabDaily.style.borderBottom = 'none';
+        if (hourlyContent) hourlyContent.style.display = 'block';
+        if (dailyContent) dailyContent.style.display = 'none';
+        updateDateSelection();
+        updateTimePreview();
+    });
+
+    pickupTimeSelect?.addEventListener('change', updateTimePreview);
+    returnTimeSelect?.addEventListener('change', updateTimePreview);
+
+    btnConfirmTime?.addEventListener('click', () => {
+        if (timeModalCurrentMode === 'daily' && startDateObj) {
+            let startStr = formatVnDate(startDateObj);
+            let endStr = endDateObj ? formatVnDate(endDateObj) : startStr;
+            let pTime = pickupTimeSelect ? pickupTimeSelect.value : '21:00';
+            let rTime = returnTimeSelect ? returnTimeSelect.value : '21:00';
+
+            const pEl = document.getElementById('pickupTimeText');
+            const rEl = document.getElementById('returnTimeText');
+            if (pEl) pEl.innerText = `${pTime}, ${startStr}`;
+            if (rEl) rEl.innerText = `${rTime}, ${endStr}`;
+        } else if (timeModalCurrentMode === 'hourly' && modalPreviewText) {
+            const pEl = document.getElementById('pickupTimeText');
+            const rEl = document.getElementById('returnTimeText');
+            const parts = modalPreviewText.innerText.split(' - ');
+            if (pEl) pEl.innerText = parts[0] || '';
+            if (rEl) rEl.innerText = parts[1] || '';
+        }
+
+        updateRentalSummary();
+        timeModal.classList.remove('active');
+    });
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (locationModal) locationModal.classList.remove('active');
+        if (timeModal) timeModal.classList.remove('active');
+        const filterModal = document.getElementById('filterModal');
+        if (filterModal) filterModal.classList.remove('active');
+    }
+});
+
 
 // --- BỘ LỌC NÂNG CAO (ADVANCED FILTER ENGINE) ---
 const filterModal = document.getElementById('filterModal');
@@ -217,6 +712,12 @@ if (openFilterModalBtn && filterModal) {
         if (e.target === filterModal) {
             filterModal.classList.remove('active');
         }
+    });
+
+    filterModal.querySelectorAll('.modal-close-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterModal.classList.remove('active');
+        });
     });
 
     filterModal.querySelectorAll('.filter-chip').forEach(chip => {
@@ -301,6 +802,8 @@ function updateFilterBadge() {
 }
 
 function parseCardPriceK(card) {
+    if (card.dataset.priceK) return Number(card.dataset.priceK);
+    if (card.dataset.rawPrice) return Math.round(Number(card.dataset.rawPrice) / 1000);
     const text = card.querySelector('.car-price')?.textContent || '';
     const match = text.match(/([\d.]+)\s*k/i);
     if (!match) return 0;
@@ -308,19 +811,22 @@ function parseCardPriceK(card) {
 }
 
 function parseCardSeats(card) {
+    if (card.dataset.seats) return Number(card.dataset.seats);
     const text = card.querySelector('.tag-seats')?.textContent || '';
     const match = text.match(/\d+/);
     return match ? parseInt(match[0], 10) : 5;
 }
 
 function parseCardTrans(card) {
+    if (card.dataset.trans) return card.dataset.trans;
     const text = (card.querySelector('.tag-trans')?.textContent || '').toLowerCase();
     return text.includes('sàn') ? 'manual' : 'auto';
 }
 
 function parseCardFuel(card) {
+    if (card.dataset.fuel) return card.dataset.fuel;
     const text = (card.textContent || '').toLowerCase();
-    if (text.includes('điện') || text.includes('vf3') || text.includes('vf 3') || text.includes('vfe34') || text.includes('vf8')) return 'electric';
+    if (text.includes('điện') || text.includes('vf')) return 'electric';
     if (text.includes('dầu') || text.includes('diesel')) return 'diesel';
     return 'gas';
 }
@@ -372,17 +878,22 @@ function initCarBadges() {
 }
 
 function applyAllFilters() {
-    const chosenLocation = (document.getElementById('filterLocationText')?.textContent || '').trim();
+    const chosenLocation = (document.getElementById('filterLocationText')?.textContent || selectedLocation || 'TP. Đà Nẵng').trim();
     const normalizedChoice = normalizeLocation(chosenLocation);
     let visibleCount = 0;
 
-    carCards.forEach(card => {
-        // 1. Kiểm tra vị trí
-        const carLocation = normalizeLocation(getCarLocation(card));
-        const matchesLocation = !normalizedChoice || carLocation.includes(normalizedChoice);
-        if (!matchesLocation) {
-            card.hidden = true;
-            return;
+    const cards = carsGrid ? Array.from(carsGrid.querySelectorAll('.car-card')) : carCards;
+
+    cards.forEach(card => {
+        let match = true;
+
+        // 1. Kiểm tra vị trí (Chỉ thành phố)
+        const carCity = normalizeLocation(getCarLocation(card));
+        if (normalizedChoice && carCity) {
+            const matchesLocation = carCity.includes(normalizedChoice) || normalizedChoice.includes(carCity);
+            if (!matchesLocation) {
+                match = false;
+            }
         }
 
         const carName = (card.querySelector('h3')?.textContent || '').trim();
@@ -390,128 +901,88 @@ function applyAllFilters() {
         const cardText = card.textContent.toLowerCase();
 
         // 2. Kiểm tra Loại xe (carType từ nút pill Loại xe)
-        if (currentFilters.carType !== 'all') {
-            const bodyType = getCarBodyType(carName, seats);
-            if (currentFilters.carType === '4-seats' && seats > 5) {
-                card.hidden = true;
-                return;
-            }
-            if (currentFilters.carType === '7-seats' && seats < 7) {
-                card.hidden = true;
-                return;
-            }
-            if (currentFilters.carType === 'sedan' && bodyType !== 'sedan') {
-                card.hidden = true;
-                return;
-            }
-            if (currentFilters.carType === 'suv' && bodyType !== 'suv') {
-                card.hidden = true;
-                return;
-            }
-            if (currentFilters.carType === 'mpv' && bodyType !== 'mpv') {
-                card.hidden = true;
-                return;
-            }
-            if (currentFilters.carType === 'pickup' && bodyType !== 'pickup') {
-                card.hidden = true;
-                return;
-            }
-            if (currentFilters.carType === 'electric' && bodyType !== 'electric' && !cardText.includes('điện') && !carName.toLowerCase().includes('vf')) {
-                card.hidden = true;
-                return;
-            }
+        if (match && currentFilters.carType !== 'all') {
+            const bodyType = card.dataset.carType || getCarBodyType(carName, seats);
+            if (currentFilters.carType === '4-seats' && seats > 5) match = false;
+            else if (currentFilters.carType === '7-seats' && seats < 7) match = false;
+            else if (currentFilters.carType === 'sedan' && bodyType !== 'sedan') match = false;
+            else if (currentFilters.carType === 'suv' && bodyType !== 'suv') match = false;
+            else if (currentFilters.carType === 'mpv' && bodyType !== 'mpv') match = false;
+            else if (currentFilters.carType === 'pickup' && bodyType !== 'pickup') match = false;
+            else if (currentFilters.carType === 'electric' && card.dataset.fuel !== 'electric' && bodyType !== 'electric') match = false;
         }
 
         // 3. Kiểm tra Hãng xe (brand từ nút pill Hãng xe)
-        if (currentFilters.brand !== 'all') {
-            const carBrand = getCarBrand(carName);
+        if (match && currentFilters.brand !== 'all') {
+            const carBrand = (card.dataset.brand || getCarBrand(carName)).toLowerCase();
             if (currentFilters.brand === 'other') {
                 const majorBrands = ['toyota', 'hyundai', 'vinfast', 'mazda', 'honda', 'kia', 'ford', 'mitsubishi'];
-                if (majorBrands.includes(carBrand)) {
-                    card.hidden = true;
-                    return;
-                }
-            } else if (carBrand !== currentFilters.brand) {
-                card.hidden = true;
-                return;
+                if (majorBrands.includes(carBrand)) match = false;
+            } else if (carBrand !== currentFilters.brand.toLowerCase()) {
+                match = false;
             }
         }
 
-        // 4. Kiểm tra Đặt xe nhanh (instant từ nút pill Đặt xe nhanh)
-        if (currentFilters.instant && !isInstantBookingCar(card)) {
-            card.hidden = true;
-            return;
+        // 4. Kiểm tra Đặt xe nhanh (instant từ nút pill hoặc checkbox)
+        if (match && currentFilters.instant && !isInstantBookingCar(card)) {
+            match = false;
         }
 
         // 5. Kiểm tra mức giá
-        if (currentFilters.price !== 'all') {
+        if (match && currentFilters.price !== 'all') {
             const priceK = parseCardPriceK(card);
-            if (currentFilters.price === 'under-800' && priceK >= 800) {
-                card.hidden = true;
-                return;
-            }
-            if (currentFilters.price === '800-1200' && (priceK < 800 || priceK > 1200)) {
-                card.hidden = true;
-                return;
-            }
-            if (currentFilters.price === 'above-1200' && priceK <= 1200) {
-                card.hidden = true;
-                return;
-            }
+            if (currentFilters.price === 'under-800' && priceK >= 800) match = false;
+            else if (currentFilters.price === '800-1200' && (priceK < 800 || priceK > 1200)) match = false;
+            else if (currentFilters.price === 'above-1200' && priceK <= 1200) match = false;
         }
 
         // 6. Kiểm tra số chỗ
-        if (currentFilters.seats !== 'all') {
-            if (currentFilters.seats === '4' && seats > 5) {
-                card.hidden = true;
-                return;
-            }
-            if (currentFilters.seats === '7' && seats < 7) {
-                card.hidden = true;
-                return;
-            }
+        if (match && currentFilters.seats !== 'all') {
+            if (currentFilters.seats === '4' && seats > 5) match = false;
+            else if (currentFilters.seats === '7' && seats < 7) match = false;
         }
 
         // 7. Kiểm tra truyền động
-        if (currentFilters.trans !== 'all') {
+        if (match && currentFilters.trans !== 'all') {
             const trans = parseCardTrans(card);
-            if (trans !== currentFilters.trans) {
-                card.hidden = true;
-                return;
-            }
+            if (trans !== currentFilters.trans) match = false;
         }
 
         // 8. Kiểm tra nhiên liệu
-        if (currentFilters.fuel !== 'all') {
+        if (match && currentFilters.fuel !== 'all') {
             const fuel = parseCardFuel(card);
-            if (fuel !== currentFilters.fuel) {
-                card.hidden = true;
-                return;
-            }
+            if (fuel !== currentFilters.fuel) match = false;
         }
 
         // 9. Kiểm tra tính năng
-        if (currentFilters.delivery && !cardText.includes('tận nơi')) {
-            card.hidden = true;
-            return;
+        if (match && currentFilters.delivery && card.dataset.delivery !== 'true' && !cardText.includes('tận nơi')) {
+            match = false;
         }
-        if (currentFilters.deposit && !cardText.includes('thế chấp')) {
-            card.hidden = true;
-            return;
+        if (match && currentFilters.deposit && card.dataset.deposit !== 'true' && !cardText.includes('thế chấp')) {
+            match = false;
         }
 
-        card.hidden = false;
-        visibleCount++;
+        if (match) {
+            card.hidden = false;
+            card.classList.remove('is-hidden');
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.hidden = true;
+            card.classList.add('is-hidden');
+            card.style.display = 'none';
+        }
     });
 
     if (countText) countText.textContent = `Tìm thấy ${visibleCount} xe phù hợp với chuyến đi của bạn`;
-    if (noCarsMessage) noCarsMessage.hidden = visibleCount > 0;
+    if (noCarsMessage) {
+        noCarsMessage.hidden = visibleCount > 0;
+        noCarsMessage.style.display = visibleCount > 0 ? 'none' : 'block';
+    }
 }
 
-if (carsGrid && (selectedLocation || document.getElementById('filterLocationText'))) {
-    initCarBadges();
-    buildLocationOptions();
-    applyLocationFilter(selectedLocation || document.getElementById('filterLocationText').textContent);
+if (carsGrid) {
+    loadVehiclesFromApi();
 }
 
 document.addEventListener('location:selected', event => {
@@ -555,7 +1026,7 @@ if (searchBtn) {
 }
 
 if (sortSelect && carsGrid) {
-    const initialOrder = Array.from(carsGrid.querySelectorAll('.car-card'));
+    if (!initialOrder || initialOrder.length === 0) initialOrder = Array.from(carsGrid.querySelectorAll('.car-card'));
 
     const getNumber = (element, selector) => {
         const match = element.querySelector(selector)?.textContent.match(/\d+/);
@@ -711,15 +1182,18 @@ function carFromCard(card) {
     const priceText = card.querySelector('.car-price')?.childNodes[0]?.textContent.trim() || '524K';
 
     return {
+        vehicleId: card.dataset.vehicleId || null,
+        listingId: card.dataset.listingId || null,
+        rawPrice: card.dataset.rawPrice ? Number(card.dataset.rawPrice) : null,
         name: card.querySelector('h3')?.textContent.trim() || 'Xe AZU Car',
         image: card.querySelector('img')?.src || '',
         location,
         price: priceText,
         rating: ratingMatch ? ratingMatch[1] : '5.0',
-        trips: tripsMatch ? `${tripsMatch[1]} chuyến` : '24 chuyến',
-        year: yearMatch ? yearMatch[1] : '2026',
+        trips: tripsMatch ? `${tripsMatch[1]} chuyến` : '0 chuyến',
+        year: yearMatch ? yearMatch[1] : '2023',
         transmission: card.querySelector('.tag-trans')?.textContent.trim() || 'Số tự động',
-        seats: card.querySelector('.tag-seats')?.textContent.trim() || '4 chỗ'
+        seats: card.querySelector('.tag-seats')?.textContent.trim() || '5 chỗ'
     };
 }
 
@@ -762,6 +1236,50 @@ function openCarPopup(car) {
     if (thumb2) thumb2.src = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600';
     if (thumb3) thumb3.src = 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600';
 
+    // Tải ảnh và thông tin chi tiết thật từ API nếu có vehicleId
+    if (car.vehicleId) {
+        fetch(`/api/vehicles/${car.vehicleId}`)
+            .then(res => res.json())
+            .then(detailRes => {
+                if (detailRes.isSuccess && detailRes.data) {
+                    const d = detailRes.data;
+                    if (d.images && d.images.length > 0) {
+                        if (mainImg) mainImg.src = d.images[0].imagePath;
+                        if (thumb1) thumb1.src = d.images[0].imagePath;
+                        if (thumb2 && d.images[1]) thumb2.src = d.images[1].imagePath;
+                        if (thumb3 && d.images[2]) thumb3.src = d.images[2].imagePath;
+                    }
+                    if (d.fuelType && fuelEl) {
+                        const isElec = /electric|điện/i.test(d.fuelType);
+                        fuelEl.textContent = isElec ? 'Điện' : (d.fuelType === 'Diesel' ? 'Dầu' : 'Xăng');
+                    }
+                }
+            })
+            .catch(() => {});
+    }
+
+    // Tải ảnh và thông tin chi tiết thật từ API nếu có vehicleId
+    if (car.vehicleId) {
+        fetch(`/api/vehicles/${car.vehicleId}`)
+            .then(res => res.json())
+            .then(detailRes => {
+                if (detailRes.isSuccess && detailRes.data) {
+                    const d = detailRes.data;
+                    if (d.images && d.images.length > 0) {
+                        if (mainImg) mainImg.src = d.images[0].imagePath;
+                        if (thumb1) thumb1.src = d.images[0].imagePath;
+                        if (thumb2 && d.images[1]) thumb2.src = d.images[1].imagePath;
+                        if (thumb3 && d.images[2]) thumb3.src = d.images[2].imagePath;
+                    }
+                    if (d.fuelType && fuelEl) {
+                        const isElec = /electric|điện/i.test(d.fuelType);
+                        fuelEl.textContent = isElec ? 'Điện' : (d.fuelType === 'Diesel' ? 'Dầu' : 'Xăng');
+                    }
+                }
+            })
+            .catch(() => {});
+    }
+
     // Đặc điểm
     const transEl = document.getElementById('popupCarTrans');
     if (transEl) transEl.textContent = car.transmission || 'Số tự động';
@@ -782,8 +1300,8 @@ function openCarPopup(car) {
     // Pricing
     let rawPrice = parseInt(String(car.price || '524').replace(/\D/g, ''), 10);
     if (!rawPrice || rawPrice < 100) rawPrice = 524;
-    const priceK = `${rawPrice}K`;
-    const priceVND = rawPrice * 1000;
+    const priceVND = car.rawPrice || (rawPrice * 1000);
+    const priceK = car.price || `${rawPrice}K`;
 
     const widgetPriceBig = document.getElementById('widgetPriceBig');
     if (widgetPriceBig) widgetPriceBig.textContent = priceK;
@@ -1014,6 +1532,8 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
     if (window.AzuStore?.addTrip) {
         window.AzuStore.addTrip({
             id: Date.now(),
+            vehicleId: currentPopupCar.vehicleId || null,
+            listingId: currentPopupCar.listingId || null,
             car: currentPopupCar.name,
             image: currentPopupCar.image,
             location: deliveryMethod === 'delivery' ? (deliveryAddress || currentPopupCar.location) : currentPopupCar.location,
@@ -1037,7 +1557,7 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
 
     // Thông báo đặt xe thành công
     if (confirm(`🎉 Đặt xe ${currentPopupCar.name} thành công!\n\n• Khách thuê: ${name}\n• Số điện thoại nhận xe: ${phone}\n• Tổng tiền: ${totalPrice}\n\nChủ xe sẽ liên hệ sớm nhất để bàn giao xe.\nBạn có muốn chuyển sang trang 'Chuyến của tôi' để kiểm tra lịch trình không?`)) {
-        window.location.href = 'my-trips.html#trips';
+        window.location.href = '/account#trips';
     }
 });
 

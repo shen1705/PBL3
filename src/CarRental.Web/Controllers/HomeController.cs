@@ -16,7 +16,9 @@ public class HomeController : Controller
 
     public IActionResult CarRegisterMode() => View();
 
-    public IActionResult MyTrips() => View();
+    public IActionResult Account() => View();
+
+    public IActionResult MyTrips() => RedirectPermanent("/account#trips");
 
     public IActionResult Support() => View();
 

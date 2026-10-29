@@ -1,0 +1,488 @@
+﻿@{
+    ViewData["Title"] = "Tài khoản của tôi - AZU Car";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/mytrips.css" asp-append-version="true">
+}
+
+    <main class="trips-shell">
+        <aside class="trips-sidebar" aria-label="Danh mục tài khoản">
+            <div class="trips-profile">
+                <h2 class="sidebar-greeting">Xin chào bạn!</h2>
+                <strong id="trip-sidebar-name" style="display:none;"></strong>
+            </div>
+            <nav class="trips-side-nav">
+                <a class="trips-side-link" href="#account" id="nav-account"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
+                <a class="trips-side-link" href="/become-owner"><i class="fa-solid fa-key"></i><span>Trở thành chủ xe</span></a>
+                <a class="trips-side-link active" href="#trips" id="nav-trips" aria-current="page"><i class="fa-regular fa-calendar-days"></i><span>Chuyến của tôi</span></a>
+                <a class="trips-side-link" href="#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
+                <a class="trips-side-link" href="#privacy" id="nav-privacy"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
+                <a class="trips-side-link" href="#password" id="nav-password"><i class="fa-solid fa-lock"></i><span>Đổi mật khẩu</span></a>
+                <a class="trips-side-link trips-logout" id="trip-logout" href="/"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Đăng xuất</span></a>
+            </nav>
+        </aside>
+
+        <!-- Mục Tài khoản của tôi (Tích hợp từ account.html) -->
+        <section class="trips-main account-main" id="account-section" aria-labelledby="account-title">
+            <div class="section-page-heading">
+                <button class="btn-back btn-back-home" type="button" aria-label="Quay lại" title="Quay lại">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h1 id="account-title">Tài khoản của tôi</h1>
+            </div>
+
+            <div class="account-content">
+                <article class="panel profile-panel">
+                    <div class="panel-heading">
+                        <div class="heading-title">
+                            <h2>Thông tin tài khoản</h2>
+                            <button class="edit-icon" id="edit-profile-button" type="button" aria-label="Chỉnh sửa thông tin tài khoản"><i class="fa-solid fa-pen"></i></button>
+                        </div>
+                        <a class="trip-count" href="#trips" id="account-trip-count-btn">
+                            <i class="fa-solid fa-suitcase-rolling"></i>
+                            <strong id="account-trip-count">0</strong>
+                            <span>chuyến</span>
+                        </a>
+                    </div>
+
+                    <div class="profile-grid">
+                        <div class="identity-card">
+                            <div class="large-avatar" data-avatar>U</div>
+                            <h3 data-name>Người dùng</h3>
+                            <p class="joined-date">Tham gia: <span>Hôm nay</span></p>
+                        </div>
+
+                        <div class="profile-details">
+                            <div class="personal-details">
+                                <div class="detail-row"><span>Ngày sinh</span><strong id="profile-birthday">Chưa cập nhật</strong></div>
+                                <div class="detail-row"><span>Giới tính</span><strong id="profile-gender">Chưa cập nhật</strong></div>
+                            </div>
+                            <div class="detail-row contact-row">
+                                <span>Số điện thoại <em class="status status-pending" id="phone-status-badge"><i class="fa-solid fa-circle-exclamation"></i> Chưa xác thực</em></span>
+                                <strong id="profile-phone">Chưa cập nhật</strong>
+                            </div>
+                            <div class="detail-row contact-row">
+                                <span>Email <em class="status status-pending" id="email-status-badge"><i class="fa-solid fa-circle-exclamation"></i> Chưa xác thực</em></span>
+                                <strong id="profile-email">Chưa cập nhật</strong>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel license-panel">
+                    <div class="license-heading">
+                        <div>
+                            <h2>Giấy phép lái xe</h2>
+                            <span class="status status-unverified"><i class="fa-solid fa-circle-exclamation"></i> Chưa xác thực</span>
+                        </div>
+                        <button class="outline-button" id="edit-license-button" type="button">Chỉnh sửa <i class="fa-solid fa-pen"></i></button>
+                    </div>
+                    <div class="license-notice notice-warning">
+                        Khách thuê cần xác thực GPLX <strong>chính chủ</strong> đồng thời phải là người <strong>trực tiếp làm thủ tục khi nhận xe.</strong>
+                        
+                    </div>
+                    <div class="license-notice notice-success">
+                        Hình chụp cần thấy được <strong>Ảnh chân dung</strong> và <strong>Số GPLX.</strong> Bạn có thể sử dụng hình chụp GPLX bản gốc
+                        (thẻ PET) hoặc <strong>GPLX điện tử</strong> (xem trên VNeID hoặc VNeTraffic) <i class="fa-regular fa-circle-question"></i>
+                    </div>
+                    <form id="license-form" class="license-form">
+                        <div class="license-upload-column">
+                            <h3>Ảnh mặt trước GPLX</h3>
+                            <label class="license-upload" id="license-upload" for="license-image">
+                                <img id="license-image-preview" alt="Ảnh mặt trước giấy phép lái xe" hidden>
+                                <span class="upload-prompt" id="upload-prompt">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Nhấn để tải ảnh GPLX</span>
+                                    <small>JPG, PNG hoặc WEBP</small>
+                                </span>
+                            </label>
+                            <input id="license-image" class="visually-hidden" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Chọn ảnh mặt trước giấy phép lái xe" disabled>
+                        </div>
+                        <div class="license-fields">
+                            <h3>Thông tin chung</h3>
+                            <label for="license-number-input">Số GPLX</label>
+                            <input id="license-number-input" name="number" type="text" placeholder="Nhập số GPLX đã cấp" autocomplete="off" disabled required>
+                            <label for="license-holder-input">Họ và tên</label>
+                            <input id="license-holder-input" name="holder" type="text" placeholder="Nhập đầy đủ họ tên" autocomplete="name" disabled required>
+                            <label for="license-birthday-input">Ngày sinh</label>
+                            <input id="license-birthday-input" name="birthday" type="date" value="1970-01-01" disabled required>
+                            <button class="primary-button license-save-button" id="license-save-button" type="submit" hidden>Lưu thông tin</button>
+                        </div>
+                    </form>
+                </article>
+            </div>
+        </section>
+
+        <!-- Mục Địa chỉ của tôi -->
+        <section class="trips-main" id="address-section" aria-labelledby="address-title" hidden>
+            <div class="section-page-heading">
+                <button class="btn-back btn-back-home" type="button" aria-label="Quay lại" title="Quay lại">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h1 id="address-title">Địa chỉ của tôi</h1>
+            </div>
+
+            <div class="management-card address-card">
+                <div class="address-card-header">
+                    <h2>Địa chỉ đã lưu</h2>
+                    <button type="button" class="btn-add-address" id="btn-open-add-address">
+                        <i class="fa-solid fa-plus"></i> Thêm địa chỉ mới
+                    </button>
+                </div>
+
+                <div class="address-empty-state" id="address-empty-state">
+                    <div class="address-empty-icon" aria-hidden="true">
+                        <svg width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M34 8C29.6 8 26 11.6 26 16C26 21.2 34 29 34 29C34 29 42 21.2 42 16C42 11.6 38.4 8 34 8Z" stroke="#c49a49" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="#fff"/>
+                            <circle cx="34" cy="16" r="3" stroke="#c49a49" stroke-width="1.8" fill="none"/>
+                            <path d="M26 24C16 28 14 38 24 43C34 48 48 42 48 33C48 26 38 27 28 35C20 41 22 50 34 51" stroke="#d6a956" stroke-width="1.8" stroke-dasharray="3 3.5" fill="none"/>
+                            <path d="M31.5 35.5L36.5 40.5M36.5 35.5L31.5 40.5" stroke="#c49a49" stroke-width="1.8" stroke-linecap="round"/>
+                            <circle cx="34" cy="53" r="2.8" fill="#1c2635"/>
+                            <path d="M29 61C29 57.5 31.2 56.5 34 56.5C36.8 56.5 39 57.5 39 61" stroke="#1c2635" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3>Bạn chưa có địa chỉ</h3>
+                    <p>Lưu địa chỉ nhận xe thường xuyên (nhà riêng, công ty...) giúp bạn đặt xe nhanh chóng hơn trong những chuyến đi tiếp theo.</p>
+                </div>
+
+                <div class="address-list" id="address-list" hidden></div>
+            </div>
+        </section>
+
+        <!-- Mục Chuyến của tôi -->
+        <section class="trips-main" id="trips-section" aria-labelledby="trips-title">
+            <div class="section-page-heading">
+                <button class="btn-back btn-back-home" type="button" aria-label="Quay lại" title="Quay lại">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h1 id="trips-title">Chuyến của tôi</h1>
+            </div>
+
+            <div class="management-card trips-card">
+                <div class="trips-tabs" role="tablist" aria-label="Loại chuyến đi">
+                    <button class="trip-tab active" id="current-trips-tab" type="button" role="tab" aria-selected="true" data-trip-type="current">Chuyến hiện tại</button>
+                    <button class="trip-tab" id="past-trips-tab" type="button" role="tab" aria-selected="false" data-trip-type="past">Lịch sử chuyến</button>
+                </div>
+
+                <section class="trips-list" id="trips-list" hidden aria-live="polite"></section>
+                <section class="trips-empty-state" id="trips-empty" aria-labelledby="empty-trips-title">
+                    <div class="empty-art" aria-hidden="true">
+                        <span class="empty-sparkle sparkle-left"><i class="fa-solid fa-sparkles"></i></span>
+                        <i class="fa-solid fa-car-side"></i>
+                        <span class="empty-sparkle sparkle-right"><i class="fa-solid fa-sparkles"></i></span>
+                    </div>
+                    <h2 id="empty-trips-title">Bạn chưa có chuyến đi nào</h2>
+                    <p id="empty-trips-description">Hãy lên kế hoạch cho chuyến hành trình sắp tới và trải nghiệm dịch vụ xe tự lái cao cấp từ AZU Car ngay hôm nay.</p>
+                    <a class="trips-primary-link" href="index.html">Khám phá xe ngay</a>
+                </section>
+            </div>
+        </section>
+
+        <!-- Mục Chính sách bảo vệ dữ liệu -->
+        <section class="trips-main" id="privacy-section" aria-labelledby="privacy-title" hidden>
+            <div class="section-page-heading">
+                <button class="btn-back btn-back-home" type="button" aria-label="Quay lại" title="Quay lại">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h1 id="privacy-title">Chính sách bảo vệ dữ liệu</h1>
+            </div>
+
+            <div class="simple-doc-card">
+                <!-- Điều khoản chính sách bảo mật -->
+                <div class="doc-section">
+                    <h2 class="doc-sec-title">Chính sách & Quy định bảo mật</h2>
+                    <div class="doc-links-list">
+                        <a href="javascript:void(0)" class="doc-link-item" id="openPersonalPrivacyLink">
+                            <i class="fa-regular fa-file-lines"></i>
+                            <span>Chính sách bảo vệ cá nhân</span>
+                            <span class="chevron">›</span>
+                        </a>
+                        <a href="javascript:void(0)" class="doc-link-item" id="openTripPrivacyLink">
+                            <i class="fa-regular fa-file-lines"></i>
+                            <span>Chính sách bảo vệ chuyến đi</span>
+                            <span class="chevron">›</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mục Đổi mật khẩu -->
+        <section class="trips-main" id="password-section" aria-labelledby="password-title" hidden>
+            <div class="section-page-heading">
+                <button class="btn-back btn-back-home" type="button" aria-label="Quay lại" title="Quay lại">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <h1 id="password-title">Đổi mật khẩu</h1>
+            </div>
+
+            <div class="management-card password-card">
+                <div class="password-card-header">
+                    <div class="password-card-text">
+                        <h2>Thiết lập mật khẩu mới</h2>
+                        <p>Để bảo mật tài khoản, vui lòng sử dụng mật khẩu mạnh và không chia sẻ cho bất kỳ ai.</p>
+                    </div>
+                    <div class="password-security-badge">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Bảo mật tài khoản</span>
+                    </div>
+                </div>
+
+                <div class="password-card-body">
+                    <form id="password-page-form" class="password-page-form" autocomplete="off">
+                        <div class="password-field-group">
+                            <label for="current-password-input">Mật khẩu hiện tại <span class="required-star">*</span></label>
+                            <div class="password-input-wrap">
+                                <i class="fa-solid fa-lock pass-icon-left"></i>
+                                <input id="current-password-input" name="currentPassword" type="password" placeholder="Nhập mật khẩu hiện tại" autocomplete="current-password" required>
+                                <button type="button" class="btn-toggle-eye" aria-label="Hiện/ẩn mật khẩu" tabindex="-1">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="password-field-group">
+                            <label for="new-password-input">Mật khẩu mới <span class="required-star">*</span></label>
+                            <div class="password-input-wrap">
+                                <i class="fa-solid fa-key pass-icon-left"></i>
+                                <input id="new-password-input" name="newPassword" type="password" placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)" minlength="6" autocomplete="new-password" required>
+                                <button type="button" class="btn-toggle-eye" aria-label="Hiện/ẩn mật khẩu" tabindex="-1">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-rules-box">
+                                <small class="rule-item" id="rule-length"><i class="fa-solid fa-circle-check"></i> Tối thiểu 6 ký tự</small>
+                                <small class="rule-item" id="rule-diff"><i class="fa-solid fa-circle-info"></i> Không trùng mật khẩu hiện tại</small>
+                            </div>
+                        </div>
+
+                        <div class="password-field-group">
+                            <label for="confirm-password-input">Xác nhận mật khẩu mới <span class="required-star">*</span></label>
+                            <div class="password-input-wrap">
+                                <i class="fa-solid fa-lock pass-icon-left"></i>
+                                <input id="confirm-password-input" name="confirmPassword" type="password" placeholder="Nhập lại mật khẩu mới" minlength="6" autocomplete="new-password" required>
+                                <button type="button" class="btn-toggle-eye" aria-label="Hiện/ẩn mật khẩu" tabindex="-1">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="password-msg-alert" id="password-msg-alert" hidden></div>
+
+                        <div class="password-actions">
+                            <button class="primary-button btn-save-password" type="submit" id="btn-save-password">
+                                Cập nhật mật khẩu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div class="footer-col">
+                <a href="index.html" class="logo footer-logo">
+                    <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
+                </a>
+                <p class="footer-desc">Nền tảng chia sẻ và cho thuê ô tô tự lái hàng đầu Việt Nam. Mang lại những chuyến đi tự do và hạnh phúc cho triệu hành trình.</p>
+            </div>
+            <div class="footer-col">
+                <h4>VỀ AZU CAR</h4>
+                <ul>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="about.html#features">Tính năng</a></li>
+                    <li><a href="my-trips.html#privacy">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>DỊCH VỤ</h4>
+                <ul>
+                    <li><a href="#">Thuê xe tự lái</a></li>
+                    <li><a href="#">Thuê xe cưới hỏi</a></li>
+                    <li><a href="#">Hợp đồng dài hạn</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>HỖ TRỢ & LIÊN HỆ</h4>
+                <p><strong>Hotline:</strong> 1900 9217 (8:00 - 21:00)</p>
+                <p><strong>Email:</strong> support@azucar.vn</p>
+                <p><strong>Văn phòng:</strong> Phường Hải Châu, TP. Đà Nẵng</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container footer-bottom-flex">
+                <p>© 2026 AZU Car Việt Nam. Bảo lưu mọi quyền lợi.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Điều khoản dịch vụ</a>
+                    <a href="#">Chính sách hoạt động</a>
+                    <a href="#">Quy chế hoạt động</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal Xem Chi Tiết Chính Sách Bảo Vệ -->
+    <div class="dialog-backdrop" id="privacyDocModal" hidden>
+        <div class="contract-modal-view" role="dialog" aria-modal="true" aria-labelledby="privacyModalTitle">
+            <button class="dialog-close" type="button" data-close-dialog aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            <div class="contract-modal-header">
+                <div>
+                    <h2 id="privacyModalTitle">CHÍNH SÁCH BẢO VỆ DỮ LIỆU CÁ NHÂN</h2>
+                    <p id="privacyModalSubtitle">Tuân thủ Nghị định 13/2023/NĐ-CP của Chính phủ</p>
+                </div>
+                <span class="badge-status active" id="privacyModalBadge"><i class="fa-solid fa-circle-check"></i> Quy chuẩn an toàn</span>
+            </div>
+
+            <div class="contract-preview-body" id="privacyModalBody">
+                <!-- Nội dung chính sách được tải động từ JS -->
+            </div>
+
+            <div class="contract-modal-actions">
+                <button class="btn-download-contract" type="button" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> In / Tải PDF
+                </button>
+                <button class="primary-button" type="button" id="closePrivacyDocModalBtn">
+                    Đóng lại
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dialog chỉnh sửa thông tin tài khoản -->
+    <div class="dialog-backdrop" id="profile-dialog" hidden>
+        <section class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="profile-dialog-title">
+            <button class="dialog-close" type="button" data-close-dialog aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            <h2 id="profile-dialog-title">Chỉnh sửa thông tin</h2>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label for="edit-name">Họ và tên</label>
+                    <input id="edit-name" name="name" type="text" placeholder="Nhập họ và tên của bạn" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-phone">Số điện thoại</label>
+                    <input id="edit-phone" name="phone" type="tel" placeholder="Nhập số điện thoại">
+                </div>
+                <div class="form-group">
+                    <label for="edit-email">Email</label>
+                    <input id="edit-email" name="email" type="email" placeholder="Nhập địa chỉ email">
+                </div>
+                <div class="form-row-grid">
+                    <div class="form-group">
+                        <label for="edit-birthday">Ngày sinh</label>
+                        <input id="edit-birthday" name="birthday" type="date">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-gender">Giới tính</label>
+                        <select id="edit-gender" name="gender">
+                            <option value="">Chọn giới tính</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="primary-button" type="submit">Lưu thay đổi</button>
+            </form>
+        </section>
+    </div>
+
+    <!-- Dialog Thêm địa chỉ mới -->
+    <div class="dialog-backdrop" id="add-address-dialog" hidden>
+        <section class="account-dialog add-address-dialog" role="dialog" aria-modal="true" aria-labelledby="add-address-dialog-title">
+            <button class="dialog-close" type="button" data-close-dialog aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+
+            <div class="add-address-header">
+                <h2 id="add-address-dialog-title">Thêm địa chỉ mới</h2>
+                <div class="default-address-toggle">
+                    <span>Đặt làm địa chỉ mặc định</span>
+                    <label class="switch-toggle" title="Đặt làm địa chỉ mặc định">
+                        <input type="checkbox" id="address-is-default" name="isDefault">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <form id="new-address-form">
+                <!-- Loại địa điểm -->
+                <div class="form-group">
+                    <label class="form-label">Loại địa điểm</label>
+                    <div class="place-type-group">
+                        <button type="button" class="place-type-btn active" data-type="Nhà riêng">
+                            <i class="fa-solid fa-house"></i> <span>Nhà riêng</span>
+                        </button>
+                        <button type="button" class="place-type-btn" data-type="Công ty">
+                            <i class="fa-solid fa-building"></i> <span>Công ty</span>
+                        </button>
+                        <button type="button" class="place-type-btn" data-type="Khác">
+                            <i class="fa-solid fa-location-dot"></i> <span>Khác</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="address-type-input" name="placeType" value="Nhà riêng">
+                </div>
+
+                <!-- Tên gợi nhớ -->
+                <div class="form-group">
+                    <label class="form-label" for="address-name-input">Tên gợi nhớ</label>
+                    <input id="address-name-input" name="placeName" type="text" placeholder="Nhập tên cho địa chỉ của bạn" value="Nhà riêng" required>
+                </div>
+
+                <!-- 3 dropdowns: Tỉnh/Thành phố, Quận/Huyện, Phường/Xã -->
+                <div class="address-select-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="address-province-select">Thành phố / Tỉnh</label>
+                        <select id="address-province-select" name="province" required>
+                            <option value="">Chọn thành phố...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="address-district-select">Quận / Huyện</label>
+                        <select id="address-district-select" name="district" required disabled>
+                            <option value="">Chọn quận huyện...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="address-ward-select">Phường / Xã</label>
+                        <select id="address-ward-select" name="ward" required disabled>
+                            <option value="">Chọn phường xã...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Địa chỉ cụ thể -->
+                <div class="form-group">
+                    <label class="form-label" for="address-street-input">Địa chỉ</label>
+                    <input id="address-street-input" name="street" type="text" placeholder="Nhập tên đường / toà nhà" required>
+                </div>
+
+                <!-- Nút Huỷ và Xác nhận -->
+                <div class="address-modal-actions">
+                    <button type="button" class="btn-address-cancel" data-close-dialog>Huỷ</button>
+                    <button type="submit" class="btn-address-confirm" id="btn-address-submit">Xác nhận</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+
+    <!-- Popup Backdrop & Modal Đăng xuất -->
+    <div class="dialog-backdrop" id="logout-modal" hidden>
+        <div class="register-dialog">
+            <button class="dialog-close" id="close-modal-btn" type="button">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2>Đăng xuất</h2>
+            <p>Bạn chắc chắn muốn đăng xuất không?</p>
+            <button class="primary-button dialog-contact" id="confirm-logout-btn" style="background: #212529; width: 100%;">
+                Đăng xuất
+            </button>
+        </div>
+    </div>
+    <script src="JS/azu-store.js"></script>
+
+@section Scripts {
+    <script src="~/js/mytrips.js" asp-append-version="true"></script>
+}

@@ -100,385 +100,12 @@
                 </div>
             </div>
 
-            <!-- Grid Thẻ Xe (16 xe mẫu) -->
+            <!-- Grid Thẻ Xe (Tải động từ CSDL qua /api/vehicles) -->
             <div class="cars-grid" id="carsGrid">
-
-                <!-- Xe 1: VinFast VF3 2026 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800" alt="VINFAST VF3 2026">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">4 CHỖ</span>
-                        </div>
-                        <h3>VINFAST VF3 2026</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 24 chuyến • <b>Đời 2026</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Hòa Thuận Tây, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="car-price">524K<span>/ngày</span></span>
-                        </div>
-                    </div>
+                <div class="loading-cars" style="grid-column: 1 / -1; text-align: center; padding: 48px; color: #64748b;">
+                    <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: #00a550;"></i>
+                    <p style="margin-top: 12px; font-weight: 500;">Đang kết nối cơ sở dữ liệu và tải danh sách xe...</p>
                 </div>
-                
-                <!-- Xe 2: Honda City RS 2022 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600" alt="HONDA CITY RS 2022">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>HONDA CITY RS 2022</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 12 chuyến • <b>Đời 2022</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="car-price">625K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 3: Kia Sonet Luxury 2022 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-            
-                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="KIA SONET LUXURY 2022">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>KIA SONET LUXURY 2022</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 4.9 • 24 chuyến • <b>Đời 2022</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                        
-                            <span class="car-price">648K<span>/ngày</span></span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 4: Toyota Vios 2026 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                
-                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="TOYOTA VIOS 2026">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>TOYOTA VIOS 2026</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 8 chuyến • <b>Đời 2026</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Thanh Khê, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="car-price">778K<span>/ngày</span></span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 5: Toyota Vios 2024 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&q=80&w=600" alt="TOYOTA VIOS 2024">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>TOYOTA VIOS 2024</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 4.9 • 18 chuyến • <b>Đời 2024</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="delivery-note"><i class="fa-solid fa-check"></i> Giao xe tận nơi</span>
-                            <span class="car-price">688K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 6: Mitsubishi Xpander 2024 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600" alt="MITSUBISHI XPANDER 2024">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">7 CHỖ</span>
-                        </div>
-                        <h3>MITSUBISHI XPANDER 2024</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 7 chuyến • <b>Đời 2024</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường An Hải, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="car-price">765K<span>/ngày</span></span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 7: Hyundai Elantra 2024 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                        
-                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="HYUNDAI ELANTRA 2024">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>HYUNDAI ELANTRA 2024</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 4.7 • 11 chuyến • <b>Đời 2024</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            
-                            <span class="car-price">720K<span>/ngày</span></span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 8: Mazda 3 Luxury 2024 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-            
-                        <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=600" alt="MAZDA 3 LUXURY 2024">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>MAZDA 3 LUXURY 2024</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 4.8 • 20 chuyến • <b>Đời 2024</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Hòa Cường, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            
-                            <span class="car-price">782K<span>/ngày</span></span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 9: Ford Territory Trend 2025 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                
-                        <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600" alt="FORD TERRITORY TREND 2025">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>FORD TERRITORY TREND 2025</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 15 chuyến • <b>Đời 2025</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Cẩm Lệ, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="car-price">888K<span>/ngày</span></span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 10: Toyota Corolla Cross 2023 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=600" alt="TOYOTA COROLLA CROSS 2023">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>TOYOTA COROLLA CROSS 2023</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 4.9 • 9 chuyến • <b>Đời 2023</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Thanh Khê, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="car-price">620K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 11: Hyundai Kona 2024 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-    
-                        <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600" alt="HYUNDAI KONA 2024">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>HYUNDAI KONA 2024</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 4.7 • 10 chuyến • <b>Đời 2024</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Hải Châu, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                        
-                            <span class="car-price">690K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 12: Mitsubishi Xforce 2024 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                    
-                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="MITSUBISHI XFORCE 2024">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>MITSUBISHI XFORCE 2024</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 14 chuyến • <b>Đời 2024</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                    
-                            <span class="car-price">748K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 13: Suzuki Ertiga 2025 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600" alt="SUZUKI ERTIGA 2025">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">7 CHỖ</span>
-                        </div>
-                        <h3>SUZUKI ERTIGA 2025</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 10 chuyến • <b>Đời 2025</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Hòa Cường, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="car-price">840K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 14: Honda BR-V 2024 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                    
-                        <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600" alt="HONDA BR-V 2024">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">7 CHỖ</span>
-                        </div>
-                        <h3>HONDA BR-V 2024</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 4.8 • 13 chuyến • <b>Đời 2024</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-        
-                            <span class="car-price">710K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 15: Nissan Kicks 2024 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                
-                        <img src="https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600" alt="NISSAN KICKS 2024">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>NISSAN KICKS 2024</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 4.9 • 13 chuyến • <b>Đời 2024</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Liên Chiểu, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="car-price">770K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 16: Ford Ranger 2025 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-            
-                        <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600" alt="FORD RANGER 2025">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">5 CHỖ</span>
-                        </div>
-                        <h3>FORD RANGER 2025</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 5.0 • 6 chuyến • <b>Đời 2025</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường Cẩm Lệ, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            
-                            <span class="car-price">945K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Xe 17: Isuzu Mu-X 2024 -->
-                <div class="car-card">
-                    <div class="car-img-wrapper">
-                    
-                        <img src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600" alt="ISUZU MU-X 2024">
-                    </div>
-                    <div class="car-info">
-                        <div class="car-tags-top">
-                            <span class="tag-trans">SỐ TỰ ĐỘNG</span>
-                            <span class="tag-seats">7 CHỖ</span>
-                        </div>
-                        <h3>ISUZU MU-X 2024</h3>
-                        <p class="car-rating-loc">
-                            <i class="fa-solid fa-star text-warning"></i> 4.8 • 11 chuyến • <b>Đời 2024</b><br>
-                            <i class="fa-solid fa-location-dot"></i> Phường An Hải, TP. Đà Nẵng
-                        </p>
-                        <div class="car-footer">
-                            <span class="car-price">860K<span>/ngày</span></span>
-                        </div>
-                    </div>
-                </div>
-
             </div>
             <p id="noCarsMessage" class="no-cars-message" hidden>Hiện chưa có xe tại địa điểm này.</p>
         </div>
@@ -630,7 +257,7 @@
                         <input type="text" placeholder="Nhập mã">
                     </div>
                 </div>
-                <p class="terms-text">Tôi đã đọc và đồng ý với <a href="my-trips.html#privacy" class="open-policy-link" data-policy="terms">Chính sách & Quy định</a> và <a href="my-trips.html#privacy" class="open-policy-link" data-policy="privacy">Chính sách Bảo vệ dữ liệu cá nhân</a></p>
+                <p class="terms-text">Tôi đã đọc và đồng ý với <a href="/account#privacy" class="open-policy-link" data-policy="terms">Chính sách & Quy định</a> và <a href="/account#privacy" class="open-policy-link" data-policy="privacy">Chính sách Bảo vệ dữ liệu cá nhân</a></p>
                 <button type="submit" class="btn-submit-auth">Đăng ký</button>
                 <p class="switch-auth-text">Bạn đã có tài khoản? <a href="#" id="switchToLogin">Đăng nhập ngay</a></p>
             </form>
@@ -669,6 +296,116 @@
                 <button type="button" class="btn-submit-auth policy-btn-agree" id="btnAcceptPolicy">
                     <i class="fa-solid fa-circle-check"></i> Đã hiểu & Đồng ý
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup chọn địa điểm -->
+    <div id="locationModal" class="location-picker-overlay">
+        <div class="location-picker-panel" role="dialog" aria-modal="true" aria-labelledby="locationModalTitle">
+            <div class="location-picker-header">
+                <div>
+                    <h2 id="locationModalTitle">Chọn địa điểm</h2>
+                    <p>Chọn nơi bạn muốn nhận xe</p>
+                </div>
+                <button class="location-picker-close" data-modal="locationModal" type="button" aria-label="Đóng">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="location-current">
+                <i class="fa-solid fa-location-dot"></i>
+                <div>
+                    <span>Địa điểm hiện tại</span>
+                    <strong id="locationCurrentText">TP. Đà Nẵng</strong>
+                </div>
+            </div>
+            <label class="location-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="locationInput" type="text" placeholder="Tìm thành phố hoặc khu vực">
+            </label>
+            <div class="location-list-title">Địa điểm đang có xe</div>
+            <div id="locationOptions" class="location-options"></div>
+            <button id="confirmLocationBtn" class="location-custom-confirm" type="button" hidden>
+                Dùng địa điểm đã nhập
+            </button>
+        </div>
+    </div>
+
+    <!-- Popup chọn thời gian thuê -->
+    <div id="timeModal" class="auth-modal-overlay">
+        <div class="auth-modal-card" style="max-width: 540px; padding: 24px;">
+            <button class="modal-close-btn" data-modal="timeModal" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header" style="margin-bottom: 16px;">
+                <h2 style="font-size: 20px; font-weight: 700; color: #1e293b;">Thời gian thuê</h2>
+            </div>
+            <div style="display: flex; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; text-align: center;">
+                <div id="tabDaily" style="flex: 1; padding-bottom: 10px; font-weight: 700; color: #00a550; border-bottom: 2px solid #00a550; cursor: pointer;">Thuê ngày</div>
+                <div id="tabHourly" style="flex: 1; padding-bottom: 10px; font-weight: 600; color: #94a3b8; cursor: pointer;">Thuê giờ</div>
+            </div>
+            <div id="dailyContent">
+                <p class="rental-date-hint" style="color: #64748b; font-size: 13px; margin-bottom: 12px;">Chọn ngày nhận xe, sau đó chọn ngày trả xe.</p>
+                <div class="rental-date-selection" style="display: flex; gap: 12px; margin-bottom: 16px;">
+                    <button id="selectPickupDate" class="rental-date-choice active" type="button" style="flex: 1; padding: 10px 14px; border: 1px solid #00a550; border-radius: 8px; background: #f0fdf4; text-align: left; cursor: pointer;">
+                        <span style="display: block; font-size: 11px; color: #64748b;">Ngày nhận xe</span>
+                        <strong id="selectedPickupDate" style="display: block; font-size: 14px; color: #00a550;">Chọn ngày</strong>
+                    </button>
+                    <button id="selectReturnDate" class="rental-date-choice" type="button" style="flex: 1; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; text-align: left; cursor: pointer;">
+                        <span style="display: block; font-size: 11px; color: #64748b;">Ngày trả xe</span>
+                        <strong id="selectedReturnDate" style="display: block; font-size: 14px; color: #1e293b;">Chọn ngày</strong>
+                    </button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <button id="prevMonthBtn" type="button" style="background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="currentMonthYearLabel" style="font-weight: 700; font-size: 16px; color: #1e293b;">Tháng 10, 2026</span>
+                    <button id="nextMonthBtn" type="button" style="background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer;"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 8px;">
+                        <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                    </div>
+                    <div id="dynamicCalendarDays" style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 13px; gap: 8px; color: #334155; cursor: pointer;"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Giờ nhận xe</label>
+                        <select id="pickupTimeSelect" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                            <option value="09:00">09:00</option><option value="12:00">12:00</option><option value="15:00">15:00</option><option value="18:00">18:00</option><option value="21:00" selected>21:00</option>
+                        </select>
+                    </div>
+                    <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Giờ trả xe</label>
+                        <select id="returnTimeSelect" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                            <option value="09:00">09:00</option><option value="12:00">12:00</option><option value="15:00">15:00</option><option value="18:00">18:00</option><option value="20:00">20:00</option><option value="21:00" selected>21:00</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="hourlyContent" style="display: none;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Ngày bắt đầu</label>
+                        <input type="date" id="hourlyDateInput" value="2026-10-14" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                    </div>
+                    <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;">
+                        <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Giờ nhận xe</label>
+                        <select id="hourlyPickupTime" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                            <option value="14:00">14:00</option><option value="15:00">15:00</option><option value="16:00" selected>16:00</option><option value="17:00">17:00</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; margin-bottom: 16px;">
+                    <label style="font-size: 11px; font-weight: 700; color: #64748b; display: block; margin-bottom: 2px;">Thời gian thuê</label>
+                    <select id="hourlyDuration" style="width: 100%; border: none; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; background: transparent; cursor: pointer;">
+                        <option value="2">2 giờ</option><option value="4" selected>4 giờ</option><option value="6">6 giờ</option><option value="8">8 giờ</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+                <div>
+                    <div id="modalPreviewText" style="font-weight: 700; font-size: 14px; color: #1e293b;"></div>
+                    <div id="modalSubPreviewText" style="font-size: 12px; color: #64748b; margin-top: 2px;"></div>
+                </div>
+                <button id="btnConfirmTime" type="button" style="background-color: #00a550; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">Tiếp tục</button>
             </div>
         </div>
     </div>
