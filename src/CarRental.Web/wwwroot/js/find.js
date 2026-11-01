@@ -1392,6 +1392,93 @@ const bookingCheckoutForm = document.getElementById('bookingCheckoutForm');
 const deliveryAddressGroup = document.getElementById('deliveryAddressGroup');
 const bookDeliveryAddress = document.getElementById('bookDeliveryAddress');
 
+
+function parseVNTimeString(str) {
+    if (!str) return new Date();
+    const match = str.match(/(?:(\d{1,2}):(\d{1,2}),?\s*)?(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (match) {
+        const hours = match[1] ? parseInt(match[1], 10) : 9;
+        const minutes = match[2] ? parseInt(match[2], 10) : 0;
+        const day = parseInt(match[3], 10);
+        const month = parseInt(match[4], 10) - 1;
+        const year = parseInt(match[5], 10);
+        return new Date(Date.UTC(year, month, day, hours, minutes));
+    }
+    const d = new Date(str);
+    return isNaN(d.getTime()) ? new Date() : d;
+}
+
+function getSelectedBookingDates() {
+    const pStr = document.getElementById('bookPickupTime')?.textContent.trim() || document.getElementById('pickupTimeText')?.textContent.trim();
+    const rStr = document.getElementById('bookReturnTime')?.textContent.trim() || document.getElementById('returnTimeText')?.textContent.trim();
+    
+    let start = parseVNTimeString(pStr);
+    let end = parseVNTimeString(rStr);
+
+    const now = new Date();
+    if (start <= now) {
+        start = new Date(Date.now() + 24 * 3600 * 1000);
+        start.setMinutes(0, 0, 0);
+    }
+    if (end <= start) {
+        end = new Date(start.getTime() + 2 * 24 * 3600 * 1000);
+    }
+
+    return { start, end };
+}
+
+async function refreshBookingPrice() {
+    if (!currentPopupCar) return;
+    const dates = getSelectedBookingDates();
+    const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked')?.value || 'host';
+
+    if (currentPopupCar.listingId) {
+        try {
+            const resp = await fetch('/api/bookings/calculate-price', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    listingId: Number(currentPopupCar.listingId),
+                    startDate: dates.start.toISOString(),
+                    endDate: dates.end.toISOString(),
+                    deliveryMethod: deliveryMethod
+                })
+            });
+            if (resp.ok) {
+                const resData = await resp.json();
+                if (resData.isSuccess && resData.data) {
+                    const d = resData.data;
+                    document.getElementById('bookBasePrice') && (document.getElementById('bookBasePrice').textContent = `${d.rentalSubtotal.toLocaleString('vi-VN')} đ (${d.rentalDays} ngày)`);
+                    document.getElementById('bookInsurancePrice') && (document.getElementById('bookInsurancePrice').textContent = `${d.insuranceFee.toLocaleString('vi-VN')} đ`);
+                    document.getElementById('bookDeliveryFee') && (document.getElementById('bookDeliveryFee').textContent = d.deliveryFee > 0 ? `${d.deliveryFee.toLocaleString('vi-VN')} đ` : 'Miễn phí');
+                    document.getElementById('bookTotalPrice') && (document.getElementById('bookTotalPrice').textContent = `${d.priceLockedTotal.toLocaleString('vi-VN')} đ`);
+                    document.getElementById('bookDepositPrice') && (document.getElementById('bookDepositPrice').textContent = `${d.depositAmount.toLocaleString('vi-VN')} đ`);
+                    document.getElementById('bookRemainingPrice') && (document.getElementById('bookRemainingPrice').textContent = `${d.remainingAmount.toLocaleString('vi-VN')} đ`);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn('Could not calculate price via API:', e);
+        }
+    }
+
+    const rawDaily = currentPopupCar.rawPrice || 700000;
+    const days = Math.max(1, Math.round((dates.end - dates.start) / (1000 * 3600 * 24)));
+    const subtotal = rawDaily * days;
+    const delivery = deliveryMethod === 'delivery' ? 100000 : 0;
+    const ins = 50000 * days;
+    const total = subtotal + delivery + ins;
+    const deposit = Math.round(total * 0.25);
+    const rem = total - deposit;
+
+    document.getElementById('bookBasePrice') && (document.getElementById('bookBasePrice').textContent = `${subtotal.toLocaleString('vi-VN')} đ (${days} ngày)`);
+    document.getElementById('bookInsurancePrice') && (document.getElementById('bookInsurancePrice').textContent = `${ins.toLocaleString('vi-VN')} đ`);
+    document.getElementById('bookDeliveryFee') && (document.getElementById('bookDeliveryFee').textContent = delivery > 0 ? `${delivery.toLocaleString('vi-VN')} đ` : 'Miễn phí');
+    document.getElementById('bookTotalPrice') && (document.getElementById('bookTotalPrice').textContent = `${total.toLocaleString('vi-VN')} đ`);
+    document.getElementById('bookDepositPrice') && (document.getElementById('bookDepositPrice').textContent = `${deposit.toLocaleString('vi-VN')} đ`);
+    document.getElementById('bookRemainingPrice') && (document.getElementById('bookRemainingPrice').textContent = `${rem.toLocaleString('vi-VN')} đ`);
+}
+
 function openBookingModal() {
     if (!currentPopupCar) return;
 
@@ -1435,6 +1522,7 @@ function openBookingModal() {
 
     if (bookingModal) {
         bookingModal.hidden = false;
+        refreshBookingPrice();
         // Tự động focus vào ô trống đầu tiên
         if (!nameInput?.value) nameInput?.focus();
         else if (!phoneInput?.value) phoneInput?.focus();
@@ -1458,6 +1546,7 @@ document.querySelectorAll('input[name="deliveryMethod"]').forEach(radio => {
         if (deliveryAddressGroup) deliveryAddressGroup.hidden = !isDelivery;
         if (bookDeliveryAddress) bookDeliveryAddress.required = isDelivery;
         if (isDelivery && bookDeliveryAddress) bookDeliveryAddress.focus();
+        refreshBookingPrice();
     });
 });
 
@@ -1507,9 +1596,15 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Submit form hoàn tất đặt xe
-bookingCheckoutForm?.addEventListener('submit', (e) => {
+bookingCheckoutForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!bookingCheckoutForm.reportValidity() || !currentPopupCar) return;
+
+    const errorBanner = document.getElementById('bookingErrorBanner');
+    if (errorBanner) {
+        errorBanner.style.display = 'none';
+        errorBanner.textContent = '';
+    }
 
     const name = document.getElementById('bookRenterName')?.value.trim();
     const phone = document.getElementById('bookRenterPhone')?.value.trim();
@@ -1520,44 +1615,101 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
     const notes = document.getElementById('bookRenterNotes')?.value.trim();
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'qr';
 
+    const submitBtn = document.getElementById('btnConfirmBooking');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+    }
+
+    const dates = getSelectedBookingDates();
     const pickupTime = document.getElementById('bookPickupTime')?.textContent.trim() || '21:00, 15/10/2026';
     const returnTime = document.getElementById('bookReturnTime')?.textContent.trim() || '21:00, 16/10/2026';
     const totalPrice = document.getElementById('bookTotalPrice')?.textContent.trim() || `${currentPopupCar.price}/ngày`;
 
-    // Lưu thông tin người dùng vào session để đồng bộ khắp trang
+    // Lưu thông tin người dùng vào session để đồng bộ
     if (phone) sessionStorage.setItem('azuCarPhone', phone);
     if (email) sessionStorage.setItem('azuCarEmail', email);
 
-    // Lưu chuyến đi vào kho AzuStore
-    if (window.AzuStore?.addTrip) {
-        window.AzuStore.addTrip({
-            id: Date.now(),
-            vehicleId: currentPopupCar.vehicleId || null,
-            listingId: currentPopupCar.listingId || null,
-            car: currentPopupCar.name,
-            image: currentPopupCar.image,
-            location: deliveryMethod === 'delivery' ? (deliveryAddress || currentPopupCar.location) : currentPopupCar.location,
-            price: currentPopupCar.price,
-            pickup: pickupTime,
-            return: returnTime,
-            status: 'current',
-            total: totalPrice,
+    // Gửi yêu cầu đặt xe lên Backend API
+    try {
+        const payload = {
+            listingId: Number(currentPopupCar.listingId || 1),
+            vehicleId: currentPopupCar.vehicleId ? Number(currentPopupCar.vehicleId) : null,
+            startDate: dates.start.toISOString(),
+            endDate: dates.end.toISOString(),
+            deliveryMethod: deliveryMethod,
+            deliveryAddress: deliveryAddress,
+            notes: notes,
             renterName: name,
             renterPhone: phone,
             renterEmail: email,
-            renterIdNumber: idNumber,
-            deliveryType: deliveryMethod,
-            paymentMethod: paymentMethod,
-            notes: notes
+            paymentMethod: paymentMethod
+        };
+
+        const resp = await fetch('/api/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
         });
-    }
+        const resData = await resp.json();
 
-    closeBookingModal();
-    closeCarModal();
+        if (resp.ok && resData.isSuccess) {
+            // Đồng bộ AzuStore
+            if (window.AzuStore?.addTrip) {
+                window.AzuStore.addTrip({
+                    id: resData.data?.bookingId || Date.now(),
+                    vehicleId: currentPopupCar.vehicleId || null,
+                    listingId: currentPopupCar.listingId || null,
+                    car: currentPopupCar.name,
+                    image: currentPopupCar.image,
+                    location: deliveryMethod === 'delivery' ? (deliveryAddress || currentPopupCar.location) : currentPopupCar.location,
+                    price: currentPopupCar.price,
+                    pickup: pickupTime,
+                    return: returnTime,
+                    status: 'current',
+                    total: totalPrice,
+                    renterName: name,
+                    renterPhone: phone,
+                    renterEmail: email,
+                    renterIdNumber: idNumber,
+                    deliveryType: deliveryMethod,
+                    paymentMethod: paymentMethod,
+                    notes: notes
+                });
+            }
 
-    // Thông báo đặt xe thành công
-    if (confirm(`🎉 Đặt xe ${currentPopupCar.name} thành công!\n\n• Khách thuê: ${name}\n• Số điện thoại nhận xe: ${phone}\n• Tổng tiền: ${totalPrice}\n\nChủ xe sẽ liên hệ sớm nhất để bàn giao xe.\nBạn có muốn chuyển sang trang 'Chuyến của tôi' để kiểm tra lịch trình không?`)) {
-        window.location.href = '/account#trips';
+            closeBookingModal();
+            closeCarModal();
+
+            const depositFormatted = resData.data?.depositAmount
+                ? Number(resData.data.depositAmount).toLocaleString('vi-VN') + ' đ'
+                : 'Đã giữ cọc';
+
+            if (confirm(`🎉 Đặt xe ${currentPopupCar.name} thành công!\n\n• Mã đơn: #${resData.data?.bookingId}\n• Tiền đặt cọc giữ xe (25%): ${depositFormatted}\n• Trạng thái: Chờ chủ xe duyệt (trong 24 giờ)\n\nBạn có muốn chuyển sang trang 'Chuyến của tôi' để theo dõi tiến độ không?`)) {
+                window.location.href = '/account#trips';
+            }
+        } else {
+            const msg = resData?.message || 'Không thể tạo đơn đặt xe lúc này. Vui lòng thử lại sau.';
+            if (errorBanner) {
+                errorBanner.textContent = msg;
+                errorBanner.style.display = 'block';
+            } else {
+                alert('Lỗi đặt xe: ' + msg);
+            }
+        }
+    } catch (err) {
+        console.error('Lỗi khi gửi yêu cầu đặt xe:', err);
+        if (errorBanner) {
+            errorBanner.textContent = 'Lỗi kết nối máy chủ. Vui lòng thử lại.';
+            errorBanner.style.display = 'block';
+        } else {
+            alert('Lỗi kết nối máy chủ.');
+        }
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Xác nhận đặt xe';
+        }
     }
 });
 

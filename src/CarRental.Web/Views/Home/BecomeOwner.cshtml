@@ -146,6 +146,19 @@
                             </label>
                         </div>
 
+                        <section class="calendar-panel owner-requests-panel" id="ownerRequestsPanel" style="margin-bottom: 20px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px;" aria-label="Yêu cầu đặt xe">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                                <h2 style="font-size: 17px; font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-bell" style="color: #d97706;"></i> Yêu cầu thuê xe cần phản hồi
+                                    <span id="pendingRequestBadge" style="background: #fef3c7; color: #b45309; font-size: 12px; padding: 2px 8px; border-radius: 999px; font-weight: 700;">0</span>
+                                </h2>
+                                <small style="color: #64748b; font-size: 13px;">Hạn phản hồi: trong 24 giờ</small>
+                            </div>
+                            <div id="ownerRequestsList" style="display: flex; flex-direction: column; gap: 12px;">
+                                <p style="color: #64748b; font-size: 14px; margin: 0;">Đang kiểm tra yêu cầu thuê xe...</p>
+                            </div>
+                        </section>
+
                         <section class="calendar-panel calendar-schedule" aria-label="Lịch trống xe">
                             <div class="calendar-empty-summary">
                                 <span class="calendar-empty-icon"><i class="fa-regular fa-calendar"></i></span>
