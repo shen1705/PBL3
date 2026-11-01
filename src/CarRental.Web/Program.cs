@@ -3,6 +3,7 @@ using CarRental.Models.Entities;
 using CarRental.Services;
 using CarRental.Services.Availability;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,7 +74,7 @@ app.MapControllerRoute("about", "about", new { controller = "Home", action = "Ab
 app.MapControllerRoute("find", "find", new { controller = "Home", action = "Find" });
 app.MapControllerRoute("become-owner", "become-owner", new { controller = "Home", action = "BecomeOwner" });
 app.MapControllerRoute("carregistermode", "carregistermode", new { controller = "Home", action = "CarRegisterMode" });
-app.MapControllerRoute("account", "account", new { controller = "Home", action = "Account" });
+app.MapControllerRoute("account", "account", new { controller = "Home", action = "Account" });
 app.MapControllerRoute("my-trips", "my-trips", new { controller = "Home", action = "MyTrips" });
 app.MapControllerRoute("support", "support", new { controller = "Home", action = "Support" });
 app.MapControllerRoute("chatbot", "chatbot", new { controller = "Home", action = "Chatbot" });
@@ -84,8 +85,8 @@ app.MapGet("/about.html", () => Results.Redirect("/about", permanent: true));
 app.MapGet("/find.html", () => Results.Redirect("/find", permanent: true));
 app.MapGet("/become-owner.html", () => Results.Redirect("/become-owner", permanent: true));
 app.MapGet("/carregistermode.html", () => Results.Redirect("/carregistermode", permanent: true));
-app.MapGet("/account.html", () => Results.Redirect("/account", permanent: true));
-app.MapGet("/my-trips", () => Results.Redirect("/account#trips", permanent: true));
+app.MapGet("/account.html", () => Results.Redirect("/account", permanent: true));
+app.MapGet("/my-trips", () => Results.Redirect("/account#trips", permanent: true));
 app.MapGet("/my-trips.html", () => Results.Redirect("/account#trips", permanent: true));
 app.MapGet("/support.html", () => Results.Redirect("/support", permanent: true));
 app.MapGet("/chatbot.html", () => Results.Redirect("/chatbot", permanent: true));
@@ -131,6 +132,35 @@ if (app.Environment.IsDevelopment())
             SampleNames = all.Data?.Items.Select(x => $"{x.Name} ({x.City})").Take(5),
             DaNangCars = daNang.Data?.TotalCount,
             Cities = cities.Data
+        });
+    });
+
+    app.MapGet("/dev/bookings-test", async (CarRental.Services.Bookings.IBookingService bookings, ApplicationDbContext db) =>
+    {
+        var firstListing = await db.VehicleListings.FirstOrDefaultAsync();
+        var priceCalc = firstListing != null
+            ? await bookings.CalculatePriceAsync(new CarRental.Models.DTOs.Bookings.BookingPriceCalculationRequest
+            {
+                ListingId = firstListing.ListingId,
+                StartDate = DateTime.UtcNow.AddDays(2),
+                EndDate = DateTime.UtcNow.AddDays(5),
+                DeliveryMethod = "delivery"
+            })
+            : null;
+
+        var renter1 = await db.Users.FirstOrDefaultAsync(u => u.UserName == "renter1");
+        var renter1Trips = renter1 != null ? await bookings.GetRenterTripsAsync(renter1.Id) : null;
+
+        var owner1 = await db.Users.FirstOrDefaultAsync(u => u.UserName == "owner1");
+        var owner1Requests = owner1 != null ? await bookings.GetOwnerBookingRequestsAsync(owner1.Id) : null;
+
+        return Results.Ok(new
+        {
+            PriceCalculation = priceCalc?.Data,
+            Renter1TripsCount = renter1Trips?.Data?.Count,
+            Renter1SampleTrip = renter1Trips?.Data?.FirstOrDefault(),
+            Owner1RequestsCount = owner1Requests?.Data?.Count,
+            Owner1SampleRequest = owner1Requests?.Data?.FirstOrDefault()
         });
     });
 

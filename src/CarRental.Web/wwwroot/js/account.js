@@ -592,48 +592,174 @@ function tripIsCurrent(trip) {
     return tripEnd >= today;
 }
 
-function renderTrips() {
-    trips = window.AzuStore.getTrips();
+function getStatusBadgeInfo(status) {
+    switch (status) {
+        case 'Pending':
+            return { text: 'Chờ chủ xe duyệt', bg: '#fef3c7', color: '#b45309' };
+        case 'Accepted':
+            return { text: 'Chủ xe đã duyệt', bg: '#dcfce7', color: '#15803d' };
+        case 'Ongoing':
+            return { text: 'Đang trong chuyến', bg: '#dbeafe', color: '#1d4ed8' };
+        case 'Completed':
+            return { text: 'Hoàn tất', bg: '#f1f5f9', color: '#475569' };
+        case 'Cancelled':
+            return { text: 'Đã hủy', bg: '#fee2e2', color: '#b91c1c' };
+        case 'Rejected':
+            return { text: 'Chủ xe từ chối', bg: '#fee2e2', color: '#b91c1c' };
+        case 'Expired':
+            return { text: 'Hết hạn duyệt', bg: '#f3f4f6', color: '#6b7280' };
+        default:
+            return { text: status, bg: '#f1f5f9', color: '#475569' };
+    }
+}
+
+async function renderTrips() {
     if (!tripsList || !tripsEmpty) return;
 
-    const visibleTrips = trips.filter(trip => tripIsCurrent(trip) === (activeTripType === 'current'));
     tripsList.replaceChildren();
-    tripsList.hidden = visibleTrips.length === 0;
-    tripsEmpty.hidden = visibleTrips.length > 0;
+    const loadingEl = document.createElement('div');
+    loadingEl.style.padding = '32px 16px';
+    loadingEl.style.textAlign = 'center';
+    loadingEl.style.color = '#64748b';
+    loadingEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách chuyến đi...';
+    tripsList.appendChild(loadingEl);
+    tripsList.hidden = false;
+    tripsEmpty.hidden = true;
 
-    if (!visibleTrips.length) {
-        if (emptyTripsTitle) {
-            emptyTripsTitle.textContent = activeTripType === 'current'
-                ? 'Bạn chưa có chuyến đi nào'
-                : 'Chưa có chuyến đi trong lịch sử';
+    let apiTrips = [];
+    try {
+        const resp = await fetch(`/api/bookings/my-trips?status=${activeTripType}`);
+        if (resp.ok) {
+            const resData = await resp.json();
+            if (resData && resData.isSuccess && Array.isArray(resData.data)) {
+                apiTrips = resData.data;
+            }
         }
-        if (emptyTripsDescription) {
-            emptyTripsDescription.textContent = activeTripType === 'current'
-                ? 'Hãy lên kế hoạch cho chuyến hành trình sắp tới và trải nghiệm dịch vụ xe tự lái cao cấp từ AZU Car ngay hôm nay.'
-                : 'Các chuyến đi đã hoàn tất sẽ được lưu lại tại đây.';
+    } catch (e) {
+        console.warn('Không thể tải danh sách chuyến từ API, dùng dữ liệu local:', e);
+    }
+
+    tripsList.replaceChildren();
+
+    if (apiTrips.length === 0) {
+        const localTrips = window.AzuStore?.getTrips ? window.AzuStore.getTrips() : [];
+        const visibleTrips = localTrips.filter(trip => tripIsCurrent(trip) === (activeTripType === 'current'));
+
+        if (!visibleTrips.length) {
+            tripsList.hidden = true;
+            tripsEmpty.hidden = false;
+            if (emptyTripsTitle) {
+                emptyTripsTitle.textContent = activeTripType === 'current'
+                    ? 'Bạn chưa có chuyến đi nào'
+                    : 'Chưa có chuyến đi trong lịch sử';
+            }
+            if (emptyTripsDescription) {
+                emptyTripsDescription.textContent = activeTripType === 'current'
+                    ? 'Hãy lên kế hoạch cho chuyến hành trình sắp tới và trải nghiệm dịch vụ xe tự lái cao cấp từ AZU Car ngay hôm nay.'
+                    : 'Các chuyến đi đã hoàn tất sẽ được lưu lại tại đây.';
+            }
+            return;
         }
+
+        tripsList.hidden = false;
+        tripsEmpty.hidden = true;
+
+        visibleTrips.forEach(trip => {
+            const card = document.createElement('article');
+            card.className = 'trip-card';
+            card.style.position = 'relative';
+
+            const image = document.createElement('img');
+            image.src = trip.image || 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600';
+            image.alt = trip.name || 'Xe đã đặt';
+
+            const info = document.createElement('div');
+            const title = document.createElement('h2');
+            title.textContent = trip.name;
+            const meta = document.createElement('p');
+            meta.textContent = `${trip.location || 'TP. Đà Nẵng'} • ${trip.pickup || ''} - ${trip.return || ''}`;
+            const status = document.createElement('span');
+            status.className = 'trip-status';
+            status.textContent = trip.status === 'confirmed' ? 'Đã duyệt' : 'Chờ duyệt';
+            const price = document.createElement('strong');
+            price.textContent = trip.total || (trip.price ? `${trip.price}/ngày` : '');
+            info.append(title, meta, status, price);
+
+            card.append(image, info);
+            tripsList.append(card);
+        });
         return;
     }
 
-    visibleTrips.forEach(trip => {
+    tripsList.hidden = false;
+    tripsEmpty.hidden = true;
+
+    apiTrips.forEach(trip => {
         const card = document.createElement('article');
         card.className = 'trip-card';
+        card.style.position = 'relative';
 
         const image = document.createElement('img');
-        image.src = trip.image || '';
-        image.alt = trip.name || 'Xe đã đặt';
+        image.src = trip.coverImageUrl || 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600';
+        image.alt = trip.vehicleName;
 
         const info = document.createElement('div');
         const title = document.createElement('h2');
-        title.textContent = trip.name;
+        title.innerHTML = `${trip.vehicleName} ${trip.licensePlate ? `<small style="font-size: 13px; color: #64748b; font-weight: normal;">(${trip.licensePlate})</small>` : ''}`;
+
+        const startStr = new Date(trip.startDate).toLocaleDateString('vi-VN');
+        const endStr = new Date(trip.endDate).toLocaleDateString('vi-VN');
         const meta = document.createElement('p');
-        meta.textContent = `${trip.location || ''} • ${trip.pickup || ''} - ${trip.return || ''}`;
-        const status = document.createElement('span');
-        status.className = 'trip-status';
-        status.textContent = trip.status === 'confirmed' ? 'Đã xác nhận' : trip.status;
+        meta.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${trip.city || 'TP. Đà Nẵng'} &bull; <i class="fa-regular fa-calendar-days"></i> ${startStr} - ${endStr} (${trip.rentalDays} ngày)`;
+
+        const badge = getStatusBadgeInfo(trip.status);
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'trip-status';
+        statusSpan.textContent = badge.text;
+        statusSpan.style.backgroundColor = badge.bg;
+        statusSpan.style.color = badge.color;
+
         const price = document.createElement('strong');
-        price.textContent = trip.price ? `${trip.price}/ngày` : '';
-        info.append(title, meta, status, price);
+        price.textContent = `Tổng: ${Number(trip.priceLockedTotal || 0).toLocaleString('vi-VN')} đ`;
+
+        const depositSmall = document.createElement('div');
+        depositSmall.style.fontSize = '13px';
+        depositSmall.style.color = '#1d4ed8';
+        depositSmall.style.marginTop = '4px';
+        depositSmall.textContent = `Đã cọc trực tuyến: ${Number(trip.depositAmount || 0).toLocaleString('vi-VN')} đ (25%)`;
+
+        info.append(title, meta, statusSpan, price, depositSmall);
+
+        if (trip.status === 'Pending' || trip.status === 'Accepted') {
+            const cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.style.cssText = 'margin-top: 10px; background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Hủy chuyến này';
+            cancelBtn.addEventListener('click', async () => {
+                const reason = prompt('Nhập lý do hủy chuyến:');
+                if (reason === null) return;
+                cancelBtn.disabled = true;
+                try {
+                    const r = await fetch(`/api/bookings/${trip.bookingId}/cancel`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reason: reason || 'Khách thuê chủ động hủy chuyến' })
+                    });
+                    const d = await r.json();
+                    if (r.ok && d.isSuccess) {
+                        alert('Hủy chuyến thành công! Tiền cọc đã được giải phóng.');
+                        renderTrips();
+                    } else {
+                        alert('Lỗi: ' + (d?.message || 'Không thể hủy chuyến'));
+                    }
+                } catch (e) {
+                    alert('Lỗi kết nối máy chủ.');
+                } finally {
+                    cancelBtn.disabled = false;
+                }
+            });
+            info.appendChild(cancelBtn);
+        }
 
         card.append(image, info);
         tripsList.append(card);
