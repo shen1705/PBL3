@@ -1689,3 +1689,31 @@ a {
     padding-top: 16px;
     border-top: 1px solid #f1f3f5;
 }
+
+/* Button Đăng ký xe tự lái (Lấy chuẩn từ trang carregistermode) */
+.register-cta {
+    display: inline-flex;
+    width: auto;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 22px;
+    background: #212529 !important;
+    box-shadow: 0 4px 9px rgba(33, 37, 41, 0.18);
+    color: #fff !important;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none !important;
+    padding: 0 24px;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.register-cta:hover {
+    background: #111827 !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+}

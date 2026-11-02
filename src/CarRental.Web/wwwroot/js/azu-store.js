@@ -62,6 +62,26 @@
         return false;
     }
 
+    function isOwner() {
+        const roles = readJson(KEYS.roles, []);
+        return Array.isArray(roles) && roles.some(r => String(r).toLowerCase() === 'owner');
+    }
+
+    function syncRoleUi() {
+        const userIsOwner = isOwner();
+        const ownerNavLinks = document.querySelectorAll('#owner-nav-link');
+        ownerNavLinks.forEach(el => {
+            el.textContent = userIsOwner ? 'Quản lý xe' : 'Trở thành chủ xe';
+        });
+
+        const navBecomeOwnerTexts = document.querySelectorAll('#nav-become-owner-text, .nav-become-owner-text');
+        navBecomeOwnerTexts.forEach(el => {
+            el.textContent = userIsOwner ? 'Quản lý xe' : 'Trở thành chủ xe';
+        });
+
+        window.dispatchEvent(new CustomEvent('azu:role-changed', { detail: { isOwner: userIsOwner } }));
+    }
+
     function syncHeaderAuth() {
         const name = sessionStorage.getItem(KEYS.fullName) || sessionStorage.getItem(KEYS.name);
         const guestActions = document.getElementById('guest-actions');
@@ -80,6 +100,8 @@
             if (guestActions) guestActions.hidden = false;
             if (accountDisplay) accountDisplay.hidden = true;
         }
+
+        syncRoleUi();
     }
 
     async function checkAuth() {
@@ -101,6 +123,8 @@
                     if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
                     if (u.email) sessionStorage.setItem(KEYS.email, u.email);
                     syncHeaderAuth();
+                    window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
+                    syncRoleUi();
                     return data.data;
                 }
             } else if (res.status === 401) {
@@ -113,6 +137,7 @@
                 sessionStorage.removeItem(KEYS.phone);
                 sessionStorage.removeItem(KEYS.email);
                 syncHeaderAuth();
+                syncRoleUi();
             }
         } catch (err) {
             console.warn('Auth check skipped:', err);
@@ -141,6 +166,8 @@
             if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
             if (u.email) sessionStorage.setItem(KEYS.email, u.email);
             syncHeaderAuth();
+            window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
+            syncRoleUi();
         }
         return data;
     }
@@ -166,6 +193,8 @@
             if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
             if (u.email) sessionStorage.setItem(KEYS.email, u.email);
             syncHeaderAuth();
+            window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
+            syncRoleUi();
         }
         return data;
     }
@@ -233,6 +262,8 @@
         currentPage,
         currentUrl,
         isLoggedIn,
+        isOwner,
+        syncRoleUi,
         rememberReturnTo,
         consumeReturnTo,
         pageName,
