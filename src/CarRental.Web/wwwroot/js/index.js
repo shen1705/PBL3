@@ -88,6 +88,15 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.setItem('azuCarFullName', displayName);
         sessionStorage.removeItem('azuCarReturnTo'); // Luôn xóa returnTo để sau khi đăng nhập luôn ở trang index
 
+        // Nếu là Admin hoặc Staff -> điều hướng thẳng vào trang quản trị
+        const rolesRaw = sessionStorage.getItem('azuCarRoles');
+        let userRoles = [];
+        try { userRoles = rolesRaw ? JSON.parse(rolesRaw) : []; } catch (e) {}
+        if (userRoles.includes('Admin') || userRoles.includes('Staff')) {
+            window.location.assign('/admin/users.html');
+            return;
+        }
+
         // Luôn chuyển về hoặc hiển thị trang chủ đã đăng nhập (index.html)
         const cur = window.location.pathname.split('/').pop() || '';
         if (cur !== '' && cur !== 'index.html') {
@@ -186,6 +195,11 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const res = await window.AzuStore.login(identity, password, true);
                 if (res && res.isSuccess) {
+                    const roles = res.data?.roles || [];
+                    if (roles.includes('Admin') || roles.includes('Staff')) {
+                        window.location.assign('/admin/users.html');
+                        return;
+                    }
                     const displayName = res.data?.fullName || res.data?.userName || identity;
                     completeAuthentication(displayName);
                     loginForm.reset();

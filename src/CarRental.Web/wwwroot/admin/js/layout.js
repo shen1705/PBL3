@@ -3,9 +3,9 @@ const menuGroups = [
     title: "Điều hành",
     items: [
       { id: "overview", label: "Tổng quan", href: "index.html" },
-      { id: "owners", label: "Hồ sơ chủ xe", href: "owners.html", count: 12 },
-      { id: "listings", label: "Kiểm duyệt tin đăng", href: "listings.html", count: 24 },
-      { id: "disputes", label: "Tranh chấp & khiếu nại", href: "disputes.html", count: 7 },
+      { id: "owners", label: "Hồ sơ chủ xe", href: "owners.html" },
+      { id: "listings", label: "Kiểm duyệt tin đăng", href: "listings.html" },
+      { id: "disputes", label: "Tranh chấp & khiếu nại", href: "disputes.html" },
     ],
   },
   {
@@ -130,3 +130,131 @@ assistantClose.addEventListener("click", () => {
   assistantPanel.hidden = true;
   assistantButton.focus();
 });
+
+function formatVnd(val) {
+  const n = Number(val) || 0;
+  if (n === 0) return '0 đ';
+  if (n >= 1_000_000_000) {
+    return (n / 1_000_000_000).toFixed(2).replace('.', ',') + ' tỷ đ';
+  }
+  if (n >= 1_000_000) {
+    return (n / 1_000_000).toFixed(1).replace('.', ',') + ' triệu đ';
+  }
+  return n.toLocaleString('vi-VN') + ' đ';
+}
+
+async function syncAdminLayoutData() {
+  try {
+    // 1. Xác thực danh tính Admin/Staff
+    const authRes = await fetch('/api/auth/me', { headers: { 'Accept': 'application/json' } });
+    if (authRes.ok) {
+      const authData = await authRes.json();
+      if (authData.isSuccess && authData.data) {
+        const user = authData.data;
+        const roles = user.roles || [];
+        const isAdmin = roles.includes('Admin');
+        const isStaff = roles.includes('Staff');
+
+        if (!isAdmin && !isStaff) {
+          window.location.href = '/';
+          return;
+        }
+
+        const displayName = user.fullName || user.userName || 'Admin';
+        const avatarEl = document.querySelector('.header__avatar');
+        const nameEl = document.querySelector('.header__user strong');
+        const roleEl = document.querySelector('.header__user small');
+        const logoutLink = document.querySelector('.sidebar__logout');
+
+        if (avatarEl) {
+          avatarEl.textContent = displayName.substring(0, 2).toUpperCase();
+        }
+        if (nameEl) {
+          nameEl.textContent = displayName;
+        }
+        if (roleEl) {
+          roleEl.textContent = isAdmin ? 'Quản trị viên' : 'Nhân viên';
+        }
+        if (logoutLink) {
+          logoutLink.href = '/logout';
+        }
+      } else {
+        window.location.href = '/?auth=login&returnUrl=' + encodeURIComponent(window.location.pathname);
+        return;
+      }
+    } else {
+      window.location.href = '/?auth=login&returnUrl=' + encodeURIComponent(window.location.pathname);
+      return;
+    }
+
+    // 2. Tải số liệu thống kê thực tế
+    const metricsRes = await fetch('/api/admin/users/metrics', { headers: { 'Accept': 'application/json' } });
+    if (metricsRes.ok) {
+      const metricsData = await metricsRes.json();
+      if (metricsData.isSuccess && metricsData.data) {
+        const m = metricsData.data;
+
+        // Cập nhật số lượng huy hiệu trên Sidebar
+        const updateSidebarBadge = (iconId, count) => {
+          const item = document.querySelector(`.sidebar__item[data-icon="${iconId}"]`);
+          if (!item) return;
+          let badge = item.querySelector('.sidebar__count');
+          if (count > 0) {
+            if (!badge) {
+              badge = document.createElement('span');
+              badge.className = 'sidebar__count';
+              item.appendChild(badge);
+            }
+            badge.textContent = count;
+          } else if (badge) {
+            badge.remove();
+          }
+        };
+
+        updateSidebarBadge('owners', m.pendingOwnerCount);
+        updateSidebarBadge('listings', m.pendingListingCount);
+        updateSidebarBadge('disputes', m.openDisputeCount);
+
+        // Nếu đang ở trang Tổng quan (index.html), đồng bộ dữ liệu thật lên các thẻ thống kê
+        const overviewMain = document.querySelector('.overview-main');
+        if (overviewMain) {
+          const statCards = overviewMain.querySelectorAll('.stats-grid .stat-card strong');
+          if (statCards.length >= 4) {
+            statCards[0].textContent = formatVnd(m.totalGmv);
+            statCards[1].textContent = formatVnd(m.platformRevenue);
+            statCards[2].textContent = m.completedTripsCount.toLocaleString('vi-VN');
+            statCards[3].textContent = m.totalUsers.toLocaleString('vi-VN');
+          }
+
+          const totalPending = m.pendingOwnerCount + m.pendingListingCount + m.openDisputeCount;
+          const taskPill = overviewMain.querySelector('.task-card .pill');
+          if (taskPill) taskPill.textContent = totalPending;
+          const requestsTabCount = overviewMain.querySelector('#overview-tab-requests span');
+          if (requestsTabCount) requestsTabCount.textContent = totalPending;
+
+          const ownersTask = overviewMain.querySelector('.task-grid a[href="owners.html"] strong');
+          if (ownersTask) ownersTask.textContent = m.pendingOwnerCount;
+          const listingsTask = overviewMain.querySelector('.task-grid a[href="listings.html"] strong');
+          if (listingsTask) listingsTask.textContent = m.pendingListingCount;
+          const disputesTask = overviewMain.querySelector('.task-grid a[href="disputes.html"] strong');
+          if (disputesTask) disputesTask.textContent = m.openDisputeCount;
+
+          const priorityDisputes = overviewMain.querySelector('.priority-list a[href="disputes.html"] strong');
+          if (priorityDisputes) priorityDisputes.textContent = m.openDisputeCount;
+          const priorityOwners = overviewMain.querySelector('.priority-list a[href="owners.html"] strong');
+          if (priorityOwners) priorityOwners.textContent = m.pendingOwnerCount;
+          const priorityListings = overviewMain.querySelector('.priority-list a[href="listings.html"] strong');
+          if (priorityListings) priorityListings.textContent = m.pendingListingCount;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Lỗi đồng bộ dữ liệu layout admin:', e);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', syncAdminLayoutData);
+} else {
+  syncAdminLayoutData();
+}

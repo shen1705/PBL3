@@ -87,10 +87,7 @@
             el.textContent = userIsOwner ? 'Quản lý xe' : 'Trở thành chủ xe';
         });
 
-        const adminNavLink = document.getElementById('admin-nav-link');
-        if (adminNavLink) {
-            adminNavLink.style.display = isAdminOrStaff() ? 'inline-flex' : 'none';
-        }
+
 
         window.dispatchEvent(new CustomEvent('azu:role-changed', { detail: { isOwner: userIsOwner } }));
     }
@@ -138,6 +135,14 @@
                     syncHeaderAuth();
                     window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
                     syncRoleUi();
+
+                    const curPath = window.location.pathname.toLowerCase();
+                    if ((curPath === '/' || curPath === '/index.html' || curPath === '') &&
+                        u.roles && (u.roles.includes('Admin') || u.roles.includes('Staff'))) {
+                        window.location.assign('/admin/users.html');
+                        return data.data;
+                    }
+
                     return data.data;
                 }
             } else if (res.status === 401) {
@@ -181,6 +186,11 @@
             syncHeaderAuth();
             window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
             syncRoleUi();
+
+            if (u.roles && (u.roles.includes('Admin') || u.roles.includes('Staff'))) {
+                window.location.assign('/admin/users.html');
+                return data;
+            }
         }
         return data;
     }

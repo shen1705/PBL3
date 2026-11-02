@@ -1,12 +1,21 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using CarRental.Web.Models;
+using CarRental.Models.Constants;
 
 namespace CarRental.Web.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index() => View();
+    public IActionResult Index()
+    {
+        if (User.Identity?.IsAuthenticated == true &&
+            (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Staff)))
+        {
+            return Redirect("/admin/users.html");
+        }
+        return View();
+    }
 
     public IActionResult About() => View();
 
@@ -16,8 +25,8 @@ public class HomeController : Controller
 
     public IActionResult CarRegisterMode() => View();
 
-    public IActionResult Account() => View();
-
+    public IActionResult Account() => View();
+
     public IActionResult MyTrips() => RedirectPermanent("/account#trips");
 
     public IActionResult Support() => View();

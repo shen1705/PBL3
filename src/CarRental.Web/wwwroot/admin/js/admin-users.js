@@ -83,15 +83,84 @@
             if (!data.isSuccess || !data.data) return;
 
             const m = data.data;
-            const metricValues = document.querySelectorAll('.admin-metrics .metric-card b');
-            if (metricValues.length >= 4) {
-                metricValues[0].textContent = m.totalUsers.toLocaleString('vi-VN');
-                metricValues[1].textContent = m.activeUsers.toLocaleString('vi-VN');
-                metricValues[2].textContent = m.ownerCount.toLocaleString('vi-VN');
-                metricValues[3].textContent = m.sanctionedCount.toLocaleString('vi-VN');
+            const metricCards = document.querySelectorAll('.admin-metrics .admin-metric');
+            if (metricCards.length >= 4) {
+                const s0 = metricCards[0].querySelector('strong');
+                const n0 = metricCards[0].querySelector('small');
+                if (s0) s0.textContent = m.totalUsers.toLocaleString('vi-VN');
+                if (n0) n0.textContent = 'Toàn bộ tài khoản';
+
+                const s1 = metricCards[1].querySelector('strong');
+                const n1 = metricCards[1].querySelector('small');
+                if (s1) s1.textContent = m.activeUsers.toLocaleString('vi-VN');
+                if (n1) {
+                    const pct = m.totalUsers > 0 ? ((m.activeUsers / m.totalUsers) * 100).toFixed(1).replace('.', ',') : '100';
+                    n1.textContent = `${pct}% tổng tài khoản`;
+                }
+
+                const s2 = metricCards[2].querySelector('strong');
+                const n2 = metricCards[2].querySelector('small');
+                if (s2) s2.textContent = m.ownerCount.toLocaleString('vi-VN');
+                if (n2) n2.textContent = 'Chủ xe đã duyệt';
+
+                const s3 = metricCards[3].querySelector('strong');
+                const n3 = metricCards[3].querySelector('small');
+                if (s3) s3.textContent = m.sanctionedCount.toLocaleString('vi-VN');
+                if (n3) n3.textContent = `${m.sanctionedCount} tài khoản bị hạn chế`;
             }
+
+            // Đồng bộ thanh thông báo notice
+            const noticeTitle = document.querySelector('.admin-notice strong');
+            const noticeSmall = document.querySelector('.admin-notice small');
+            if (noticeTitle) {
+                noticeTitle.textContent = m.sanctionedCount > 0
+                    ? `${m.sanctionedCount} tài khoản đang bị hạn chế`
+                    : 'Không có tài khoản nào bị hạn chế';
+            }
+            if (noticeSmall) {
+                noticeSmall.textContent = m.sanctionedCount > 0
+                    ? 'Tài khoản có chế tài hoạt động · Cập nhật hệ thống'
+                    : 'Tất cả tài khoản người dùng đang hoạt động bình thường';
+            }
+
+            // Đồng bộ số lượng tài khoản trong tiêu đề bảng
+            const sectionP = document.querySelector('.card.admin-panel .admin-section-head p');
+            if (sectionP) {
+                sectionP.textContent = `${m.totalUsers.toLocaleString('vi-VN')} tài khoản`;
+            }
+
+            // Đồng bộ số lượng trên các nút Tab
+            const tabAll = document.querySelector('.admin-tabs button[data-tab="all"]');
+            if (tabAll) tabAll.textContent = `Tất cả (${m.totalUsers.toLocaleString('vi-VN')})`;
+            const tabActive = document.querySelector('.admin-tabs button[data-tab="active"]');
+            if (tabActive) tabActive.textContent = `Đang hoạt động (${m.activeUsers.toLocaleString('vi-VN')})`;
+            const tabReview = document.querySelector('.admin-tabs button[data-tab="review"]');
+            if (tabReview) tabReview.textContent = `Hạn chế (${m.sanctionedCount.toLocaleString('vi-VN')})`;
+            const tabPending = document.querySelector('.admin-tabs button[data-tab="pending"]');
+            if (tabPending) tabPending.textContent = `Chờ duyệt (${m.pendingVerificationCount.toLocaleString('vi-VN')})`;
+
+            // Đồng bộ số lượng huy hiệu trên Sidebar
+            syncSidebarCount('owners', m.pendingOwnerCount);
+            syncSidebarCount('listings', m.pendingListingCount);
+            syncSidebarCount('disputes', m.openDisputeCount);
         } catch (e) {
             console.error('Lỗi tải thống kê:', e);
+        }
+    }
+
+    function syncSidebarCount(iconId, count) {
+        const item = document.querySelector(`.sidebar__item[data-icon="${iconId}"]`);
+        if (!item) return;
+        let countEl = item.querySelector('.sidebar__count');
+        if (count > 0) {
+            if (!countEl) {
+                countEl = document.createElement('span');
+                countEl.className = 'sidebar__count';
+                item.appendChild(countEl);
+            }
+            countEl.textContent = count;
+        } else if (countEl) {
+            countEl.textContent = '0';
         }
     }
 
