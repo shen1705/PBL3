@@ -115,15 +115,74 @@ Phiên làm việc này đã hoàn thành 100% các chức năng cơ bản của
 [4. Handover & Full Rental Lifecycle] (Hoàn tất 100% Core MVP)
        │
        ▼
-[5. Admin Portal Authorization & Management APIs] ◄─── (ƯU TIÊN TIẾP THEO)
+[5. Admin & Staff Account Management] (Hoàn tất 100% - Branch: feature/admin-account-management)
        │
        ▼
-[6. Real-time Notifications & Chatbot Integration]
+[6. Admin Approvals: Owner Profiles & Vehicle Listings] ◄─── (ƯU TIÊN TIẾP THEO)
+       │
+       ▼
+[7. Admin Financial Settlement, Fees & Disputes]
 ```
 
-### Hướng Triển Khai Ưu Tiên Tiếp Theo: Admin Portal Authorization & Management APIs
-1. **Bảo vệ thư mục Quản trị:** Cấu hình Middleware/Endpoint routing để chặn truy cập trái phép vào `/admin/*` đối với người dùng không có role `Admin`.
-2. **Quản lý danh mục & phê duyệt:**
-   - API phê duyệt / từ chối hồ sơ đăng ký chủ xe và xe cho thuê.
-   - API xem lịch sử giao dịch toàn hệ thống và tổng doanh thu phí sàn (5%).
-   - API quản lý chế tài vi phạm tài khoản (`AccountSanction`).
+
+---
+
+## 5. Chi Tiết Phiên Làm Việc (Session 6: Admin & Staff Account Management)
+
+Đã hoàn thành phân hệ Quản lý tài khoản người dùng dành cho Admin và Staff theo đúng đặc tả ca sử dụng `UC-AS-03`, `UC-AS-07`, `UC-AS-09`:
+
+### 5.1. Mô Hình Dữ Liệu & Hằng Số (`CarRental.Models`)
+- Bổ sung vai trò `RoleNames.Staff = "Staff"` và `RoleNames.AdminOrStaff = "Admin,Staff"`.
+- Bổ sung thư mục DTOs [`src/CarRental.Models/DTOs/Admin/`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Models/DTOs/Admin/):
+  - `AdminUserListItemDto`: Thông tin người dùng tóm tắt, vai trò chính, trạng thái xác minh GPLX/CCCD, chế tài đang áp dụng, số chuyến thuê, số xe sở hữu.
+  - `AdminUserDetailDto`: Chi tiết đầy đủ thông tin định danh, tài khoản ngân hàng, lịch sử chế tài (`Sanctions`), 5 chuyến xe gần nhất và danh sách xe sở hữu.
+  - `AdminUserFilterDto`: Tham số tìm kiếm đa năng (Query theo tên/username/email/SĐT, Tab trạng thái, Phân quyền vai trò, Phân trang).
+  - `AdminUserMetricsDto`: 4 chỉ số thống kê (Tổng người dùng, Đang hoạt động, Chủ xe, Đang bị tạm khóa/chế tài).
+  - `SanctionUserRequest`: Tham số áp dụng chế tài (`SanctionType`: `Suspend7d`, `Suspend30d`, `Ban`; `Reason`).
+  - `LiftSanctionRequest`: Tham số gỡ bỏ chế tài / mở khóa tài khoản.
+  - `ResetPasswordByAdminRequest`: Tham số đặt lại mật khẩu người dùng bởi quản trị viên.
+  - `UpdateUserRolesRequest`: Phân quyền vai trò người dùng (Renter, Owner, Staff, Admin).
+
+### 5.2. Tầng Nghiệp Vụ (`CarRental.Services.Admin`)
+- Xây dựng [`IAdminUserService`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/Admin/IAdminUserService.cs) và [`AdminUserService`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/Admin/AdminUserService.cs):
+  - `GetUserMetricsAsync()`: Tính toán chính xác 4 chỉ số tổng quan từ cơ sở dữ liệu.
+  - `GetUsersAsync(filter)`: Lấy danh sách người dùng kèm batch-loading liên kết quan hệ (GPLX, OwnerProfile, Sanction, thống kê chuyến, thống kê xe) tối ưu hiệu năng.
+  - `GetUserByIdAsync(id)`: Lấy chi tiết tài khoản cùng lịch sử chế tài có tên người thực hiện và người gỡ bỏ.
+  - `SanctionUserAsync()`: Kiểm tra quyền chặt chẽ theo quy định:
+    - Ngăn chặn tự khóa tài khoản của chính mình (`Conflict`).
+    - **Staff không được phép khóa tài khoản của Staff khác hoặc Admin** (`Forbidden - 403`).
+    - Tính toán thời hạn hết hạn (`Suspend7d` $ightarrow$ +7 ngày, `Suspend30d` $ightarrow$ +30 ngày, `Ban` $ightarrow$ vĩnh viễn).
+    - Tạo bản ghi `AccountSanction` và đồng bộ khóa đăng nhập ASP.NET Core Identity (`SetLockoutEndDateAsync`).
+  - `LiftSanctionAsync()`: Đánh dấu `LiftedAt` và `LiftedBy`, gỡ bỏ `LockoutEndDate` cho phép người dùng hoạt động bình thường ngay lập tức.
+  - `ResetUserPasswordAsync()`: Đặt lại mật khẩu người dùng an toàn qua `UserManager.ResetPasswordAsync`.
+  - `UpdateUserRolesAsync()`: Chỉ dành riêng cho Admin; bảo vệ tài khoản Admin cuối cùng không bị gỡ vai trò.
+- Cập nhật [`AuthService.cs`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/Auth/AuthService.cs): Kiểm tra `s.LiftedAt == null` khi truy vấn chế tài kích hoạt, đảm bảo tài khoản sau khi mở khóa có thể đăng nhập ngay.
+
+### 5.3. Tầng Điều Khiển API (`CarRental.Web.Controllers`)
+- Xây dựng [`AdminUsersController`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Controllers/AdminUsersController.cs) với tiền tố route `api/admin/users`:
+  - `[Authorize(Roles = RoleNames.AdminOrStaff)]`: Bảo vệ toàn bộ endpoint, chỉ Admin hoặc Staff mới có quyền truy cập.
+  - `GET api/admin/users/metrics`: Lấy số liệu thống kê.
+  - `GET api/admin/users`: Lấy danh sách, tìm kiếm và lọc người dùng.
+  - `GET api/admin/users/{id}`: Xem chi tiết người dùng.
+  - `POST api/admin/users/{id}/sanction`: Khóa tài khoản / áp dụng chế tài.
+  - `POST api/admin/users/{id}/lift-sanction`: Mở khóa tài khoản.
+  - `POST api/admin/users/{id}/reset-password`: Đặt lại mật khẩu.
+  - `PUT api/admin/users/{id}/roles`: `[Authorize(Roles = RoleNames.Admin)]` Cập nhật vai trò.
+
+### 5.4. Bảo Vệ Thư Mục Quản Trị & Tích Hợp Frontend
+- **Bảo vệ toàn diện thư mục `/admin`:**
+  - Bổ sung Middleware trong [`Program.cs`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Program.cs): Bắt mọi truy cập đến `/admin` và `/admin/*.html`. Nếu chưa đăng nhập $ightarrow$ chuyển hướng về trang đăng nhập; nếu không có vai trò `Admin` hoặc `Staff` $ightarrow$ chặn và điều hướng về trang chủ.
+- **Tích hợp giao diện quản trị:**
+  - Xây dựng script tương tác [`admin-users.js`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/admin/js/admin-users.js) kết nối trực tiếp các API backend vào [`users.html`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/admin/users.html):
+    - Tự động hiển thị tên và vai trò quản trị viên trên header.
+    - Hiển thị danh sách người dùng với phân trang, tìm kiếm tức thì theo từ khóa, lọc theo tab trạng thái.
+    - Panel chi tiết "Tài khoản đang xem" hiển thị thông tin hồ sơ, hoạt động, thông tin chế tài nếu có.
+    - Hộp thoại Dialog Modal trực quan cho các thao tác: Khóa tài khoản (chọn 7 ngày / 30 ngày / vĩnh viễn kèm lý do), Mở khóa tài khoản, Đặt lại mật khẩu, Phân quyền vai trò.
+  - Đồng bộ nút bấm **"Quản trị"** tại Header điều hướng chính [`_Layout.cshtml`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Shared/_Layout.cshtml) và [`azu-store.js`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/azu-store.js) tự động hiển thị cho người dùng có vai trò `Admin` hoặc `Staff`.
+
+---
+
+## 6. Kiểm Thử & Biên Dịch (Verification)
+- Biên dịch toàn bộ Solution: `dotnet build PBL3\CarRentalMarketplace.slnx`
+  - Kết quả: **0 Warning(s), 0 Error(s)**.
+- Git Branch: `feature/admin-account-management`.
