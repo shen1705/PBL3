@@ -52,6 +52,14 @@ Phiên làm việc này đã hoàn thành 100% các chức năng cơ bản của
 ### 2.3.1. Cập Nhật Nhãn Ô Đăng Nhập
 - Đổi nhãn (`label`) và văn bản gợi ý (`placeholder`) của trường đăng nhập từ `"Tên hoặc số điện thoại"` thành **`"Username hoặc số điện thoại"`** trên tất cả các view và modal liên quan (`_Modals.cshtml`, `Find.cshtml`, v.v.).
 
+### 2.3.3. Sửa Lỗi Layout Trang Đăng Ký Xe (`/carregistermode`)
+- **Nguyên nhân lỗi:** File [`CarRegisterMode.cshtml`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Home/CarRegisterMode.cshtml) bị thiếu thẻ mở `<main class="owner-register-main">` và `<section class="owner-intro">`, dẫn đến CSS Grid 2 cột (`grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.95fr)`) không được kích hoạt, khiến card đăng ký bị rớt xuống dưới bên trái và nửa phải màn hình bị trống. Ngoài ra còn tồn tại một block `<footer>` trùng lặp với `_Layout.cshtml`.
+- **Khắc phục:**
+  - Bổ sung đầy đủ thẻ mở `<main class="owner-register-main">` và `<section class="owner-intro">`.
+  - Cập nhật liên kết nút quay lại thành `href="/become-owner"`.
+  - Loại bỏ block footer trùng lặp.
+  - Sau khi sửa, bố cục 2 cột (cột trái: quy trình 4 bước, cột phải: thẻ đăng ký kèm minh họa) hiển thị cân đối ở giữa màn hình.
+
 ### 2.3.2. Phân Quyền Hiển Thị Theo Role (Owner vs Renter)
 - **Role Owner:** Đổi liên kết điều hướng từ "Trở thành chủ xe" thành **"Quản lý xe"** (tại Header Navigation `_Layout.cshtml`, Sidebar `Account.cshtml`, `MyTrips.cshtml` và `BecomeOwner.cshtml`). Hiển thị toàn bộ các mục: Danh sách xe, Lịch xe, Doanh thu, Hợp đồng, Cẩm nang, Chính sách.
 - **Role Renter (Người không phải chủ xe):**
