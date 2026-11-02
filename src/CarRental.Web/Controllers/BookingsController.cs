@@ -181,4 +181,112 @@ public class BookingsController : ControllerBase
 
         return Ok(result);
     }
+
+    // Nhận xe
+    [Authorize]
+    [HttpPost("api/bookings/{id:int}/pickup")]
+    public async Task<IActionResult> ConfirmPickup(int id, [FromBody] ConfirmHandoverRequest? request, CancellationToken ct)
+    {
+        var userId = _currentUser.UserId;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập.", errorCode = ErrorCodes.Unauthorized });
+
+        request ??= new ConfirmHandoverRequest { Type = HandoverTypes.Pickup };
+        request.Type = HandoverTypes.Pickup;
+
+        var result = await _bookingService.ConfirmPickupAsync(id, request, userId, ct);
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == ErrorCodes.NotFound)
+                return NotFound(result);
+            if (result.ErrorCode == ErrorCodes.Forbidden)
+                return StatusCode(StatusCodes.Status403Forbidden, result);
+            if (result.ErrorCode == ErrorCodes.Conflict)
+                return Conflict(result);
+
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    // Trả xe
+    [Authorize]
+    [HttpPost("api/bookings/{id:int}/return")]
+    public async Task<IActionResult> ConfirmReturn(int id, [FromBody] ConfirmHandoverRequest? request, CancellationToken ct)
+    {
+        var userId = _currentUser.UserId;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập.", errorCode = ErrorCodes.Unauthorized });
+
+        request ??= new ConfirmHandoverRequest { Type = HandoverTypes.Return };
+        request.Type = HandoverTypes.Return;
+
+        var result = await _bookingService.ConfirmReturnAsync(id, request, userId, ct);
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == ErrorCodes.NotFound)
+                return NotFound(result);
+            if (result.ErrorCode == ErrorCodes.Forbidden)
+                return StatusCode(StatusCodes.Status403Forbidden, result);
+            if (result.ErrorCode == ErrorCodes.Conflict)
+                return Conflict(result);
+
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    // Đánh giá
+    [Authorize]
+    [HttpPost("api/bookings/{id:int}/review")]
+    public async Task<IActionResult> SubmitReview(int id, [FromBody] CreateReviewRequest request, CancellationToken ct)
+    {
+        var userId = _currentUser.UserId;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập.", errorCode = ErrorCodes.Unauthorized });
+
+        if (request == null)
+            return BadRequest(new { isSuccess = false, message = "Dữ liệu đánh giá không hợp lệ.", errorCode = ErrorCodes.Validation });
+
+        request.BookingId = id;
+
+        if (!ModelState.IsValid)
+        {
+            var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            return BadRequest(new { isSuccess = false, message = errors, errorCode = ErrorCodes.Validation });
+        }
+
+        var result = await _bookingService.SubmitReviewAsync(request, userId, ct);
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == ErrorCodes.NotFound)
+                return NotFound(result);
+            if (result.ErrorCode == ErrorCodes.Forbidden)
+                return StatusCode(StatusCodes.Status403Forbidden, result);
+            if (result.ErrorCode == ErrorCodes.Conflict)
+                return Conflict(result);
+
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    // Doanh thu chủ xe
+    [Authorize]
+    [HttpGet("api/bookings/owner-revenue")]
+    public async Task<IActionResult> GetOwnerRevenue(CancellationToken ct)
+    {
+        var userId = _currentUser.UserId;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập.", errorCode = ErrorCodes.Unauthorized });
+
+        var result = await _bookingService.GetOwnerRevenueAsync(userId, ct);
+        if (!result.IsSuccess)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
 }

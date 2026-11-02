@@ -272,6 +272,8 @@ public class BookingService : IBookingService
                 .ThenInclude(v => v.Owner)
             .Include(b => b.Listing)
                 .ThenInclude(l => l.Images)
+            .Include(b => b.HandoverConfirmations)
+            .Include(b => b.Reviews)
             .OrderByDescending(b => b.CreatedAt)
             .AsQueryable();
 
@@ -284,7 +286,7 @@ public class BookingService : IBookingService
                                          b.Status == BookingStatuses.Accepted ||
                                          b.Status == BookingStatuses.Ongoing);
             }
-            else if (filter == "completed" || filter == "history")
+            else if (filter == "completed" || filter == "history" || filter == "past")
             {
                 query = query.Where(b => b.Status == BookingStatuses.Completed ||
                                          b.Status == BookingStatuses.Cancelled ||
@@ -327,7 +329,11 @@ public class BookingService : IBookingService
                 OwnerName = b.Vehicle.Owner?.FullName ?? b.Vehicle.Owner?.UserName ?? "Chủ xe",
                 OwnerPhone = b.Vehicle.Owner?.PhoneNumber,
                 CreatedAt = b.CreatedAt,
-                ResponseDeadline = b.ResponseDeadline
+                ResponseDeadline = b.ResponseDeadline,
+                CompletedAt = b.CompletedAt,
+                HasPickupConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Pickup),
+                HasReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return),
+                HasReviewed = b.Reviews.Any(r => r.ReviewerId == renterUserId)
             };
         }).ToList();
 
@@ -351,6 +357,8 @@ public class BookingService : IBookingService
             .Include(b => b.Vehicle)
             .Include(b => b.Listing)
                 .ThenInclude(l => l.Images)
+            .Include(b => b.HandoverConfirmations)
+            .Include(b => b.Reviews)
             .OrderByDescending(b => b.CreatedAt)
             .AsQueryable();
 
@@ -401,7 +409,11 @@ public class BookingService : IBookingService
                 OwnerName = "Tôi",
                 OwnerPhone = b.Vehicle.Owner?.PhoneNumber,
                 CreatedAt = b.CreatedAt,
-                ResponseDeadline = b.ResponseDeadline
+                ResponseDeadline = b.ResponseDeadline,
+                CompletedAt = b.CompletedAt,
+                HasPickupConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Pickup),
+                HasReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return),
+                HasReviewed = b.Reviews.Any(r => r.ReviewerId == ownerUserId)
             };
         }).ToList();
 
@@ -419,6 +431,12 @@ public class BookingService : IBookingService
                 .ThenInclude(v => v.Owner)
             .Include(b => b.Listing)
                 .ThenInclude(l => l.Images)
+            .Include(b => b.HandoverConfirmations)
+                .ThenInclude(h => h.Confirmer)
+            .Include(b => b.Reviews)
+                .ThenInclude(r => r.Reviewer)
+            .Include(b => b.Reviews)
+                .ThenInclude(r => r.Reviewee)
             .FirstOrDefaultAsync(b => b.BookingId == bookingId, ct);
 
         if (booking == null)
@@ -461,7 +479,31 @@ public class BookingService : IBookingService
             CompletedAt = booking.CompletedAt,
             CancelledAt = booking.CancelledAt,
             CancelledBy = booking.CancelledBy,
-            CancelReason = booking.CancelReason
+            CancelReason = booking.CancelReason,
+            HasPickupConfirmed = booking.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Pickup),
+            HasReturnConfirmed = booking.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return),
+            HasReviewed = booking.Reviews.Any(r => r.ReviewerId == currentUserId),
+            Handovers = booking.HandoverConfirmations.Select(h => new HandoverConfirmationDto
+            {
+                ConfirmationId = h.ConfirmationId,
+                BookingId = h.BookingId,
+                Type = h.Type,
+                ConfirmedBy = h.ConfirmedBy,
+                ConfirmerName = h.Confirmer?.FullName ?? h.Confirmer?.UserName ?? "Thành viên",
+                ConfirmedAt = h.ConfirmedAt
+            }).ToList(),
+            Reviews = booking.Reviews.Select(r => new ReviewDto
+            {
+                ReviewId = r.ReviewId,
+                BookingId = r.BookingId,
+                ReviewerId = r.ReviewerId,
+                ReviewerName = r.Reviewer?.FullName ?? r.Reviewer?.UserName ?? "Thành viên",
+                RevieweeId = r.RevieweeId,
+                RevieweeName = r.Reviewee?.FullName ?? r.Reviewee?.UserName ?? "Thành viên",
+                Rating = r.Rating,
+                Comment = r.Comment,
+                CreatedAt = r.CreatedAt
+            }).ToList()
         };
 
         return ServiceResult<BookingDetailDto>.Success(dto);
@@ -591,6 +633,285 @@ public class BookingService : IBookingService
         await _db.SaveChangesAsync(ct);
 
         return await GetBookingDetailAsync(bookingId, currentUserId, ct);
+    }
+
+    public async Task<ServiceResult<BookingDetailDto>> ConfirmPickupAsync(
+        int bookingId,
+        ConfirmHandoverRequest request,
+        string currentUserId,
+        CancellationToken ct = default)
+    {
+        var booking = await _db.Bookings
+            .Include(b => b.Renter)
+            .Include(b => b.Vehicle)
+                .ThenInclude(v => v.Owner)
+            .Include(b => b.Listing)
+                .ThenInclude(l => l.Images)
+            .Include(b => b.HandoverConfirmations)
+                .ThenInclude(h => h.Confirmer)
+            .Include(b => b.SourceHold)
+            .FirstOrDefaultAsync(b => b.BookingId == bookingId, ct);
+
+        if (booking == null)
+            return ServiceResult<BookingDetailDto>.Fail("Không tìm thấy đơn thuê xe.", ErrorCodes.NotFound);
+
+        bool isRenter = booking.RenterId == currentUserId;
+        bool isOwner = booking.Vehicle.OwnerId == currentUserId;
+
+        if (!isRenter && !isOwner)
+            return ServiceResult<BookingDetailDto>.Fail("Bạn không có quyền thực hiện bàn giao cho đơn thuê này.", ErrorCodes.Forbidden);
+
+        if (booking.Status != BookingStatuses.Accepted && booking.Status != BookingStatuses.Ongoing)
+            return ServiceResult<BookingDetailDto>.Fail($"Đơn thuê đang ở trạng thái '{booking.Status}', chỉ có thể bàn giao xe khi đơn đã được chủ xe duyệt (Accepted).", ErrorCodes.InvalidState);
+
+        var now = _clock.UtcNow;
+
+        // save handover
+        var existingConf = booking.HandoverConfirmations.FirstOrDefault(h => h.Type == HandoverTypes.Pickup && h.ConfirmedBy == currentUserId);
+        if (existingConf == null)
+        {
+            var conf = new HandoverConfirmation
+            {
+                BookingId = bookingId,
+                Type = HandoverTypes.Pickup,
+                ConfirmedBy = currentUserId,
+                ConfirmedAt = now
+            };
+            _db.HandoverConfirmations.Add(conf);
+            booking.HandoverConfirmations.Add(conf);
+        }
+
+        // set ongoing
+        if (booking.Status == BookingStatuses.Accepted)
+        {
+            booking.Status = BookingStatuses.Ongoing;
+            _logger.LogInformation("Đơn thuê #{BookingId} đã chuyển sang trạng thái ONGOING bởi {UserId}", bookingId, currentUserId);
+        }
+
+        await _db.SaveChangesAsync(ct);
+
+        return await GetBookingDetailAsync(bookingId, currentUserId, ct);
+    }
+
+    public async Task<ServiceResult<BookingDetailDto>> ConfirmReturnAsync(
+        int bookingId,
+        ConfirmHandoverRequest request,
+        string currentUserId,
+        CancellationToken ct = default)
+    {
+        var booking = await _db.Bookings
+            .Include(b => b.Renter)
+            .Include(b => b.Vehicle)
+                .ThenInclude(v => v.Owner)
+            .Include(b => b.Listing)
+                .ThenInclude(l => l.Images)
+            .Include(b => b.HandoverConfirmations)
+                .ThenInclude(h => h.Confirmer)
+            .Include(b => b.Disputes)
+            .Include(b => b.SourceHold)
+            .FirstOrDefaultAsync(b => b.BookingId == bookingId, ct);
+
+        if (booking == null)
+            return ServiceResult<BookingDetailDto>.Fail("Không tìm thấy đơn thuê xe.", ErrorCodes.NotFound);
+
+        bool isRenter = booking.RenterId == currentUserId;
+        bool isOwner = booking.Vehicle.OwnerId == currentUserId;
+
+        if (!isRenter && !isOwner)
+            return ServiceResult<BookingDetailDto>.Fail("Bạn không có quyền thực hiện trả xe cho đơn thuê này.", ErrorCodes.Forbidden);
+
+        if (booking.Status != BookingStatuses.Ongoing && booking.Status != BookingStatuses.Completed)
+            return ServiceResult<BookingDetailDto>.Fail($"Đơn thuê đang ở trạng thái '{booking.Status}', chỉ có thể trả xe khi đơn đang trong chuyến (Ongoing).", ErrorCodes.InvalidState);
+
+        var now = _clock.UtcNow;
+
+        // save handover
+        var existingConf = booking.HandoverConfirmations.FirstOrDefault(h => h.Type == HandoverTypes.Return && h.ConfirmedBy == currentUserId);
+        if (existingConf == null)
+        {
+            var conf = new HandoverConfirmation
+            {
+                BookingId = bookingId,
+                Type = HandoverTypes.Return,
+                ConfirmedBy = currentUserId,
+                ConfirmedAt = now
+            };
+            _db.HandoverConfirmations.Add(conf);
+            booking.HandoverConfirmations.Add(conf);
+        }
+
+        // check complete condition
+        // host or both confirmed
+        var returnCount = booking.HandoverConfirmations.Count(h => h.Type == HandoverTypes.Return);
+        bool shouldComplete = isOwner || returnCount >= 2;
+
+        if (shouldComplete && booking.Status == BookingStatuses.Ongoing)
+        {
+            // check open dispute
+            bool hasOpenDisputes = booking.Disputes.Any(d => d.Status == DisputeStatuses.Open);
+            if (!hasOpenDisputes)
+            {
+                booking.Status = BookingStatuses.Completed;
+                booking.CompletedAt = now;
+
+                // settle payment & refund deposit
+                if (booking.SourceHold != null)
+                {
+                    booking.SourceHold.Status = DepositHoldStatuses.Converted;
+                }
+
+                // record payment & revenue
+                var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == bookingId, ct);
+                decimal commissionRate = BusinessRules.DefaultCommissionRate;
+                decimal commissionAmount = Math.Round(booking.PriceLockedTotal * commissionRate);
+
+                if (payment == null)
+                {
+                    payment = new Payment
+                    {
+                        BookingId = bookingId,
+                        DepositStatus = DepositStatuses.Refunded,
+                        CommissionRate = commissionRate,
+                        CommissionAmount = commissionAmount,
+                        RevenueRecordedAt = now
+                    };
+                    _db.Payments.Add(payment);
+                }
+                else
+                {
+                    payment.DepositStatus = DepositStatuses.Refunded;
+                    payment.CommissionRate = commissionRate;
+                    payment.CommissionAmount = commissionAmount;
+                    payment.RevenueRecordedAt = now;
+                }
+
+                _logger.LogInformation("Đơn thuê #{BookingId} đã HOÀN TẤT (COMPLETED). Doanh thu: {Total}, Hoa hồng: {Commission}",
+                    bookingId, booking.PriceLockedTotal, commissionAmount);
+            }
+        }
+
+        await _db.SaveChangesAsync(ct);
+
+        return await GetBookingDetailAsync(bookingId, currentUserId, ct);
+    }
+
+    public async Task<ServiceResult<ReviewDto>> SubmitReviewAsync(
+        CreateReviewRequest request,
+        string currentUserId,
+        CancellationToken ct = default)
+    {
+        if (request.Rating < 1 || request.Rating > 5)
+            return ServiceResult<ReviewDto>.Fail("Số sao đánh giá phải từ 1 đến 5.", ErrorCodes.Validation);
+
+        var booking = await _db.Bookings
+            .Include(b => b.Vehicle)
+            .FirstOrDefaultAsync(b => b.BookingId == request.BookingId, ct);
+
+        if (booking == null)
+            return ServiceResult<ReviewDto>.Fail("Không tìm thấy đơn thuê xe.", ErrorCodes.NotFound);
+
+        if (booking.Status != BookingStatuses.Completed)
+            return ServiceResult<ReviewDto>.Fail("Chỉ có thể đánh giá sau khi chuyến đi đã hoàn tất.", ErrorCodes.InvalidState);
+
+        bool isRenter = booking.RenterId == currentUserId;
+        bool isOwner = booking.Vehicle.OwnerId == currentUserId;
+
+        if (!isRenter && !isOwner)
+            return ServiceResult<ReviewDto>.Fail("Bạn không có quyền đánh giá đơn thuê này.", ErrorCodes.Forbidden);
+
+        // check reviewed
+        var existing = await _db.Reviews.FirstOrDefaultAsync(r => r.BookingId == request.BookingId && r.ReviewerId == currentUserId, ct);
+        if (existing != null)
+            return ServiceResult<ReviewDto>.Fail("Bạn đã gửi đánh giá cho chuyến đi này rồi.", ErrorCodes.Conflict);
+
+        string revieweeId = isRenter ? booking.Vehicle.OwnerId : booking.RenterId;
+        var now = _clock.UtcNow;
+
+        var review = new Review
+        {
+            BookingId = request.BookingId,
+            ReviewerId = currentUserId,
+            RevieweeId = revieweeId,
+            Rating = request.Rating,
+            Comment = string.IsNullOrWhiteSpace(request.Comment) ? "Dịch vụ rất tốt!" : request.Comment.Trim(),
+            CreatedAt = now,
+            IsPublic = true
+        };
+
+        _db.Reviews.Add(review);
+        await _db.SaveChangesAsync(ct);
+
+        var reviewer = await _db.Users.FindAsync(new object[] { currentUserId }, ct);
+        var reviewee = await _db.Users.FindAsync(new object[] { revieweeId }, ct);
+
+        var dto = new ReviewDto
+        {
+            ReviewId = review.ReviewId,
+            BookingId = review.BookingId,
+            ReviewerId = review.ReviewerId,
+            ReviewerName = reviewer?.FullName ?? reviewer?.UserName ?? "Thành viên",
+            RevieweeId = review.RevieweeId,
+            RevieweeName = reviewee?.FullName ?? reviewee?.UserName ?? "Thành viên",
+            Rating = review.Rating,
+            Comment = review.Comment,
+            CreatedAt = review.CreatedAt
+        };
+
+        return ServiceResult<ReviewDto>.Success(dto, "Cảm ơn bạn đã gửi đánh giá chuyến đi!");
+    }
+
+    public async Task<ServiceResult<OwnerRevenueSummaryDto>> GetOwnerRevenueAsync(
+        string ownerUserId,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(ownerUserId))
+            return ServiceResult<OwnerRevenueSummaryDto>.Fail("Yêu cầu đăng nhập.", ErrorCodes.Unauthorized);
+
+        var bookings = await _db.Bookings.AsNoTracking()
+            .Include(b => b.Vehicle)
+            .Include(b => b.Renter)
+            .Include(b => b.Payment)
+            .Where(b => b.Vehicle.OwnerId == ownerUserId && b.Status == BookingStatuses.Completed)
+            .OrderByDescending(b => b.CompletedAt)
+            .ToListAsync(ct);
+
+        decimal rate = BusinessRules.DefaultCommissionRate;
+        var tripItems = bookings.Select(b =>
+        {
+            decimal comm = b.Payment?.CommissionAmount ?? Math.Round(b.PriceLockedTotal * rate);
+            decimal net = b.PriceLockedTotal - comm;
+
+            return new OwnerRevenueTripItemDto
+            {
+                BookingId = b.BookingId,
+                VehicleName = $"{b.Vehicle.Brand} {b.Vehicle.Model} {b.Vehicle.Year}",
+                LicensePlate = b.Vehicle.LicensePlate,
+                RenterName = b.Renter?.FullName ?? b.Renter?.UserName ?? "Khách thuê",
+                StartDate = b.StartDate,
+                EndDate = b.EndDate,
+                RentalDays = b.RentalDays,
+                TotalAmount = b.PriceLockedTotal,
+                CommissionAmount = comm,
+                NetEarning = net,
+                CompletedAt = b.CompletedAt
+            };
+        }).ToList();
+
+        decimal totalRevenue = tripItems.Sum(t => t.TotalAmount);
+        decimal totalCommission = tripItems.Sum(t => t.CommissionAmount);
+        decimal netTotal = totalRevenue - totalCommission;
+
+        var result = new OwnerRevenueSummaryDto
+        {
+            TotalCompletedTrips = tripItems.Count,
+            GrossRentalRevenue = totalRevenue,
+            TotalCommissionPaid = totalCommission,
+            NetEarnings = netTotal,
+            CommissionRate = rate,
+            Trips = tripItems
+        };
+
+        return ServiceResult<OwnerRevenueSummaryDto>.Success(result);
     }
 
     public async Task<ServiceResult<int>> AutoExpireBookingsAsync(CancellationToken ct = default)

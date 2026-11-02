@@ -19,6 +19,7 @@ public class BookingSummaryDto
     public string Status { get; set; } = string.Empty;
     public decimal PriceLockedTotal { get; set; }
     public decimal DepositAmount { get; set; }
+    public decimal RemainingAmount => PriceLockedTotal > DepositAmount ? PriceLockedTotal - DepositAmount : 0m;
 
     public string RenterId { get; set; } = string.Empty;
     public string RenterName { get; set; } = string.Empty;
@@ -30,4 +31,10 @@ public class BookingSummaryDto
 
     public DateTime CreatedAt { get; set; }
     public DateTime ResponseDeadline { get; set; }
+    public DateTime? CompletedAt { get; set; }
+
+    // Handover & Review states
+    public bool HasPickupConfirmed { get; set; }
+    public bool HasReturnConfirmed { get; set; }
+    public bool HasReviewed { get; set; }
 }
