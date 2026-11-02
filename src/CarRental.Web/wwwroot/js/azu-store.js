@@ -1,9 +1,12 @@
 (function (global) {
     const KEYS = {
         name: 'azuCarDisplayName',
+        fullName: 'azuCarFullName',
+        username: 'azuCarUserName',
         userId: 'azuCarUserId',
         roles: 'azuCarRoles',
         phone: 'azuCarPhone',
+        email: 'azuCarEmail',
         trips: 'azuCarTrips',
         ownerCars: 'azuCarOwnerCars',
         returnTo: 'azuCarReturnTo',
@@ -60,7 +63,7 @@
     }
 
     function syncHeaderAuth() {
-        const name = sessionStorage.getItem(KEYS.name);
+        const name = sessionStorage.getItem(KEYS.fullName) || sessionStorage.getItem(KEYS.name);
         const guestActions = document.getElementById('guest-actions');
         const accountDisplay = document.getElementById('account-display');
         const accountAvatar = document.getElementById('account-avatar');
@@ -89,19 +92,26 @@
                 const data = await res.json();
                 if (data.isSuccess && data.data) {
                     const u = data.data;
-                    const displayName = u.fullName || u.userName;
+                    const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
                     sessionStorage.setItem(KEYS.name, displayName);
+                    sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
+                    sessionStorage.setItem(KEYS.username, u.userName || '');
                     sessionStorage.setItem(KEYS.userId, u.userId);
                     writeJson(KEYS.roles, u.roles || []);
                     if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
+                    if (u.email) sessionStorage.setItem(KEYS.email, u.email);
                     syncHeaderAuth();
                     return data.data;
                 }
             } else if (res.status === 401) {
                 // Not authenticated on server; clear stale local session
                 sessionStorage.removeItem(KEYS.name);
+                sessionStorage.removeItem(KEYS.fullName);
+                sessionStorage.removeItem(KEYS.username);
                 sessionStorage.removeItem(KEYS.userId);
                 sessionStorage.removeItem(KEYS.roles);
+                sessionStorage.removeItem(KEYS.phone);
+                sessionStorage.removeItem(KEYS.email);
                 syncHeaderAuth();
             }
         } catch (err) {
@@ -122,11 +132,14 @@
         const data = await res.json();
         if (res.ok && data.isSuccess) {
             const u = data.data;
-            const displayName = u.fullName || u.userName;
+            const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
             sessionStorage.setItem(KEYS.name, displayName);
+            sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
+            sessionStorage.setItem(KEYS.username, u.userName || '');
             sessionStorage.setItem(KEYS.userId, u.userId);
             writeJson(KEYS.roles, u.roles || []);
             if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
+            if (u.email) sessionStorage.setItem(KEYS.email, u.email);
             syncHeaderAuth();
         }
         return data;
@@ -144,11 +157,14 @@
         const data = await res.json();
         if (res.ok && data.isSuccess) {
             const u = data.data;
-            const displayName = u.fullName || u.userName;
+            const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
             sessionStorage.setItem(KEYS.name, displayName);
+            sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
+            sessionStorage.setItem(KEYS.username, u.userName || '');
             sessionStorage.setItem(KEYS.userId, u.userId);
             writeJson(KEYS.roles, u.roles || []);
             if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
+            if (u.email) sessionStorage.setItem(KEYS.email, u.email);
             syncHeaderAuth();
         }
         return data;
@@ -161,9 +177,12 @@
             console.error('Logout error:', e);
         }
         sessionStorage.removeItem(KEYS.name);
+        sessionStorage.removeItem(KEYS.fullName);
+        sessionStorage.removeItem(KEYS.username);
         sessionStorage.removeItem(KEYS.userId);
         sessionStorage.removeItem(KEYS.roles);
         sessionStorage.removeItem(KEYS.phone);
+        sessionStorage.removeItem(KEYS.email);
         syncHeaderAuth();
         window.location.assign('/');
     }

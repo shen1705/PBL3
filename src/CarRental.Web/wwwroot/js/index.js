@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!displayName) return;
 
         sessionStorage.setItem('azuCarDisplayName', displayName);
+        sessionStorage.setItem('azuCarFullName', displayName);
         sessionStorage.removeItem('azuCarReturnTo'); // Luôn xóa returnTo để sau khi đăng nhập luôn ở trang index
 
         // Luôn chuyển về hoặc hiển thị trang chủ đã đăng nhập (index.html)
@@ -237,9 +238,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 registerErrorBanner.textContent = '';
             }
 
-            const nameInput = registerForm.elements.namedItem('name');
+            const usernameInput = registerForm.elements.namedItem('username') || registerForm.elements.namedItem('name');
+            const fullnameInput = registerForm.elements.namedItem('fullname') || registerForm.elements.namedItem('fullName') || usernameInput;
             const phoneInput = registerForm.elements.namedItem('phone');
-            if (!(nameInput instanceof HTMLInputElement)
+            if (!(usernameInput instanceof HTMLInputElement)
                 || !(passwordInput instanceof HTMLInputElement)
                 || !(passwordConfirmInput instanceof HTMLInputElement)) return;
 
@@ -255,15 +257,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 const res = await window.AzuStore.register({
-                    userName: nameInput.value.trim(),
-                    fullName: nameInput.value.trim(),
+                    userName: usernameInput.value.trim(),
+                    fullName: (fullnameInput instanceof HTMLInputElement && fullnameInput.value.trim()) || usernameInput.value.trim(),
                     phoneNumber: phoneInput instanceof HTMLInputElement ? phoneInput.value.trim() : '',
                     password: passwordInput.value,
                     confirmPassword: passwordConfirmInput.value
                 });
 
                 if (res && res.isSuccess) {
-                    const displayName = res.data?.fullName || res.data?.userName || nameInput.value.trim();
+                    const displayName = res.data?.fullName || res.data?.userName || (fullnameInput instanceof HTMLInputElement && fullnameInput.value.trim()) || usernameInput.value.trim();
                     completeAuthentication(displayName);
                     passwordConfirmInput.setCustomValidity('');
                     registerForm.reset();

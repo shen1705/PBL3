@@ -84,7 +84,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: #00a550;
+    background: #212529;
     color: #ffffff !important;
     padding: 7px 16px;
     border-radius: 20px;
@@ -92,14 +92,14 @@ body {
     font-weight: 700 !important;
     text-decoration: none;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 165, 80, 0.25);
+    box-shadow: 0 4px 12px rgba(33, 37, 41, 0.15);
 }
 
 .nav-find-car-btn:hover {
-    background: #008f45;
+    background: #111827;
     color: #ffffff !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 165, 80, 0.35);
+    box-shadow: 0 6px 16px rgba(33, 37, 41, 0.25);
 }
 
 .nav-find-car-btn i {
