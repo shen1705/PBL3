@@ -54,7 +54,7 @@ public class AdminUserService : IAdminUserService
         var sanctionedCount = sanctionedUserIds.Count;
         var activeCount = Math.Max(0, totalUsers - sanctionedCount);
 
-        // owners count or vehicle
+        // owners count
         var ownerUserIds = await _db.OwnerProfiles.AsNoTracking()
             .Where(o => o.ApprovalStatus == OwnerApprovalStatuses.Approved)
             .Select(o => o.UserId)
@@ -68,13 +68,34 @@ public class AdminUserService : IAdminUserService
             .Distinct()
             .CountAsync(ct);
 
+        var pendingListingCount = await _db.VehicleListings.AsNoTracking()
+            .CountAsync(l => l.ModerationStatus == ListingModerationStatuses.PendingApproval, ct);
+
+        var openDisputeCount = await _db.Disputes.AsNoTracking()
+            .CountAsync(d => d.Status == DisputeStatuses.Open, ct);
+
+        var completedBookings = await _db.Bookings.AsNoTracking()
+            .Where(b => b.Status == BookingStatuses.Completed)
+            .Select(b => b.PriceLockedTotal)
+            .ToListAsync(ct);
+
+        var completedCount = completedBookings.Count;
+        var totalGmv = completedBookings.Sum();
+        var platformRevenue = Math.Round(totalGmv * 0.05m, 0);
+
         var metrics = new AdminUserMetricsDto
         {
             TotalUsers = totalUsers,
             ActiveUsers = activeCount,
             OwnerCount = ownerUserIds.Count,
             SanctionedCount = sanctionedCount,
-            PendingVerificationCount = pendingOwnerCount
+            PendingVerificationCount = pendingOwnerCount,
+            PendingOwnerCount = pendingOwnerCount,
+            PendingListingCount = pendingListingCount,
+            OpenDisputeCount = openDisputeCount,
+            CompletedTripsCount = completedCount,
+            TotalGmv = totalGmv,
+            PlatformRevenue = platformRevenue
         };
 
         return ServiceResult<AdminUserMetricsDto>.Success(metrics);
