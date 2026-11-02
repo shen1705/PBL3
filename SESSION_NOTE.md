@@ -49,6 +49,9 @@ Phiên làm việc này đã hoàn thành 100% các chức năng cơ bản của
 - `POST /api/bookings/{id}/review`: `[Authorize]` Gửi đánh giá 1-5 sao và phản hồi sau chuyến đi.
 - `GET /api/bookings/owner-revenue`: `[Authorize]` Lấy thống kê tổng doanh thu, hoa hồng, thu nhập ròng và bảng kê các chuyến hoàn tất của chủ xe.
 
+### 2.3.1. Cập Nhật Nhãn Ô Đăng Nhập
+- Đổi nhãn (`label`) và văn bản gợi ý (`placeholder`) của trường đăng nhập từ `"Tên hoặc số điện thoại"` thành **`"Username hoặc số điện thoại"`** trên tất cả các view và modal liên quan (`_Modals.cshtml`, `Find.cshtml`, v.v.).
+
 ### 2.4. Tích Hợp Giao Diện Người Dùng (Frontend Integration)
 1. **Trang Chuyến của tôi (`/account#trips`, `mytrips.js`, `account.js`):**
    - Đơn `Accepted`: Hiển thị nút **"Bàn giao / Nhận xe"** $\rightarrow$ gọi API nhận xe, chuyển trạng thái sang `Ongoing`.
