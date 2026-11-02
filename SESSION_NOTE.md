@@ -68,6 +68,14 @@ Phiên làm việc này đã hoàn thành 100% các chức năng cơ bản của
   - Chỉ hiển thị: **Cẩm nang cho thuê xe** (kèm banner đăng ký xe), **Chính sách bảo vệ dữ liệu** và nút **Đăng ký chủ xe** trên sidebar.
   - Ngăn chặn truy cập trực tiếp bằng URL hash của các mục chủ xe, tự động điều hướng về `#cam-nang`.
 
+
+### 2.3.4. Đồng Bộ Nút Đăng Ký Chủ Xe Theo Thiết Kế Chuẩn (`carregistermode`)
+- **Vấn đề:** Nút đăng ký chủ xe trên trang `/become-owner#cam-nang` (tại sidebar và trong banner cẩm nang dành cho người chưa phải chủ xe) sử dụng màu vàng mù tạt (`#c49a49`) lệch với design system.
+- **Khắc phục:**
+  - Định nghĩa lớp styling `.register-cta` trong [`become-owner.css`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/css/become-owner.css) theo đúng chuẩn nút bấm màu đen bo tròn (pill shape: `#212529`, hover `#111827`, `border-radius: 22px`, chữ trắng `font-weight: 700`, đổ bóng mềm).
+  - Cập nhật văn bản nút bấm thành **"Đăng ký xe tự lái"** đồng nhất với trang `/carregistermode`.
+  - Cả nút bấm trên sidebar và nút trong banner cẩm nang đều trỏ đến route `/carregistermode`.
+
 ### 2.4. Tích Hợp Giao Diện Người Dùng (Frontend Integration)
 1. **Trang Chuyến của tôi (`/account#trips`, `mytrips.js`, `account.js`):**
    - Đơn `Accepted`: Hiển thị nút **"Bàn giao / Nhận xe"** $\rightarrow$ gọi API nhận xe, chuyển trạng thái sang `Ongoing`.
