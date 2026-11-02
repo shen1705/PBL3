@@ -26,6 +26,7 @@
                 <a href="/become-owner" id="owner-nav-link">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</a>
                 <a href="/account#trips" id="trips-nav-link">Chuyến của tôi</a>
                 <a href="/support" id="support-nav-link">Trợ giúp</a>
+                <a href="/admin/users.html" id="admin-nav-link" style="color: #e11d48; font-weight: 700; @(User.IsInRole("Admin") || User.IsInRole("Staff") ? "" : "display: none;")"><i class="fa-solid fa-shield-halved"></i> Quản trị</a>
             </nav>
 
             <div class="nav-actions">

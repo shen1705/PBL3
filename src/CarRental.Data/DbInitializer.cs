@@ -29,6 +29,20 @@ public static class DbInitializer
         var users = await SeedUsersAsync(db, userManager);
         await SeedSettingsAndBankAsync(db, users);
         await SeedVehiclesAndBookingsAsync(db, users);
+
+        // seed staff role
+        var staff1User = await userManager.FindByNameAsync("staff1");
+        if (staff1User != null && !await userManager.IsInRoleAsync(staff1User, RoleNames.Staff))
+            Check(await userManager.AddToRoleAsync(staff1User, RoleNames.Staff));
+
+        var staff2User = await userManager.FindByNameAsync("staff2");
+        if (staff2User != null)
+        {
+            if (!await userManager.IsInRoleAsync(staff2User, RoleNames.Staff))
+                Check(await userManager.AddToRoleAsync(staff2User, RoleNames.Staff));
+            if (await userManager.IsInRoleAsync(staff2User, RoleNames.Admin))
+                Check(await userManager.RemoveFromRoleAsync(staff2User, RoleNames.Admin));
+        }
     }
 
     private static void Check(IdentityResult r)
@@ -51,8 +65,8 @@ public static class DbInitializer
             ("owner2",  "Hoàng Thị Em",    true,  "0900000005", new[] { RoleNames.Renter, RoleNames.Owner }),
             ("owner3",  "Võ Văn Phúc",     false, "0900000006", new[] { RoleNames.Renter, RoleNames.Owner }),
             ("owner4",  "Lê Hoàng Duy",    false, "0900000012", new[] { RoleNames.Renter, RoleNames.Owner }),
-            ("staff1",  "Đặng Thu Hà",     true,  "0900000007", new[] { RoleNames.Admin }),
-            ("staff2",  "Bùi Văn Khoa",    false, "0900000008", new[] { RoleNames.Admin }),
+            ("staff1",  "Đặng Thu Hà",     true,  "0900000007", new[] { RoleNames.Staff, RoleNames.Admin }),
+            ("staff2",  "Bùi Văn Khoa",    false, "0900000008", new[] { RoleNames.Staff }),
             ("admin1",  "Quản trị Một",    false, "0900000009", new[] { RoleNames.Admin }),
             ("admin2",  "Quản trị Hai",    true,  "0900000010", new[] { RoleNames.Admin }),
         };

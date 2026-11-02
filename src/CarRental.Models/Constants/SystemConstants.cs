@@ -5,8 +5,10 @@ public static class RoleNames
 {
     public const string Renter = "Renter";
     public const string Owner = "Owner";
+    public const string Staff = "Staff";
     public const string Admin = "Admin";
-    public static readonly IReadOnlyList<string> All = [Renter, Owner, Admin];
+    public const string AdminOrStaff = "Admin,Staff";
+    public static readonly IReadOnlyList<string> All = [Renter, Owner, Staff, Admin];
 }
 // permission
 public static class AppClaimTypes

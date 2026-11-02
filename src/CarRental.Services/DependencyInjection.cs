@@ -1,4 +1,5 @@
 using CarRental.Services.Abstractions;
+using CarRental.Services.Admin;
 using CarRental.Services.Auth;
 using CarRental.Services.Availability;
 using CarRental.Services.Bookings;
@@ -20,6 +21,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IVehicleService, VehicleService>();
         services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<IAdminUserService, AdminUserService>();
 
         return services;
     }
