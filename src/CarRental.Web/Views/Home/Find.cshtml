@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Tìm kiếm xe tự lái - AZU Car";
 }
 
@@ -226,9 +226,15 @@
             </div>
             <form class="auth-form" id="register-form">
                 <div class="form-group">
-                    <label for="register-name">Tên tài khoản</label>
+                    <label for="register-username">Tên tài khoản <small style="color: #64748b; font-weight: normal;">(dùng để đăng nhập)</small></label>
                     <div class="input-wrapper">
-                        <input id="register-name" name="name" type="text" placeholder="Nhập tên tài khoản" autocomplete="name" required>
+                        <input id="register-username" name="username" type="text" placeholder="Nhập tên tài khoản (viết liền không dấu)" autocomplete="username" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="register-fullname">Họ và tên</label>
+                    <div class="input-wrapper">
+                        <input id="register-fullname" name="fullname" type="text" placeholder="Nhập họ và tên đầy đủ của bạn" autocomplete="name" required>
                     </div>
                 </div>
                 <div class="form-group">

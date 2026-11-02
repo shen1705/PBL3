@@ -93,13 +93,14 @@ public class AuthService : IAuthService
     // Register ( Dang ki )
     public async Task<ServiceResult<AuthUserDto>> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(request.UserName) || string.IsNullOrWhiteSpace(request.Password))
+        if (string.IsNullOrWhiteSpace(request.UserName) || string.IsNullOrWhiteSpace(request.FullName) || string.IsNullOrWhiteSpace(request.Password))
             return ServiceResult<AuthUserDto>.Fail("Vui lòng điền đầy đủ các thông tin bắt buộc.", "REQUIRED_FIELDS_MISSING");
 
         if (request.Password != request.ConfirmPassword)
             return ServiceResult<AuthUserDto>.Fail("Mật khẩu xác nhận không khớp.", "PASSWORD_MISMATCH");
 
         var cleanUserName = request.UserName.Trim();
+        var cleanFullName = request.FullName.Trim();
         var cleanPhone = request.PhoneNumber?.Trim().Replace(" ", "").Replace("-", "").Replace(".", "") ?? string.Empty;
 
         // Kiểm tra username đã tồn tại
@@ -128,7 +129,7 @@ public class AuthService : IAuthService
         var newUser = new ApplicationUser
         {
             UserName = cleanUserName,
-            FullName = string.IsNullOrWhiteSpace(request.FullName) ? cleanUserName : request.FullName.Trim(),
+            FullName = cleanFullName,
             Email = email,
             PhoneNumber = cleanPhone,
             EmailConfirmed = true,

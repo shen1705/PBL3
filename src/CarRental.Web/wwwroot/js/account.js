@@ -4,6 +4,8 @@ if (!window.AzuStore.isLoggedIn()) {
 
 const accountKeys = {
     name: 'azuCarDisplayName',
+    fullName: 'azuCarFullName',
+    username: 'azuCarUserName',
     phone: 'azuCarPhone',
     email: 'azuCarEmail',
     birthday: 'azuCarBirthday',
@@ -132,6 +134,7 @@ function handleHashNavigation() {
 }
 
 window.addEventListener('hashchange', handleHashNavigation);
+window.addEventListener('azu:auth-changed', () => { renderAccountData(); });
 
 // Sidebar Clicks
 navAccount?.addEventListener('click', (e) => {
@@ -390,13 +393,23 @@ document.getElementById('account-trip-count-btn')?.addEventListener('click', (e)
 
 // Render Account Data
 function renderAccountData() {
-    const currentName = sessionStorage.getItem(accountKeys.name) || 'Người dùng';
+    const currentName = sessionStorage.getItem(accountKeys.fullName) || sessionStorage.getItem(accountKeys.name) || 'Người dùng';
     const firstLetter = Array.from(currentName)[0]?.toLocaleUpperCase('vi') || 'U';
 
     document.querySelectorAll('[data-name]').forEach(el => { el.textContent = currentName; });
     document.querySelectorAll('[data-avatar]').forEach(el => { el.textContent = firstLetter; });
     if (tripSidebarName) tripSidebarName.textContent = currentName;
     if (tripSidebarAvatar) tripSidebarAvatar.textContent = firstLetter;
+
+    const currentUsername = sessionStorage.getItem(accountKeys.username) || '';
+    const profileUsernameEl = document.getElementById('profile-username');
+    if (profileUsernameEl) {
+        profileUsernameEl.textContent = currentUsername ? `@${currentUsername}` : '---';
+    }
+    const profileDetailUsernameEl = document.getElementById('profile-detail-username');
+    if (profileDetailUsernameEl) {
+        profileDetailUsernameEl.textContent = currentUsername || '---';
+    }
 
     const phone = sessionStorage.getItem(accountKeys.phone)?.trim();
     const email = sessionStorage.getItem(accountKeys.email)?.trim();

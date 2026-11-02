@@ -10,7 +10,7 @@ const profileAvatar = document.getElementById('profile-avatar');
 const profileLink = document.getElementById('owner-account-link');
 const emptyState = document.getElementById('empty-state');
 const vehicleList = document.getElementById('owner-vehicle-list');
-const displayName = sessionStorage.getItem('azuCarDisplayName');
+const displayName = sessionStorage.getItem('azuCarFullName') || sessionStorage.getItem('azuCarDisplayName');
 let currentFilter = 'all';
 
 if (profileName && profileAvatar && profileLink) {
@@ -40,6 +40,19 @@ if (tripSidebarName) {
         tripSidebarName.style.display = 'block';
     }
 }
+
+window.addEventListener('azu:auth-changed', (e) => {
+    const u = e.detail;
+    const name = (u?.fullName && u.fullName.trim()) || u?.userName;
+    if (name) {
+        if (profileName) profileName.textContent = name;
+        if (profileAvatar) profileAvatar.textContent = Array.from(name.trim())[0].toLocaleUpperCase('vi');
+        if (tripSidebarName) {
+            tripSidebarName.textContent = name;
+            tripSidebarName.style.display = 'block';
+        }
+    }
+});
 
 const statusLabels = {
     pending: 'Chờ duyệt',
