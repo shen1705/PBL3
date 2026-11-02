@@ -161,7 +161,7 @@ document.querySelectorAll('.vehicle-tab').forEach(tab => {
 document.querySelectorAll('.register-trigger').forEach(button => {
     button.addEventListener('click', (e) => {
         e.preventDefault();
-        window.location.href = 'carregistermode.html';
+        window.location.href = '/carregistermode';
     });
 });
 
@@ -194,7 +194,7 @@ function applyRolePermissions() {
     // register button
     const sidebarRegisterBtn = document.getElementById('sidebarRegisterBtn');
     if (sidebarRegisterBtn) {
-        sidebarRegisterBtn.style.display = isOwner ? 'none' : 'flex';
+        sidebarRegisterBtn.style.display = isOwner ? 'none' : 'inline-flex';
     }
 
     // register banner
