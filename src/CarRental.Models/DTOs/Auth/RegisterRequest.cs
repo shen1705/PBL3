@@ -7,8 +7,11 @@ public class RegisterRequest
     [Required(ErrorMessage = "Vui lòng nhập tên tài khoản.")]
     [MinLength(3, ErrorMessage = "Tên tài khoản phải có ít nhất 3 ký tự.")]
     [MaxLength(50, ErrorMessage = "Tên tài khoản không vượt quá 50 ký tự.")]
+    [RegularExpression(@"^[a-zA-Z0-9_\.]+$", ErrorMessage = "Tên tài khoản chỉ được chứa chữ cái, chữ số, dấu gạch dưới hoặc dấu chấm (không dấu, không khoảng trắng).")]
     public string UserName { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Vui lòng nhập họ và tên.")]
+    [MinLength(2, ErrorMessage = "Họ và tên phải có ít nhất 2 ký tự.")]
     [MaxLength(100, ErrorMessage = "Họ và tên không vượt quá 100 ký tự.")]
     public string FullName { get; set; } = string.Empty;
 

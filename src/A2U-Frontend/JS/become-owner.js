@@ -10,27 +10,49 @@ const profileAvatar = document.getElementById('profile-avatar');
 const profileLink = document.getElementById('owner-account-link');
 const emptyState = document.getElementById('empty-state');
 const vehicleList = document.getElementById('owner-vehicle-list');
-const displayName = sessionStorage.getItem('azuCarDisplayName');
+const displayName = sessionStorage.getItem('azuCarFullName') || sessionStorage.getItem('azuCarDisplayName');
 let currentFilter = 'all';
 
 if (profileName && profileAvatar && profileLink) {
     if (displayName) {
         profileName.textContent = displayName;
         profileAvatar.textContent = Array.from(displayName)[0].toLocaleUpperCase('vi');
-        profileLink.href = 'my-trips.html#account';
+        profileLink.href = '/account';
         profileLink.setAttribute('aria-label', `Tài khoản ${displayName}`);
     } else {
         profileName.textContent = 'Đăng nhập';
         profileAvatar.textContent = '?';
-        profileLink.href = 'index.html';
+        profileLink.href = '/';
         profileLink.addEventListener('click', (e) => {
             e.preventDefault();
             sessionStorage.removeItem('azuCarReturnTo');
             sessionStorage.setItem('azuCarPromptLogin', '1');
-            window.location.href = 'index.html';
+            window.location.href = '/';
         });
     }
 }
+
+const tripSidebarName = document.getElementById('trip-sidebar-name');
+if (tripSidebarName) {
+    const userGreetingName = displayName || sessionStorage.getItem('azuCarAccountName');
+    if (userGreetingName) {
+        tripSidebarName.textContent = userGreetingName;
+        tripSidebarName.style.display = 'block';
+    }
+}
+
+window.addEventListener('azu:auth-changed', (e) => {
+    const u = e.detail;
+    const name = (u?.fullName && u.fullName.trim()) || u?.userName;
+    if (name) {
+        if (profileName) profileName.textContent = name;
+        if (profileAvatar) profileAvatar.textContent = Array.from(name.trim())[0].toLocaleUpperCase('vi');
+        if (tripSidebarName) {
+            tripSidebarName.textContent = name;
+            tripSidebarName.style.display = 'block';
+        }
+    }
+});
 
 const statusLabels = {
     pending: 'Chờ duyệt',
@@ -500,7 +522,35 @@ function renderCalendar() {
         if (date.getMonth() === month) {
             const availability = document.createElement('span');
             availability.className = 'calendar-availability';
-            availability.textContent = 'Trống';
+
+            // Check cached bookings for this date
+            const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+            const matchedBooking = cachedOwnerBookings.find(b => {
+                if (b.status === 'Cancelled' || b.status === 'Rejected' || b.status === 'Expired') return false;
+                const bStart = new Date(b.startDate);
+                const bEnd = new Date(b.endDate);
+                const startMid = new Date(bStart.getFullYear(), bStart.getMonth(), bStart.getDate()).getTime();
+                const endMid = new Date(bEnd.getFullYear(), bEnd.getMonth(), bEnd.getDate()).getTime();
+                return dateMidnight >= startMid && dateMidnight <= endMid;
+            });
+
+            if (matchedBooking) {
+                if (matchedBooking.status === 'Pending') {
+                    availability.textContent = 'Chờ duyệt';
+                    dayCell.style.background = '#fef3c7';
+                    dayCell.style.color = '#92400e';
+                } else if (matchedBooking.status === 'Accepted' || matchedBooking.status === 'Ongoing') {
+                    availability.textContent = 'Có chuyến';
+                    dayCell.style.background = '#dbeafe';
+                    dayCell.style.color = '#1e40af';
+                } else {
+                    availability.textContent = 'Bận';
+                    dayCell.style.background = '#fee2e2';
+                    dayCell.style.color = '#991b1b';
+                }
+            } else {
+                availability.textContent = 'Trống';
+            }
             dayCell.appendChild(availability);
         }
 
@@ -535,6 +585,136 @@ document.getElementById('nextMonth')?.addEventListener('click', () => {
     renderCalendar();
 });
 
-renderCalendar();
+let cachedOwnerBookings = [];
+
+async function loadOwnerBookingRequests() {
+    const listEl = document.getElementById('ownerRequestsList');
+    const badgeEl = document.getElementById('pendingRequestBadge');
+    if (!listEl) return;
+
+    try {
+        const resp = await fetch('/api/bookings/owner-requests');
+        if (!resp.ok) {
+            listEl.innerHTML = '<p style="color: #64748b; font-size: 14px; margin: 0;"><i class="fa-solid fa-lock"></i> Vui lòng đăng nhập với tài khoản chủ xe để xem các yêu cầu thuê xe.</p>';
+            return;
+        }
+        const resData = await resp.json();
+        const items = resData?.data || [];
+        cachedOwnerBookings = items;
+        const pendingItems = items.filter(b => b.status === 'Pending');
+        if (badgeEl) badgeEl.textContent = pendingItems.length;
+
+        if (items.length === 0) {
+            listEl.innerHTML = '<p style="color: #64748b; font-size: 14px; margin: 0;">Hiện chưa có yêu cầu thuê xe nào từ khách hàng.</p>';
+            renderCalendar();
+            return;
+        }
+
+        listEl.replaceChildren();
+        items.forEach(req => {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'owner-request-card';
+            itemEl.style.cssText = 'border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;';
+
+            const startStr = new Date(req.startDate).toLocaleDateString('vi-VN');
+            const endStr = new Date(req.endDate).toLocaleDateString('vi-VN');
+            const totalStr = Number(req.priceLockedTotal || 0).toLocaleString('vi-VN') + ' đ';
+            const depositStr = Number(req.depositAmount || 0).toLocaleString('vi-VN') + ' đ';
+
+            let statusLabel = req.status;
+            let statusColor = '#64748b';
+            let statusBg = '#f1f5f9';
+            if (req.status === 'Pending') { statusLabel = 'Chờ bạn duyệt'; statusColor = '#b45309'; statusBg = '#fef3c7'; }
+            else if (req.status === 'Accepted') { statusLabel = 'Đã duyệt'; statusColor = '#15803d'; statusBg = '#dcfce7'; }
+            else if (req.status === 'Rejected') { statusLabel = 'Đã từ chối'; statusColor = '#b91c1c'; statusBg = '#fee2e2'; }
+            else if (req.status === 'Ongoing') { statusLabel = 'Đang trong chuyến'; statusColor = '#1d4ed8'; statusBg = '#dbeafe'; }
+
+            itemEl.innerHTML = `
+                <div style="flex: 1; min-width: 250px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <strong style="color: #1e293b; font-size: 15px;">#${req.bookingId} - ${req.vehicleName}</strong>
+                        <span style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: ${statusBg}; color: ${statusColor}; font-weight: 700;">${statusLabel}</span>
+                    </div>
+                    <div style="font-size: 13px; color: #475569; line-height: 1.6;">
+                        <div><i class="fa-regular fa-user" style="width: 16px;"></i> Khách thuê: <strong>${req.renterName}</strong> ${req.renterPhone ? `(${req.renterPhone})` : ''}</div>
+                        <div><i class="fa-regular fa-calendar-days" style="width: 16px;"></i> Lịch thuê: <strong>${startStr} - ${endStr}</strong> (${req.rentalDays} ngày)</div>
+                        <div><i class="fa-solid fa-receipt" style="width: 16px;"></i> Tổng tiền: <strong>${totalStr}</strong> • Cọc đã giữ: <span style="color: #1d4ed8; font-weight: 700;">${depositStr} (25%)</span></div>
+                    </div>
+                </div>
+            `;
+
+            if (req.status === 'Pending') {
+                const actionsEl = document.createElement('div');
+                actionsEl.style.cssText = 'display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
+
+                const acceptBtn = document.createElement('button');
+                acceptBtn.type = 'button';
+                acceptBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
+                acceptBtn.innerHTML = '<i class="fa-solid fa-check"></i> Chấp nhận';
+                acceptBtn.addEventListener('click', async () => {
+                    if (!confirm(`Bạn có chắc muốn chấp nhận đơn thuê #${req.bookingId} (${req.vehicleName}) của ${req.renterName}?`)) return;
+                    acceptBtn.disabled = true;
+                    try {
+                        const r = await fetch(`/api/bookings/${req.bookingId}/respond`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ accept: true })
+                        });
+                        const data = await r.json();
+                        if (r.ok && data.isSuccess) {
+                            alert('Đã chấp nhận đơn thuê thành công!');
+                            loadOwnerBookingRequests();
+                        } else {
+                            alert('Lỗi: ' + (data?.message || 'Không thể chấp nhận đơn'));
+                        }
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ.');
+                    } finally {
+                        acceptBtn.disabled = false;
+                    }
+                });
+
+                const rejectBtn = document.createElement('button');
+                rejectBtn.type = 'button';
+                rejectBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #dc2626; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
+                rejectBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Từ chối';
+                rejectBtn.addEventListener('click', async () => {
+                    const reason = prompt('Nhập lý do từ chối đơn thuê:');
+                    if (reason === null) return;
+                    rejectBtn.disabled = true;
+                    try {
+                        const r = await fetch(`/api/bookings/${req.bookingId}/respond`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ accept: false, reason: reason || 'Chủ xe bận lịch' })
+                        });
+                        const data = await r.json();
+                        if (r.ok && data.isSuccess) {
+                            alert('Đã từ chối đơn thuê. Tiền cọc giữ chỗ đã được giải phóng cho khách.');
+                            loadOwnerBookingRequests();
+                        } else {
+                            alert('Lỗi: ' + (data?.message || 'Không thể từ chối đơn'));
+                        }
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ.');
+                    } finally {
+                        rejectBtn.disabled = false;
+                    }
+                });
+
+                actionsEl.append(acceptBtn, rejectBtn);
+                itemEl.appendChild(actionsEl);
+            }
+
+            listEl.appendChild(itemEl);
+        });
+
+        renderCalendar();
+    } catch (e) {
+        console.warn('Lỗi khi tải yêu cầu của chủ xe:', e);
+        listEl.innerHTML = '<p style="color: #ef4444; font-size: 14px; margin: 0;">Lỗi kết nối máy chủ khi kiểm tra yêu cầu.</p>';
+    }
+}
 
 renderCalendar();
+loadOwnerBookingRequests();
