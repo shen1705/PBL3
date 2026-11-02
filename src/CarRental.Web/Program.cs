@@ -64,10 +64,34 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Bảo vệ thư mục Quản trị (Admin Portal) - Chỉ cho phép Admin và Staff
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.ToLowerInvariant() ?? "";
+    if (path.StartsWith("/admin") && (path == "/admin" || path == "/admin/" || path.EndsWith(".html")))
+    {
+        if (context.User.Identity?.IsAuthenticated != true)
+        {
+            context.Response.Redirect("/?auth=login&returnUrl=" + Uri.EscapeDataString(context.Request.Path));
+            return;
+        }
+
+        if (!context.User.IsInRole(CarRental.Models.Constants.RoleNames.Admin) &&
+            !context.User.IsInRole(CarRental.Models.Constants.RoleNames.Staff))
+        {
+            context.Response.Redirect("/");
+            return;
+        }
+    }
+
+    await next();
+});
+
+app.UseStaticFiles();
 app.MapStaticAssets();
 
 // Friendly routes
@@ -166,7 +190,8 @@ if (app.Environment.IsDevelopment())
         });
     });
 
-    using var scope = app.Services.CreateScope();
+    
+using var scope = app.Services.CreateScope();
     await DbInitializer.SeedAsync(scope.ServiceProvider);
 }
 

@@ -67,6 +67,14 @@
         return Array.isArray(roles) && roles.some(r => String(r).toLowerCase() === 'owner');
     }
 
+    function isAdminOrStaff() {
+        const roles = readJson(KEYS.roles, []);
+        return Array.isArray(roles) && roles.some(r => {
+            const low = String(r).toLowerCase();
+            return low === 'admin' || low === 'staff';
+        });
+    }
+
     function syncRoleUi() {
         const userIsOwner = isOwner();
         const ownerNavLinks = document.querySelectorAll('#owner-nav-link');
@@ -78,6 +86,11 @@
         navBecomeOwnerTexts.forEach(el => {
             el.textContent = userIsOwner ? 'Quản lý xe' : 'Trở thành chủ xe';
         });
+
+        const adminNavLink = document.getElementById('admin-nav-link');
+        if (adminNavLink) {
+            adminNavLink.style.display = isAdminOrStaff() ? 'inline-flex' : 'none';
+        }
 
         window.dispatchEvent(new CustomEvent('azu:role-changed', { detail: { isOwner: userIsOwner } }));
     }

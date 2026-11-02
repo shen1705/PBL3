@@ -269,7 +269,7 @@ public class AuthService : IAuthService
     {
         var now = _clock.UtcNow;
         return await _db.AccountSanctions.AsNoTracking()
-            .Where(s => s.UserId == userId && (s.ExpiresAt == null || s.ExpiresAt > now))
+            .Where(s => s.UserId == userId && s.LiftedAt == null && (s.ExpiresAt == null || s.ExpiresAt > now))
             .OrderByDescending(s => s.IssuedAt)
             .FirstOrDefaultAsync(ct);
     }
