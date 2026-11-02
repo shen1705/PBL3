@@ -23,7 +23,7 @@
             <nav class="nav-links" aria-label="Điều hướng chính">
                 <a href="/find" id="find-nav-link" class="nav-find-car-btn"><i class="fa-solid fa-magnifying-glass"></i> Tìm xe</a>
                 <a href="/about" id="about-nav-link">Về AZU Car</a>
-                <a href="/become-owner" id="owner-nav-link">Trở thành chủ xe</a>
+                <a href="/become-owner" id="owner-nav-link">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</a>
                 <a href="/account#trips" id="trips-nav-link">Chuyến của tôi</a>
                 <a href="/support" id="support-nav-link">Trợ giúp</a>
             </nav>

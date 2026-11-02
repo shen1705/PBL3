@@ -18,7 +18,7 @@
                 </div>
                 <nav class="trips-side-nav">
                     <a class="trips-side-link" href="/account" id="nav-account"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
-                    <a class="trips-side-link active" href="/become-owner" id="nav-become-owner" aria-current="page"><i class="fa-solid fa-key"></i><span>Trở thành chủ xe</span></a>
+                    <a class="trips-side-link active" href="/become-owner" id="nav-become-owner" aria-current="page"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span></a>
                     <a class="trips-side-link" href="/account#trips" id="nav-trips"><i class="fa-regular fa-calendar-days"></i><span>Chuyến của tôi</span></a>
                     <a class="trips-side-link" href="/account#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
                     <a class="trips-side-link" href="/account#privacy" id="nav-privacy"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
@@ -30,12 +30,13 @@
             <!-- Panel 2: BecomeOwner management sub-panel -->
             <aside class="sidebar become-owner-panel" aria-label="Danh mục quản lý chủ xe">
                 <nav class="side-nav">
-                    <a class="side-link" href="#danh-sach-xe-content"><i class="fa-solid fa-car"></i><span>Danh sách xe</span></a>
-                    <a class="side-link" href="#lich-xe"><i class="fa-regular fa-calendar"></i><span>Lịch xe</span></a>
+                    <a class="side-link owner-only" href="#danh-sach-xe-content"><i class="fa-solid fa-car"></i><span>Danh sách xe</span></a>
+                    <a class="side-link owner-only" href="#lich-xe"><i class="fa-regular fa-calendar"></i><span>Lịch xe</span></a>
                     <a class="side-link active" href="#cam-nang"><i class="fa-solid fa-book-open"></i><span>Cẩm nang cho thuê xe</span></a>
-                    <a class="side-link" href="#doanh-thu"><i class="fa-solid fa-chart-line"></i><span>Doanh thu cho thuê</span></a>
-                    <a class="side-link" href="#hop-dong"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
+                    <a class="side-link owner-only" href="#doanh-thu"><i class="fa-solid fa-chart-line"></i><span>Doanh thu cho thuê</span></a>
+                    <a class="side-link owner-only" href="#hop-dong"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
                     <a class="side-link" href="#bao-mat"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
+                    <a class="side-link renter-only-register" id="sidebarRegisterBtn" href="carregistermode.html" style="display: none; background: #c49a49; color: #fff; font-weight: 700; margin-top: 10px; border-radius: 8px; justify-content: center;"><i class="fa-solid fa-plus"></i><span>Đăng ký chủ xe</span></a>
                 </nav>
             </aside>
         </div>
@@ -186,6 +187,18 @@
                 <div class="section-page-heading">
                     <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
                     <h1 id="guide-title">Cẩm nang cho thuê xe</h1>
+                </div>
+
+                <!-- Banner đăng ký trở thành chủ xe dành cho Renter -->
+                <div class="renter-register-banner" id="renterRegisterBanner" style="display: none; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; border-radius: 14px; padding: 22px 24px; margin-bottom: 20px; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 250px;">
+                        <span style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #d1a34b;">Gia nhập đối tác AZU Car</span>
+                        <h2 style="font-size: 19px; font-weight: 800; margin: 4px 0 6px 0; color: #fff;">Bạn muốn tăng thu nhập từ xe nhàn rỗi?</h2>
+                        <p style="margin: 0; font-size: 13.5px; color: #cbd5e1; line-height: 1.5;">Đăng ký trở thành chủ xe ngay hôm nay để nhận quyền lợi bảo hiểm toàn diện và kết nối hàng ngàn khách thuê xe uy tín.</p>
+                    </div>
+                    <a href="carregistermode.html" class="primary-button register-trigger" style="background: #c49a49; color: #fff; padding: 11px 22px; border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: none; white-space: nowrap;">
+                        <i class="fa-solid fa-plus"></i> Đăng ký chủ xe ngay
+                    </a>
                 </div>
 
                 <div class="guide-card">

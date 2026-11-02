@@ -52,6 +52,11 @@ window.addEventListener('azu:auth-changed', (e) => {
             tripSidebarName.style.display = 'block';
         }
     }
+    applyRolePermissions();
+});
+
+window.addEventListener('azu:role-changed', () => {
+    applyRolePermissions();
 });
 
 const statusLabels = {
@@ -166,9 +171,64 @@ renderOwnerCars();
 const sideLinks = document.querySelectorAll('.side-link');
 const contentSections = document.querySelectorAll('.content-section');
 
+function applyRolePermissions() {
+    const isOwner = window.AzuStore?.isOwner ? window.AzuStore.isOwner() : false;
+
+    // 1. Cập nhật nhãn text "Quản lý xe" vs "Trở thành chủ xe"
+    const navTextEl = document.getElementById('nav-become-owner-text');
+    if (navTextEl) {
+        navTextEl.textContent = isOwner ? 'Quản lý xe' : 'Trở thành chủ xe';
+    }
+
+    const pageHeadingTitle = document.getElementById('page-title');
+    if (pageHeadingTitle) {
+        pageHeadingTitle.textContent = isOwner ? 'Quản lý cho thuê' : 'Trở thành chủ xe';
+    }
+
+    // 2. Ẩn/hiện các link chỉ dành riêng cho chủ xe
+    const ownerOnlyLinks = document.querySelectorAll('.side-link.owner-only');
+    ownerOnlyLinks.forEach(link => {
+        link.style.display = isOwner ? 'flex' : 'none';
+    });
+
+    // 3. Nút đăng ký chủ xe ở sidebar cho renter
+    const sidebarRegisterBtn = document.getElementById('sidebarRegisterBtn');
+    if (sidebarRegisterBtn) {
+        sidebarRegisterBtn.style.display = isOwner ? 'none' : 'flex';
+    }
+
+    // 4. Banner đăng ký trong cẩm nang cho renter
+    const registerBanner = document.getElementById('renterRegisterBanner');
+    if (registerBanner) {
+        registerBanner.style.display = isOwner ? 'none' : 'flex';
+    }
+
+    // 5. Nếu không phải chủ xe nhưng đang ở các mục của chủ xe, chuyển về cẩm nang
+    const currentHash = (window.location.hash || '').replace('#', '');
+    const ownerSections = ['danh-sach-xe', 'danh-sach-xe-content', 'lich-xe', 'lich-xe-content', 'doanh-thu', 'doanh-thu-content', 'hop-dong', 'hop-dong-content'];
+    if (!isOwner) {
+        if (!currentHash || ownerSections.includes(currentHash)) {
+            switchSection('cam-nang');
+            window.history.replaceState(null, '', '#cam-nang');
+        }
+    } else {
+        if (!currentHash) {
+            switchSection('danh-sach-xe-content');
+            window.history.replaceState(null, '', '#danh-sach-xe-content');
+        }
+    }
+}
+
 function switchSection(targetId) {
     if (!targetId) return;
     const cleanId = targetId.startsWith('#') ? targetId.slice(1) : targetId;
+
+    // Ngăn chặn người dùng không phải chủ xe vào các mục quản lý xe
+    const isOwner = window.AzuStore?.isOwner ? window.AzuStore.isOwner() : false;
+    const ownerSections = ['danh-sach-xe', 'danh-sach-xe-content', 'lich-xe', 'lich-xe-content', 'doanh-thu', 'doanh-thu-content', 'hop-dong', 'hop-dong-content'];
+    if (!isOwner && ownerSections.includes(cleanId)) {
+        targetId = 'cam-nang';
+    }
 
     // Map common aliases
     let resolvedId = cleanId;
@@ -179,7 +239,10 @@ function switchSection(targetId) {
     if (cleanId === 'bao-mat') resolvedId = 'bao-mat-content';
     if (cleanId === 'doanh-thu') {
         resolvedId = 'doanh-thu-content';
-        loadOwnerRevenue();
+        if (isOwner) loadOwnerRevenue();
+    }
+    if (!isOwner && ownerSections.includes(cleanId)) {
+        resolvedId = 'cam-nang-content';
     }
 
     let sectionEl = document.getElementById(resolvedId);
@@ -892,6 +955,9 @@ async function loadOwnerRevenue() {
     }
 }
 
-renderCalendar();
-loadOwnerBookingRequests();
-loadOwnerRevenue();
+applyRolePermissions();
+if (window.AzuStore?.isOwner && window.AzuStore.isOwner()) {
+    renderCalendar();
+    loadOwnerBookingRequests();
+    loadOwnerRevenue();
+}
