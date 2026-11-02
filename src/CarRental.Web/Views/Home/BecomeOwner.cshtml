@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Quản lý cho thuê - AZU Car";
 }
 
@@ -36,7 +36,9 @@
                     <a class="side-link owner-only" href="#doanh-thu"><i class="fa-solid fa-chart-line"></i><span>Doanh thu cho thuê</span></a>
                     <a class="side-link owner-only" href="#hop-dong"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
                     <a class="side-link" href="#bao-mat"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
-                    <a class="side-link renter-only-register" id="sidebarRegisterBtn" href="carregistermode.html" style="display: none; background: #c49a49; color: #fff; font-weight: 700; margin-top: 10px; border-radius: 8px; justify-content: center;"><i class="fa-solid fa-plus"></i><span>Đăng ký chủ xe</span></a>
+                    <a class="register-cta" id="sidebarRegisterBtn" href="/carregistermode" style="display: none; margin-top: 6px; width: 100%;">
+                        Đăng ký xe tự lái
+                    </a>
                 </nav>
             </aside>
         </div>
@@ -78,7 +80,7 @@
                         </div>
                         <h2>Không tìm thấy xe nào.</h2>
                         <p>Hãy đăng ký xe để bắt đầu cho thuê trên AZU Car</p>
-                        <a href="carregistermode.html" class="primary-button register-trigger">
+                        <a href="/carregistermode" class="register-cta">
                             <i class="fa-solid fa-plus"></i> Đăng ký xe ngay
                         </a>
                     </div>
@@ -196,8 +198,8 @@
                         <h2 style="font-size: 19px; font-weight: 800; margin: 4px 0 6px 0; color: #fff;">Bạn muốn tăng thu nhập từ xe nhàn rỗi?</h2>
                         <p style="margin: 0; font-size: 13.5px; color: #cbd5e1; line-height: 1.5;">Đăng ký trở thành chủ xe ngay hôm nay để nhận quyền lợi bảo hiểm toàn diện và kết nối hàng ngàn khách thuê xe uy tín.</p>
                     </div>
-                    <a href="carregistermode.html" class="primary-button register-trigger" style="background: #c49a49; color: #fff; padding: 11px 22px; border-radius: 8px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: none; white-space: nowrap;">
-                        <i class="fa-solid fa-plus"></i> Đăng ký chủ xe ngay
+                    <a href="/carregistermode" class="register-cta">
+                        Đăng ký xe tự lái
                     </a>
                 </div>
 
