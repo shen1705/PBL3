@@ -33,6 +33,7 @@
                     <a class="side-link" href="#danh-sach-xe-content"><i class="fa-solid fa-car"></i><span>Danh sách xe</span></a>
                     <a class="side-link" href="#lich-xe"><i class="fa-regular fa-calendar"></i><span>Lịch xe</span></a>
                     <a class="side-link active" href="#cam-nang"><i class="fa-solid fa-book-open"></i><span>Cẩm nang cho thuê xe</span></a>
+                    <a class="side-link" href="#doanh-thu"><i class="fa-solid fa-chart-line"></i><span>Doanh thu cho thuê</span></a>
                     <a class="side-link" href="#hop-dong"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
                     <a class="side-link" href="#bao-mat"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
                 </nav>
@@ -287,6 +288,54 @@
                                 <span class="chevron">›</span>
                             </a>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 6: Doanh thu cho thuê -->
+            <section class="content-section" id="doanh-thu-content" aria-labelledby="doanh-thu-title" hidden>
+                <div class="section-page-heading">
+                    <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h1 id="doanh-thu-title">Doanh thu cho thuê</h1>
+                </div>
+
+                <div class="management-card" style="padding: 24px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div style="background: #eff6ff; border-radius: 12px; padding: 18px; border: 1px solid #bfdbfe;">
+                            <span style="font-size: 13px; color: #1e40af; font-weight: 600;">Tổng doanh thu (Gross)</span>
+                            <h2 id="revenueGross" style="font-size: 24px; font-weight: 800; color: #1d4ed8; margin: 8px 0 0 0;">0 đ</h2>
+                        </div>
+                        <div style="background: #fef2f2; border-radius: 12px; padding: 18px; border: 1px solid #fecaca;">
+                            <span style="font-size: 13px; color: #991b1b; font-weight: 600;">Phí nền tảng (5%)</span>
+                            <h2 id="revenueCommission" style="font-size: 24px; font-weight: 800; color: #dc2626; margin: 8px 0 0 0;">0 đ</h2>
+                        </div>
+                        <div style="background: #f0fdf4; border-radius: 12px; padding: 18px; border: 1px solid #bbf7d0;">
+                            <span style="font-size: 13px; color: #166534; font-weight: 600;">Thu nhập thực nhận (95%)</span>
+                            <h2 id="revenueNet" style="font-size: 24px; font-weight: 800; color: #16a34a; margin: 8px 0 0 0;">0 đ</h2>
+                        </div>
+                        <div style="background: #f8fafc; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0;">
+                            <span style="font-size: 13px; color: #475569; font-weight: 600;">Số chuyến hoàn tất</span>
+                            <h2 id="revenueCompletedTrips" style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 8px 0 0 0;">0</h2>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 14px;">Bảng kê các chuyến xe đã hoàn tất</h3>
+                    <div id="revenueTripsTableWrap" style="overflow-x: auto;">
+                        <p id="revenueEmptyMsg" style="color: #64748b; font-size: 14px; margin: 0;">Chưa có chuyến đi nào hoàn tất để tổng kết doanh thu.</p>
+                        <table id="revenueTripsTable" style="width: 100%; border-collapse: collapse; font-size: 13.5px; display: none;">
+                            <thead>
+                                <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; text-align: left; color: #475569;">
+                                    <th style="padding: 10px 12px;">Mã đơn</th>
+                                    <th style="padding: 10px 12px;">Xe thuê</th>
+                                    <th style="padding: 10px 12px;">Khách thuê</th>
+                                    <th style="padding: 10px 12px;">Thời gian</th>
+                                    <th style="padding: 10px 12px; text-align: right;">Tổng giá thuê</th>
+                                    <th style="padding: 10px 12px; text-align: right;">Phí sàn (5%)</th>
+                                    <th style="padding: 10px 12px; text-align: right;">Chủ xe nhận</th>
+                                </tr>
+                            </thead>
+                            <tbody id="revenueTripsBody"></tbody>
+                        </table>
                     </div>
                 </div>
             </section>
