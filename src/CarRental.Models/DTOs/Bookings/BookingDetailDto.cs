@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace CarRental.Models.DTOs.Bookings;
 
@@ -31,6 +32,7 @@ public class BookingDetailDto
     public string Status { get; set; } = string.Empty;
     public decimal PriceLockedTotal { get; set; }
     public decimal DepositAmount { get; set; }
+    public decimal RemainingAmount => PriceLockedTotal > DepositAmount ? PriceLockedTotal - DepositAmount : 0m;
 
     // Lifecycle Timestamps
     public DateTime CreatedAt { get; set; }
@@ -46,4 +48,11 @@ public class BookingDetailDto
     // Extras
     public string? DeliveryMethod { get; set; }
     public string? DeliveryAddress { get; set; }
+
+    // Handover & Settlement
+    public bool HasPickupConfirmed { get; set; }
+    public bool HasReturnConfirmed { get; set; }
+    public bool HasReviewed { get; set; }
+    public List<HandoverConfirmationDto> Handovers { get; set; } = new();
+    public List<ReviewDto> Reviews { get; set; } = new();
 }

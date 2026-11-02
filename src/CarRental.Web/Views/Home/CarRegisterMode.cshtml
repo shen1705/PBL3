@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="~/css/carregistermode.css" asp-append-version="true">
 }
 
+    <main class="owner-register-main">
+        <section class="owner-intro">
             <p class="intro-eyebrow">TRỞ THÀNH CHỦ XE CÙNG AZU CAR</p>
             <h1>Tối ưu thu nhập từ chiếc xe nhàn rỗi của bạn</h1>
             <p class="intro-description">AZU Car giúp bạn kết nối với hàng ngàn khách hàng uy tín tại Việt Nam. Quy trình đăng ký nhanh chóng, bảo hiểm chuyến đi toàn diện và an toàn tuyệt đối.</p>
@@ -36,7 +38,7 @@
         </section>
 
         <section class="register-card" aria-labelledby="register-title">
-            <a class="back-link" href="become-owner.html#danh-sach-xe-content" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></a>
+            <a class="back-link" href="/become-owner" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></a>
             <h2 id="register-title">Đăng ký xe</h2>
             <div class="register-illustration" aria-hidden="true">
                 <div class="illustration-orbit"></div>
@@ -52,50 +54,6 @@
             <button class="register-cta" id="start-registration" type="button">Đăng ký xe tự lái</button>
         </section>
     </main>
-
-    <footer class="footer" id="support">
-        <div class="container footer-grid">
-            <div class="footer-col">
-                <a href="index.html" class="logo footer-logo">
-                    <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
-                </a>
-                <p class="footer-desc">Nền tảng chia sẻ và cho thuê ô tô tự lái hàng đầu Việt Nam. Mang lại những chuyến đi tự do và hạnh phúc cho triệu hành trình.</p>
-            </div>
-            <div class="footer-col">
-                <h4>VỀ AZU CAR</h4>
-                <ul>
-                    <li><a href="about.html">Về chúng tôi</a></li>
-                    <li><a href="about.html#features">Tính năng</a></li>
-                    <li><a href="become-owner.html#bao-mat">Chính sách bảo mật</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>DỊCH VỤ</h4>
-                <ul>
-                    <li><a href="#">Thuê xe tự lái</a></li>
-                    <li><a href="#">Thuê xe cưới hỏi</a></li>
-                    <li><a href="#">Hợp đồng dài hạn</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>HỖ TRỢ & LIÊN HỆ</h4>
-                <p><strong>Hotline:</strong> 1900 9217 (8:00 - 21:00)</p>
-                <p><strong>Email:</strong> support@azucar.vn</p>
-                <p><strong>Văn phòng:</strong> Phường Hải Châu, TP. Đà Nẵng</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="container footer-bottom-flex">
-                <p>2026 AZU Car Việt Nam. Bảo lưu mọi quyền lợi.</p>
-                <div class="footer-bottom-links">
-                    <a href="#">Điều khoản dịch vụ</a>
-                    <a href="#">Chính sách hoạt động</a>
-                    <a href="#">Quy chế hoạt động</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
 
     <!-- Modal Đăng ký xe -->
     <div class="registration-overlay" id="registration-overlay" hidden>
@@ -394,7 +352,7 @@
                             </div>
 
                             <div class="pane-actions center-actions">
-                                <a href="become-owner.html#danh-sach-xe-content" class="btn-finish-reg">
+                                <a href="/become-owner#danh-sach-xe-content" class="btn-finish-reg">
                                     <i class="fa-solid fa-car"></i> Đến trang Quản lý xe
                                 </a>
                             </div>

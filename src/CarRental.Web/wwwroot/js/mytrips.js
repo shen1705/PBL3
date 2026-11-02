@@ -741,10 +741,124 @@ async function renderTrips() {
 
         info.append(title, meta, statusSpan, price, depositSmall);
 
+        const actionsDiv = document.createElement('div');
+        actionsDiv.style.cssText = 'margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
+
+        // 1. Nhận xe
+        if (trip.status === 'Accepted') {
+            const pickupBtn = document.createElement('button');
+            pickupBtn.type = 'button';
+            pickupBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            pickupBtn.innerHTML = '<i class="fa-solid fa-key"></i> Bàn giao / Nhận xe';
+            pickupBtn.addEventListener('click', async () => {
+                const conf = confirm(`Xác nhận bạn đã nhận bàn giao xe ${trip.vehicleName}? Chuyến đi sẽ chính thức bắt đầu.`);
+                if (!conf) return;
+                pickupBtn.disabled = true;
+                try {
+                    const r = await fetch(`/api/bookings/${trip.bookingId}/pickup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'Pickup' })
+                    });
+                    const d = await r.json();
+                    if (r.ok && d.isSuccess) {
+                        alert('Xác nhận nhận xe thành công! Chúc bạn có một hành trình an toàn và vui vẻ.');
+                        renderTrips();
+                    } else {
+                        alert('Lỗi: ' + (d?.message || 'Không thể xác nhận nhận xe'));
+                    }
+                } catch (e) {
+                    alert('Lỗi kết nối máy chủ.');
+                } finally {
+                    pickupBtn.disabled = false;
+                }
+            });
+            actionsDiv.appendChild(pickupBtn);
+        }
+
+        // 2. Trả xe
+        if (trip.status === 'Ongoing') {
+            const returnBtn = document.createElement('button');
+            returnBtn.type = 'button';
+            returnBtn.style.cssText = 'background: #2563eb; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            returnBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Xác nhận trả xe';
+            returnBtn.addEventListener('click', async () => {
+                const conf = confirm(`Xác nhận hoàn tất chuyến đi và trả lại xe ${trip.vehicleName} cho chủ xe?`);
+                if (!conf) return;
+                returnBtn.disabled = true;
+                try {
+                    const r = await fetch(`/api/bookings/${trip.bookingId}/return`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'Return' })
+                    });
+                    const d = await r.json();
+                    if (r.ok && d.isSuccess) {
+                        alert('Xác nhận trả xe thành công! Cảm ơn bạn đã đồng hành cùng AZU Car.');
+                        renderTrips();
+                    } else {
+                        alert('Lỗi: ' + (d?.message || 'Không thể xác nhận trả xe'));
+                    }
+                } catch (e) {
+                    alert('Lỗi kết nối máy chủ.');
+                } finally {
+                    returnBtn.disabled = false;
+                }
+            });
+            actionsDiv.appendChild(returnBtn);
+        }
+
+        // 3. Đánh giá
+        if (trip.status === 'Completed') {
+            if (!trip.hasReviewed) {
+                const reviewBtn = document.createElement('button');
+                reviewBtn.type = 'button';
+                reviewBtn.style.cssText = 'background: #f59e0b; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+                reviewBtn.innerHTML = '<i class="fa-solid fa-star"></i> Đánh giá chuyến đi';
+                reviewBtn.addEventListener('click', async () => {
+                    const starsStr = prompt('Đánh giá chất lượng dịch vụ (từ 1 đến 5 sao):', '5');
+                    if (starsStr === null) return;
+                    const rating = parseInt(starsStr, 10);
+                    if (isNaN(rating) || rating < 1 || rating > 5) {
+                        alert('Số sao không hợp lệ (vui lòng chọn từ 1 đến 5 sao).');
+                        return;
+                    }
+                    const comment = prompt('Nhận xét của bạn về chủ xe và xe:', 'Xe đi rất êm, sạch sẽ, chủ xe nhiệt tình và đúng giờ!');
+                    if (comment === null) return;
+                    reviewBtn.disabled = true;
+                    try {
+                        const r = await fetch(`/api/bookings/${trip.bookingId}/review`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ rating, comment: comment || 'Chuyến đi tuyệt vời!' })
+                        });
+                        const d = await r.json();
+                        if (r.ok && d.isSuccess) {
+                            alert('Cảm ơn bạn đã gửi đánh giá cho chuyến đi!');
+                            renderTrips();
+                        } else {
+                            alert('Lỗi: ' + (d?.message || 'Không thể gửi đánh giá'));
+                        }
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ.');
+                    } finally {
+                        reviewBtn.disabled = false;
+                    }
+                });
+                actionsDiv.appendChild(reviewBtn);
+            } else {
+                const reviewedBadge = document.createElement('span');
+                reviewedBadge.style.cssText = 'font-size: 13px; color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
+                reviewedBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã gửi đánh giá';
+                actionsDiv.appendChild(reviewedBadge);
+            }
+        }
+
+        // 4. Hủy chuyến
         if (trip.status === 'Pending' || trip.status === 'Accepted') {
             const cancelBtn = document.createElement('button');
             cancelBtn.type = 'button';
-            cancelBtn.style.cssText = 'margin-top: 10px; background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            cancelBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
             cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Hủy chuyến này';
             cancelBtn.addEventListener('click', async () => {
                 const reason = prompt('Nhập lý do hủy chuyến:');
@@ -769,7 +883,11 @@ async function renderTrips() {
                     cancelBtn.disabled = false;
                 }
             });
-            info.appendChild(cancelBtn);
+            actionsDiv.appendChild(cancelBtn);
+        }
+
+        if (actionsDiv.children.length > 0) {
+            info.appendChild(actionsDiv);
         }
 
         card.append(image, info);
