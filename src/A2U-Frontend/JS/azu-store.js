@@ -1,7 +1,12 @@
 (function (global) {
     const KEYS = {
         name: 'azuCarDisplayName',
+        fullName: 'azuCarFullName',
+        username: 'azuCarUserName',
+        userId: 'azuCarUserId',
+        roles: 'azuCarRoles',
         phone: 'azuCarPhone',
+        email: 'azuCarEmail',
         trips: 'azuCarTrips',
         ownerCars: 'azuCarOwnerCars',
         returnTo: 'azuCarReturnTo',
@@ -58,28 +63,151 @@
     }
 
     function syncHeaderAuth() {
-        const name = sessionStorage.getItem(KEYS.name);
+        const name = sessionStorage.getItem(KEYS.fullName) || sessionStorage.getItem(KEYS.name);
         const guestActions = document.getElementById('guest-actions');
         const accountDisplay = document.getElementById('account-display');
         const accountAvatar = document.getElementById('account-avatar');
         const accountName = document.getElementById('account-name');
+        const tripsNavLink = document.getElementById('trips-nav-link');
 
         if (name) {
             if (guestActions) guestActions.hidden = true;
             if (accountDisplay) accountDisplay.hidden = false;
-            if (accountAvatar) accountAvatar.textContent = Array.from(name)[0].toLocaleUpperCase('vi');
+            if (accountAvatar) accountAvatar.textContent = Array.from(name.trim())[0].toLocaleUpperCase('vi');
             if (accountName) accountName.textContent = name;
+            if (tripsNavLink) tripsNavLink.hidden = false;
         } else {
             if (guestActions) guestActions.hidden = false;
             if (accountDisplay) accountDisplay.hidden = true;
         }
     }
 
+    async function checkAuth() {
+        try {
+            const res = await fetch('/api/auth/me', {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.isSuccess && data.data) {
+                    const u = data.data;
+                    const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
+                    sessionStorage.setItem(KEYS.name, displayName);
+                    sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
+                    sessionStorage.setItem(KEYS.username, u.userName || '');
+                    sessionStorage.setItem(KEYS.userId, u.userId);
+                    writeJson(KEYS.roles, u.roles || []);
+                    if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
+                    if (u.email) sessionStorage.setItem(KEYS.email, u.email);
+                    syncHeaderAuth();
+                    return data.data;
+                }
+            } else if (res.status === 401) {
+                // clear stale session
+                sessionStorage.removeItem(KEYS.name);
+                sessionStorage.removeItem(KEYS.fullName);
+                sessionStorage.removeItem(KEYS.username);
+                sessionStorage.removeItem(KEYS.userId);
+                sessionStorage.removeItem(KEYS.roles);
+                sessionStorage.removeItem(KEYS.phone);
+                sessionStorage.removeItem(KEYS.email);
+                syncHeaderAuth();
+            }
+        } catch (err) {
+            console.warn('Auth check skipped:', err);
+        }
+        return null;
+    }
+
+    async function login(identifier, password, rememberMe = true) {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ identifier, password, rememberMe })
+        });
+        const data = await res.json();
+        if (res.ok && data.isSuccess) {
+            const u = data.data;
+            const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
+            sessionStorage.setItem(KEYS.name, displayName);
+            sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
+            sessionStorage.setItem(KEYS.username, u.userName || '');
+            sessionStorage.setItem(KEYS.userId, u.userId);
+            writeJson(KEYS.roles, u.roles || []);
+            if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
+            if (u.email) sessionStorage.setItem(KEYS.email, u.email);
+            syncHeaderAuth();
+        }
+        return data;
+    }
+
+    async function register(reqData) {
+        const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(reqData)
+        });
+        const data = await res.json();
+        if (res.ok && data.isSuccess) {
+            const u = data.data;
+            const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
+            sessionStorage.setItem(KEYS.name, displayName);
+            sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
+            sessionStorage.setItem(KEYS.username, u.userName || '');
+            sessionStorage.setItem(KEYS.userId, u.userId);
+            writeJson(KEYS.roles, u.roles || []);
+            if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
+            if (u.email) sessionStorage.setItem(KEYS.email, u.email);
+            syncHeaderAuth();
+        }
+        return data;
+    }
+
+    async function logout() {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (e) {
+            console.error('Logout error:', e);
+        }
+        sessionStorage.removeItem(KEYS.name);
+        sessionStorage.removeItem(KEYS.fullName);
+        sessionStorage.removeItem(KEYS.username);
+        sessionStorage.removeItem(KEYS.userId);
+        sessionStorage.removeItem(KEYS.roles);
+        sessionStorage.removeItem(KEYS.phone);
+        sessionStorage.removeItem(KEYS.email);
+        syncHeaderAuth();
+        window.location.assign('/');
+    }
+
+    async function changePassword(currentPassword, newPassword, confirmPassword) {
+        const res = await fetch('/api/auth/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ currentPassword, newPassword, confirmPassword })
+        });
+        return await res.json();
+    }
+
     if (typeof document !== 'undefined') {
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', syncHeaderAuth);
+            document.addEventListener('DOMContentLoaded', () => {
+                syncHeaderAuth();
+                checkAuth();
+            });
         } else {
             syncHeaderAuth();
+            checkAuth();
         }
 
         // auth button click
@@ -110,6 +238,11 @@
         pageName,
         requireLogin,
         syncHeaderAuth,
+        checkAuth,
+        login,
+        register,
+        logout,
+        changePassword,
         getTrips() {
             return readJson(KEYS.trips, []);
         },

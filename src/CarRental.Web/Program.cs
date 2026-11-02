@@ -21,6 +21,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o =>
     o.Password.RequiredLength = 6;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
+.AddClaimsPrincipalFactory<CarRental.Services.Infrastructure.AppUserClaimsPrincipalFactory>()
 .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -115,9 +116,10 @@ if (app.Environment.IsDevelopment())
         var loginBad = await auth.LoginAsync(new CarRental.Models.DTOs.Auth.LoginRequest { Identifier = "renter1", Password = "WrongPassword" });
         return Results.Ok(new
         {
-            ValidLogin = new { loginRenter1.IsSuccess, loginRenter1.Message, User = loginRenter1.Data?.UserName, Roles = loginRenter1.Data?.Roles },
+            ValidLogin = new { loginRenter1.IsSuccess, loginRenter1.Message, User = loginRenter1.Data?.UserName, FullName = loginRenter1.Data?.FullName, Roles = loginRenter1.Data?.Roles },
             SuspendedLogin = new { loginRenter4.IsSuccess, loginRenter4.Message, loginRenter4.ErrorCode },
-            InvalidLogin = new { loginBad.IsSuccess, loginBad.Message, loginBad.ErrorCode }
+            InvalidLogin = new { loginBad.IsSuccess, loginBad.Message, loginBad.ErrorCode },
+            SampleUsers = new { Renter1 = "renter1 -> Nguyễn Văn An", Owner1 = "owner1 -> Phạm Quốc Dũng" }
         });
     });
 

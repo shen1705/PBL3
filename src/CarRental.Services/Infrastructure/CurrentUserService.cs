@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using CarRental.Services.Abstractions;
 using Microsoft.AspNetCore.Http;
@@ -20,6 +23,9 @@ public class CurrentUserService : ICurrentUserService
 
     public string? UserName => User?.FindFirst(ClaimTypes.Name)?.Value
         ?? User?.Identity?.Name;
+
+    public string? FullName => User?.FindFirst("fullname")?.Value
+        ?? User?.FindFirst(ClaimTypes.GivenName)?.Value;
 
     public string? Email => User?.FindFirst(ClaimTypes.Email)?.Value;
 
