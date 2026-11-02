@@ -52,6 +52,14 @@ Phiên làm việc này đã hoàn thành 100% các chức năng cơ bản của
 ### 2.3.1. Cập Nhật Nhãn Ô Đăng Nhập
 - Đổi nhãn (`label`) và văn bản gợi ý (`placeholder`) của trường đăng nhập từ `"Tên hoặc số điện thoại"` thành **`"Username hoặc số điện thoại"`** trên tất cả các view và modal liên quan (`_Modals.cshtml`, `Find.cshtml`, v.v.).
 
+### 2.3.2. Phân Quyền Hiển Thị Theo Role (Owner vs Renter)
+- **Role Owner:** Đổi liên kết điều hướng từ "Trở thành chủ xe" thành **"Quản lý xe"** (tại Header Navigation `_Layout.cshtml`, Sidebar `Account.cshtml`, `MyTrips.cshtml` và `BecomeOwner.cshtml`). Hiển thị toàn bộ các mục: Danh sách xe, Lịch xe, Doanh thu, Hợp đồng, Cẩm nang, Chính sách.
+- **Role Renter (Người không phải chủ xe):**
+  - Giữ nguyên tên "Trở thành chủ xe".
+  - Ẩn hoàn toàn các phân hệ nội bộ của chủ xe: Danh sách xe, Lịch xe, Doanh thu cho thuê, Hợp đồng.
+  - Chỉ hiển thị: **Cẩm nang cho thuê xe** (kèm banner đăng ký xe), **Chính sách bảo vệ dữ liệu** và nút **Đăng ký chủ xe** trên sidebar.
+  - Ngăn chặn truy cập trực tiếp bằng URL hash của các mục chủ xe, tự động điều hướng về `#cam-nang`.
+
 ### 2.4. Tích Hợp Giao Diện Người Dùng (Frontend Integration)
 1. **Trang Chuyến của tôi (`/account#trips`, `mytrips.js`, `account.js`):**
    - Đơn `Accepted`: Hiển thị nút **"Bàn giao / Nhận xe"** $\rightarrow$ gọi API nhận xe, chuyển trạng thái sang `Ongoing`.
