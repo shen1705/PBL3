@@ -68,7 +68,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Bảo vệ thư mục Quản trị (Admin Portal) - Chỉ cho phép Admin và Staff
+// Bảo vệ role Quản trị (Admin Portal) - Chỉ cho phép Admin và Staff
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value?.ToLowerInvariant() ?? "";

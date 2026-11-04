@@ -686,10 +686,15 @@
                         <h2 class="section-subheading">Chủ xe</h2>
                         <div class="owner-profile-card">
                             <div class="owner-main-info">
-                                <img class="owner-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150" alt="Chủ xe Linh">
+                                <div class="owner-avatar-circle" id="popupOwnerAvatarText" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #1e293b, #334155); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.12); flex-shrink: 0;">
+                                    L
+                                </div>
                                 <div>
                                     <h3 class="owner-name" id="popupOwnerName">Linh</h3>
-                                    <p class="owner-rating"><i class="fa-solid fa-star star-gold"></i> 5.0 • 24 chuyến</p>
+                                    <p class="owner-rating" id="popupOwnerRating"><i class="fa-solid fa-star star-gold"></i> 5.0 • 24 chuyến</p>
+                                    <div id="popupOwnerSelfBadge" style="display: none; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; width: fit-content; margin-top: 4px; align-items: center; gap: 4px;">
+                                        <i class="fa-solid fa-crown" style="color: #0284c7;"></i> Xe của bạn
+                                    </div>
                                 </div>
                             </div>
                             <div class="owner-stats-grid">
@@ -849,6 +854,9 @@
 
                         <!-- Nút Chọn thuê -->
                         <button type="button" class="btn-rent-now" id="btnRentCarSubmit">CHỌN THUÊ</button>
+                        <a href="/become-owner#danh-sach-xe-content" class="btn-rent-now" id="btnOwnerManageCar" style="display: none; background: #1e293b; color: #fff; text-decoration: none; align-items: center; justify-content: center; gap: 8px;">
+                            <i class="fa-solid fa-sliders"></i> Quản lý xe của bạn
+                        </a>
                     </div>
 
                     <!-- Box Phụ phí có thể phát sinh -->
