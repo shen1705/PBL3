@@ -166,25 +166,11 @@ a {
     box-sizing: border-box;
 }
 
-.account-sidebar-group .sidebar.become-owner-panel {
-    flex: 0 0 230px;
-    width: 230px;
-    min-width: 230px;
-    max-width: 230px;
-    display: flex;
-    flex-direction: column;
-    padding: 18px 12px;
-    border-right: 1px solid #edf0f3;
-    background: #fbfcfd;
-    box-sizing: border-box;
-}
-
 @media (max-width: 992px) {
     .account-sidebar-group {
         flex-direction: column;
     }
-    .account-sidebar-group .trips-sidebar,
-    .account-sidebar-group .sidebar.become-owner-panel {
+    .account-sidebar-group .trips-sidebar {
         width: 100%;
         max-width: 100%;
         flex: 0 0 auto;
@@ -216,6 +202,39 @@ a {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.owner-submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: -4px 0 4px;
+    padding-left: 14px;
+}
+
+.owner-submenu[hidden] {
+    display: none;
+}
+
+.owner-submenu .side-link {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+}
+
+.owner-submenu .side-link.active::before {
+    left: -14px;
+}
+
+#nav-become-owner .owner-menu-chevron {
+    width: auto;
+    margin-left: auto;
+    font-size: 11px;
+    transition: transform 0.15s ease;
+}
+
+#nav-become-owner[aria-expanded="true"] .owner-menu-chevron {
+    transform: rotate(180deg);
 }
 
 .side-link {
@@ -1118,6 +1137,51 @@ a {
     background: #fff;
     box-shadow: 0 8px 24px rgba(26, 38, 53, 0.06);
     overflow: hidden;
+}
+
+.renter-register-banner {
+    position: relative;
+    z-index: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #fff;
+}
+
+.renter-register-copy {
+    flex: 1 1 300px;
+    min-width: 0;
+}
+
+.renter-register-copy > span {
+    color: #d1a34b;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.renter-register-copy h2 {
+    margin: 4px 0 6px;
+    color: #fff;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.renter-register-copy p {
+    margin: 0;
+    color: #cbd5e1;
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+.renter-register-banner .register-cta {
+    flex: 0 0 auto;
 }
 
 .guide-header {

@@ -592,6 +592,117 @@ document.addEventListener('keydown', (e) => {
 // Trips Logic
 let trips = window.AzuStore.getTrips();
 let activeTripType = 'current';
+let reviewModal;
+let activeReviewTrip;
+
+function closeReviewModal() {
+    if (!reviewModal) return;
+    if (activeReviewTrip) {
+        sessionStorage.setItem(`review-prompt-dismissed-${activeReviewTrip.bookingId}`, 'true');
+    }
+    reviewModal.hidden = true;
+    activeReviewTrip = null;
+}
+
+function ensureReviewModal() {
+    if (reviewModal) return reviewModal;
+
+    reviewModal = document.createElement('div');
+    reviewModal.className = 'review-modal-backdrop';
+    reviewModal.hidden = true;
+    reviewModal.innerHTML = `
+        <form class="review-modal" aria-labelledby="review-modal-title">
+            <button class="review-modal-close" type="button" aria-label="Đóng popup đánh giá"><i class="fa-solid fa-xmark"></i></button>
+            <h2 id="review-modal-title">Chuyến đi đã hoàn tất</h2>
+            <p class="review-modal-vehicle"></p>
+            <label class="review-rating-label">Trải nghiệm của bạn thế nào?</label>
+            <div class="review-stars" role="group" aria-label="Chọn số sao đánh giá">
+                ${[1, 2, 3, 4, 5].map(rating => `<button type="button" class="review-star" data-rating="${rating}" aria-label="${rating} sao" aria-pressed="false"><i class="fa-solid fa-star"></i></button>`).join('')}
+            </div>
+            <p class="review-rating-hint" aria-live="polite">Chọn số sao</p>
+            <label class="review-comment-label" for="review-comment">Nhận xét <span>(không bắt buộc)</span></label>
+            <textarea id="review-comment" maxlength="1000" rows="3" placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+            <p class="review-error" role="alert" hidden></p>
+            <button class="review-submit" type="submit" disabled>Gửi đánh giá</button>
+        </form>`;
+    document.body.appendChild(reviewModal);
+
+    const form = reviewModal.querySelector('form');
+    const stars = Array.from(reviewModal.querySelectorAll('.review-star'));
+    const ratingHint = reviewModal.querySelector('.review-rating-hint');
+    const submitButton = reviewModal.querySelector('.review-submit');
+    const errorMessage = reviewModal.querySelector('.review-error');
+    const ratingLabels = ['', 'Rất tệ', 'Chưa tốt', 'Bình thường', 'Tốt', 'Tuyệt vời'];
+    let selectedRating = 0;
+
+    const setRating = rating => {
+        selectedRating = rating;
+        stars.forEach(star => {
+            const isSelected = Number(star.dataset.rating) <= rating;
+            star.classList.toggle('is-selected', isSelected);
+            star.setAttribute('aria-pressed', String(Number(star.dataset.rating) === rating));
+        });
+        ratingHint.textContent = ratingLabels[rating] || 'Chọn số sao';
+        submitButton.disabled = rating === 0;
+        errorMessage.hidden = true;
+    };
+
+    stars.forEach(star => star.addEventListener('click', () => setRating(Number(star.dataset.rating))));
+    reviewModal.querySelector('.review-modal-close').addEventListener('click', closeReviewModal);
+    reviewModal.addEventListener('click', event => {
+        if (event.target === reviewModal) closeReviewModal();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !reviewModal.hidden) closeReviewModal();
+    });
+
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!activeReviewTrip || selectedRating < 1) return;
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'Đang gửi...';
+        errorMessage.hidden = true;
+        try {
+            const response = await fetch(`/api/bookings/${activeReviewTrip.bookingId}/review`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rating: selectedRating,
+                    comment: reviewModal.querySelector('#review-comment').value.trim()
+                })
+            });
+            const result = await response.json();
+            if (!response.ok || !result.isSuccess) {
+                throw new Error(result?.message || 'Không thể gửi đánh giá. Vui lòng thử lại.');
+            }
+
+            reviewModal.hidden = true;
+            activeReviewTrip = null;
+            alert('Cảm ơn bạn đã gửi đánh giá cho chuyến đi!');
+            renderTrips();
+        } catch (error) {
+            errorMessage.textContent = error.message || 'Lỗi kết nối máy chủ.';
+            errorMessage.hidden = false;
+            submitButton.disabled = false;
+        } finally {
+            submitButton.textContent = 'Gửi đánh giá';
+        }
+    });
+
+    reviewModal.resetRating = () => setRating(0);
+    return reviewModal;
+}
+
+function openReviewModal(trip) {
+    const modal = ensureReviewModal();
+    activeReviewTrip = trip;
+    modal.querySelector('.review-modal-vehicle').textContent = trip.vehicleName || 'Cảm ơn bạn đã sử dụng dịch vụ AZU Car';
+    modal.querySelector('#review-comment').value = '';
+    modal.querySelector('.review-error').hidden = true;
+    modal.resetRating();
+    modal.hidden = false;
+}
 
 function tripIsCurrent(trip) {
     const returnDate = String(trip.return || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
@@ -794,7 +905,11 @@ async function renderTrips() {
                     });
                     const d = await r.json();
                     if (r.ok && d.isSuccess) {
-                        alert('Xác nhận trả xe thành công! Cảm ơn bạn đã đồng hành cùng AZU Car.');
+                        if (String(d.data?.status || '').toLowerCase() === 'completed') {
+                            openReviewModal(trip);
+                        } else {
+                            alert('Đã xác nhận trả xe. Chuyến đi sẽ hoàn tất sau khi chủ xe xác nhận.');
+                        }
                         renderTrips();
                     } else {
                         alert('Lỗi: ' + (d?.message || 'Không thể xác nhận trả xe'));
@@ -815,36 +930,7 @@ async function renderTrips() {
                 reviewBtn.type = 'button';
                 reviewBtn.style.cssText = 'background: #f59e0b; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
                 reviewBtn.innerHTML = '<i class="fa-solid fa-star"></i> Đánh giá chuyến đi';
-                reviewBtn.addEventListener('click', async () => {
-                    const starsStr = prompt('Đánh giá chất lượng dịch vụ (từ 1 đến 5 sao):', '5');
-                    if (starsStr === null) return;
-                    const rating = parseInt(starsStr, 10);
-                    if (isNaN(rating) || rating < 1 || rating > 5) {
-                        alert('Số sao không hợp lệ (vui lòng chọn từ 1 đến 5 sao).');
-                        return;
-                    }
-                    const comment = prompt('Nhận xét của bạn về chủ xe và xe:', 'Xe đi rất êm, sạch sẽ, chủ xe nhiệt tình và đúng giờ!');
-                    if (comment === null) return;
-                    reviewBtn.disabled = true;
-                    try {
-                        const r = await fetch(`/api/bookings/${trip.bookingId}/review`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ rating, comment: comment || 'Chuyến đi tuyệt vời!' })
-                        });
-                        const d = await r.json();
-                        if (r.ok && d.isSuccess) {
-                            alert('Cảm ơn bạn đã gửi đánh giá cho chuyến đi!');
-                            renderTrips();
-                        } else {
-                            alert('Lỗi: ' + (d?.message || 'Không thể gửi đánh giá'));
-                        }
-                    } catch (e) {
-                        alert('Lỗi kết nối máy chủ.');
-                    } finally {
-                        reviewBtn.disabled = false;
-                    }
-                });
+                reviewBtn.addEventListener('click', () => openReviewModal(trip));
                 actionsDiv.appendChild(reviewBtn);
             } else {
                 const reviewedBadge = document.createElement('span');
@@ -893,6 +979,15 @@ async function renderTrips() {
         card.append(image, info);
         tripsList.append(card);
     });
+
+    const unreviewedTrip = apiTrips.find(trip =>
+        trip.status === 'Completed' &&
+        !trip.hasReviewed &&
+        sessionStorage.getItem(`review-prompt-dismissed-${trip.bookingId}`) !== 'true'
+    );
+    if (unreviewedTrip && (!reviewModal || reviewModal.hidden)) {
+        openReviewModal(unreviewedTrip);
+    }
 }
 
 document.querySelectorAll('.trip-tab').forEach(tab => {

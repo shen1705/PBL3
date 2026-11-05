@@ -4,13 +4,12 @@
 
 @section Styles {
     <link rel="stylesheet" href="~/css/mytrips.css" asp-append-version="true">
-    <link rel="stylesheet" href="~/css/become-owner.css" asp-append-version="true">
+    <link rel="stylesheet" href="/css/become-owner.css?v=owner-submenu-1">
 }
 
     <div class="workspace">
-        <!-- Hai panel bên trái song song: Panel 1 (Tài khoản) + Panel 2 (Quản lý chủ xe) -->
+        <!-- Sidebar -->
         <div class="account-sidebar-group">
-            <!-- Panel 1: Personal Account navigation -->
             <aside class="trips-sidebar" aria-label="Danh mục tài khoản">
                 <div class="trips-profile">
                     <h2 class="sidebar-greeting">Xin chào bạn!</h2>
@@ -18,7 +17,15 @@
                 </div>
                 <nav class="trips-side-nav">
                     <a class="trips-side-link" href="/account" id="nav-account"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
-                    <a class="trips-side-link active" href="/become-owner" id="nav-become-owner" aria-current="page"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span></a>
+                    <a class="trips-side-link active" href="/become-owner" id="nav-become-owner" aria-current="page" aria-expanded="true" aria-controls="owner-submenu"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span><i class="fa-solid fa-chevron-down owner-menu-chevron" aria-hidden="true"></i></a>
+                    <div class="owner-submenu" id="owner-submenu">
+                        <a class="side-link owner-only" href="#danh-sach-xe-content"><span>Danh sách xe</span></a>
+                        <a class="side-link owner-only" href="#lich-xe"><span>Lịch xe</span></a>
+                        <a class="side-link" href="#cam-nang"><span>Cẩm nang cho thuê xe</span></a>
+                        <a class="side-link owner-only" href="#doanh-thu"><span>Doanh thu cho thuê</span></a>
+                        <a class="side-link owner-only" href="#hop-dong"><span>Hợp đồng</span></a>
+                        <a class="side-link" href="#bao-mat"><span>Chính sách bảo vệ dữ liệu</span></a>
+                    </div>
                     <a class="trips-side-link" href="/account#trips" id="nav-trips"><i class="fa-regular fa-calendar-days"></i><span>Chuyến của tôi</span></a>
                     <a class="trips-side-link" href="/account#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
                     <a class="trips-side-link" href="/account#privacy" id="nav-privacy"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
@@ -27,20 +34,6 @@
                 </nav>
             </aside>
 
-            <!-- Panel 2: BecomeOwner management sub-panel -->
-            <aside class="sidebar become-owner-panel" aria-label="Danh mục quản lý chủ xe">
-                <nav class="side-nav">
-                    <a class="side-link owner-only" href="#danh-sach-xe-content"><i class="fa-solid fa-car"></i><span>Danh sách xe</span></a>
-                    <a class="side-link owner-only" href="#lich-xe"><i class="fa-regular fa-calendar"></i><span>Lịch xe</span></a>
-                    <a class="side-link active" href="#cam-nang"><i class="fa-solid fa-book-open"></i><span>Cẩm nang cho thuê xe</span></a>
-                    <a class="side-link owner-only" href="#doanh-thu"><i class="fa-solid fa-chart-line"></i><span>Doanh thu cho thuê</span></a>
-                    <a class="side-link owner-only" href="#hop-dong"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
-                    <a class="side-link" href="#bao-mat"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
-                    <a class="register-cta" id="sidebarRegisterBtn" href="/carregistermode" style="display: none; margin-top: 6px; width: 100%;">
-                        Đăng ký xe tự lái
-                    </a>
-                </nav>
-            </aside>
         </div>
 
         <main class="main-area">
@@ -191,19 +184,16 @@
                     <h1 id="guide-title">Cẩm nang cho thuê xe</h1>
                 </div>
 
-                <!-- Banner đăng ký trở thành chủ xe dành cho Renter -->
-                <div class="renter-register-banner" id="renterRegisterBanner" style="display: none; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; border-radius: 14px; padding: 22px 24px; margin-bottom: 20px; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 250px;">
-                        <span style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #d1a34b;">Gia nhập đối tác AZU Car</span>
-                        <h2 style="font-size: 19px; font-weight: 800; margin: 4px 0 6px 0; color: #fff;">Bạn muốn tăng thu nhập từ xe nhàn rỗi?</h2>
-                        <p style="margin: 0; font-size: 13.5px; color: #cbd5e1; line-height: 1.5;">Đăng ký trở thành chủ xe ngay hôm nay để nhận quyền lợi bảo hiểm toàn diện và kết nối hàng ngàn khách thuê xe uy tín.</p>
-                    </div>
-                    <a href="/carregistermode" class="register-cta">
-                        Đăng ký xe tự lái
-                    </a>
-                </div>
-
                 <div class="guide-card">
+                    <div class="renter-register-banner" id="renterRegisterBanner" style="display: none;">
+                        <div class="renter-register-copy">
+                            <span>Gia nhập đối tác AZU Car</span>
+                            <h2>Bạn muốn tăng thu nhập từ xe nhàn rỗi?</h2>
+                            <p>Đăng ký trở thành chủ xe ngay hôm nay để nhận quyền lợi bảo hiểm toàn diện và kết nối hàng ngàn khách thuê xe uy tín.</p>
+                        </div>
+                        <a href="/carregistermode" class="register-cta">Đăng ký xe tự lái</a>
+                    </div>
+
                     <div class="guide-decor" aria-hidden="true">
                         <div class="guide-decor-circle"></div>
                         <svg class="guide-decor-star star-top" width="13" height="13" viewBox="0 0 24 24" fill="#c49a49">
@@ -356,51 +346,6 @@
             </section>
         </main>
     </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container footer-grid">
-            <div class="footer-col">
-                <a href="index.html" class="logo footer-logo">
-                    <img src="Images/logo_transparent.png" alt="AZU Car Logo" class="brand-logo-img">
-                </a>
-                <p class="footer-desc">Nền tảng chia sẻ và cho thuê ô tô tự lái hàng đầu Việt Nam. Mang lại những chuyến đi tự do và hạnh phúc cho triệu hành trình.</p>
-            </div>
-            <div class="footer-col">
-                <h4>VỀ AZU CAR</h4>
-                <ul>
-                    <li><a href="about.html">Về chúng tôi</a></li>
-                    <li><a href="about.html#features">Tính năng</a></li>
-                    <li><a href="become-owner.html#bao-mat">Chính sách bảo mật</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>DỊCH VỤ</h4>
-                <ul>
-                    <li><a href="#">Thuê xe tự lái</a></li>
-                    <li><a href="#">Thuê xe cưới hỏi</a></li>
-                    <li><a href="#">Hợp đồng dài hạn</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>HỖ TRỢ & LIÊN HỆ</h4>
-                <p><strong>Hotline:</strong> 1900 9217 (8:00 - 21:00)</p>
-                <p><strong>Email:</strong> support@azucar.vn</p>
-                <p><strong>Văn phòng:</strong> Phường Hải Châu, TP. Đà Nẵng</p>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="container footer-bottom-flex">
-                <p>© 2026 AZU Car Việt Nam. Bảo lưu mọi quyền lợi.</p>
-                <div class="footer-bottom-links">
-                    <a href="#">Điều khoản dịch vụ</a>
-                    <a href="#">Chính sách hoạt động</a>
-                    <a href="#">Quy chế hoạt động</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
 
     <!-- Modal Quy trình -->
     <div class="dialog-backdrop" id="processModal" hidden>

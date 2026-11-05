@@ -170,6 +170,18 @@ renderOwnerCars();
 // sidebar navigation
 const sideLinks = document.querySelectorAll('.side-link');
 const contentSections = document.querySelectorAll('.content-section');
+const ownerMenuToggle = document.getElementById('nav-become-owner');
+const ownerSubmenu = document.getElementById('owner-submenu');
+
+if (ownerMenuToggle && ownerSubmenu) {
+    ownerMenuToggle.addEventListener('click', event => {
+        event.preventDefault();
+        const isExpanded = ownerMenuToggle.getAttribute('aria-expanded') === 'true';
+        ownerMenuToggle.setAttribute('aria-expanded', String(!isExpanded));
+        ownerSubmenu.hidden = isExpanded;
+        ownerSubmenu.style.display = isExpanded ? 'none' : 'flex';
+    });
+}
 
 function applyRolePermissions() {
     const isOwner = window.AzuStore?.isOwner ? window.AzuStore.isOwner() : false;
