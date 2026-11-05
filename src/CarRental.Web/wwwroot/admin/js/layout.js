@@ -54,8 +54,8 @@ function renderHeader() {
       <span class="header__wordmark"><strong>AZU</strong><em>Car</em></span>
     </a>
     <nav class="header__nav" aria-label="Điều hướng chính">
-      <a href="index.html" class="is-active">Quản trị</a>
       <a href="/">Trang chủ</a>
+      <a href="index.html" class="is-active">Quản trị</a>
     </nav>
     <div class="header__tools">
       <button class="header__icon-button header__notification" type="button" aria-label="Thông báo" data-admin-notifications>
