@@ -1,34 +1,37 @@
 const adminMain = document.querySelector(".admin-main");
 const pageTabGroups = {
   owners: [
-    { id: "profile", label: "Hồ sơ", children: [1, 2, 3] },
-    { id: "vehicles", label: "Xe & thanh toán", children: [4, 5] },
-    { id: "activity", label: "Hoạt động", children: [6] },
+    { id: "profile", label: "Chủ xe", children: [1, 2] },
+    { id: "vehicles", label: "Xe & thanh toán", children: [3, 4] },
   ],
   listings: [
-    { id: "queue", label: "Chờ kiểm duyệt", children: [1, 2, 3] },
-    { id: "review", label: "Đối chiếu tin đăng", children: [4] },
+    { id: "queue", label: "Chờ duyệt", children: [1, 2] },
+    { id: "review", label: "Đối chiếu", children: [3] },
   ],
   disputes: [
-    { id: "cases", label: "Vụ việc đang mở", children: [1, 2, 3] },
-    { id: "case-detail", label: "Theo dõi xử lý", children: [4] },
+    { id: "cases", label: "Đang mở", children: [1, 2] },
+    { id: "case-detail", label: "Chi tiết", children: [3] },
   ],
   users: [
-    { id: "accounts", label: "Tài khoản", children: [1, 2, 3] },
-    { id: "review", label: "Cần rà soát", children: [4] },
+    { id: "accounts", label: "Tài khoản", children: [1, 2] },
+    { id: "review", label: "Rà soát", children: [3] },
   ],
   fees: [
-    { id: "rules", label: "Quy tắc phí", children: [1, 2, 3, 4] },
-    { id: "principles", label: "Nguyên tắc", children: [5] },
-    { id: "history", label: "Lịch sử", children: [6] },
+    { id: "rules", label: "Quy tắc", children: [1, 2, 3] },
+    { id: "history", label: "Lịch sử", children: [4] },
   ],
   revenue: [
     { id: "summary", label: "Tổng quan", children: [1, 2, 3] },
-    { id: "settlements", label: "Đối soát", children: [4, 5, 6] },
+    { id: "settlements", label: "Đối soát", children: [4, 5] },
   ],
   logs: [
-    { id: "activity", label: "Nhật ký", children: [1, 2, 3] },
-    { id: "event", label: "Chi tiết sự kiện", children: [4] },
+    { id: "activity", label: "Nhật ký", children: [1, 2] },
+    { id: "event", label: "Chi tiết", children: [3] },
+  ],
+  settings: [
+    { id: "permissions", label: "Phân quyền", children: [1, 2] },
+    { id: "accounts", label: "Tài khoản", children: [3] },
+    { id: "security", label: "Bảo mật", children: [4] },
   ],
 };
 
@@ -129,32 +132,61 @@ adminWorkspaceTabs.forEach(tab => {
   });
 });
 
-const createPopup = ({ title, detail, action, href }) => {
+const createPopup = ({ title, detail = "", action = false, href, kind = "detail", trigger = document.activeElement }) => {
   const previous = document.querySelector(".admin-dialog");
   if (previous) previous.remove();
 
   const dialog = document.createElement("dialog");
-  dialog.className = "admin-dialog";
+  dialog.className = `admin-dialog admin-dialog--${action ? "action" : kind}`;
   dialog.setAttribute("aria-labelledby", "admin-dialog-title");
   const header = document.createElement("div");
   header.className = "admin-dialog__header";
+  const icon = document.createElement("span");
+  icon.className = "admin-dialog__icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = action ? "↗" : kind === "notifications" ? "!" : "i";
+  const titleGroup = document.createElement("div");
+  titleGroup.className = "admin-dialog__title-group";
+  const eyebrow = document.createElement("small");
+  eyebrow.textContent = "AZU CAR · QUẢN TRỊ";
   const heading = document.createElement("h2");
   heading.id = "admin-dialog-title";
   heading.textContent = title;
+  titleGroup.append(eyebrow, heading);
   const close = document.createElement("button");
   close.className = "admin-dialog__close";
   close.type = "button";
   close.setAttribute("aria-label", "Đóng cửa sổ");
   close.textContent = "×";
   close.addEventListener("click", () => dialog.close());
-  header.append(heading, close);
+  header.append(icon, titleGroup, close);
 
   const body = document.createElement("div");
   body.className = "admin-dialog__body";
   if (action) {
+    const notice = document.createElement("div");
+    notice.className = "admin-dialog__notice";
+    const noticeIcon = document.createElement("span");
+    noticeIcon.setAttribute("aria-hidden", "true");
+    noticeIcon.textContent = "i";
     const message = document.createElement("p");
-    message.textContent = "Đây là bản xem trước giao diện. Thao tác chưa được gửi tới hệ thống.";
-    body.append(message);
+    message.textContent = `“${title}” hiện là bản xem trước; dữ liệu chưa được thay đổi.`;
+    notice.append(noticeIcon, message);
+    body.append(notice);
+    if (detail) {
+      const list = document.createElement("ul");
+      detail.split("\n").map(line => line.trim()).filter(Boolean).slice(0, 5).forEach(line => {
+        const item = document.createElement("li");
+        item.textContent = line;
+        list.append(item);
+      });
+      if (list.childElementCount) body.append(list);
+    }
+  } else if (kind === "notifications" && !detail) {
+    const empty = document.createElement("p");
+    empty.className = "admin-dialog__empty";
+    empty.textContent = "Không có yêu cầu đang chờ xử lý.";
+    body.append(empty);
   } else {
     const list = document.createElement("ul");
     detail.split("\n").map(line => line.trim()).filter(Boolean).slice(0, 7).forEach(line => {
@@ -185,7 +217,10 @@ const createPopup = ({ title, detail, action, href }) => {
   dialog.addEventListener("click", event => {
     if (event.target === dialog) dialog.close();
   });
-  dialog.addEventListener("close", () => dialog.remove(), { once: true });
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    if (trigger instanceof HTMLElement && trigger.isConnected) trigger.focus();
+  }, { once: true });
   document.body.append(dialog);
   dialog.showModal();
   close.focus();
@@ -206,13 +241,29 @@ document.addEventListener("click", event => {
   const overviewTab = target.closest("[data-overview-tab]");
   if (overviewTab) return;
 
+  const notificationButton = target.closest("[data-admin-notifications]");
+  if (notificationButton) {
+    const pendingItems = [...document.querySelectorAll(".sidebar__item")].flatMap(item => {
+      const badge = item.querySelector(".sidebar__count");
+      const count = badge ? Number.parseInt(badge.textContent, 10) : 0;
+      return count > 0 ? [`${item.querySelector(".sidebar__label")?.textContent.trim() || item.textContent.trim()}: ${count} chờ xử lý`] : [];
+    });
+    createPopup({
+      title: "Thông báo",
+      detail: pendingItems.join("\n"),
+      kind: "notifications",
+      trigger: notificationButton,
+    });
+    return;
+  }
+
   const actionButton = target.closest("[data-action]");
   if (actionButton) {
     event.preventDefault();
     createPopup({
       title: actionButton.textContent.trim().replace(/^[✓+↓▦☷⌖]+\s*/, "") || "Thao tác quản trị",
-      detail: "",
       action: true,
+      trigger: actionButton,
     });
     return;
   }
@@ -222,6 +273,23 @@ document.addEventListener("click", event => {
     document.querySelectorAll(".request-tabs [data-request-filter]").forEach(tab => tab.classList.toggle("is-active", tab === requestTab));
     requestCategory = requestTab.dataset.requestFilter;
     filterOverviewRequests();
+    return;
+  }
+
+  const adminTab = target.closest(".admin-workspace__tab, .admin-tabs [data-tab]");
+  if (adminTab) return;
+
+  const button = target.closest("button");
+  if (button && !button.closest(".admin-dialog, .ai-assistant")) {
+    const context = button.closest(".admin-table tbody tr, .requests-card tbody tr, .card");
+    const buttonTitle = button.textContent.trim().replace(/^[✓+↓▦☷⌖]+\s*/, "") || button.getAttribute("aria-label") || "Thao tác quản trị";
+    event.preventDefault();
+    createPopup({
+      title: buttonTitle,
+      detail: context ? textForDetail(context) : "",
+      action: true,
+      trigger: button,
+    });
     return;
   }
 
@@ -239,6 +307,22 @@ document.addEventListener("click", event => {
     title: heading ? heading.innerText.trim().split("\n")[0] : "Chi tiết",
     detail: textForDetail(content),
     href: anchor ? anchor.getAttribute("href") : null,
+    trigger: target,
+  });
+});
+
+document.addEventListener("change", event => {
+  const input = event.target instanceof HTMLInputElement ? event.target : null;
+  if (!input || input.type !== "checkbox" || input.closest(".admin-dialog")) return;
+  const label = input.closest("label");
+  const title = label?.querySelector("b")?.textContent.trim()
+    || input.getAttribute("aria-label")
+    || "Cài đặt";
+  createPopup({
+    title,
+    detail: label?.innerText || "",
+    action: true,
+    trigger: input,
   });
 });
 
