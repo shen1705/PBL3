@@ -151,10 +151,7 @@ Phiên làm việc này đã hoàn thành 100% các chức năng cơ bản của
   - `SanctionUserAsync()`: Kiểm tra quyền chặt chẽ theo quy định:
     - Ngăn chặn tự khóa tài khoản của chính mình (`Conflict`).
     - **Staff không được phép khóa tài khoản của Staff khác hoặc Admin** (`Forbidden - 403`).
-    - Tính toán thời hạn hết hạn (`Suspend7d` $
-ightarrow$ +7 ngày, `Suspend30d` $
-ightarrow$ +30 ngày, `Ban` $
-ightarrow$ vĩnh viễn).
+    - Tính toán thời hạn hết hạn (`Suspend7d` $ightarrow$ +7 ngày, `Suspend30d` $ightarrow$ +30 ngày, `Ban` $ightarrow$ vĩnh viễn).
     - Tạo bản ghi `AccountSanction` và đồng bộ khóa đăng nhập ASP.NET Core Identity (`SetLockoutEndDateAsync`).
   - `LiftSanctionAsync()`: Đánh dấu `LiftedAt` và `LiftedBy`, gỡ bỏ `LockoutEndDate` cho phép người dùng hoạt động bình thường ngay lập tức.
   - `ResetUserPasswordAsync()`: Đặt lại mật khẩu người dùng an toàn qua `UserManager.ResetPasswordAsync`.
@@ -174,9 +171,7 @@ ightarrow$ vĩnh viễn).
 
 ### 5.4. Bảo Vệ Thư Mục Quản Trị & Tích Hợp Frontend
 - **Bảo vệ toàn diện thư mục `/admin`:**
-  - Bổ sung Middleware trong [`Program.cs`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Program.cs): Bắt mọi truy cập đến `/admin` và `/admin/*.html`. Nếu chưa đăng nhập $
-ightarrow$ chuyển hướng về trang đăng nhập; nếu không có vai trò `Admin` hoặc `Staff` $
-ightarrow$ chặn và điều hướng về trang chủ.
+  - Bổ sung Middleware trong [`Program.cs`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Program.cs): Bắt mọi truy cập đến `/admin` và `/admin/*.html`. Nếu chưa đăng nhập $ightarrow$ chuyển hướng về trang đăng nhập; nếu không có vai trò `Admin` hoặc `Staff` $ightarrow$ chặn và điều hướng về trang chủ.
 - **Tích hợp giao diện quản trị:**
   - Xây dựng script tương tác [`admin-users.js`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/admin/js/admin-users.js) kết nối trực tiếp các API backend vào [`users.html`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/admin/users.html):
     - Tự động hiển thị tên và vai trò quản trị viên trên header.
@@ -191,49 +186,3 @@ ightarrow$ chặn và điều hướng về trang chủ.
 - Biên dịch toàn bộ Solution: `dotnet build PBL3\CarRentalMarketplace.slnx`
   - Kết quả: **0 Warning(s), 0 Error(s)**.
 - Git Branch: `feature/admin-account-management`.
-
-
----
-
-## 7. Đồng Bộ Thông Số Thực Tế Quản Trị & Điều Hướng Trực Tiếp Admin
-
-### 7.1. Đồng bộ số liệu thực tế từ Database vào Trung tâm Quản trị
-- **Mở rộng Metrics Service & DTO:**
-  - [`AdminUserMetricsDto.cs`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Models/DTOs/Admin/AdminUserMetricsDto.cs): Bổ sung các chỉ số vận hành: `PendingOwnerCount`, `PendingListingCount`, `OpenDisputeCount`, `CompletedTripsCount`, `TotalGmv`, `PlatformRevenue`.
-  - [`AdminUserService.cs`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/Admin/AdminUserService.cs): Tính toán chính xác từ CSDL qua EF Core:
-    - Tổng số người dùng (`Users.CountAsync`).
-    - Số tài khoản đang bị hạn chế/chế tài còn hiệu lực (`AccountSanctions`).
-    - Số chủ xe đã duyệt (`OwnerProfiles`).
-    - Số hồ sơ chủ xe đang chờ duyệt (`PendingOwnerCount`).
-    - Số tin đăng xe chờ kiểm duyệt (`PendingListingCount`).
-    - Số tranh chấp đang mở (`OpenDisputeCount`).
-    - Số chuyến đi hoàn tất, Tổng giá trị giao dịch (GMV), và Doanh thu nền tảng (`Bookings.Where(Completed)`).
-- **Đồng bộ giao diện Quản lý người dùng (`/admin/users.html`):**
-  - Khắc phục triệt để lỗi selector DOM trong [`admin-users.js`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/admin/js/admin-users.js): cập nhật thẻ `.admin-metrics .admin-metric strong` và `small`.
-  - Đồng bộ số liệu động trên cả 4 thẻ thống kê: Tổng tài khoản, Đang hoạt động (% tổng), Chủ xe đã duyệt, Tài khoản bị hạn chế.
-  - Tự động cập nhật thanh thông báo (`.admin-notice`), tiêu đề danh sách và số lượng trên toàn bộ các tab bộ lọc (`Tất cả (N)`, `Đang hoạt động (N)`, `Hạn chế (N)`, `Chờ duyệt (N)`).
-  - Tự động cập nhật huy hiệu số lượng chờ xử lý trên Sidebar (`owners`, `listings`, `disputes`).
-- **Đồng bộ giao diện Tổng quan hệ thống (`/admin/index.html`):**
-  - Xây dựng `syncAdminLayoutData` trong [`layout.js`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/admin/js/layout.js):
-    - Đồng bộ 4 thẻ thống kê đầu trang: Tổng GMV (VNĐ), Doanh thu nền tảng (VNĐ), Chuyến đi hoàn tất, Số tài khoản người dùng.
-    - Đồng bộ nhãn công việc cần xử lý và danh sách việc ưu tiên (Hồ sơ chủ xe, Tin đăng, Tranh chấp).
-    - Cập nhật avatar ký tự đầu, họ tên và vai trò (`Quản trị viên` / `Nhân viên`) của tài khoản đang đăng nhập.
-
-### 7.2. Điều hướng trực tiếp khi Admin đăng nhập & Tự động chuyển hướng
-- **Không qua trang chủ khi đăng nhập:**
-  - Cập nhật [`index.js`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/index.js) và [`azu-store.js`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/azu-store.js): Khi người dùng có vai trò `Admin` hoặc `Staff` đăng nhập thành công, hệ thống lập tức chuyển hướng trực tiếp tới `/admin/users.html`, không bao giờ điều hướng về trang chủ `/`.
-- **Chặn truy cập trang chủ cho tài khoản quản trị:**
-  - Cập nhật [`HomeController.cs`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Controllers/HomeController.cs): Action `Index()` kiểm tra nếu người dùng đã đăng nhập có vai trò `Admin` hoặc `Staff`, máy chủ tự động trả về `Redirect("/admin/users.html")`.
-  - Đồng bộ kiểm tra phía client trong `checkAuth()` để ngăn mọi trường hợp flash giao diện người dùng phổ thông.
-
-### 7.3. Xóa hoàn toàn nút Quản trị trên Header trang chủ
-- Gỡ bỏ hoàn toàn phần tử `#admin-nav-link` khỏi [`_Layout.cshtml`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Shared/_Layout.cshtml).
-- Loại bỏ mã xử lý hiển thị nút quản trị trong [`azu-store.js`](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/azu-store.js) và [`src/A2U-Frontend/JS/azu-store.js`](file:///C:/Users/admin/documents/PBL3/PBL3/src/A2U-Frontend/JS/azu-store.js).
-
-### 7.4. Kết quả Kiểm thử & Biên dịch
-- `dotnet build PBL3\CarRentalMarketplace.slnx`: **0 Warning(s), 0 Error(s)**.
-- Kiểm thử tích hợp tự động qua script Python:
-  - Trang chủ hoàn toàn không còn nút hoặc liên kết quản trị.
-  - Đăng nhập tài khoản `admin1` (`Test@12345`) thành công nhận vai trò `Admin`.
-  - Truy cập route `/` với cookie Admin trả về HTTP 302 Redirect thẳng đến `/admin/users.html`.
-  - API `GET /api/admin/users/metrics` trả về số liệu thực tế khớp 100% với dữ liệu CSDL.
