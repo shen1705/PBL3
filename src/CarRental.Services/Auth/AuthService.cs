@@ -90,6 +90,45 @@ public class AuthService : IAuthService
         _logger.LogInformation("User {UserName} logged in successfully.", user.UserName);
         return ServiceResult<AuthUserDto>.Success(dto, "Đăng nhập thành công.");
     }
+    private static string FormatIdentityPasswordErrors(IEnumerable<IdentityError> errors)
+    {
+        var messages = new List<string>();
+        foreach (var err in errors)
+        {
+            switch (err.Code)
+            {
+                case "PasswordTooShort":
+                    messages.Add("Mật khẩu quá ngắn (yêu cầu tối thiểu 6 ký tự).");
+                    break;
+                case "PasswordRequiresDigit":
+                    messages.Add("Mật khẩu phải chứa ít nhất một chữ số (0-9).");
+                    break;
+                case "PasswordRequiresUpper":
+                    messages.Add("Mật khẩu phải chứa ít nhất một chữ in hoa (A-Z).");
+                    break;
+                case "PasswordRequiresLower":
+                    messages.Add("Mật khẩu phải chứa ít nhất một chữ in thường (a-z).");
+                    break;
+                case "PasswordRequiresNonAlphanumeric":
+                    messages.Add("Mật khẩu phải chứa ít nhất một ký tự đặc biệt (!@#$%^&*...).");
+                    break;
+                case "DuplicateUserName":
+                    messages.Add("Tên tài khoản này đã được sử dụng.");
+                    break;
+                case "DuplicateEmail":
+                    messages.Add("Email này đã được sử dụng.");
+                    break;
+                case "InvalidUserName":
+                    messages.Add("Tên tài khoản không hợp lệ.");
+                    break;
+                default:
+                    messages.Add(err.Description);
+                    break;
+            }
+        }
+        return "Mật khẩu không đủ mạnh hoặc không hợp lệ: " + string.Join(" ", messages);
+    }
+
     // Register ( Dang ki )
     public async Task<ServiceResult<AuthUserDto>> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
     {
@@ -139,7 +178,7 @@ public class AuthService : IAuthService
         var createResult = await _userManager.CreateAsync(newUser, request.Password);
         if (!createResult.Succeeded)
         {
-            var errorMsg = string.Join("; ", createResult.Errors.Select(e => e.Description));
+            var errorMsg = FormatIdentityPasswordErrors(createResult.Errors);
             return ServiceResult<AuthUserDto>.Fail(errorMsg, "CREATE_USER_FAILED");
         }
 
@@ -176,7 +215,7 @@ public class AuthService : IAuthService
         var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
         if (!result.Succeeded)
         {
-            var error = string.Join("; ", result.Errors.Select(e => e.Description));
+            var error = FormatIdentityPasswordErrors(result.Errors);
             return ServiceResult.Fail(error, "CHANGE_PASSWORD_FAILED");
         }
 
@@ -208,7 +247,7 @@ public class AuthService : IAuthService
         var result = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
         if (!result.Succeeded)
         {
-            var error = string.Join("; ", result.Errors.Select(e => e.Description));
+            var error = FormatIdentityPasswordErrors(result.Errors);
             return ServiceResult.Fail(error, "RESET_PASSWORD_FAILED");
         }
 

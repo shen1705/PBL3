@@ -13,9 +13,9 @@
                 <strong id="trip-sidebar-name" style="display:none;"></strong>
             </div>
             <nav class="trips-side-nav">
-                <a class="trips-side-link" href="#account" id="nav-account"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
+                <a class="trips-side-link active" href="#account" id="nav-account" aria-current="page"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
                 <a class="trips-side-link" href="/become-owner" id="nav-become-owner"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span></a>
-                <a class="trips-side-link active" href="#trips" id="nav-trips" aria-current="page"><i class="fa-regular fa-calendar-days"></i><span>Chuyến của tôi</span></a>
+                <a class="trips-side-link" href="#trips" id="nav-trips"><i class="fa-regular fa-calendar-days"></i><span>Chuyến của tôi</span></a>
                 <a class="trips-side-link" href="#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
                 <a class="trips-side-link" href="#privacy" id="nav-privacy"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
                 <a class="trips-side-link" href="#password" id="nav-password"><i class="fa-solid fa-lock"></i><span>Đổi mật khẩu</span></a>

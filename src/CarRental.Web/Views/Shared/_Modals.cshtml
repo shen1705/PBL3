@@ -135,16 +135,19 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="register-password">Mật khẩu</label>
+                <label for="register-password">Mật khẩu <small style="color: #64748b; font-weight: normal;">(tối thiểu 6 ký tự)</small></label>
                 <div class="input-wrapper password-box">
-                    <input id="register-password" name="password" type="password" placeholder="Nhập mật khẩu" autocomplete="new-password" required>
+                    <input id="register-password" name="password" type="password" placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)" autocomplete="new-password" minlength="6" required>
                     <i class="fa-regular fa-eye-slash toggle-password"></i>
                 </div>
+                <small class="password-rule-hint" style="display: block; color: #64748b; font-size: 12px; margin-top: 4px;">
+                    <i class="fa-solid fa-circle-info"></i> Mật khẩu phải có tối thiểu 6 ký tự.
+                </small>
             </div>
             <div class="form-group">
                 <label for="register-password-confirm">Nhập lại mật khẩu</label>
                 <div class="input-wrapper password-box">
-                    <input id="register-password-confirm" name="passwordConfirm" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password" required>
+                    <input id="register-password-confirm" name="passwordConfirm" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password" minlength="6" required>
                     <i class="fa-regular fa-eye-slash toggle-password"></i>
                 </div>
             </div>
@@ -195,56 +198,6 @@
                 <i class="fa-solid fa-circle-check"></i> Đã hiểu & Đồng ý
             </button>
         </div>
-    </div>
-</div>
-
-<!-- Modal Đăng ký xe cho thuê (Chủ xe) -->
-<div id="registerCarModal" class="auth-modal-overlay">
-    <div class="auth-modal-card" style="max-width: 540px;">
-        <button class="modal-close-btn" data-modal="registerCarModal"><i class="fa-solid fa-xmark"></i></button>
-        <div class="modal-header">
-            <h2 style="color: #024064;">Đăng ký xe cho thuê</h2>
-            <p>Bạn vui lòng điền đầy đủ thông tin, AZU Car sẽ liên hệ với bạn trong vòng một ngày làm việc.</p>
-        </div>
-        <form class="auth-form" onsubmit="event.preventDefault(); alert('Gửi thông tin thành công! Chúng tôi sẽ liên hệ lại với bạn.'); document.getElementById('registerCarModal').classList.remove('active');">
-            <div class="form-group">
-                <label>Khu vực cho thuê</label>
-                <div class="input-wrapper">
-                    <select class="custom-select-input" required>
-                        <option value="" disabled selected>Chọn khu vực</option>
-                        <option value="danang">TP. Đà Nẵng</option>
-                        <option value="hcm">TP. Hồ Chí Minh</option>
-                        <option value="hanoi">Hà Nội</option>
-                        <option value="nhatrang">Nha Trang</option>
-                        <option value="dalat">Đà Lạt</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                <div class="form-group">
-                    <label>Tên chủ xe*</label>
-                    <div class="input-wrapper">
-                        <input type="text" placeholder="Tên của bạn" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Số di động*</label>
-                    <div class="input-wrapper">
-                        <input type="tel" placeholder="Số của bạn" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Xe cho thuê</label>
-                <div class="input-wrapper">
-                    <input type="text" placeholder="Loại xe của bạn (VD: VinFast VF8, Mazda CX-5...)" required>
-                </div>
-            </div>
-
-            <button type="submit" class="btn-submit-auth" style="background-color: #0b2c46; margin-top: 10px;">Gửi thông tin đến AZU Car</button>
-        </form>
     </div>
 </div>
 
