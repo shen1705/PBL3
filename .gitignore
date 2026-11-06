@@ -92,3 +92,10 @@ node_modules/
 !/docs/.obsidian/app.json
 /docs/.trash/
 /docs/report/exports/
+
+
+# Session notes (local developer/session documentation - do not commit to repository)
+SESSION_NOTE.md
+*SESSION_NOTE*
+session_notes/
+*.session.md
