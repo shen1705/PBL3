@@ -20,6 +20,7 @@
     var isOwnerPage = reqPath.StartsWith("/become-owner") || reqPath.StartsWith("/carregistermode");
     var isTripsPage = reqPath.StartsWith("/mytrips") || reqPath.StartsWith("/account");
     var isSupportPage = reqPath.StartsWith("/support");
+    var isFindPage = reqPath.StartsWith("/find");
 }
     <header class="header">
         <div class="container nav-container">
@@ -52,6 +53,8 @@
     @RenderBody()
 
     <!-- Footer -->
+    @if (ViewData["HideFooter"] as bool? != true && !isFindPage)
+    {
     <footer class="footer" id="support">
         <div class="container footer-grid">
             <div class="footer-col">
@@ -94,6 +97,7 @@
             </div>
         </div>
     </footer>
+    }
 
     <!-- Shared Modals -->
     <partial name="_Modals" />
