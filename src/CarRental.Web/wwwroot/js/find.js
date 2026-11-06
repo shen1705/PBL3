@@ -47,6 +47,16 @@ function createSampleCarCard(car) {
     image.alt = car.name;
     imageWrapper.appendChild(image);
 
+    const currentUserId = sessionStorage.getItem('azuCarUserId');
+    if (currentUserId && car.ownerId && currentUserId === car.ownerId) {
+        card.dataset.isMyCar = 'true';
+        const myBadge = document.createElement('span');
+        myBadge.className = 'badge-my-car';
+        myBadge.innerHTML = '<i class="fa-solid fa-crown" style="color: #fbbf24;"></i> Xe của bạn';
+        myBadge.setAttribute('style', 'position: absolute; bottom: 8px; left: 8px; background: rgba(15, 23, 42, 0.9); color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; z-index: 2; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); border: 1px solid rgba(251, 191, 36, 0.4);');
+        imageWrapper.appendChild(myBadge);
+    }
+
     if (['VIOS', 'CITY', 'XPANDER', 'SONET', 'CR-V'].some(m => car.name.toUpperCase().includes(m))) {
         card.dataset.instant = 'true';
         const badge = document.createElement('span');
@@ -105,6 +115,8 @@ function createCarCardFromApi(car) {
     card.className = 'car-card';
     card.dataset.vehicleId = car.vehicleId;
     card.dataset.listingId = car.listingId;
+    card.dataset.ownerId = car.ownerId || '';
+    card.dataset.ownerName = car.ownerName || '';
     card.dataset.rawPrice = car.pricePerDay;
     card.dataset.priceK = Math.round(Number(car.pricePerDay) / 1000);
     card.dataset.city = (car.city || '').trim();
@@ -149,6 +161,16 @@ function createCarCardFromApi(car) {
     image.src = car.coverImageUrl || 'images/car-default.png';
     image.alt = car.name;
     imageWrapper.appendChild(image);
+
+    const currentUserId = sessionStorage.getItem('azuCarUserId');
+    if (currentUserId && car.ownerId && currentUserId === car.ownerId) {
+        card.dataset.isMyCar = 'true';
+        const myBadge = document.createElement('span');
+        myBadge.className = 'badge-my-car';
+        myBadge.innerHTML = '<i class="fa-solid fa-crown" style="color: #fbbf24;"></i> Xe của bạn';
+        myBadge.setAttribute('style', 'position: absolute; bottom: 8px; left: 8px; background: rgba(15, 23, 42, 0.9); color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; z-index: 2; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); border: 1px solid rgba(251, 191, 36, 0.4);');
+        imageWrapper.appendChild(myBadge);
+    }
 
     const info = document.createElement('div');
     info.className = 'car-info';
@@ -230,6 +252,16 @@ async function loadVehiclesFromApi() {
         initCarBadges();
         buildLocationOptions();
         applyLocationFilter(selectedLocation || document.getElementById('filterLocationText')?.textContent);
+        // auto open car detail
+        const autoVehicleId = searchParams.get('vehicleId');
+        if (autoVehicleId) {
+            const targetCard = Array.from(carsGrid.querySelectorAll('.car-card'))
+                .find(c => c.dataset.vehicleId == autoVehicleId);
+            if (targetCard) {
+                const carObj = carFromCard(targetCard);
+                openCarPopup(carObj);
+            }
+        }
     }
 }
 
@@ -1184,6 +1216,8 @@ function carFromCard(card) {
     return {
         vehicleId: card.dataset.vehicleId || null,
         listingId: card.dataset.listingId || null,
+        ownerId: card.dataset.ownerId || '',
+        ownerName: card.dataset.ownerName || '',
         rawPrice: card.dataset.rawPrice ? Number(card.dataset.rawPrice) : null,
         name: card.querySelector('h3')?.textContent.trim() || 'Xe AZU Car',
         image: card.querySelector('img')?.src || '',
@@ -1236,28 +1270,33 @@ function openCarPopup(car) {
     if (thumb2) thumb2.src = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600';
     if (thumb3) thumb3.src = 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600';
 
-    // load car detail api
-    if (car.vehicleId) {
-        fetch(`/api/vehicles/${car.vehicleId}`)
-            .then(res => res.json())
-            .then(detailRes => {
-                if (detailRes.isSuccess && detailRes.data) {
-                    const d = detailRes.data;
-                    if (d.images && d.images.length > 0) {
-                        if (mainImg) mainImg.src = d.images[0].imagePath;
-                        if (thumb1) thumb1.src = d.images[0].imagePath;
-                        if (thumb2 && d.images[1]) thumb2.src = d.images[1].imagePath;
-                        if (thumb3 && d.images[2]) thumb3.src = d.images[2].imagePath;
-                    }
-                    if (d.fuelType && fuelEl) {
-                        const isElec = /electric|điện/i.test(d.fuelType);
-                        fuelEl.textContent = isElec ? 'Điện' : (d.fuelType === 'Diesel' ? 'Dầu' : 'Xăng');
-                    }
-                }
-            })
-            .catch(() => {});
+    // owner info
+    const ownerNameEl = document.getElementById('popupOwnerName');
+    const ownerAvatarText = document.getElementById('popupOwnerAvatarText');
+    const ownerRatingEl = document.getElementById('popupOwnerRating');
+    const nameToDisplay = car.ownerName || 'Chủ xe AZU';
+    if (ownerNameEl) ownerNameEl.textContent = nameToDisplay;
+    if (ownerAvatarText) ownerAvatarText.textContent = Array.from(nameToDisplay.trim())[0]?.toUpperCase() || 'C';
+    if (ownerRatingEl) {
+        ownerRatingEl.innerHTML = `<i class="fa-solid fa-star star-gold"></i> ${(typeof car.rating === 'number' ? car.rating : 5.0).toFixed(1)} • ${car.trips || car.totalTrips || 0} chuyến`;
     }
 
+    const currentUserId = sessionStorage.getItem('azuCarUserId');
+    const isMyCar = Boolean(currentUserId && car.ownerId && currentUserId === car.ownerId);
+    const selfBadge = document.getElementById('popupOwnerSelfBadge');
+    if (selfBadge) selfBadge.style.display = isMyCar ? 'inline-flex' : 'none';
+
+    const btnRent = document.getElementById('btnRentCarSubmit');
+    const btnOwnerManage = document.getElementById('btnOwnerManageCar');
+    if (btnRent && btnOwnerManage) {
+        if (isMyCar) {
+            btnRent.style.display = 'none';
+            btnOwnerManage.style.display = 'flex';
+        } else {
+            btnRent.style.display = 'block';
+            btnOwnerManage.style.display = 'none';
+        }
+    }
     // load car detail api
     if (car.vehicleId) {
         fetch(`/api/vehicles/${car.vehicleId}`)
@@ -1274,6 +1313,37 @@ function openCarPopup(car) {
                     if (d.fuelType && fuelEl) {
                         const isElec = /electric|điện/i.test(d.fuelType);
                         fuelEl.textContent = isElec ? 'Điện' : (d.fuelType === 'Diesel' ? 'Dầu' : 'Xăng');
+                    }
+                    if (d.ownerName) {
+                        if (ownerNameEl) ownerNameEl.textContent = d.ownerName;
+                        if (ownerAvatarText) ownerAvatarText.textContent = Array.from(d.ownerName.trim())[0]?.toUpperCase() || 'C';
+                    }
+                    if (ownerRatingEl) {
+                        const r = (typeof d.rating === 'number' ? d.rating : 5.0).toFixed(1);
+                        const t = d.totalTrips || 0;
+                        ownerRatingEl.innerHTML = `<i class="fa-solid fa-star star-gold"></i> ${r} • ${t} chuyến`;
+                    }
+                    if (d.description) {
+                        const descEl = document.getElementById('popupCarDescription');
+                        if (descEl) descEl.innerHTML = `<p>${d.description.replace(/\n/g, '<br>')}</p>`;
+                    }
+                    if (d.location || d.city) {
+                        const hostLocEl = document.getElementById('bookHostLocation');
+                        if (hostLocEl) hostLocEl.textContent = `${d.location || d.city} (Miễn phí)`;
+                        const specificLoc = document.getElementById('popupCarSpecificLoc');
+                        if (specificLoc) specificLoc.textContent = d.location || d.city;
+                    }
+                    const uid = sessionStorage.getItem('azuCarUserId');
+                    const isOwnerOfCar = Boolean(uid && d.ownerId && uid === d.ownerId);
+                    if (selfBadge) selfBadge.style.display = isOwnerOfCar ? 'inline-flex' : 'none';
+                    if (btnRent && btnOwnerManage) {
+                        if (isOwnerOfCar) {
+                            btnRent.style.display = 'none';
+                            btnOwnerManage.style.display = 'flex';
+                        } else {
+                            btnRent.style.display = 'block';
+                            btnOwnerManage.style.display = 'none';
+                        }
                     }
                 }
             })

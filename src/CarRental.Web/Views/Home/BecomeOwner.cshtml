@@ -19,12 +19,13 @@
                     <a class="trips-side-link" href="/account" id="nav-account"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
                     <a class="trips-side-link active" href="/become-owner" id="nav-become-owner" aria-current="page" aria-expanded="true" aria-controls="owner-submenu"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span><i class="fa-solid fa-chevron-down owner-menu-chevron" aria-hidden="true"></i></a>
                     <div class="owner-submenu" id="owner-submenu">
-                        <a class="side-link owner-only" href="#danh-sach-xe-content"><span>Danh sách xe</span></a>
-                        <a class="side-link owner-only" href="#lich-xe"><span>Lịch xe</span></a>
-                        <a class="side-link" href="#cam-nang"><span>Cẩm nang cho thuê xe</span></a>
-                        <a class="side-link owner-only" href="#doanh-thu"><span>Doanh thu cho thuê</span></a>
-                        <a class="side-link owner-only" href="#hop-dong"><span>Hợp đồng</span></a>
-                        <a class="side-link" href="#bao-mat"><span>Chính sách bảo vệ dữ liệu</span></a>
+                        <a class="side-link owner-only" href="#danh-sach-xe-content"><i class="fa-solid fa-car"></i><span>Danh sách xe</span></a>
+                        <a class="side-link active" href="#cam-nang-content"><i class="fa-solid fa-book-open"></i><span>Cẩm nang cho thuê xe</span></a>
+                        <a class="side-link owner-only" href="#lich-xe-content"><i class="fa-regular fa-calendar"></i><span>Lịch xe</span></a>
+                        <a class="side-link owner-only" href="#doanh-thu-content"><i class="fa-solid fa-chart-line"></i><span>Doanh thu cho thuê</span></a>
+                        <a class="side-link owner-only" href="#hop-dong-content"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
+                        <a class="side-link" href="#bao-mat-content"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
+                        <a class="register-cta" id="sidebarRegisterBtn" href="/carregistermode" style="display: none; margin-top: 6px; width: 100%; text-decoration: none; text-align: center;">Đăng ký xe tự lái</a>
                     </div>
                     <a class="trips-side-link" href="/account#trips" id="nav-trips"><i class="fa-regular fa-calendar-days"></i><span>Chuyến của tôi</span></a>
                     <a class="trips-side-link" href="/account#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
@@ -33,11 +34,10 @@
                     <a class="trips-side-link trips-logout" id="trip-logout" href="/"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Đăng xuất</span></a>
                 </nav>
             </aside>
-
         </div>
 
         <main class="main-area">
-            <!-- Section 1: Danh sách xe -->
+            <!-- section car list -->
             <section class="content-section" id="danh-sach-xe-content" aria-labelledby="page-title" hidden>
                 <div class="section-page-heading">
                     <button class="btn-back btn-back-home" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
@@ -81,7 +81,7 @@
                 </div>
             </section>
 
-            <!-- Section 2: Lịch xe -->
+            <!--car schedule -->
             <section class="content-section calendar-content" id="lich-xe-content" aria-labelledby="calendar-page-title" hidden>
                 <div class="calendar-page-heading">
                     <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
@@ -177,14 +177,14 @@
                 </div>
             </section>
 
-            <!-- Section 3: Cẩm nang cho thuê xe -->
+            <!-- vehicle rental guide -->
             <section class="content-section" id="cam-nang-content" aria-labelledby="guide-title">
                 <div class="section-page-heading">
                     <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
                     <h1 id="guide-title">Cẩm nang cho thuê xe</h1>
                 </div>
 
-                <div class="guide-card">
+<div class="guide-card">
                     <div class="renter-register-banner" id="renterRegisterBanner" style="display: none;">
                         <div class="renter-register-copy">
                             <span>Gia nhập đối tác AZU Car</span>
@@ -205,7 +205,7 @@
                     </div>
 
                     <div class="guide-list">
-                        <!-- Item 1: Quy trình cho thuê xe -->
+                        <!-- rental guide -->
                         <article class="guide-item">
                             <div class="guide-icon-box badge-gold">
                                 <i class="fa-regular fa-file-lines"></i>
@@ -220,7 +220,7 @@
 
                         <div class="guide-divider"></div>
 
-                        <!-- Item 2: Cập nhật thông tin mới -->
+                        <!-- news -->
                         <article class="guide-item">
                             <div class="guide-icon-box badge-red">
                                 <i class="fa-regular fa-bell"></i>
@@ -239,7 +239,7 @@
                 </div>
             </section>
 
-            <!-- Section 4: Hợp đồng -->
+            <!--contract -->
             <section class="content-section" id="hop-dong-content" aria-labelledby="hop-dong-title" hidden>
                 <div class="section-page-heading">
                     <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
@@ -247,7 +247,7 @@
                 </div>
 
                 <div class="simple-doc-card">
-                    <!-- Hợp đồng mẫu -->
+                    <!-- contract sample  -->
                     <div class="doc-section">
                         <h2 class="doc-sec-title">Hợp đồng mẫu</h2>
                         <p class="doc-sec-sub">Chọn loại hợp đồng bạn muốn xem</p>
@@ -265,7 +265,7 @@
                 </div>
             </section>
 
-            <!-- Section 5: Chính sách bảo vệ dữ liệu -->
+            <!--Chính sách bảo vệ dữ liệu -->
             <section class="content-section" id="bao-mat-content" aria-labelledby="bao-mat-title" hidden>
                 <div class="section-page-heading">
                     <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
@@ -297,7 +297,7 @@
                 </div>
             </section>
 
-            <!-- Section 6: Doanh thu cho thuê -->
+            <!-- Doanh thu cho thuê -->
             <section class="content-section" id="doanh-thu-content" aria-labelledby="doanh-thu-title" hidden>
                 <div class="section-page-heading">
                     <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
