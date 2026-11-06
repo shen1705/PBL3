@@ -10,13 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const renterNavLink = document.getElementById('renter-nav-link');
     const tripsNavLink = document.getElementById('trips-nav-link');
     const supportNavLink = document.getElementById('support-nav-link');
-    const openOwnerModalBtn = document.getElementById('openOwnerModalBtn');
-
     const loginModal = document.getElementById('loginModal');
     const loginForm = document.getElementById('login-form');
     const registerModal = document.getElementById('registerModal');
     const registerForm = document.getElementById('register-form');
-    const registerCarModal = document.getElementById('registerCarModal');
     const locationModal = document.getElementById('locationModal');
     const openLocationModal = document.getElementById('openLocationModal');
     const locationInput = document.getElementById('locationInput');
@@ -298,13 +295,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (openOwnerModalBtn) {
-        openOwnerModalBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (registerCarModal) registerCarModal.classList.add('active');
-        });
-    }
-
     if (openLocationModal && locationModal && locationInput && selectedLocationText) {
         const showLocationModal = function() {
             locationInput.value = '';
@@ -567,7 +557,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             closeModal(loginModal);
             closeModal(registerModal);
-            closeModal(registerCarModal);
             closeModal(forgotModal);
             if (locationModal) locationModal.classList.remove('active');
         }

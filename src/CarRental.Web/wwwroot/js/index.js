@@ -10,13 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const renterNavLink = document.getElementById('renter-nav-link');
     const tripsNavLink = document.getElementById('trips-nav-link');
     const supportNavLink = document.getElementById('support-nav-link');
-    const openOwnerModalBtn = document.getElementById('openOwnerModalBtn');
-
     const loginModal = document.getElementById('loginModal');
     const loginForm = document.getElementById('login-form');
     const registerModal = document.getElementById('registerModal');
     const registerForm = document.getElementById('register-form');
-    const registerCarModal = document.getElementById('registerCarModal');
     const locationModal = document.getElementById('locationModal');
     const openLocationModal = document.getElementById('openLocationModal');
     const locationInput = document.getElementById('locationInput');
@@ -162,11 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (loginModal) loginModal.classList.add('active');
         });
     }
-    if (registerCarModal && window.location.hash === '#registerCarModal') {
-        registerCarModal.classList.add('active');
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-    }
-
     const loginErrorBanner = document.getElementById('login-error-banner');
     const registerErrorBanner = document.getElementById('register-error-banner');
 
@@ -262,6 +254,17 @@ document.addEventListener('DOMContentLoaded', function() {
             validatePasswordMatch();
             if (!registerForm.reportValidity()) return;
 
+            if (passwordInput.value.length < 6) {
+                if (registerErrorBanner) {
+                    registerErrorBanner.textContent = 'Mật khẩu không đủ mạnh: Mật khẩu phải có tối thiểu 6 ký tự.';
+                    registerErrorBanner.style.display = 'block';
+                } else {
+                    alert('Mật khẩu không đủ mạnh: Mật khẩu phải có tối thiểu 6 ký tự.');
+                }
+                passwordInput.focus();
+                return;
+            }
+
             const submitBtn = registerForm.querySelector('.btn-submit-auth');
             const origText = submitBtn ? submitBtn.textContent : '';
             if (submitBtn) {
@@ -309,13 +312,6 @@ document.addEventListener('DOMContentLoaded', function() {
         registerBtn.addEventListener('click', function(e) {
             e.preventDefault();
             if (registerModal) registerModal.classList.add('active');
-        });
-    }
-
-    if (openOwnerModalBtn) {
-        openOwnerModalBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (registerCarModal) registerCarModal.classList.add('active');
         });
     }
 
@@ -581,7 +577,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             closeModal(loginModal);
             closeModal(registerModal);
-            closeModal(registerCarModal);
             closeModal(forgotModal);
             if (locationModal) locationModal.classList.remove('active');
         }

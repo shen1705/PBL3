@@ -1781,3 +1781,33 @@ a {
     color: #fff !important;
     transform: translateY(-1px);
 }
+
+/* Sáng vàng rõ nét khi chọn bất kỳ tab nào */
+.side-link.active,
+.owner-submenu .side-link.active,
+.trips-side-link.active {
+    background: #fff8e9 !important;
+    color: #b88a32 !important;
+    font-weight: 700 !important;
+}
+
+.side-link.active i,
+.owner-submenu .side-link.active i,
+.trips-side-link.active i {
+    color: #c49a49 !important;
+}
+
+.side-link.active::before,
+.owner-submenu .side-link.active::before,
+.trips-side-link.active::before {
+    background: #c49a49 !important;
+    width: 4px !important;
+}
+
+/* Tab loại xe (Xe tự lái) sáng vàng */
+.vehicle-tab.active {
+    border-color: #c49a49 !important;
+    background: #fff8e9 !important;
+    color: #b88a32 !important;
+    font-weight: 700 !important;
+}
