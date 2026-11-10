@@ -442,14 +442,14 @@
                             <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff; text-align: center;">
                                 <div style="font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #475569;">Mặt trước CCCD</div>
                                 ${owner.cccdImageFront ? `
-                                    <img src="${owner.cccdImageFront}" alt="Mặt trước CCCD" style="max-height: 140px; max-width: 100%; border-radius: 6px; object-fit: contain; cursor: pointer;" onclick="window.open('${owner.cccdImageFront}', '_blank')">
+                                    <img src="${toImgUrl(owner.cccdImageFront)}" alt="Mặt trước CCCD" style="max-height: 140px; max-width: 100%; border-radius: 6px; object-fit: contain; cursor: pointer;" onclick="window.open('${toImgUrl(owner.cccdImageFront)}', '_blank')">
                                     <div style="font-size: 10px; color: #64748b; margin-top: 4px;">(Nhấn vào ảnh để xem kích thước lớn)</div>
                                 ` : '<div style="padding: 30px 0; color: #94a3b8;">Chưa tải ảnh</div>'}
                             </div>
                             <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff; text-align: center;">
                                 <div style="font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #475569;">Mặt sau CCCD</div>
                                 ${owner.cccdImageBack ? `
-                                    <img src="${owner.cccdImageBack}" alt="Mặt sau CCCD" style="max-height: 140px; max-width: 100%; border-radius: 6px; object-fit: contain; cursor: pointer;" onclick="window.open('${owner.cccdImageBack}', '_blank')">
+                                    <img src="${toImgUrl(owner.cccdImageBack)}" alt="Mặt sau CCCD" style="max-height: 140px; max-width: 100%; border-radius: 6px; object-fit: contain; cursor: pointer;" onclick="window.open('${toImgUrl(owner.cccdImageBack)}', '_blank')">
                                     <div style="font-size: 10px; color: #64748b; margin-top: 4px;">(Nhấn vào ảnh để xem kích thước lớn)</div>
                                 ` : '<div style="padding: 30px 0; color: #94a3b8;">Chưa tải ảnh</div>'}
                             </div>
@@ -510,8 +510,8 @@
                 footer.appendChild(accessBtn);
             }
 
-            // reject button
-            if (owner.approvalStatus !== 'Rejected') {
+            // reject button (only pending)
+            if (owner.approvalStatus === 'Pending') {
                 const rejectBtn = document.createElement('button');
                 rejectBtn.className = 'button button--light';
                 rejectBtn.style.color = '#dc2626';
@@ -522,8 +522,8 @@
                 footer.appendChild(rejectBtn);
             }
 
-            // approve button
-            if (owner.approvalStatus !== 'Approved') {
+            // approve button (only pending)
+            if (owner.approvalStatus === 'Pending') {
                 const approveBtn = document.createElement('button');
                 approveBtn.className = 'button button--primary';
                 approveBtn.textContent = '✓ Duyệt hồ sơ';
@@ -671,6 +671,12 @@
         document.body.append(dialog);
         dialog.showModal();
         return dialog;
+    }
+
+    function toImgUrl(p) {
+        if (!p) return '';
+        if (p.startsWith('http://') || p.startsWith('https://') || p.startsWith('/')) return p;
+        return '/' + p;
     }
 
     function escapeHtml(text) {

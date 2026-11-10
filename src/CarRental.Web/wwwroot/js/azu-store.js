@@ -320,4 +320,23 @@
             return readJson(KEYS.selectedCar, null);
         }
     };
+
+    // toggle password visibility
+    document.addEventListener('click', (e) => {
+        const toggle = e.target.closest('.toggle-password');
+        if (!toggle) return;
+        const wrap = toggle.closest('.password-box, .password-input-wrap, .input-wrapper');
+        const input = wrap ? wrap.querySelector('input') : toggle.previousElementSibling;
+        if (input) {
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggle.classList.remove('fa-eye-slash');
+                toggle.classList.add('fa-eye');
+            } else {
+                input.type = 'password';
+                toggle.classList.remove('fa-eye');
+                toggle.classList.add('fa-eye-slash');
+            }
+        }
+    });
 })(window);

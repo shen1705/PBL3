@@ -194,14 +194,25 @@ function createCarCardFromApi(car) {
     const starIcon = document.createElement('i');
     starIcon.className = 'fa-solid fa-star text-warning';
     
-    const ratingVal = (typeof car.rating === 'number' ? car.rating : 5.0).toFixed(1);
+    const hasRating = typeof car.rating === 'number' && car.rating > 0;
+    const ratingVal = hasRating ? car.rating.toFixed(1) : '';
     const tripsVal = car.totalTrips || 0;
     const yearVal = car.year || 2023;
 
-    details.append(
-        starIcon,
-        document.createTextNode(` ${ratingVal} • ${tripsVal} chuyến • `)
-    );
+    if (hasRating) {
+        details.append(
+            starIcon,
+            document.createTextNode(` ${ratingVal} • ${tripsVal} chuyến • `)
+        );
+    } else {
+        const noRatingSpan = document.createElement('span');
+        noRatingSpan.style.color = '#64748b';
+        noRatingSpan.textContent = 'Chưa có đánh giá';
+        details.append(
+            noRatingSpan,
+            document.createTextNode(` • ${tripsVal} chuyến • `)
+        );
+    }
     const bYear = document.createElement('b');
     bYear.textContent = `Đời ${yearVal}`;
     details.appendChild(bYear);
@@ -260,6 +271,37 @@ async function loadVehiclesFromApi() {
             if (targetCard) {
                 const carObj = carFromCard(targetCard);
                 openCarPopup(carObj);
+            } else {
+                fetch(`/api/vehicles/${autoVehicleId}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.isSuccess && res.data) {
+                            const d = res.data;
+                            openCarPopup({
+                                vehicleId: d.vehicleId,
+                                listingId: d.listingId,
+                                ownerId: d.ownerId,
+                                ownerName: d.ownerName,
+                                name: d.name,
+                                brand: d.brand,
+                                model: d.model,
+                                year: d.year,
+                                seats: d.seats,
+                                transmission: d.transmission,
+                                fuel: d.fuelType,
+                                price: (Number(d.pricePerDay) / 1000).toLocaleString('vi-VN') + 'K',
+                                rawPrice: d.pricePerDay,
+                                location: d.location,
+                                city: d.city,
+                                district: d.district,
+                                coverImageUrl: d.coverImageUrl,
+                                rating: d.rating,
+                                totalTrips: d.totalTrips,
+                                trips: d.totalTrips
+                            });
+                        }
+                    })
+                    .catch(() => {});
             }
         }
     }
@@ -1278,7 +1320,11 @@ function openCarPopup(car) {
     if (ownerNameEl) ownerNameEl.textContent = nameToDisplay;
     if (ownerAvatarText) ownerAvatarText.textContent = Array.from(nameToDisplay.trim())[0]?.toUpperCase() || 'C';
     if (ownerRatingEl) {
-        ownerRatingEl.innerHTML = `<i class="fa-solid fa-star star-gold"></i> ${(typeof car.rating === 'number' ? car.rating : 5.0).toFixed(1)} • ${car.trips || car.totalTrips || 0} chuyến`;
+        const hasCarR = typeof car.rating === 'number' && car.rating > 0;
+        const trCount = car.trips || car.totalTrips || 0;
+        ownerRatingEl.innerHTML = hasCarR
+            ? `<i class="fa-solid fa-star star-gold"></i> ${car.rating.toFixed(1)} • ${trCount} chuyến`
+            : `Chưa có đánh giá • ${trCount} chuyến`;
     }
 
     const currentUserId = sessionStorage.getItem('azuCarUserId');
@@ -1319,9 +1365,11 @@ function openCarPopup(car) {
                         if (ownerAvatarText) ownerAvatarText.textContent = Array.from(d.ownerName.trim())[0]?.toUpperCase() || 'C';
                     }
                     if (ownerRatingEl) {
-                        const r = (typeof d.rating === 'number' ? d.rating : 5.0).toFixed(1);
+                        const hasR = typeof d.rating === 'number' && d.rating > 0;
                         const t = d.totalTrips || 0;
-                        ownerRatingEl.innerHTML = `<i class="fa-solid fa-star star-gold"></i> ${r} • ${t} chuyến`;
+                        ownerRatingEl.innerHTML = hasR
+                            ? `<i class="fa-solid fa-star star-gold"></i> ${d.rating.toFixed(1)} • ${t} chuyến`
+                            : `Chưa có đánh giá • ${t} chuyến`;
                     }
                     if (d.description) {
                         const descEl = document.getElementById('popupCarDescription');
@@ -1351,11 +1399,13 @@ function openCarPopup(car) {
                     const reviewsGrid = document.getElementById('popupReviewsGrid') || carDetailModal?.querySelector('.reviews-grid');
                     const moreReviewsBtn = document.getElementById('popupMoreReviewsBtn') || carDetailModal?.querySelector('.btn-more-reviews');
 
-                    const avgRating = (typeof d.rating === 'number' ? d.rating : 5.0).toFixed(1);
                     const totalRevCount = typeof d.totalReviews === 'number' ? d.totalReviews : (d.reviews ? d.reviews.length : 0);
+                    const hasRev = typeof d.rating === 'number' && d.rating > 0 && totalRevCount > 0;
 
                     if (reviewsHeading) {
-                        reviewsHeading.innerHTML = `<i class="fa-solid fa-star star-gold"></i> ${avgRating} • ${totalRevCount} đánh giá`;
+                        reviewsHeading.innerHTML = hasRev
+                            ? `<i class="fa-solid fa-star star-gold"></i> ${d.rating.toFixed(1)} • ${totalRevCount} đánh giá`
+                            : `Chưa có đánh giá (${totalRevCount} đánh giá)`;
                     }
 
                     if (reviewsGrid) {

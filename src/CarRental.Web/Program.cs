@@ -91,6 +91,18 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// seed fallback
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? "";
+    if (path.StartsWith("/admin/seed/", StringComparison.OrdinalIgnoreCase))
+    {
+        context.Response.Redirect(path.Substring(6));
+        return;
+    }
+    await next();
+});
+
 app.UseStaticFiles();
 app.MapStaticAssets();
 
@@ -113,6 +125,8 @@ app.MapGet("/carregistermode.html", () => Results.Redirect("/carregistermode", p
 app.MapGet("/account.html", () => Results.Redirect("/account", permanent: true));
 app.MapGet("/my-trips", () => Results.Redirect("/account#trips", permanent: true));
 app.MapGet("/my-trips.html", () => Results.Redirect("/account#trips", permanent: true));
+app.MapGet("/mytrips", () => Results.Redirect("/account#trips", permanent: true));
+app.MapGet("/mytrips.html", () => Results.Redirect("/account#trips", permanent: true));
 app.MapGet("/support.html", () => Results.Redirect("/support", permanent: true));
 app.MapGet("/chatbot.html", () => Results.Redirect("/chatbot", permanent: true));
 app.MapGet("/admin", () => Results.Redirect("/admin/index.html"));

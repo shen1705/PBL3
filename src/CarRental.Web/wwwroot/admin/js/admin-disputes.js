@@ -438,7 +438,7 @@
                         ${d.evidenceImage ? `
                             <div style="margin-top: 10px;">
                                 <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Ảnh bằng chứng kèm theo:</div>
-                                <img src="${d.evidenceImage}" alt="Ảnh bằng chứng" style="max-height: 160px; max-width: 100%; border-radius: 6px; border: 1px solid #e2e8f0; object-fit: contain; cursor: pointer;" onclick="window.open('${d.evidenceImage}', '_blank')">
+                                <img src="${toImgUrl(d.evidenceImage)}" alt="Ảnh bằng chứng" style="max-height: 160px; max-width: 100%; border-radius: 6px; border: 1px solid #e2e8f0; object-fit: contain; cursor: pointer;" onclick="window.open('${toImgUrl(d.evidenceImage)}', '_blank')">
                             </div>
                         ` : ''}
                     </div>
@@ -588,6 +588,12 @@
         document.body.append(dialog);
         dialog.showModal();
         return dialog;
+    }
+
+    function toImgUrl(p) {
+        if (!p) return '';
+        if (p.startsWith('http://') || p.startsWith('https://') || p.startsWith('/')) return p;
+        return '/' + p;
     }
 
     function escapeHtml(text) {

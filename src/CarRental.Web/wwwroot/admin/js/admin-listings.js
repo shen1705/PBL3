@@ -397,7 +397,7 @@
                 imagesGallery = `
                     <div style="display: flex; gap: 8px; overflow-x: auto; padding: 6px 0;">
                         ${l.images.map(img => `
-                            <img src="${img.imagePath}" alt="Ảnh xe" style="height: 100px; width: 140px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer;" onclick="window.open('${img.imagePath}', '_blank')">
+                            <img src="${toImgUrl(img.imagePath)}" alt="Ảnh xe" style="height: 100px; width: 140px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; cursor: pointer;" onclick="window.open('${toImgUrl(img.imagePath)}', '_blank')">
                         `).join('')}
                     </div>
                 `;
@@ -453,14 +453,14 @@
                             <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff; text-align: center;">
                                 <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569;">Giấy đăng ký xe</div>
                                 ${l.registrationCertImage ? `
-                                    <img src="${l.registrationCertImage}" alt="Đăng ký xe" style="max-height: 110px; max-width: 100%; border-radius: 4px; object-fit: contain; cursor: pointer;" onclick="window.open('${l.registrationCertImage}', '_blank')">
+                                    <img src="${toImgUrl(l.registrationCertImage)}" alt="Đăng ký xe" style="max-height: 110px; max-width: 100%; border-radius: 4px; object-fit: contain; cursor: pointer;" onclick="window.open('${toImgUrl(l.registrationCertImage)}', '_blank')">
                                 ` : '<div style="padding: 24px 0; color: #94a3b8; font-size: 11px;">Chưa cung cấp</div>'}
                             </div>
 
                             <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff; text-align: center;">
                                 <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569;">Bảo hiểm TNDS</div>
                                 ${l.insuranceImage ? `
-                                    <img src="${l.insuranceImage}" alt="Bảo hiểm xe" style="max-height: 110px; max-width: 100%; border-radius: 4px; object-fit: contain; cursor: pointer;" onclick="window.open('${l.insuranceImage}', '_blank')">
+                                    <img src="${toImgUrl(l.insuranceImage)}" alt="Bảo hiểm xe" style="max-height: 110px; max-width: 100%; border-radius: 4px; object-fit: contain; cursor: pointer;" onclick="window.open('${toImgUrl(l.insuranceImage)}', '_blank')">
                                     <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Hạn: ${l.insuranceExpiryDate || '—'}</div>
                                 ` : '<div style="padding: 24px 0; color: #94a3b8; font-size: 11px;">Chưa cung cấp</div>'}
                             </div>
@@ -468,7 +468,7 @@
                             <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; background: #fff; text-align: center;">
                                 <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569;">Sổ đăng kiểm</div>
                                 ${l.inspectionCertImage ? `
-                                    <img src="${l.inspectionCertImage}" alt="Đăng kiểm xe" style="max-height: 110px; max-width: 100%; border-radius: 4px; object-fit: contain; cursor: pointer;" onclick="window.open('${l.inspectionCertImage}', '_blank')">
+                                    <img src="${toImgUrl(l.inspectionCertImage)}" alt="Đăng kiểm xe" style="max-height: 110px; max-width: 100%; border-radius: 4px; object-fit: contain; cursor: pointer;" onclick="window.open('${toImgUrl(l.inspectionCertImage)}', '_blank')">
                                     <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Hạn: ${l.inspectionExpiryDate || '—'}</div>
                                 ` : '<div style="padding: 24px 0; color: #94a3b8; font-size: 11px;">Chưa cung cấp</div>'}
                             </div>
@@ -736,6 +736,12 @@
         document.body.append(dialog);
         dialog.showModal();
         return dialog;
+    }
+
+    function toImgUrl(p) {
+        if (!p) return '';
+        if (p.startsWith('http://') || p.startsWith('https://') || p.startsWith('/')) return p;
+        return '/' + p;
     }
 
     function escapeHtml(text) {

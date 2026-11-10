@@ -186,7 +186,7 @@ public class VehicleService : IVehicleService
                           .Where(b => b.Status == BookingStatuses.Completed)
                           .SelectMany(b => b.Reviews)
                           .Where(r => r.RevieweeId == v.OwnerId && r.IsPublic)
-                          .Average(r => (double?)r.Rating) ?? 5.0)
+                          .Average(r => (double?)r.Rating) ?? 0.0)
                           .ThenByDescending(v => v.Bookings.Count(b => b.Status == BookingStatuses.Completed))
             };
 
@@ -219,7 +219,7 @@ public class VehicleService : IVehicleService
                     .Where(x => x.r.RevieweeId == v.OwnerId && (x.r.IsPublic || (x.b.CompletedAt.HasValue && x.b.CompletedAt.Value <= sevenDaysAgo)))
                     .Select(x => x.r)
                     .ToList();
-                var rating = publicReviews.Any() ? Math.Round(publicReviews.Average(r => r.Rating), 1) : 5.0;
+                var rating = publicReviews.Any() ? Math.Round(publicReviews.Average(r => r.Rating), 1) : 0.0;
 
                 return new VehicleCardDto
                 {
@@ -292,7 +292,7 @@ public class VehicleService : IVehicleService
                 .OrderByDescending(r => r.CreatedAt)
                 .ToList();
 
-            var rating = publicReviews.Any() ? Math.Round(publicReviews.Average(r => r.Rating), 1) : 5.0;
+            var rating = publicReviews.Any() ? Math.Round(publicReviews.Average(r => r.Rating), 1) : 0.0;
 
             var reviewDtos = publicReviews.Select(r => new ReviewDto
             {
@@ -421,7 +421,7 @@ public class VehicleService : IVehicleService
                     .Where(x => x.r.RevieweeId == v.OwnerId && (x.r.IsPublic || (x.b.CompletedAt.HasValue && x.b.CompletedAt.Value <= sevenDaysAgo)))
                     .Select(x => x.r)
                     .ToList();
-                var rating = publicReviews.Any() ? Math.Round(publicReviews.Average(r => r.Rating), 1) : 5.0;
+                var rating = publicReviews.Any() ? Math.Round(publicReviews.Average(r => r.Rating), 1) : 0.0;
 
                 return new VehicleCardDto
                 {

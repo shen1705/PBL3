@@ -32,7 +32,7 @@
                 <a href="/find" id="find-nav-link" class="nav-find-car-btn"><i class="fa-solid fa-magnifying-glass"></i> Tìm xe</a>
                 <a href="/about" id="about-nav-link" class="@(isAboutPage ? "active" : "")">Về AZU Car</a>
                 <a href="/become-owner" id="owner-nav-link" class="@(isOwnerPage ? "active" : "")">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</a>
-                <a href="/mytrips" id="trips-nav-link" class="@(isTripsPage ? "active" : "")">Chuyến của tôi</a>
+                <a href="/account#trips" id="trips-nav-link" class="@(isTripsPage ? "active" : "")">Chuyến của tôi</a>
                 <a href="/support" id="support-nav-link" class="@(isSupportPage ? "active" : "")">Trợ giúp</a>
             </nav>
 
