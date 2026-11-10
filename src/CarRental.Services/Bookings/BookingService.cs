@@ -274,6 +274,7 @@ public class BookingService : IBookingService
                 .ThenInclude(l => l.Images)
             .Include(b => b.HandoverConfirmations)
             .Include(b => b.Reviews)
+            .Include(b => b.Disputes)
             .OrderByDescending(b => b.CreatedAt)
             .AsQueryable();
 
@@ -333,7 +334,9 @@ public class BookingService : IBookingService
                 CompletedAt = b.CompletedAt,
                 HasPickupConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Pickup),
                 HasReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return),
-                HasReviewed = b.Reviews.Any(r => r.ReviewerId == renterUserId)
+                HasReviewed = b.Reviews.Any(r => r.ReviewerId == renterUserId),
+                HasDispute = b.Disputes.Any(d => d.Status == DisputeStatuses.Open),
+                DisputeStatus = b.Disputes.OrderByDescending(d => d.CreatedAt).FirstOrDefault()?.Status
             };
         }).ToList();
 
@@ -359,6 +362,7 @@ public class BookingService : IBookingService
                 .ThenInclude(l => l.Images)
             .Include(b => b.HandoverConfirmations)
             .Include(b => b.Reviews)
+            .Include(b => b.Disputes)
             .OrderByDescending(b => b.CreatedAt)
             .AsQueryable();
 
@@ -413,7 +417,9 @@ public class BookingService : IBookingService
                 CompletedAt = b.CompletedAt,
                 HasPickupConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Pickup),
                 HasReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return),
-                HasReviewed = b.Reviews.Any(r => r.ReviewerId == ownerUserId)
+                HasReviewed = b.Reviews.Any(r => r.ReviewerId == ownerUserId),
+                HasDispute = b.Disputes.Any(d => d.Status == DisputeStatuses.Open),
+                DisputeStatus = b.Disputes.OrderByDescending(d => d.CreatedAt).FirstOrDefault()?.Status
             };
         }).ToList();
 
@@ -437,6 +443,7 @@ public class BookingService : IBookingService
                 .ThenInclude(r => r.Reviewer)
             .Include(b => b.Reviews)
                 .ThenInclude(r => r.Reviewee)
+            .Include(b => b.Disputes)
             .FirstOrDefaultAsync(b => b.BookingId == bookingId, ct);
 
         if (booking == null)
@@ -485,6 +492,8 @@ public class BookingService : IBookingService
             HasPickupConfirmed = booking.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Pickup),
             HasReturnConfirmed = booking.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return),
             HasReviewed = booking.Reviews.Any(r => r.ReviewerId == currentUserId),
+            HasDispute = booking.Disputes.Any(d => d.Status == DisputeStatuses.Open),
+            DisputeStatus = booking.Disputes.OrderByDescending(d => d.CreatedAt).FirstOrDefault()?.Status,
             Handovers = booking.HandoverConfirmations.Select(h => new HandoverConfirmationDto
             {
                 ConfirmationId = h.ConfirmationId,
@@ -878,6 +887,61 @@ public class BookingService : IBookingService
             : "Cảm ơn bạn đã gửi đánh giá! Đánh giá sẽ được công khai khi đối tác hoàn tất đánh giá hoặc sau 7 ngày.";
 
         return ServiceResult<ReviewDto>.Success(dto, message);
+    }
+
+    // create dispute
+    public async Task<ServiceResult<bool>> CreateDisputeAsync(
+        int bookingId,
+        CreateDisputeRequest request,
+        string currentUserId,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Description) || request.Description.Trim().Length < 10)
+            return ServiceResult<bool>.Fail("Vui lòng cung cấp mô tả chi tiết sự cố (tối thiểu 10 ký tự).", ErrorCodes.Validation);
+
+        var booking = await _db.Bookings
+            .Include(b => b.Vehicle)
+            .Include(b => b.Disputes)
+            .FirstOrDefaultAsync(b => b.BookingId == bookingId, ct);
+
+        if (booking == null)
+            return ServiceResult<bool>.Fail("Không tìm thấy thông tin đơn thuê xe.", ErrorCodes.NotFound);
+
+        bool isRenter = booking.RenterId == currentUserId;
+        bool isOwner = booking.Vehicle.OwnerId == currentUserId;
+
+        if (!isRenter && !isOwner)
+            return ServiceResult<bool>.Fail("Bạn không có quyền gửi khiếu nại cho đơn thuê này.", ErrorCodes.Forbidden);
+
+        // only ongoing
+        if (booking.Status != BookingStatuses.Ongoing)
+            return ServiceResult<bool>.Fail("Chỉ có thể gửi khiếu nại khi chuyến đi đang diễn ra hoặc đang trong quá trình bàn giao trả xe.", ErrorCodes.InvalidState);
+
+        // check existing open dispute
+        if (booking.Disputes.Any(d => d.Status == DisputeStatuses.Open))
+            return ServiceResult<bool>.Fail("Đơn thuê này đang có khiếu nại đang chờ xử lý.", ErrorCodes.Conflict);
+
+        var now = _clock.UtcNow;
+        var evidence = string.IsNullOrWhiteSpace(request.EvidenceImage)
+            ? "https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&q=80&w=800"
+            : request.EvidenceImage.Trim();
+
+        var dispute = new Dispute
+        {
+            BookingId = bookingId,
+            RaisedBy = currentUserId,
+            Description = request.Description.Trim(),
+            EvidenceImage = evidence,
+            Status = DisputeStatuses.Open,
+            CreatedAt = now
+        };
+
+        _db.Disputes.Add(dispute);
+        await _db.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Người dùng {UserId} gửi khiếu nại cho đơn thuê #{BookingId}", currentUserId, bookingId);
+
+        return ServiceResult<bool>.Success(true, "Khiếu nại của bạn đã được gửi thành công đến Quản trị viên để thụ lý.");
     }
 
     public async Task<ServiceResult<OwnerRevenueSummaryDto>> GetOwnerRevenueAsync(

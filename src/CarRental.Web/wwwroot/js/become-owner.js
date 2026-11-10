@@ -2005,6 +2005,46 @@ async function loadOwnerBookingRequests() {
 
                 actionsEl.appendChild(completeBtn);
 
+                if (req.hasDispute) {
+                    const dispBadge = document.createElement('span');
+                    dispBadge.style.cssText = 'font-size: 13px; color: #dc2626; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
+                    dispBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Đang khiếu nại (Chờ xử lý)';
+                    actionsEl.appendChild(dispBadge);
+                } else {
+                    const disputeBtn = document.createElement('button');
+                    disputeBtn.type = 'button';
+                    disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
+                    disputeBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sự cố';
+                    disputeBtn.addEventListener('click', async () => {
+                        const desc = prompt('Nhập chi tiết sự cố phát sinh (tối thiểu 10 ký tự):');
+                        if (!desc) return;
+                        if (desc.trim().length < 10) {
+                            alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');
+                            return;
+                        }
+                        disputeBtn.disabled = true;
+                        try {
+                            const r = await fetch(`/api/bookings/${req.bookingId}/dispute`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ description: desc.trim() })
+                            });
+                            const d = await r.json();
+                            if (r.ok && d.isSuccess) {
+                                alert(d.message || 'Khiếu nại đã được gửi thành công.');
+                                loadOwnerBookingRequests();
+                            } else {
+                                alert('Lỗi: ' + (d?.message || 'Không thể gửi khiếu nại'));
+                            }
+                        } catch (e) {
+                            alert('Lỗi kết nối máy chủ.');
+                        } finally {
+                            disputeBtn.disabled = false;
+                        }
+                    });
+                    actionsEl.appendChild(disputeBtn);
+                }
+
                 itemEl.appendChild(actionsEl);
 
             } else if (req.status === 'Completed') {

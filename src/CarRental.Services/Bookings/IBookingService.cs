@@ -28,6 +28,8 @@ public interface IBookingService
 
     Task<ServiceResult<ReviewDto>> SubmitReviewAsync(CreateReviewRequest request, string currentUserId, CancellationToken ct = default);
 
+    Task<ServiceResult<bool>> CreateDisputeAsync(int bookingId, CreateDisputeRequest request, string currentUserId, CancellationToken ct = default);
+
     Task<ServiceResult<OwnerRevenueSummaryDto>> GetOwnerRevenueAsync(string ownerUserId, CancellationToken ct = default);
 
     Task<ServiceResult<int>> AutoExpireBookingsAsync(CancellationToken ct = default);
