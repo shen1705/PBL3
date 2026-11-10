@@ -53,6 +53,8 @@ public class BookingDetailDto
     public bool HasPickupConfirmed { get; set; }
     public bool HasReturnConfirmed { get; set; }
     public bool HasReviewed { get; set; }
+    public bool HasDispute { get; set; }
+    public string? DisputeStatus { get; set; }
     public List<HandoverConfirmationDto> Handovers { get; set; } = new();
     public List<ReviewDto> Reviews { get; set; } = new();
 }

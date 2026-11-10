@@ -194,14 +194,25 @@ function createCarCardFromApi(car) {
     const starIcon = document.createElement('i');
     starIcon.className = 'fa-solid fa-star text-warning';
     
-    const ratingVal = (typeof car.rating === 'number' ? car.rating : 5.0).toFixed(1);
+    const hasRating = typeof car.rating === 'number' && car.rating > 0;
+    const ratingVal = hasRating ? car.rating.toFixed(1) : '';
     const tripsVal = car.totalTrips || 0;
     const yearVal = car.year || 2023;
 
-    details.append(
-        starIcon,
-        document.createTextNode(` ${ratingVal} • ${tripsVal} chuyến • `)
-    );
+    if (hasRating) {
+        details.append(
+            starIcon,
+            document.createTextNode(` ${ratingVal} • ${tripsVal} chuyến • `)
+        );
+    } else {
+        const noRatingSpan = document.createElement('span');
+        noRatingSpan.style.color = '#64748b';
+        noRatingSpan.textContent = 'Chưa có đánh giá';
+        details.append(
+            noRatingSpan,
+            document.createTextNode(` • ${tripsVal} chuyến • `)
+        );
+    }
     const bYear = document.createElement('b');
     bYear.textContent = `Đời ${yearVal}`;
     details.appendChild(bYear);
@@ -260,6 +271,37 @@ async function loadVehiclesFromApi() {
             if (targetCard) {
                 const carObj = carFromCard(targetCard);
                 openCarPopup(carObj);
+            } else {
+                fetch(`/api/vehicles/${autoVehicleId}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.isSuccess && res.data) {
+                            const d = res.data;
+                            openCarPopup({
+                                vehicleId: d.vehicleId,
+                                listingId: d.listingId,
+                                ownerId: d.ownerId,
+                                ownerName: d.ownerName,
+                                name: d.name,
+                                brand: d.brand,
+                                model: d.model,
+                                year: d.year,
+                                seats: d.seats,
+                                transmission: d.transmission,
+                                fuel: d.fuelType,
+                                price: (Number(d.pricePerDay) / 1000).toLocaleString('vi-VN') + 'K',
+                                rawPrice: d.pricePerDay,
+                                location: d.location,
+                                city: d.city,
+                                district: d.district,
+                                coverImageUrl: d.coverImageUrl,
+                                rating: d.rating,
+                                totalTrips: d.totalTrips,
+                                trips: d.totalTrips
+                            });
+                        }
+                    })
+                    .catch(() => {});
             }
         }
     }
@@ -1278,7 +1320,11 @@ function openCarPopup(car) {
     if (ownerNameEl) ownerNameEl.textContent = nameToDisplay;
     if (ownerAvatarText) ownerAvatarText.textContent = Array.from(nameToDisplay.trim())[0]?.toUpperCase() || 'C';
     if (ownerRatingEl) {
-        ownerRatingEl.innerHTML = `<i class="fa-solid fa-star star-gold"></i> ${(typeof car.rating === 'number' ? car.rating : 5.0).toFixed(1)} • ${car.trips || car.totalTrips || 0} chuyến`;
+        const hasCarR = typeof car.rating === 'number' && car.rating > 0;
+        const trCount = car.trips || car.totalTrips || 0;
+        ownerRatingEl.innerHTML = hasCarR
+            ? `<i class="fa-solid fa-star star-gold"></i> ${car.rating.toFixed(1)} • ${trCount} chuyến`
+            : `Chưa có đánh giá • ${trCount} chuyến`;
     }
 
     const currentUserId = sessionStorage.getItem('azuCarUserId');
@@ -1319,9 +1365,11 @@ function openCarPopup(car) {
                         if (ownerAvatarText) ownerAvatarText.textContent = Array.from(d.ownerName.trim())[0]?.toUpperCase() || 'C';
                     }
                     if (ownerRatingEl) {
-                        const r = (typeof d.rating === 'number' ? d.rating : 5.0).toFixed(1);
+                        const hasR = typeof d.rating === 'number' && d.rating > 0;
                         const t = d.totalTrips || 0;
-                        ownerRatingEl.innerHTML = `<i class="fa-solid fa-star star-gold"></i> ${r} • ${t} chuyến`;
+                        ownerRatingEl.innerHTML = hasR
+                            ? `<i class="fa-solid fa-star star-gold"></i> ${d.rating.toFixed(1)} • ${t} chuyến`
+                            : `Chưa có đánh giá • ${t} chuyến`;
                     }
                     if (d.description) {
                         const descEl = document.getElementById('popupCarDescription');
@@ -1343,6 +1391,97 @@ function openCarPopup(car) {
                         } else {
                             btnRent.style.display = 'block';
                             btnOwnerManage.style.display = 'none';
+                        }
+                    }
+
+                    // render customer reviews
+                    const reviewsHeading = document.getElementById('popupReviewsHeading') || carDetailModal?.querySelector('.car-popup-section .section-subheading');
+                    const reviewsGrid = document.getElementById('popupReviewsGrid') || carDetailModal?.querySelector('.reviews-grid');
+                    const moreReviewsBtn = document.getElementById('popupMoreReviewsBtn') || carDetailModal?.querySelector('.btn-more-reviews');
+
+                    const totalRevCount = typeof d.totalReviews === 'number' ? d.totalReviews : (d.reviews ? d.reviews.length : 0);
+                    const hasRev = typeof d.rating === 'number' && d.rating > 0 && totalRevCount > 0;
+
+                    if (reviewsHeading) {
+                        reviewsHeading.innerHTML = hasRev
+                            ? `<i class="fa-solid fa-star star-gold"></i> ${d.rating.toFixed(1)} • ${totalRevCount} đánh giá`
+                            : `Chưa có đánh giá (${totalRevCount} đánh giá)`;
+                    }
+
+                    if (reviewsGrid) {
+                        const reviews = Array.isArray(d.reviews) ? d.reviews : [];
+                        if (reviews.length === 0) {
+                            reviewsGrid.innerHTML = '<p class="review-text" style="grid-column: 1 / -1; color: #94a3b8; font-style: italic; padding: 8px 0;">Xe chưa có đánh giá nào từ khách thuê.</p>';
+                            if (moreReviewsBtn) moreReviewsBtn.style.display = 'none';
+                        } else {
+                            let showingAll = false;
+                            const renderList = (limit) => {
+                                reviewsGrid.innerHTML = '';
+                                const items = limit ? reviews.slice(0, limit) : reviews;
+                                items.forEach(r => {
+                                    const card = document.createElement('div');
+                                    card.className = 'review-card';
+                                    const rawName = (r.reviewerName || 'Khách thuê').trim();
+                                    const parts = rawName.split(/\s+/).filter(Boolean);
+                                    const initials = parts.length >= 2
+                                        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+                                        : rawName.substring(0, 2).toUpperCase();
+                                    const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi-VN') : '';
+                                    const stars = Math.max(1, Math.min(5, r.rating || 5));
+                                    const starsHtml = Array.from({ length: 5 }, (_, i) =>
+                                        `<i class="fa-${i < stars ? 'solid' : 'regular'} fa-star"></i>`
+                                    ).join('');
+
+                                    const userDiv = document.createElement('div');
+                                    userDiv.className = 'review-user';
+
+                                    const avatarDiv = document.createElement('div');
+                                    avatarDiv.className = 'review-avatar';
+                                    avatarDiv.textContent = initials;
+
+                                    const userInfoDiv = document.createElement('div');
+                                    userInfoDiv.className = 'review-user-info';
+                                    const h4 = document.createElement('h4');
+                                    h4.textContent = rawName;
+                                    const starsDiv = document.createElement('div');
+                                    starsDiv.className = 'review-stars';
+                                    starsDiv.innerHTML = starsHtml;
+                                    userInfoDiv.appendChild(h4);
+                                    userInfoDiv.appendChild(starsDiv);
+
+                                    const dateSpan = document.createElement('span');
+                                    dateSpan.className = 'review-date';
+                                    dateSpan.textContent = dateStr;
+
+                                    userDiv.appendChild(avatarDiv);
+                                    userDiv.appendChild(userInfoDiv);
+                                    userDiv.appendChild(dateSpan);
+
+                                    const p = document.createElement('p');
+                                    p.className = 'review-text';
+                                    p.textContent = r.comment || 'Chuyến đi rất tốt!';
+
+                                    card.appendChild(userDiv);
+                                    card.appendChild(p);
+                                    reviewsGrid.appendChild(card);
+                                });
+                            };
+
+                            renderList(4);
+
+                            if (moreReviewsBtn) {
+                                if (reviews.length > 4) {
+                                    moreReviewsBtn.style.display = 'inline-block';
+                                    moreReviewsBtn.textContent = 'Xem thêm';
+                                    moreReviewsBtn.onclick = () => {
+                                        showingAll = !showingAll;
+                                        renderList(showingAll ? null : 4);
+                                        moreReviewsBtn.textContent = showingAll ? 'Thu gọn' : 'Xem thêm';
+                                    };
+                                } else {
+                                    moreReviewsBtn.style.display = 'none';
+                                }
+                            }
                         }
                     }
                 }

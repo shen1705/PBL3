@@ -274,6 +274,42 @@ public class BookingsController : ControllerBase
         return Ok(result);
     }
 
+    // Khiếu nại sự cố
+    [Authorize]
+    [HttpPost("api/bookings/{id:int}/dispute")]
+    public async Task<IActionResult> CreateDispute(int id, [FromBody] CreateDisputeRequest request, CancellationToken ct)
+    {
+        var userId = _currentUser.UserId;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập.", errorCode = ErrorCodes.Unauthorized });
+
+        if (request == null)
+            return BadRequest(new { isSuccess = false, message = "Dữ liệu khiếu nại không hợp lệ.", errorCode = ErrorCodes.Validation });
+
+        request.BookingId = id;
+
+        if (!ModelState.IsValid)
+        {
+            var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            return BadRequest(new { isSuccess = false, message = errors, errorCode = ErrorCodes.Validation });
+        }
+
+        var result = await _bookingService.CreateDisputeAsync(id, request, userId, ct);
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == ErrorCodes.NotFound)
+                return NotFound(result);
+            if (result.ErrorCode == ErrorCodes.Forbidden)
+                return StatusCode(StatusCodes.Status403Forbidden, result);
+            if (result.ErrorCode == ErrorCodes.Conflict)
+                return Conflict(result);
+
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
     // Doanh thu chủ xe
     [Authorize]
     [HttpGet("api/bookings/owner-revenue")]

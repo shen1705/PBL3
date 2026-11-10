@@ -498,9 +498,10 @@ function renderOwnerCars() {
 
 
 
+        const vehId = car.vehicleId || car.id;
         const viewPostBtn = document.createElement('a');
-
-        viewPostBtn.href = car.vehicleId ? `/find?vehicleId=${car.vehicleId}` : `/find?keyword=${encodeURIComponent(car.model || car.name)}`;
+        viewPostBtn.href = vehId ? `/find?vehicleId=${vehId}` : `/find?keyword=${encodeURIComponent(car.model || car.name || '')}`;
+        viewPostBtn.target = '_blank';
 
         viewPostBtn.className = 'small-button';
 
@@ -2005,6 +2006,46 @@ async function loadOwnerBookingRequests() {
 
                 actionsEl.appendChild(completeBtn);
 
+                if (req.hasDispute) {
+                    const dispBadge = document.createElement('span');
+                    dispBadge.style.cssText = 'font-size: 13px; color: #dc2626; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
+                    dispBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Đang khiếu nại (Chờ xử lý)';
+                    actionsEl.appendChild(dispBadge);
+                } else {
+                    const disputeBtn = document.createElement('button');
+                    disputeBtn.type = 'button';
+                    disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
+                    disputeBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sự cố';
+                    disputeBtn.addEventListener('click', async () => {
+                        const desc = prompt('Nhập chi tiết sự cố phát sinh (tối thiểu 10 ký tự):');
+                        if (!desc) return;
+                        if (desc.trim().length < 10) {
+                            alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');
+                            return;
+                        }
+                        disputeBtn.disabled = true;
+                        try {
+                            const r = await fetch(`/api/bookings/${req.bookingId}/dispute`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ description: desc.trim() })
+                            });
+                            const d = await r.json();
+                            if (r.ok && d.isSuccess) {
+                                alert(d.message || 'Khiếu nại đã được gửi thành công.');
+                                loadOwnerBookingRequests();
+                            } else {
+                                alert('Lỗi: ' + (d?.message || 'Không thể gửi khiếu nại'));
+                            }
+                        } catch (e) {
+                            alert('Lỗi kết nối máy chủ.');
+                        } finally {
+                            disputeBtn.disabled = false;
+                        }
+                    });
+                    actionsEl.appendChild(disputeBtn);
+                }
+
                 itemEl.appendChild(actionsEl);
 
             } else if (req.status === 'Completed') {
@@ -2016,87 +2057,19 @@ async function loadOwnerBookingRequests() {
 
 
                 if (!req.hasReviewed) {
-
                     const reviewBtn = document.createElement('button');
-
                     reviewBtn.type = 'button';
-
                     reviewBtn.style.cssText = 'background: #f59e0b; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
-
                     reviewBtn.innerHTML = '<i class="fa-solid fa-star"></i> Đánh giá khách thuê';
-
-                    reviewBtn.addEventListener('click', async () => {
-
-                        const starsStr = prompt(`Đánh giá khách thuê ${req.renterName} (từ 1 đến 5 sao):`, '5');
-
-                        if (starsStr === null) return;
-
-                        const rating = parseInt(starsStr, 10);
-
-                        if (isNaN(rating) || rating < 1 || rating > 5) {
-
-                            alert('Số sao không hợp lệ (vui lòng chọn từ 1 đến 5 sao).');
-
-                            return;
-
-                        }
-
-                        const comment = prompt('Nhận xét về khách thuê:', 'Khách trả xe đúng giờ, bảo quản xe cẩn thận!');
-
-                        if (comment === null) return;
-
-                        reviewBtn.disabled = true;
-
-                        try {
-
-                            const r = await fetch(`/api/bookings/${req.bookingId}/review`, {
-
-                                method: 'POST',
-
-                                headers: { 'Content-Type': 'application/json' },
-
-                                body: JSON.stringify({ rating, comment: comment || 'Khách thuê rất tốt!' })
-
-                            });
-
-                            const data = await r.json();
-
-                            if (r.ok && data.isSuccess) {
-
-                                alert('Đã gửi đánh giá khách thuê thành công!');
-
-                                loadOwnerBookingRequests();
-
-                            } else {
-
-                                alert('Lỗi: ' + (data?.message || 'Không thể gửi đánh giá'));
-
-                            }
-
-                        } catch (e) {
-
-                            alert('Lỗi kết nối máy chủ.');
-
-                        } finally {
-
-                            reviewBtn.disabled = false;
-
-                        }
-
+                    reviewBtn.addEventListener('click', () => {
+                        openOwnerReviewModal(req);
                     });
-
                     actionsEl.appendChild(reviewBtn);
-
                 } else {
-
                     const reviewedBadge = document.createElement('span');
-
                     reviewedBadge.style.cssText = 'font-size: 12.5px; color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
-
                     reviewedBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã gửi đánh giá';
-
                     actionsEl.appendChild(reviewedBadge);
-
                 }
 
 
@@ -2236,6 +2209,120 @@ async function loadOwnerRevenue() {
 }
 
 
+
+// owner review modal
+let ownerReviewModal = null;
+let activeOwnerReviewReq = null;
+
+function ensureOwnerReviewModal() {
+    if (ownerReviewModal) return ownerReviewModal;
+
+    ownerReviewModal = document.createElement('div');
+    ownerReviewModal.className = 'review-modal-backdrop';
+    ownerReviewModal.hidden = true;
+    ownerReviewModal.innerHTML = `
+        <form class="review-modal" aria-labelledby="owner-review-modal-title">
+            <button class="review-modal-close" type="button" aria-label="Đóng popup đánh giá"><i class="fa-solid fa-xmark"></i></button>
+            <h2 id="owner-review-modal-title">Đánh giá khách thuê</h2>
+            <p class="review-modal-vehicle" id="owner-review-subtitle"></p>
+            <label class="review-rating-label">Mức độ hài lòng của bạn về khách thuê:</label>
+            <div class="review-stars" role="group" aria-label="Chọn số sao đánh giá">
+                ${[1, 2, 3, 4, 5].map(rating => `<button type="button" class="review-star" data-rating="${rating}" aria-label="${rating} sao" aria-pressed="false"><i class="fa-solid fa-star"></i></button>`).join('')}
+            </div>
+            <p class="review-rating-hint" aria-live="polite">Chọn số sao</p>
+            <label class="review-comment-label" for="owner-review-comment">Nhận xét về khách thuê <span>(không bắt buộc)</span></label>
+            <textarea id="owner-review-comment" maxlength="1000" rows="3" placeholder="Ví dụ: Khách trả xe đúng giờ, bảo quản xe cẩn thận..."></textarea>
+            <p class="review-error" role="alert" hidden></p>
+            <button class="review-submit" type="submit" disabled>Gửi đánh giá</button>
+        </form>`;
+    document.body.appendChild(ownerReviewModal);
+
+    const form = ownerReviewModal.querySelector('form');
+    const stars = Array.from(ownerReviewModal.querySelectorAll('.review-star'));
+    const ratingHint = ownerReviewModal.querySelector('.review-rating-hint');
+    const submitBtn = ownerReviewModal.querySelector('.review-submit');
+    const errEl = ownerReviewModal.querySelector('.review-error');
+    const ratingLabels = ['', 'Rất tệ', 'Chưa tốt', 'Bình thường', 'Tốt', 'Tuyệt vời'];
+    let selectedRating = 0;
+
+    const setRating = (r) => {
+        selectedRating = r;
+        stars.forEach(star => {
+            const isSel = Number(star.dataset.rating) <= r;
+            star.classList.toggle('is-selected', isSel);
+            star.setAttribute('aria-pressed', String(Number(star.dataset.rating) === r));
+        });
+        ratingHint.textContent = ratingLabels[r] || 'Chọn số sao';
+        submitBtn.disabled = r === 0;
+        errEl.hidden = true;
+    };
+
+    stars.forEach(star => star.addEventListener('click', () => setRating(Number(star.dataset.rating))));
+    ownerReviewModal.querySelector('.review-modal-close').addEventListener('click', () => {
+        ownerReviewModal.hidden = true;
+        activeOwnerReviewReq = null;
+    });
+    ownerReviewModal.addEventListener('click', (e) => {
+        if (e.target === ownerReviewModal) {
+            ownerReviewModal.hidden = true;
+            activeOwnerReviewReq = null;
+        }
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!activeOwnerReviewReq || selectedRating < 1) return;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang gửi...';
+        errEl.hidden = true;
+
+        try {
+            const res = await fetch(`/api/bookings/${activeOwnerReviewReq.bookingId}/review`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rating: selectedRating,
+                    comment: ownerReviewModal.querySelector('#owner-review-comment').value.trim() || 'Khách thuê rất tốt!'
+                })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.isSuccess) {
+                throw new Error(data?.message || 'Không thể gửi đánh giá.');
+            }
+
+            ownerReviewModal.hidden = true;
+            activeOwnerReviewReq = null;
+            alert(data?.message || 'Đã gửi đánh giá khách thuê thành công!');
+            loadOwnerBookingRequests();
+        } catch (err) {
+            errEl.textContent = err.message || 'Lỗi gửi đánh giá.';
+            errEl.hidden = false;
+            submitBtn.disabled = false;
+        } finally {
+            submitBtn.textContent = 'Gửi đánh giá';
+        }
+    });
+
+    ownerReviewModal.reset = () => {
+        setRating(0);
+        ownerReviewModal.querySelector('#owner-review-comment').value = '';
+        errEl.hidden = true;
+    };
+
+    return ownerReviewModal;
+}
+
+function openOwnerReviewModal(req) {
+    const modal = ensureOwnerReviewModal();
+    activeOwnerReviewReq = req;
+    modal.reset();
+    const subTitle = modal.querySelector('#owner-review-subtitle');
+    if (subTitle) {
+        subTitle.textContent = `Khách thuê: ${req.renterName || 'Khách thuê'} · Xe: ${req.vehicleName || 'Xe của bạn'}`;
+    }
+    modal.hidden = false;
+}
 
 applyRolePermissions();
 

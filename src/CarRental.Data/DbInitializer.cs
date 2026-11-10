@@ -116,7 +116,7 @@ public static class DbInitializer
                     LicenseNumber = $"GPLX-{key.ToUpper()}",
                     LicenseClass = "B2",
                     ExpiryDate = DateOnly.FromDateTime(now.AddYears(5)),
-                    ImageFront = $"seed/license-{key}.jpg"
+                    ImageFront = $"/seed/license-{key}.jpg"
                 });
             }
 
@@ -127,8 +127,8 @@ public static class DbInitializer
                 {
                     UserId = user.Id,
                     CccdNumber = $"00109900000{key[^1]}",
-                    CccdImageFront = $"seed/cccd-{key}-front.jpg",
-                    CccdImageBack = $"seed/cccd-{key}-back.jpg",
+                    CccdImageFront = $"/seed/cccd-{key}-front.jpg",
+                    CccdImageBack = $"/seed/cccd-{key}-back.jpg",
                     ApprovalStatus = isPending ? OwnerApprovalStatuses.Pending : OwnerApprovalStatuses.Approved,
                     AccessStatus = isPending ? OwnerAccessStatuses.Inactive : OwnerAccessStatuses.Active,
                     SubmittedAt = isPending ? now.AddDays(-2) : now.AddDays(-30),
@@ -230,8 +230,11 @@ public static class DbInitializer
             ("V14", "owner2", "51G-888.99", "Mazda",      "CX-30",         2023, 5,  "Automatic", "Gasoline",   850_000m, "TP. Hồ Chí Minh", "Bình Thạnh",     10.8031m, 106.6944m, VehicleStatuses.Approved,        ListingModerationStatuses.Public),
             ("V15", "owner3", "51H-999.00", "Honda",      "CR-V",          2023, 7,  "Automatic", "Gasoline", 1_200_000m, "TP. Hồ Chí Minh", "Quận 7",         10.7327m, 106.7188m, VehicleStatuses.Approved,        ListingModerationStatuses.Public),
 
-            // pending car
+            // pending cars for admin testing
             ("V16", "owner4", "43A-999.88", "VinFast",    "VF 5 Plus",     2024, 5,  "Automatic", "Electric",   550_000m, "TP. Đà Nẵng",   "Hải Châu",      16.0600m, 108.2100m, VehicleStatuses.PendingApproval, ListingModerationStatuses.PendingApproval),
+            ("V17", "owner1", "30H-999.11", "Hyundai",    "Tucson",        2024, 5,  "Automatic", "Gasoline", 1_000_000m, "Hà Nội",        "Cầu Giấy",      21.0333m, 105.7944m, VehicleStatuses.PendingApproval, ListingModerationStatuses.PendingApproval),
+            ("V18", "owner2", "51K-888.22", "Ford",       "Everest",       2024, 7,  "Automatic", "Diesel",   1_500_000m, "TP. Hồ Chí Minh", "Quận 2",        10.7850m, 106.7450m, VehicleStatuses.PendingApproval, ListingModerationStatuses.PendingApproval),
+            ("V19", "owner3", "43F-777.33", "Mazda",      "CX-8",          2024, 7,  "Automatic", "Gasoline", 1_300_000m, "TP. Đà Nẵng",   "Sơn Trà",       16.0601m, 108.2394m, VehicleStatuses.Approved,        ListingModerationStatuses.Public),
         };
 
         var listings = new Dictionary<string, VehicleListing>();
@@ -259,10 +262,10 @@ public static class DbInitializer
                     Status = s.VehStatus,
                     Document = new VehicleDocument
                     {
-                        RegistrationCertImage = $"seed/reg{n}.jpg",
-                        InsuranceImage = $"seed/ins{n}.jpg",
+                        RegistrationCertImage = $"/seed/reg{n}.jpg",
+                        InsuranceImage = $"/seed/ins{n}.jpg",
                         InsuranceExpiryDate = DateOnly.FromDateTime(today.AddYears(1)),
-                        InspectionCertImage = $"seed/insp{n}.jpg",
+                        InspectionCertImage = $"/seed/insp{n}.jpg",
                         InspectionExpiryDate = DateOnly.FromDateTime(today.AddYears(1))
                     }
                 };
@@ -281,7 +284,7 @@ public static class DbInitializer
                     ModeratedBy = s.ModStatus == ListingModerationStatuses.Public ? u["staff1"].Id : null,
                     ModeratedAt = s.ModStatus == ListingModerationStatuses.Public ? now : null,
                     Images = Enumerable.Range(1, 3)
-                        .Select(i => new ListingImage { ImagePath = $"seed/car{n}-{i}.jpg", SortOrder = i, IsCover = i == 1 })
+                        .Select(i => new ListingImage { ImagePath = $"/seed/car{n}-{i}.jpg", SortOrder = i, IsCover = i == 1 })
                         .ToList()
                 };
                 listings[s.Key] = listing;
@@ -695,7 +698,7 @@ public static class DbInitializer
                     BookingId = bV9Completed.BookingId,
                     RaisedBy = bV9Completed.RenterId,
                     Description = "Chủ xe yêu cầu cấn trừ 500.000đ tiền cọc vì vết xước ở cản trước, tuy nhiên vết xước này đã có từ trước khi bàn giao xe.",
-                    EvidenceImage = "seed/dispute-evidence-1.jpg",
+                    EvidenceImage = "/seed/dispute-evidence-1.jpg",
                     Status = DisputeStatuses.Resolved,
                     CreatedAt = bV9Completed.EndDate.AddHours(1),
                     ResolvedBy = staff1.Id,
@@ -713,7 +716,7 @@ public static class DbInitializer
                     BookingId = bV2Cancelled.BookingId,
                     RaisedBy = bV2Cancelled.RenterId,
                     Description = "Chủ xe không phản hồi tin nhắn và cuộc gọi vào sáng ngày nhận xe, buộc tôi phải hủy đơn và thuê xe khác ngoài đường.",
-                    EvidenceImage = "seed/dispute-evidence-2.jpg",
+                    EvidenceImage = "/seed/dispute-evidence-2.jpg",
                     Status = DisputeStatuses.Open,
                     CreatedAt = now.AddHours(-14),
                     ResolvedBy = null,
@@ -724,6 +727,127 @@ public static class DbInitializer
             }
 
             await db.SaveChangesAsync();
+        }
+
+        // ensure open dispute for admin testing
+        if (!await db.Disputes.AnyAsync(d => d.Status == DisputeStatuses.Open))
+        {
+            var openCandidate = await db.Bookings.Include(b => b.Vehicle)
+                .FirstOrDefaultAsync(b => !b.Disputes.Any() && (b.Status == BookingStatuses.Cancelled || b.Status == BookingStatuses.Ongoing || b.Status == BookingStatuses.Completed));
+            if (openCandidate != null)
+            {
+                db.Disputes.Add(new Dispute
+                {
+                    BookingId = openCandidate.BookingId,
+                    RaisedBy = openCandidate.RenterId,
+                    Description = "Chủ xe giao xe trễ 2 tiếng so với thỏa thuận và khi nhận thì bình xăng chỉ còn 1/4 vạch, yêu cầu sàn can thiệp hỗ trợ trừ tiền phụ phí.",
+                    EvidenceImage = "/seed/dispute-evidence-2.jpg",
+                    Status = DisputeStatuses.Open,
+                    CreatedAt = now.AddHours(-10)
+                });
+                await db.SaveChangesAsync();
+            }
+        }
+
+        // ensure pending booking for owner test
+        if (!await db.Bookings.AnyAsync(b => b.Status == BookingStatuses.Pending))
+        {
+            var pListing = await db.VehicleListings.Include(l => l.Vehicle)
+                .FirstOrDefaultAsync(l => l.ModerationStatus == ListingModerationStatuses.Public);
+            if (pListing != null)
+            {
+                var renter1 = u["renter1"];
+                var pStart = today.AddDays(5);
+                var pEnd = today.AddDays(8);
+                var pDays = 3;
+                var pTotal = pListing.PricePerDay * pDays;
+                var pHold = new DepositHold
+                {
+                    Renter = renter1,
+                    Listing = pListing,
+                    StartDate = pStart,
+                    EndDate = pEnd,
+                    RentalDays = pDays,
+                    PriceLockedTotal = pTotal,
+                    DepositAmount = pTotal * BusinessRules.DepositRate,
+                    Status = DepositHoldStatuses.Converted,
+                    CreatedAt = now
+                };
+                db.Bookings.Add(new Booking
+                {
+                    Renter = renter1,
+                    Listing = pListing,
+                    Vehicle = pListing.Vehicle,
+                    SourceHold = pHold,
+                    StartDate = pStart,
+                    EndDate = pEnd,
+                    RentalDays = pDays,
+                    Status = BookingStatuses.Pending,
+                    PriceLockedTotal = pTotal,
+                    DepositAmount = pTotal * BusinessRules.DepositRate,
+                    CreatedAt = now,
+                    ResponseDeadline = now.AddHours(BusinessRules.ResponseDeadlineHours)
+                });
+                await db.SaveChangesAsync();
+            }
+        }
+
+        // ensure completed booking for owner review test
+        if (!await db.Bookings.AnyAsync(b => b.Status == BookingStatuses.Completed && !b.Reviews.Any(r => r.ReviewerId == b.Vehicle.OwnerId)))
+        {
+            var cListing = await db.VehicleListings.Include(l => l.Vehicle)
+                .FirstOrDefaultAsync(l => l.ModerationStatus == ListingModerationStatuses.Public);
+            if (cListing != null)
+            {
+                var renter2 = u["renter2"];
+                var cStart = today.AddDays(-5);
+                var cEnd = today.AddDays(-2);
+                var cDays = 3;
+                var cTotal = cListing.PricePerDay * cDays;
+                var cHold = new DepositHold
+                {
+                    Renter = renter2,
+                    Listing = cListing,
+                    StartDate = cStart,
+                    EndDate = cEnd,
+                    RentalDays = cDays,
+                    PriceLockedTotal = cTotal,
+                    DepositAmount = cTotal * BusinessRules.DepositRate,
+                    Status = DepositHoldStatuses.Converted,
+                    CreatedAt = cStart.AddDays(-2)
+                };
+                var cBooking = new Booking
+                {
+                    Renter = renter2,
+                    Listing = cListing,
+                    Vehicle = cListing.Vehicle,
+                    SourceHold = cHold,
+                    StartDate = cStart,
+                    EndDate = cEnd,
+                    RentalDays = cDays,
+                    Status = BookingStatuses.Completed,
+                    PriceLockedTotal = cTotal,
+                    DepositAmount = cTotal * BusinessRules.DepositRate,
+                    CreatedAt = cStart.AddDays(-2),
+                    AcceptedAt = cStart.AddDays(-1),
+                    CompletedAt = cEnd
+                };
+                db.Bookings.Add(cBooking);
+                await db.SaveChangesAsync();
+
+                // renter reviewed first (double-blind test)
+                db.Reviews.Add(new Review
+                {
+                    BookingId = cBooking.BookingId,
+                    ReviewerId = renter2.Id,
+                    RevieweeId = cListing.Vehicle.OwnerId,
+                    Rating = 5,
+                    Comment = "Chuyến đi rất êm ái, xe mới và chủ xe nhiệt tình hỗ trợ!",
+                    IsPublic = false,
+                    CreatedAt = cEnd.AddHours(1)
+                });
+                await db.SaveChangesAsync();
+            }
         }
     }
 }

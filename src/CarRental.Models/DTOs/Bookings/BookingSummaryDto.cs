@@ -37,4 +37,6 @@ public class BookingSummaryDto
     public bool HasPickupConfirmed { get; set; }
     public bool HasReturnConfirmed { get; set; }
     public bool HasReviewed { get; set; }
+    public bool HasDispute { get; set; }
+    public string? DisputeStatus { get; set; }
 }
