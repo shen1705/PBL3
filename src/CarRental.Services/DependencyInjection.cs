@@ -22,6 +22,10 @@ public static class DependencyInjection
         services.AddScoped<IVehicleService, VehicleService>();
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IAdminUserService, AdminUserService>();
+        services.AddScoped<IAdminOwnerService, AdminOwnerService>();
+        services.AddScoped<IAdminListingService, AdminListingService>();
+        services.AddScoped<IAdminDisputeService, AdminDisputeService>();
+        services.AddScoped<IAdminFeeService, AdminFeeService>();
 
         return services;
     }
