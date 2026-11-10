@@ -1,6 +1,7 @@
 using CarRental.Data;
 using CarRental.Models.Common;
 using CarRental.Models.Constants;
+using CarRental.Models.DTOs.Bookings;
 using CarRental.Models.DTOs.Vehicles;
 using CarRental.Models.Entities;
 using CarRental.Services.Abstractions;
@@ -170,6 +171,9 @@ public class VehicleService : IVehicleService
                 }
             }
 
+            var now = _clock.UtcNow;
+            var sevenDaysAgo = now.AddDays(-7);
+
             var totalCount = await query.CountAsync(ct);
 
             // sort
@@ -178,7 +182,11 @@ public class VehicleService : IVehicleService
                 "price-asc" => query.OrderBy(v => v.Listings.OrderBy(l => l.PricePerDay).Select(l => l.PricePerDay).FirstOrDefault()),
                 "price-desc" => query.OrderByDescending(v => v.Listings.OrderBy(l => l.PricePerDay).Select(l => l.PricePerDay).FirstOrDefault()),
                 "popular" => query.OrderByDescending(v => v.Bookings.Count(b => b.Status == BookingStatuses.Completed)),
-                _ => query.OrderByDescending(v => v.Bookings.SelectMany(b => b.Reviews).Where(r => r.IsPublic).Average(r => (double?)r.Rating) ?? 5.0)
+                _ => query.OrderByDescending(v => v.Bookings
+                          .Where(b => b.Status == BookingStatuses.Completed)
+                          .SelectMany(b => b.Reviews)
+                          .Where(r => r.RevieweeId == v.OwnerId && r.IsPublic)
+                          .Average(r => (double?)r.Rating) ?? 5.0)
                           .ThenByDescending(v => v.Bookings.Count(b => b.Status == BookingStatuses.Completed))
             };
 
@@ -191,7 +199,7 @@ public class VehicleService : IVehicleService
                 .Include(v => v.Listings.Where(l => l.ModerationStatus == ListingModerationStatuses.Public))
                     .ThenInclude(l => l.Images)
                 .Include(v => v.Bookings)
-                    .ThenInclude(b => b.Reviews.Where(r => r.IsPublic))
+                    .ThenInclude(b => b.Reviews)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(ct);
@@ -206,7 +214,11 @@ public class VehicleService : IVehicleService
                 var coverImage = ResolveImageUrl(rawCover, v.Brand, v.Model);
 
                 var completedBookings = v.Bookings.Where(b => b.Status == BookingStatuses.Completed).ToList();
-                var publicReviews = completedBookings.SelectMany(b => b.Reviews).Where(r => r.IsPublic).ToList();
+                var publicReviews = completedBookings
+                    .SelectMany(b => b.Reviews, (b, r) => new { b, r })
+                    .Where(x => x.r.RevieweeId == v.OwnerId && (x.r.IsPublic || (x.b.CompletedAt.HasValue && x.b.CompletedAt.Value <= sevenDaysAgo)))
+                    .Select(x => x.r)
+                    .ToList();
                 var rating = publicReviews.Any() ? Math.Round(publicReviews.Average(r => r.Rating), 1) : 5.0;
 
                 return new VehicleCardDto
@@ -252,6 +264,9 @@ public class VehicleService : IVehicleService
     {
         try
         {
+            var now = _clock.UtcNow;
+            var sevenDaysAgo = now.AddDays(-7);
+
             var v = await _db.Vehicles
                 .AsNoTracking()
                 .Include(x => x.Owner)
@@ -259,7 +274,8 @@ public class VehicleService : IVehicleService
                     .ThenInclude(l => l.Images)
                 .Include(x => x.Unavailabilities)
                 .Include(x => x.Bookings)
-                    .ThenInclude(b => b.Reviews.Where(r => r.IsPublic))
+                    .ThenInclude(b => b.Reviews)
+                        .ThenInclude(r => r.Reviewer)
                 .FirstOrDefaultAsync(x => x.VehicleId == vehicleId, ct);
 
             if (v == null)
@@ -269,8 +285,28 @@ public class VehicleService : IVehicleService
                        ?? v.Listings.OrderByDescending(l => l.ListingId).FirstOrDefault();
 
             var completedBookings = v.Bookings.Where(b => b.Status == BookingStatuses.Completed).ToList();
-            var publicReviews = completedBookings.SelectMany(b => b.Reviews).Where(r => r.IsPublic).ToList();
+            var publicReviews = completedBookings
+                .SelectMany(b => b.Reviews, (b, r) => new { b, r })
+                .Where(x => x.r.RevieweeId == v.OwnerId && (x.r.IsPublic || (x.b.CompletedAt.HasValue && x.b.CompletedAt.Value <= sevenDaysAgo)))
+                .Select(x => x.r)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+
             var rating = publicReviews.Any() ? Math.Round(publicReviews.Average(r => r.Rating), 1) : 5.0;
+
+            var reviewDtos = publicReviews.Select(r => new ReviewDto
+            {
+                ReviewId = r.ReviewId,
+                BookingId = r.BookingId,
+                ReviewerId = r.ReviewerId,
+                ReviewerName = r.Reviewer?.FullName ?? r.Reviewer?.UserName ?? "Thành viên",
+                RevieweeId = r.RevieweeId,
+                RevieweeName = v.Owner?.FullName ?? v.Owner?.UserName ?? "Chủ xe",
+                Rating = r.Rating,
+                Comment = r.Comment,
+                CreatedAt = r.CreatedAt,
+                IsPublic = true
+            }).ToList();
 
             var images = listing?.Images
                 .OrderBy(i => i.SortOrder)
@@ -285,8 +321,6 @@ public class VehicleService : IVehicleService
             var coverImage = images.FirstOrDefault(i => i.IsCover)?.ImagePath
                           ?? images.FirstOrDefault()?.ImagePath
                           ?? ResolveImageUrl(null, v.Brand, v.Model);
-
-            var now = _clock.UtcNow;
 
             var blockedRanges = v.Unavailabilities
                 .Where(u => u.EndDate >= now)
@@ -341,7 +375,9 @@ public class VehicleService : IVehicleService
                 CreatedAt = listing?.CreatedAt ?? DateTime.UtcNow,
                 Images = images,
                 BlockedRanges = blockedRanges,
-                BookedRanges = bookedRanges
+                BookedRanges = bookedRanges,
+                Reviews = reviewDtos,
+                TotalReviews = reviewDtos.Count
             };
 
             return ServiceResult<VehicleDetailDto>.Success(detail);
@@ -358,6 +394,9 @@ public class VehicleService : IVehicleService
     {
         try
         {
+            var now = _clock.UtcNow;
+            var sevenDaysAgo = now.AddDays(-7);
+
             var vehicles = await _db.Vehicles
                 .AsNoTracking()
                 .Where(v => v.OwnerId == ownerId && v.Status != VehicleStatuses.Removed)
@@ -365,7 +404,7 @@ public class VehicleService : IVehicleService
                 .Include(v => v.Listings)
                     .ThenInclude(l => l.Images)
                 .Include(v => v.Bookings)
-                    .ThenInclude(b => b.Reviews.Where(r => r.IsPublic))
+                    .ThenInclude(b => b.Reviews)
                 .OrderByDescending(v => v.VehicleId)
                 .ToListAsync(ct);
 
@@ -377,7 +416,12 @@ public class VehicleService : IVehicleService
                 var coverImage = ResolveImageUrl(rawCover, v.Brand, v.Model);
 
                 var completedBookings = v.Bookings.Where(b => b.Status == BookingStatuses.Completed).ToList();
-                var rating = completedBookings.SelectMany(b => b.Reviews).Where(r => r.IsPublic).Select(r => (double)r.Rating).DefaultIfEmpty(5.0).Average();
+                var publicReviews = completedBookings
+                    .SelectMany(b => b.Reviews, (b, r) => new { b, r })
+                    .Where(x => x.r.RevieweeId == v.OwnerId && (x.r.IsPublic || (x.b.CompletedAt.HasValue && x.b.CompletedAt.Value <= sevenDaysAgo)))
+                    .Select(x => x.r)
+                    .ToList();
+                var rating = publicReviews.Any() ? Math.Round(publicReviews.Average(r => r.Rating), 1) : 5.0;
 
                 return new VehicleCardDto
                 {

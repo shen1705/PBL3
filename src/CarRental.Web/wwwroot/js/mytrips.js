@@ -679,7 +679,7 @@ function ensureReviewModal() {
 
             reviewModal.hidden = true;
             activeReviewTrip = null;
-            alert('Cảm ơn bạn đã gửi đánh giá cho chuyến đi!');
+            alert(result?.message || 'Cảm ơn bạn đã gửi đánh giá cho chuyến đi!');
             renderTrips();
         } catch (error) {
             errorMessage.textContent = error.message || 'Lỗi kết nối máy chủ.';

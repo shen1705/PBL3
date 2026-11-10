@@ -1345,6 +1345,95 @@ function openCarPopup(car) {
                             btnOwnerManage.style.display = 'none';
                         }
                     }
+
+                    // render customer reviews
+                    const reviewsHeading = document.getElementById('popupReviewsHeading') || carDetailModal?.querySelector('.car-popup-section .section-subheading');
+                    const reviewsGrid = document.getElementById('popupReviewsGrid') || carDetailModal?.querySelector('.reviews-grid');
+                    const moreReviewsBtn = document.getElementById('popupMoreReviewsBtn') || carDetailModal?.querySelector('.btn-more-reviews');
+
+                    const avgRating = (typeof d.rating === 'number' ? d.rating : 5.0).toFixed(1);
+                    const totalRevCount = typeof d.totalReviews === 'number' ? d.totalReviews : (d.reviews ? d.reviews.length : 0);
+
+                    if (reviewsHeading) {
+                        reviewsHeading.innerHTML = `<i class="fa-solid fa-star star-gold"></i> ${avgRating} • ${totalRevCount} đánh giá`;
+                    }
+
+                    if (reviewsGrid) {
+                        const reviews = Array.isArray(d.reviews) ? d.reviews : [];
+                        if (reviews.length === 0) {
+                            reviewsGrid.innerHTML = '<p class="review-text" style="grid-column: 1 / -1; color: #94a3b8; font-style: italic; padding: 8px 0;">Xe chưa có đánh giá nào từ khách thuê.</p>';
+                            if (moreReviewsBtn) moreReviewsBtn.style.display = 'none';
+                        } else {
+                            let showingAll = false;
+                            const renderList = (limit) => {
+                                reviewsGrid.innerHTML = '';
+                                const items = limit ? reviews.slice(0, limit) : reviews;
+                                items.forEach(r => {
+                                    const card = document.createElement('div');
+                                    card.className = 'review-card';
+                                    const rawName = (r.reviewerName || 'Khách thuê').trim();
+                                    const parts = rawName.split(/\s+/).filter(Boolean);
+                                    const initials = parts.length >= 2
+                                        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+                                        : rawName.substring(0, 2).toUpperCase();
+                                    const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi-VN') : '';
+                                    const stars = Math.max(1, Math.min(5, r.rating || 5));
+                                    const starsHtml = Array.from({ length: 5 }, (_, i) =>
+                                        `<i class="fa-${i < stars ? 'solid' : 'regular'} fa-star"></i>`
+                                    ).join('');
+
+                                    const userDiv = document.createElement('div');
+                                    userDiv.className = 'review-user';
+
+                                    const avatarDiv = document.createElement('div');
+                                    avatarDiv.className = 'review-avatar';
+                                    avatarDiv.textContent = initials;
+
+                                    const userInfoDiv = document.createElement('div');
+                                    userInfoDiv.className = 'review-user-info';
+                                    const h4 = document.createElement('h4');
+                                    h4.textContent = rawName;
+                                    const starsDiv = document.createElement('div');
+                                    starsDiv.className = 'review-stars';
+                                    starsDiv.innerHTML = starsHtml;
+                                    userInfoDiv.appendChild(h4);
+                                    userInfoDiv.appendChild(starsDiv);
+
+                                    const dateSpan = document.createElement('span');
+                                    dateSpan.className = 'review-date';
+                                    dateSpan.textContent = dateStr;
+
+                                    userDiv.appendChild(avatarDiv);
+                                    userDiv.appendChild(userInfoDiv);
+                                    userDiv.appendChild(dateSpan);
+
+                                    const p = document.createElement('p');
+                                    p.className = 'review-text';
+                                    p.textContent = r.comment || 'Chuyến đi rất tốt!';
+
+                                    card.appendChild(userDiv);
+                                    card.appendChild(p);
+                                    reviewsGrid.appendChild(card);
+                                });
+                            };
+
+                            renderList(4);
+
+                            if (moreReviewsBtn) {
+                                if (reviews.length > 4) {
+                                    moreReviewsBtn.style.display = 'inline-block';
+                                    moreReviewsBtn.textContent = 'Xem thêm';
+                                    moreReviewsBtn.onclick = () => {
+                                        showingAll = !showingAll;
+                                        renderList(showingAll ? null : 4);
+                                        moreReviewsBtn.textContent = showingAll ? 'Thu gọn' : 'Xem thêm';
+                                    };
+                                } else {
+                                    moreReviewsBtn.style.display = 'none';
+                                }
+                            }
+                        }
+                    }
                 }
             })
             .catch(() => {});

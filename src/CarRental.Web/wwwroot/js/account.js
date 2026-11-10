@@ -834,7 +834,7 @@ async function renderTrips() {
                         });
                         const d = await r.json();
                         if (r.ok && d.isSuccess) {
-                            alert('Cảm ơn bạn đã gửi đánh giá cho chuyến đi!');
+                            alert(d?.message || 'Cảm ơn bạn đã gửi đánh giá cho chuyến đi!');
                             renderTrips();
                         } else {
                             alert('Lỗi: ' + (d?.message || 'Không thể gửi đánh giá'));

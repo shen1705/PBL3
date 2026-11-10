@@ -2063,7 +2063,7 @@ async function loadOwnerBookingRequests() {
 
                             if (r.ok && data.isSuccess) {
 
-                                alert('Đã gửi đánh giá khách thuê thành công!');
+                                alert(data?.message || 'Đã gửi đánh giá khách thuê thành công!');
 
                                 loadOwnerBookingRequests();
 

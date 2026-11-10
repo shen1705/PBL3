@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using CarRental.Models.DTOs.Bookings;
+
 namespace CarRental.Models.DTOs.Vehicles;
 
 public class DateRangeDto
@@ -19,4 +22,6 @@ public class VehicleDetailDto : VehicleCardDto
     public List<ListingImageDto> Images { get; set; } = new();
     public List<DateRangeDto> BlockedRanges { get; set; } = new();
     public List<DateRangeDto> BookedRanges { get; set; } = new();
+    public List<ReviewDto> Reviews { get; set; } = new();
+    public int TotalReviews { get; set; }
 }

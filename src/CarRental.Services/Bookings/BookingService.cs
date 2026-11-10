@@ -448,6 +448,8 @@ public class BookingService : IBookingService
         var firstImg = GetFirstImage(booking.Listing);
         var coverUrl = ResolveImageUrl(firstImg, booking.Vehicle.Brand, booking.Vehicle.Model);
 
+        var now = _clock.UtcNow;
+
         var dto = new BookingDetailDto
         {
             BookingId = booking.BookingId,
@@ -492,18 +494,21 @@ public class BookingService : IBookingService
                 ConfirmerName = h.Confirmer?.FullName ?? h.Confirmer?.UserName ?? "Thành viên",
                 ConfirmedAt = h.ConfirmedAt
             }).ToList(),
-            Reviews = booking.Reviews.Select(r => new ReviewDto
-            {
-                ReviewId = r.ReviewId,
-                BookingId = r.BookingId,
-                ReviewerId = r.ReviewerId,
-                ReviewerName = r.Reviewer?.FullName ?? r.Reviewer?.UserName ?? "Thành viên",
-                RevieweeId = r.RevieweeId,
-                RevieweeName = r.Reviewee?.FullName ?? r.Reviewee?.UserName ?? "Thành viên",
-                Rating = r.Rating,
-                Comment = r.Comment,
-                CreatedAt = r.CreatedAt
-            }).ToList()
+            Reviews = booking.Reviews
+                .Where(r => r.ReviewerId == currentUserId || r.IsPublic || (booking.CompletedAt.HasValue && booking.CompletedAt.Value <= now.AddDays(-7)))
+                .Select(r => new ReviewDto
+                {
+                    ReviewId = r.ReviewId,
+                    BookingId = r.BookingId,
+                    ReviewerId = r.ReviewerId,
+                    ReviewerName = r.Reviewer?.FullName ?? r.Reviewer?.UserName ?? "Thành viên",
+                    RevieweeId = r.RevieweeId,
+                    RevieweeName = r.Reviewee?.FullName ?? r.Reviewee?.UserName ?? "Thành viên",
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    CreatedAt = r.CreatedAt,
+                    IsPublic = r.IsPublic || (booking.CompletedAt.HasValue && booking.CompletedAt.Value <= now.AddDays(-7))
+                }).ToList()
         };
 
         return ServiceResult<BookingDetailDto>.Success(dto);
@@ -827,6 +832,16 @@ public class BookingService : IBookingService
         string revieweeId = isRenter ? booking.Vehicle.OwnerId : booking.RenterId;
         var now = _clock.UtcNow;
 
+        // double-blind review check
+        var otherReview = await _db.Reviews.FirstOrDefaultAsync(r => r.BookingId == request.BookingId && r.ReviewerId == revieweeId, ct);
+        bool past7Days = booking.CompletedAt.HasValue && (now - booking.CompletedAt.Value).TotalDays >= 7;
+        bool makePublic = otherReview != null || past7Days;
+
+        if (otherReview != null && !otherReview.IsPublic)
+        {
+            otherReview.IsPublic = true;
+        }
+
         var review = new Review
         {
             BookingId = request.BookingId,
@@ -835,7 +850,7 @@ public class BookingService : IBookingService
             Rating = request.Rating,
             Comment = string.IsNullOrWhiteSpace(request.Comment) ? "Dịch vụ rất tốt!" : request.Comment.Trim(),
             CreatedAt = now,
-            IsPublic = true
+            IsPublic = makePublic
         };
 
         _db.Reviews.Add(review);
@@ -854,10 +869,15 @@ public class BookingService : IBookingService
             RevieweeName = reviewee?.FullName ?? reviewee?.UserName ?? "Thành viên",
             Rating = review.Rating,
             Comment = review.Comment,
-            CreatedAt = review.CreatedAt
+            CreatedAt = review.CreatedAt,
+            IsPublic = review.IsPublic
         };
 
-        return ServiceResult<ReviewDto>.Success(dto, "Cảm ơn bạn đã gửi đánh giá chuyến đi!");
+        var message = makePublic
+            ? "Cảm ơn bạn đã gửi đánh giá! Đánh giá đã được công khai."
+            : "Cảm ơn bạn đã gửi đánh giá! Đánh giá sẽ được công khai khi đối tác hoàn tất đánh giá hoặc sau 7 ngày.";
+
+        return ServiceResult<ReviewDto>.Success(dto, message);
     }
 
     public async Task<ServiceResult<OwnerRevenueSummaryDto>> GetOwnerRevenueAsync(
