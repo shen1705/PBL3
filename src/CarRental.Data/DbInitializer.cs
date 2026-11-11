@@ -299,6 +299,28 @@ public static class DbInitializer
                     firstListing.Longitude ??= s.Lng;
                     if (string.IsNullOrEmpty(firstListing.City)) firstListing.City = s.City;
                     listings[s.Key] = firstListing;
+
+                    // Update listing images to real downloaded vehicle photos
+                    if (firstListing.Images != null && firstListing.Images.Any())
+                    {
+                        var imgs = firstListing.Images.OrderBy(i => i.SortOrder).ToList();
+                        for (int i = 0; i < imgs.Count; i++)
+                        {
+                            var imgIdx = (i % 3) + 1;
+                            imgs[i].ImagePath = $"/seed/car{n}-{imgIdx}.jpg";
+                            imgs[i].IsCover = (i == 0);
+                        }
+                        for (int i = imgs.Count + 1; i <= 3; i++)
+                        {
+                            firstListing.Images.Add(new ListingImage { ImagePath = $"/seed/car{n}-{i}.jpg", SortOrder = i, IsCover = false });
+                        }
+                    }
+                    else
+                    {
+                        firstListing.Images = Enumerable.Range(1, 3)
+                            .Select(i => new ListingImage { ImagePath = $"/seed/car{n}-{i}.jpg", SortOrder = i, IsCover = i == 1 })
+                            .ToList();
+                    }
                 }
             }
         }
