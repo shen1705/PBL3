@@ -1811,3 +1811,19 @@ a {
     color: #b88a32 !important;
     font-weight: 700 !important;
 }
+
+/* Quản lý chuyến đi của chủ xe */
+.owner-trip-tab {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.owner-trip-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (max-width: 768px) {
+    .owner-trip-card {
+        grid-template-columns: 1fr !important;
+    }
+}

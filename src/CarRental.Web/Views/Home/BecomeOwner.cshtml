@@ -20,11 +20,12 @@
                     <a class="trips-side-link active" href="/become-owner" id="nav-become-owner" aria-current="page" aria-expanded="true" aria-controls="owner-submenu"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span><i class="fa-solid fa-chevron-down owner-menu-chevron" aria-hidden="true"></i></a>
                     <div class="owner-submenu" id="owner-submenu">
                         <a class="side-link owner-only" href="#danh-sach-xe-content"><span>Danh sách xe</span></a>
-                        <a class="side-link active" href="#cam-nang-content"><span>Cẩm nang cho thuê xe</span></a>
+                        <a class="side-link owner-only" href="#quan-ly-chuyen-content"><span>Quản lý chuyến</span></a>
                         <a class="side-link owner-only" href="#lich-xe-content"><span>Lịch xe</span></a>
                         <a class="side-link owner-only" href="#doanh-thu-content"><span>Doanh thu cho thuê</span></a>
                         <a class="side-link owner-only" href="#hop-dong-content"><span>Hợp đồng</span></a>
                         <a class="side-link" href="#bao-mat-content"><span>Chính sách bảo vệ dữ liệu</span></a>
+                        <a class="side-link" href="#cam-nang-content"><span>Cẩm nang cho thuê xe</span></a>
                     </div>
                     <a class="trips-side-link" href="/account#trips" id="nav-trips"><i class="fa-regular fa-calendar-days"></i><span>Chuyến của tôi</span></a>
                     <a class="trips-side-link" href="/account#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
@@ -77,6 +78,39 @@
                         </a>
                     </div>
                     <div class="owner-vehicle-list" id="owner-vehicle-list" hidden></div>
+                </div>
+            </section>
+
+            <!-- section trip management for owner -->
+            <section class="content-section" id="quan-ly-chuyen-content" aria-labelledby="owner-trips-title" hidden>
+                <div class="section-page-heading">
+                    <button class="btn-back btn-back-home" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h1 id="owner-trips-title">Quản lý chuyến</h1>
+                </div>
+
+                <div class="management-card">
+                    <div class="management-top">
+                        <div class="vehicle-tabs" role="tablist" aria-label="Trạng thái chuyến">
+                            <button class="vehicle-tab active owner-trip-tab" type="button" role="tab" aria-selected="true" data-trip-status="all">Tất cả</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Pending">Chờ duyệt</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Accepted">Đã duyệt</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Ongoing">Đang thuê</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Completed">Hoàn tất</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Cancelled">Đã hủy</button>
+                        </div>
+                    </div>
+
+                    <div class="empty-state" id="owner-trips-empty" hidden>
+                        <div class="empty-car-art" aria-hidden="true">
+                            <span class="sparkle sparkle-one"><i class="fa-solid fa-sparkles"></i></span>
+                            <span class="sparkle sparkle-two"><i class="fa-solid fa-sparkles"></i></span>
+                            <span class="car-circle"><i class="fa-solid fa-calendar-check"></i></span>
+                        </div>
+                        <h2 id="ownerTripsEmptyTitle">Chưa có chuyến đi nào.</h2>
+                        <p id="ownerTripsEmptyDesc">Danh sách các yêu cầu đặt xe và chuyến đi của khách thuê sẽ hiển thị tại đây.</p>
+                    </div>
+
+                    <div class="owner-trips-list" id="owner-trips-list" style="padding: 16px; display: flex; flex-direction: column; gap: 16px;"></div>
                 </div>
             </section>
 
@@ -141,19 +175,6 @@
                                 </select>
                             </label>
                         </div>
-
-                        <section class="calendar-panel owner-requests-panel" id="ownerRequestsPanel" style="margin-bottom: 20px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px;" aria-label="Yêu cầu đặt xe">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                                <h2 style="font-size: 17px; font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fa-solid fa-bell" style="color: #d97706;"></i> Yêu cầu thuê xe cần phản hồi
-                                    <span id="pendingRequestBadge" style="background: #fef3c7; color: #b45309; font-size: 12px; padding: 2px 8px; border-radius: 999px; font-weight: 700;">0</span>
-                                </h2>
-                                <small style="color: #64748b; font-size: 13px;">Hạn phản hồi: trong 24 giờ</small>
-                            </div>
-                            <div id="ownerRequestsList" style="display: flex; flex-direction: column; gap: 12px;">
-                                <p style="color: #64748b; font-size: 14px; margin: 0;">Đang kiểm tra yêu cầu thuê xe...</p>
-                            </div>
-                        </section>
 
                         <section class="calendar-panel calendar-schedule" aria-label="Lịch trống xe">
                             <div class="calendar-empty-summary">

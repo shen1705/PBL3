@@ -877,7 +877,19 @@ async function renderTrips() {
 
             const info = document.createElement('div');
             const title = document.createElement('h2');
-            title.textContent = trip.name;
+            const bId = trip.bookingId || trip.id;
+            if (bId) {
+                const titleLink = document.createElement('a');
+                titleLink.href = `/booking/${bId}`;
+                titleLink.textContent = trip.name;
+                titleLink.title = 'Xem chi tiết đơn thuê xe';
+                titleLink.style.cssText = 'color: #1c2635; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
+                titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#2563eb'; });
+                titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1c2635'; });
+                title.appendChild(titleLink);
+            } else {
+                title.textContent = trip.name;
+            }
             const meta = document.createElement('p');
             meta.textContent = `${trip.location || 'TP. Đà Nẵng'} • ${trip.pickup || ''} - ${trip.return || ''}`;
             const status = document.createElement('span');
@@ -907,7 +919,21 @@ async function renderTrips() {
 
         const info = document.createElement('div');
         const title = document.createElement('h2');
-        title.innerHTML = `${trip.vehicleName} ${trip.licensePlate ? `<small style="font-size: 13px; color: #64748b; font-weight: normal;">(${trip.licensePlate})</small>` : ''}`;
+        const titleLink = document.createElement('a');
+        titleLink.href = `/booking/${trip.bookingId}`;
+        titleLink.textContent = trip.vehicleName;
+        titleLink.title = 'Xem chi tiết đơn thuê xe';
+        titleLink.style.cssText = 'color: #1c2635; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
+        titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#2563eb'; });
+        titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1c2635'; });
+
+        title.appendChild(titleLink);
+        if (trip.licensePlate) {
+            const plateSmall = document.createElement('small');
+            plateSmall.style.cssText = 'font-size: 13px; color: #64748b; font-weight: normal; margin-left: 6px;';
+            plateSmall.textContent = `(${trip.licensePlate})`;
+            title.appendChild(plateSmall);
+        }
 
         const startStr = new Date(trip.startDate).toLocaleDateString('vi-VN');
         const endStr = new Date(trip.endDate).toLocaleDateString('vi-VN');
@@ -1094,6 +1120,14 @@ async function renderTrips() {
             });
             actionsDiv.appendChild(cancelBtn);
         }
+
+        const detailLink = document.createElement('a');
+        detailLink.href = `/booking/${trip.bookingId}`;
+        detailLink.style.cssText = 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; transition: all 0.2s;';
+        detailLink.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Chi tiết đơn thuê';
+        detailLink.addEventListener('mouseenter', () => { detailLink.style.background = '#2563eb'; detailLink.style.color = '#fff'; });
+        detailLink.addEventListener('mouseleave', () => { detailLink.style.background = '#eff6ff'; detailLink.style.color = '#2563eb'; });
+        actionsDiv.appendChild(detailLink);
 
         if (actionsDiv.children.length > 0) {
             info.appendChild(actionsDiv);

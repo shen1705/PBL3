@@ -50,10 +50,11 @@
         <aside class="sidebar" aria-label="Danh mục quản lý chủ xe">
             <nav class="side-nav">
                 <a class="side-link" href="#danh-sach-xe-content"><i class="fa-solid fa-car"></i><span>Danh sách xe</span></a>
+                <a class="side-link" href="#quan-ly-chuyen-content"><i class="fa-solid fa-calendar-check"></i><span>Quản lý chuyến</span></a>
                 <a class="side-link" href="#lich-xe"><i class="fa-regular fa-calendar"></i><span>Lịch xe</span></a>
-                <a class="side-link active" href="#cam-nang"><i class="fa-solid fa-book-open"></i><span>Cẩm nang cho thuê xe</span></a>
                 <a class="side-link" href="#hop-dong"><i class="fa-regular fa-file"></i><span>Hợp đồng</span></a>
                 <a class="side-link" href="#bao-mat"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
+                <a class="side-link active" href="#cam-nang"><i class="fa-solid fa-book-open"></i><span>Cẩm nang cho thuê xe</span></a>
             </nav>
         </aside>
 
@@ -99,6 +100,39 @@
                         </a>
                     </div>
                     <div class="owner-vehicle-list" id="owner-vehicle-list" hidden></div>
+                </div>
+            </section>
+
+            <!-- Section: Quản lý chuyến -->
+            <section class="content-section" id="quan-ly-chuyen-content" aria-labelledby="owner-trips-title" hidden>
+                <div class="section-page-heading">
+                    <button class="btn-back btn-back-home" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+                    <h1 id="owner-trips-title">Quản lý chuyến</h1>
+                </div>
+
+                <div class="management-card">
+                    <div class="management-top">
+                        <div class="vehicle-tabs" role="tablist" aria-label="Trạng thái chuyến">
+                            <button class="vehicle-tab active owner-trip-tab" type="button" role="tab" aria-selected="true" data-trip-status="all">Tất cả</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Pending">Chờ duyệt</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Accepted">Đã duyệt</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Ongoing">Đang thuê</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Completed">Hoàn tất</button>
+                            <button class="vehicle-tab owner-trip-tab" type="button" role="tab" aria-selected="false" data-trip-status="Cancelled">Đã hủy</button>
+                        </div>
+                    </div>
+
+                    <div class="empty-state" id="owner-trips-empty" hidden>
+                        <div class="empty-car-art" aria-hidden="true">
+                            <span class="sparkle sparkle-one"><i class="fa-solid fa-sparkles"></i></span>
+                            <span class="sparkle sparkle-two"><i class="fa-solid fa-sparkles"></i></span>
+                            <span class="car-circle"><i class="fa-solid fa-calendar-check"></i></span>
+                        </div>
+                        <h2 id="ownerTripsEmptyTitle">Chưa có chuyến đi nào.</h2>
+                        <p id="ownerTripsEmptyDesc">Danh sách các yêu cầu đặt xe và chuyến đi của khách thuê sẽ hiển thị tại đây.</p>
+                    </div>
+
+                    <div class="owner-trips-list" id="owner-trips-list" style="padding: 16px; display: flex; flex-direction: column; gap: 16px;"></div>
                 </div>
             </section>
 

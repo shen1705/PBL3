@@ -147,6 +147,38 @@ a {
     background: #f1f5f9;
 }
 
+.account-sidebar-group {
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.account-sidebar-group .trips-sidebar {
+    flex: 0 0 240px;
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+    display: flex;
+    flex-direction: column;
+    padding: 18px 12px;
+    border-right: 1px solid #edf0f3;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+@media (max-width: 992px) {
+    .account-sidebar-group {
+        flex-direction: column;
+    }
+    .account-sidebar-group .trips-sidebar {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 auto;
+        border-right: none;
+        border-bottom: 1px solid #edf0f3;
+    }
+}
+
 .workspace + .footer,
 .workspace ~ .footer,
 .footer {
@@ -170,6 +202,39 @@ a {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.owner-submenu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: -4px 0 4px;
+    padding-left: 14px;
+}
+
+.owner-submenu[hidden] {
+    display: none;
+}
+
+.owner-submenu .side-link {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+}
+
+.owner-submenu .side-link.active::before {
+    left: -14px;
+}
+
+#nav-become-owner .owner-menu-chevron {
+    width: auto;
+    margin-left: auto;
+    font-size: 11px;
+    transition: transform 0.15s ease;
+}
+
+#nav-become-owner[aria-expanded="true"] .owner-menu-chevron {
+    transform: rotate(180deg);
 }
 
 .side-link {
@@ -1074,6 +1139,51 @@ a {
     overflow: hidden;
 }
 
+.renter-register-banner {
+    position: relative;
+    z-index: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 18px 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #fff;
+}
+
+.renter-register-copy {
+    flex: 1 1 300px;
+    min-width: 0;
+}
+
+.renter-register-copy > span {
+    color: #d1a34b;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.renter-register-copy h2 {
+    margin: 4px 0 6px;
+    color: #fff;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.renter-register-copy p {
+    margin: 0;
+    color: #cbd5e1;
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+.renter-register-banner .register-cta {
+    flex: 0 0 auto;
+}
+
 .guide-header {
     position: relative;
     display: flex;
@@ -1642,4 +1752,78 @@ a {
     margin-top: 20px;
     padding-top: 16px;
     border-top: 1px solid #f1f3f5;
+}
+
+/* Button Đăng ký xe tự lái (Lấy chuẩn từ trang carregistermode) */
+.register-cta {
+    display: inline-flex;
+    width: auto;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 22px;
+    background: #212529 !important;
+    box-shadow: 0 4px 9px rgba(33, 37, 41, 0.18);
+    color: #fff !important;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none !important;
+    padding: 0 24px;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.register-cta:hover {
+    background: #111827 !important;
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+/* Sáng vàng rõ nét khi chọn bất kỳ tab nào */
+.side-link.active,
+.owner-submenu .side-link.active,
+.trips-side-link.active {
+    background: #fff8e9 !important;
+    color: #b88a32 !important;
+    font-weight: 700 !important;
+}
+
+.side-link.active i,
+.owner-submenu .side-link.active i,
+.trips-side-link.active i {
+    color: #c49a49 !important;
+}
+
+.side-link.active::before,
+.owner-submenu .side-link.active::before,
+.trips-side-link.active::before {
+    background: #c49a49 !important;
+    width: 4px !important;
+}
+
+/* Tab loại xe (Xe tự lái) sáng vàng */
+.vehicle-tab.active {
+    border-color: #c49a49 !important;
+    background: #fff8e9 !important;
+    color: #b88a32 !important;
+    font-weight: 700 !important;
+}
+
+/* Quản lý chuyến đi của chủ xe */
+.owner-trip-tab {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.owner-trip-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (max-width: 768px) {
+    .owner-trip-card {
+        grid-template-columns: 1fr !important;
+    }
 }

@@ -383,7 +383,7 @@ function renderOwnerCars() {
         titleLink.target = '_blank';
         titleLink.textContent = car.name;
         titleLink.style.cssText = 'color: #1e293b; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
-        titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#00a550'; });
+        titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#2563eb'; });
         titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1e293b'; });
 
         title.appendChild(titleLink);
@@ -585,11 +585,11 @@ filterMenu?.addEventListener('click', event => {
 
 // switch car tab
 
-document.querySelectorAll('.vehicle-tab').forEach(tab => {
+document.querySelectorAll('.vehicle-tab:not(.owner-trip-tab)').forEach(tab => {
 
     tab.addEventListener('click', () => {
 
-        document.querySelectorAll('.vehicle-tab').forEach(item => {
+        document.querySelectorAll('.vehicle-tab:not(.owner-trip-tab)').forEach(item => {
 
             const isActive = item === tab;
 
@@ -718,7 +718,7 @@ function applyRolePermissions() {
 
     const currentHash = (window.location.hash || '').replace('#', '');
 
-    const ownerSections = ['danh-sach-xe', 'danh-sach-xe-content', 'lich-xe', 'lich-xe-content', 'doanh-thu', 'doanh-thu-content', 'hop-dong', 'hop-dong-content'];
+    const ownerSections = ['danh-sach-xe', 'danh-sach-xe-content', 'quan-ly-chuyen', 'quan-ly-chuyen-content', 'lich-xe', 'lich-xe-content', 'doanh-thu', 'doanh-thu-content', 'hop-dong', 'hop-dong-content'];
 
     if (!isOwner) {
 
@@ -758,7 +758,7 @@ function switchSection(targetId) {
 
     const isOwner = window.AzuStore?.isOwner ? window.AzuStore.isOwner() : false;
 
-    const ownerSections = ['danh-sach-xe', 'danh-sach-xe-content', 'lich-xe', 'lich-xe-content', 'doanh-thu', 'doanh-thu-content', 'hop-dong', 'hop-dong-content'];
+    const ownerSections = ['danh-sach-xe', 'danh-sach-xe-content', 'quan-ly-chuyen', 'quan-ly-chuyen-content', 'lich-xe', 'lich-xe-content', 'doanh-thu', 'doanh-thu-content', 'hop-dong', 'hop-dong-content'];
 
     if (!isOwner && ownerSections.includes(cleanId)) {
 
@@ -781,6 +781,14 @@ function switchSection(targetId) {
         resolvedId = 'danh-sach-xe-content';
 
         loadOwnerCars();
+
+    }
+
+    if (cleanId === 'quan-ly-chuyen' || cleanId === 'quan-ly-chuyen-content') {
+
+        resolvedId = 'quan-ly-chuyen-content';
+
+        if (isOwner) loadOwnerTrips();
 
     }
 
@@ -1616,469 +1624,357 @@ document.getElementById('nextMonth')?.addEventListener('click', () => {
 
 let cachedOwnerBookings = [];
 
+let currentOwnerTripStatus = 'all';
 
+function getOwnerTripStatusBadge(status) {
+    switch (status) {
+        case 'Pending':
+            return { text: 'Chờ duyệt', bg: '#fef3c7', color: '#b45309' };
+        case 'Accepted':
+            return { text: 'Đã duyệt (Chờ giao xe)', bg: '#dcfce7', color: '#15803d' };
+        case 'Ongoing':
+            return { text: 'Đang trong chuyến', bg: '#dbeafe', color: '#1d4ed8' };
+        case 'Completed':
+            return { text: 'Hoàn tất', bg: '#f1f5f9', color: '#475569' };
+        case 'Cancelled':
+            return { text: 'Đã hủy', bg: '#fee2e2', color: '#b91c1c' };
+        case 'Rejected':
+            return { text: 'Đã từ chối', bg: '#fee2e2', color: '#b91c1c' };
+        case 'Expired':
+            return { text: 'Hết hạn', bg: '#f3f4f6', color: '#6b7280' };
+        default:
+            return { text: status, bg: '#f1f5f9', color: '#475569' };
+    }
+}
 
-async function loadOwnerBookingRequests() {
-
-    const listEl = document.getElementById('ownerRequestsList');
-
-    const badgeEl = document.getElementById('pendingRequestBadge');
-
+async function loadOwnerTrips(status = currentOwnerTripStatus) {
+    currentOwnerTripStatus = status;
+    const listEl = document.getElementById('owner-trips-list');
+    const emptyEl = document.getElementById('owner-trips-empty');
     if (!listEl) return;
 
-
+    listEl.innerHTML = '<div style="text-align: center; padding: 32px; color: #64748b;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Đang tải danh sách chuyến đi...</div>';
+    listEl.hidden = false;
+    if (emptyEl) emptyEl.hidden = true;
 
     try {
-
-        const resp = await fetch('/api/bookings/owner-requests');
-
+        const url = status && status !== 'all' 
+            ? `/api/bookings/owner-requests?status=${encodeURIComponent(status)}`
+            : `/api/bookings/owner-requests`;
+        const resp = await fetch(url);
         if (!resp.ok) {
-
-            listEl.innerHTML = '<p style="color: #64748b; font-size: 14px; margin: 0;"><i class="fa-solid fa-lock"></i> Vui lòng đăng nhập với tài khoản chủ xe để xem các yêu cầu thuê xe.</p>';
-
+            listEl.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 24px;">Vui lòng đăng nhập với tài khoản chủ xe để xem các chuyến đi.</div>';
             return;
-
         }
 
         const resData = await resp.json();
-
         const items = resData?.data || [];
-
         cachedOwnerBookings = items;
-
-        const pendingItems = items.filter(b => b.status === 'Pending');
-
-        if (badgeEl) badgeEl.textContent = pendingItems.length;
-
-
-
-        if (items.length === 0) {
-
-            listEl.innerHTML = '<p style="color: #64748b; font-size: 14px; margin: 0;">Hiện chưa có yêu cầu thuê xe nào từ khách hàng.</p>';
-
-            renderCalendar();
-
-            return;
-
-        }
-
-
-
-        listEl.replaceChildren();
-
-        items.forEach(req => {
-
-            const itemEl = document.createElement('div');
-
-            itemEl.className = 'owner-request-card';
-
-            itemEl.style.cssText = 'border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;';
-
-
-
-            const startStr = new Date(req.startDate).toLocaleDateString('vi-VN');
-
-            const endStr = new Date(req.endDate).toLocaleDateString('vi-VN');
-
-            const totalStr = Number(req.priceLockedTotal || 0).toLocaleString('vi-VN') + ' đ';
-
-            const depositStr = Number(req.depositAmount || 0).toLocaleString('vi-VN') + ' đ';
-
-
-
-            let statusLabel = req.status;
-
-            let statusColor = '#64748b';
-
-            let statusBg = '#f1f5f9';
-
-            if (req.status === 'Pending') { statusLabel = 'Chờ bạn duyệt'; statusColor = '#b45309'; statusBg = '#fef3c7'; }
-
-            else if (req.status === 'Accepted') { statusLabel = 'Đã duyệt'; statusColor = '#15803d'; statusBg = '#dcfce7'; }
-
-            else if (req.status === 'Rejected') { statusLabel = 'Đã từ chối'; statusColor = '#b91c1c'; statusBg = '#fee2e2'; }
-
-            else if (req.status === 'Ongoing') { statusLabel = 'Đang trong chuyến'; statusColor = '#1d4ed8'; statusBg = '#dbeafe'; }
-
-            else if (req.status === 'Completed') { statusLabel = 'Hoàn tất'; statusColor = '#166534'; statusBg = '#dcfce7'; }
-
-
-
-            itemEl.innerHTML = `
-
-                <div style="flex: 1; min-width: 250px;">
-
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-
-                        <strong style="color: #1e293b; font-size: 15px;">#${req.bookingId} - ${req.vehicleName}</strong>
-
-                        <span style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background: ${statusBg}; color: ${statusColor}; font-weight: 700;">${statusLabel}</span>
-
-                    </div>
-
-                    <div style="font-size: 13px; color: #475569; line-height: 1.6;">
-
-                        <div><i class="fa-regular fa-user" style="width: 16px;"></i> Khách thuê: <strong>${req.renterName}</strong> ${req.renterPhone ? `(${req.renterPhone})` : ''}</div>
-
-                        <div><i class="fa-regular fa-calendar-days" style="width: 16px;"></i> Lịch thuê: <strong>${startStr} - ${endStr}</strong> (${req.rentalDays} ngày)</div>
-
-                        <div><i class="fa-solid fa-receipt" style="width: 16px;"></i> Tổng tiền: <strong>${totalStr}</strong> • Cọc đã giữ: <span style="color: #1d4ed8; font-weight: 700;">${depositStr} (25%)</span></div>
-
-                    </div>
-
-                </div>
-
-            `;
-
-
-
-            if (req.status === 'Pending') {
-
-                const actionsEl = document.createElement('div');
-
-                actionsEl.style.cssText = 'display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
-
-
-
-                const acceptBtn = document.createElement('button');
-
-                acceptBtn.type = 'button';
-
-                acceptBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
-
-                acceptBtn.innerHTML = '<i class="fa-solid fa-check"></i> Chấp nhận';
-
-                acceptBtn.addEventListener('click', async () => {
-
-                    if (!confirm(`Bạn có chắc muốn chấp nhận đơn thuê #${req.bookingId} (${req.vehicleName}) của ${req.renterName}?`)) return;
-
-                    acceptBtn.disabled = true;
-
-                    try {
-
-                        const r = await fetch(`/api/bookings/${req.bookingId}/respond`, {
-
-                            method: 'PUT',
-
-                            headers: { 'Content-Type': 'application/json' },
-
-                            body: JSON.stringify({ accept: true })
-
-                        });
-
-                        const data = await r.json();
-
-                        if (r.ok && data.isSuccess) {
-
-                            alert('Đã chấp nhận đơn thuê thành công!');
-
-                            loadOwnerBookingRequests();
-
-                        } else {
-
-                            alert('Lỗi: ' + (data?.message || 'Không thể chấp nhận đơn'));
-
-                        }
-
-                    } catch (e) {
-
-                        alert('Lỗi kết nối máy chủ.');
-
-                    } finally {
-
-                        acceptBtn.disabled = false;
-
-                    }
-
-                });
-
-
-
-                const rejectBtn = document.createElement('button');
-
-                rejectBtn.type = 'button';
-
-                rejectBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #dc2626; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
-
-                rejectBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Từ chối';
-
-                rejectBtn.addEventListener('click', async () => {
-
-                    const reason = prompt('Nhập lý do từ chối đơn thuê:');
-
-                    if (reason === null) return;
-
-                    rejectBtn.disabled = true;
-
-                    try {
-
-                        const r = await fetch(`/api/bookings/${req.bookingId}/respond`, {
-
-                            method: 'PUT',
-
-                            headers: { 'Content-Type': 'application/json' },
-
-                            body: JSON.stringify({ accept: false, reason: reason || 'Chủ xe bận lịch' })
-
-                        });
-
-                        const data = await r.json();
-
-                        if (r.ok && data.isSuccess) {
-
-                            alert('Đã từ chối đơn thuê. Tiền cọc giữ chỗ đã được giải phóng cho khách.');
-
-                            loadOwnerBookingRequests();
-
-                        } else {
-
-                            alert('Lỗi: ' + (data?.message || 'Không thể từ chối đơn'));
-
-                        }
-
-                    } catch (e) {
-
-                        alert('Lỗi kết nối máy chủ.');
-
-                    } finally {
-
-                        rejectBtn.disabled = false;
-
-                    }
-
-                });
-
-
-
-                actionsEl.append(acceptBtn, rejectBtn);
-
-                itemEl.appendChild(actionsEl);
-
-            } else if (req.status === 'Accepted') {
-
-                const actionsEl = document.createElement('div');
-
-                actionsEl.style.cssText = 'display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
-
-
-
-                const handoverBtn = document.createElement('button');
-
-                handoverBtn.type = 'button';
-
-                handoverBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
-
-                handoverBtn.innerHTML = '<i class="fa-solid fa-car-side"></i> Bàn giao xe cho khách';
-
-                handoverBtn.addEventListener('click', async () => {
-
-                    if (!confirm(`Xác nhận giao xe #${req.vehicleName} cho khách thuê ${req.renterName}? Chuyến đi sẽ chính thức bắt đầu.`)) return;
-
-                    handoverBtn.disabled = true;
-
-                    try {
-
-                        const r = await fetch(`/api/bookings/${req.bookingId}/pickup`, {
-
-                            method: 'POST',
-
-                            headers: { 'Content-Type': 'application/json' },
-
-                            body: JSON.stringify({ type: 'Pickup' })
-
-                        });
-
-                        const data = await r.json();
-
-                        if (r.ok && data.isSuccess) {
-
-                            alert('Đã xác nhận bàn giao xe thành công! Chuyến đi chuyển sang trạng thái Đang diễn ra.');
-
-                            loadOwnerBookingRequests();
-
-                        } else {
-
-                            alert('Lỗi: ' + (data?.message || 'Không thể xác nhận bàn giao'));
-
-                        }
-
-                    } catch (e) {
-
-                        alert('Lỗi kết nối máy chủ.');
-
-                    } finally {
-
-                        handoverBtn.disabled = false;
-
-                    }
-
-                });
-
-
-
-                actionsEl.appendChild(handoverBtn);
-
-                itemEl.appendChild(actionsEl);
-
-            } else if (req.status === 'Ongoing') {
-
-                const actionsEl = document.createElement('div');
-
-                actionsEl.style.cssText = 'display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
-
-
-
-                const completeBtn = document.createElement('button');
-
-                completeBtn.type = 'button';
-
-                completeBtn.style.cssText = 'background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
-
-                completeBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Nhận lại xe & Hoàn tất chuyến';
-
-                completeBtn.addEventListener('click', async () => {
-
-                    const remaining = Number(req.priceLockedTotal || 0) - Number(req.depositAmount || 0);
-
-                    if (!confirm(`Xác nhận đã nhận lại xe và quyết toán số tiền thuê còn lại (${remaining.toLocaleString('vi-VN')} đ) từ khách ${req.renterName}? Hệ thống sẽ hoàn tất chuyến đi và ghi nhận doanh thu.`)) return;
-
-                    completeBtn.disabled = true;
-
-                    try {
-
-                        const r = await fetch(`/api/bookings/${req.bookingId}/return`, {
-
-                            method: 'POST',
-
-                            headers: { 'Content-Type': 'application/json' },
-
-                            body: JSON.stringify({ type: 'Return' })
-
-                        });
-
-                        const data = await r.json();
-
-                        if (r.ok && data.isSuccess) {
-
-                            alert('Đã hoàn tất chuyến đi thành công! Doanh thu đã được ghi nhận.');
-
-                            loadOwnerBookingRequests();
-
-                            loadOwnerRevenue();
-
-                        } else {
-
-                            alert('Lỗi: ' + (data?.message || 'Không thể hoàn tất chuyến'));
-
-                        }
-
-                    } catch (e) {
-
-                        alert('Lỗi kết nối máy chủ.');
-
-                    } finally {
-
-                        completeBtn.disabled = false;
-
-                    }
-
-                });
-
-
-
-                actionsEl.appendChild(completeBtn);
-
-                if (req.hasDispute) {
-                    const dispBadge = document.createElement('span');
-                    dispBadge.style.cssText = 'font-size: 13px; color: #dc2626; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
-                    dispBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Đang khiếu nại (Chờ xử lý)';
-                    actionsEl.appendChild(dispBadge);
-                } else {
-                    const disputeBtn = document.createElement('button');
-                    disputeBtn.type = 'button';
-                    disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
-                    disputeBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sự cố';
-                    disputeBtn.addEventListener('click', async () => {
-                        const desc = prompt('Nhập chi tiết sự cố phát sinh (tối thiểu 10 ký tự):');
-                        if (!desc) return;
-                        if (desc.trim().length < 10) {
-                            alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');
-                            return;
-                        }
-                        disputeBtn.disabled = true;
-                        try {
-                            const r = await fetch(`/api/bookings/${req.bookingId}/dispute`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ description: desc.trim() })
-                            });
-                            const d = await r.json();
-                            if (r.ok && d.isSuccess) {
-                                alert(d.message || 'Khiếu nại đã được gửi thành công.');
-                                loadOwnerBookingRequests();
-                            } else {
-                                alert('Lỗi: ' + (d?.message || 'Không thể gửi khiếu nại'));
-                            }
-                        } catch (e) {
-                            alert('Lỗi kết nối máy chủ.');
-                        } finally {
-                            disputeBtn.disabled = false;
-                        }
-                    });
-                    actionsEl.appendChild(disputeBtn);
-                }
-
-                itemEl.appendChild(actionsEl);
-
-            } else if (req.status === 'Completed') {
-
-                const actionsEl = document.createElement('div');
-
-                actionsEl.style.cssText = 'display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
-
-
-
-                if (!req.hasReviewed) {
-                    const reviewBtn = document.createElement('button');
-                    reviewBtn.type = 'button';
-                    reviewBtn.style.cssText = 'background: #f59e0b; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;';
-                    reviewBtn.innerHTML = '<i class="fa-solid fa-star"></i> Đánh giá khách thuê';
-                    reviewBtn.addEventListener('click', () => {
-                        openOwnerReviewModal(req);
-                    });
-                    actionsEl.appendChild(reviewBtn);
-                } else {
-                    const reviewedBadge = document.createElement('span');
-                    reviewedBadge.style.cssText = 'font-size: 12.5px; color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
-                    reviewedBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã gửi đánh giá';
-                    actionsEl.appendChild(reviewedBadge);
-                }
-
-
-
-                itemEl.appendChild(actionsEl);
-
-            }
-
-
-
-            listEl.appendChild(itemEl);
-
-        });
-
-
-
         renderCalendar();
-
+        renderOwnerTrips(items);
     } catch (e) {
+        console.warn('Lỗi khi tải chuyến của chủ xe:', e);
+        listEl.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 24px;">Lỗi kết nối máy chủ khi tải danh sách chuyến đi.</div>';
+    }
+}
 
-        console.warn('Lỗi khi tải yêu cầu của chủ xe:', e);
+function renderOwnerTrips(items) {
+    const listEl = document.getElementById('owner-trips-list');
+    const emptyEl = document.getElementById('owner-trips-empty');
+    if (!listEl) return;
 
-        listEl.innerHTML = '<p style="color: #ef4444; font-size: 14px; margin: 0;">Lỗi kết nối máy chủ khi kiểm tra yêu cầu.</p>';
+    listEl.replaceChildren();
 
+    if (!items || items.length === 0) {
+        listEl.hidden = true;
+        if (emptyEl) emptyEl.hidden = false;
+        return;
     }
 
+    listEl.hidden = false;
+    if (emptyEl) emptyEl.hidden = true;
+
+    items.forEach(req => {
+        const card = document.createElement('article');
+        card.className = 'owner-trip-card';
+        card.style.cssText = 'display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; transition: box-shadow 0.2s ease;';
+        card.addEventListener('mouseenter', () => { card.style.boxShadow = '0 6px 18px rgba(0,0,0,0.06)'; });
+        card.addEventListener('mouseleave', () => { card.style.boxShadow = 'none'; });
+
+        const thumb = document.createElement('div');
+        thumb.style.cssText = 'width: 100%; height: 130px; border-radius: 8px; overflow: hidden; background: #f8fafc; display: flex; align-items: center; justify-content: center;';
+        if (req.coverImageUrl) {
+            thumb.innerHTML = `<img src="${req.coverImageUrl}" alt="${req.vehicleName}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        } else {
+            thumb.innerHTML = '<i class="fa-solid fa-car-side" style="font-size: 28px; color: #94a3b8;"></i>';
+        }
+
+        const info = document.createElement('div');
+        info.style.cssText = 'display: flex; flex-direction: column; justify-content: space-between; gap: 8px;';
+
+        const topRow = document.createElement('div');
+        topRow.style.cssText = 'display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;';
+
+        const titleWrap = document.createElement('div');
+        titleWrap.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-wrap: wrap;';
+
+        const title = document.createElement('h3');
+        title.style.cssText = 'margin: 0; font-size: 16px; font-weight: 700;';
+
+        const titleLink = document.createElement('a');
+        titleLink.href = `/booking/${req.bookingId}`;
+        titleLink.textContent = `#${req.bookingId} - ${req.vehicleName}`;
+        titleLink.title = 'Xem chi tiết đơn thuê xe';
+        titleLink.style.cssText = 'color: #1e293b; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
+        titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#2563eb'; });
+        titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1e293b'; });
+
+        title.appendChild(titleLink);
+        titleWrap.appendChild(title);
+
+        if (req.licensePlate) {
+            const plateBadge = document.createElement('span');
+            plateBadge.style.cssText = 'background: #f1f5f9; color: #475569; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #cbd5e1;';
+            plateBadge.textContent = req.licensePlate;
+            titleWrap.appendChild(plateBadge);
+        }
+
+        const badge = getOwnerTripStatusBadge(req.status);
+        const statusSpan = document.createElement('span');
+        statusSpan.style.cssText = `background: ${badge.bg}; color: ${badge.color}; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap;`;
+        statusSpan.textContent = badge.text;
+
+        topRow.append(titleWrap, statusSpan);
+
+        const details = document.createElement('div');
+        details.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 13px; color: #475569;';
+
+        const startStr = new Date(req.startDate).toLocaleDateString('vi-VN');
+        const endStr = new Date(req.endDate).toLocaleDateString('vi-VN');
+
+        details.innerHTML = `
+            <div>
+                <p style="margin: 0 0 4px;"><i class="fa-regular fa-user" style="color: #64748b; width: 16px;"></i> Khách thuê: <strong>${req.renterName}</strong> ${req.renterPhone ? `(${req.renterPhone})` : ''}</p>
+                <p style="margin: 0;"><i class="fa-solid fa-location-dot" style="color: #64748b; width: 16px;"></i> Khu vực: ${req.district ? req.district + ', ' : ''}${req.city || 'TP. Đà Nẵng'}</p>
+            </div>
+            <div>
+                <p style="margin: 0 0 4px;"><i class="fa-regular fa-calendar-days" style="color: #64748b; width: 16px;"></i> Thời gian: <strong>${startStr} - ${endStr}</strong> (${req.rentalDays} ngày)</p>
+                <p style="margin: 0;"><i class="fa-solid fa-receipt" style="color: #16a34a; width: 16px;"></i> Tổng tiền: <strong style="color: #1e293b;">${Number(req.priceLockedTotal || 0).toLocaleString('vi-VN')} đ</strong></p>
+            </div>
+            <div>
+                <p style="margin: 0 0 4px; color: #1d4ed8;"><i class="fa-solid fa-shield-halved" style="width: 16px;"></i> Cọc AZU giữ: <strong>${Number(req.depositAmount || 0).toLocaleString('vi-VN')} đ (25%)</strong></p>
+                <p style="margin: 0; color: #64748b;"><i class="fa-solid fa-hand-holding-dollar" style="width: 16px;"></i> Còn lại khi nhận xe: <strong>${Number(req.remainingAmount || 0).toLocaleString('vi-VN')} đ</strong></p>
+            </div>
+        `;
+
+        const actionsRow = document.createElement('div');
+        actionsRow.style.cssText = 'display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding-top: 8px; border-top: 1px dashed #e2e8f0;';
+
+        if (req.status === 'Pending') {
+            const acceptBtn = document.createElement('button');
+            acceptBtn.type = 'button';
+            acceptBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            acceptBtn.innerHTML = '<i class="fa-solid fa-check"></i> Chấp nhận';
+            acceptBtn.addEventListener('click', async () => {
+                if (!confirm(`Bạn có chắc muốn chấp nhận đơn thuê #${req.bookingId} (${req.vehicleName}) của ${req.renterName}?`)) return;
+                acceptBtn.disabled = true;
+                try {
+                    const r = await fetch(`/api/bookings/${req.bookingId}/respond`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ accept: true })
+                    });
+                    const d = await r.json();
+                    if (r.ok && d.isSuccess) {
+                        alert('Đã chấp nhận đơn thuê thành công!');
+                        loadOwnerTrips();
+                        loadOwnerRevenue();
+                    } else {
+                        alert('Lỗi: ' + (d?.message || 'Không thể chấp nhận đơn'));
+                    }
+                } catch(e) {
+                    alert('Lỗi kết nối máy chủ.');
+                } finally {
+                    acceptBtn.disabled = false;
+                }
+            });
+
+            const rejectBtn = document.createElement('button');
+            rejectBtn.type = 'button';
+            rejectBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #dc2626; padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            rejectBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Từ chối';
+            rejectBtn.addEventListener('click', async () => {
+                const reason = prompt('Nhập lý do từ chối đơn thuê:');
+                if (reason === null) return;
+                rejectBtn.disabled = true;
+                try {
+                    const r = await fetch(`/api/bookings/${req.bookingId}/respond`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ accept: false, reason: reason || 'Chủ xe bận lịch' })
+                    });
+                    const d = await r.json();
+                    if (r.ok && d.isSuccess) {
+                        alert('Đã từ chối đơn thuê. Tiền cọc giữ chỗ đã được giải phóng cho khách.');
+                        loadOwnerTrips();
+                        loadOwnerRevenue();
+                    } else {
+                        alert('Lỗi: ' + (d?.message || 'Không thể từ chối đơn'));
+                    }
+                } catch(e) {
+                    alert('Lỗi kết nối máy chủ.');
+                } finally {
+                    rejectBtn.disabled = false;
+                }
+            });
+
+            actionsRow.append(acceptBtn, rejectBtn);
+        } else if (req.status === 'Accepted') {
+            const handoverBtn = document.createElement('button');
+            handoverBtn.type = 'button';
+            handoverBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            handoverBtn.innerHTML = '<i class="fa-solid fa-car-side"></i> Bàn giao xe cho khách';
+            handoverBtn.addEventListener('click', async () => {
+                if (!confirm(`Xác nhận giao xe ${req.vehicleName} cho khách thuê ${req.renterName}? Chuyến đi sẽ chính thức bắt đầu.`)) return;
+                handoverBtn.disabled = true;
+                try {
+                    const r = await fetch(`/api/bookings/${req.bookingId}/pickup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'Pickup' })
+                    });
+                    const d = await r.json();
+                    if (r.ok && d.isSuccess) {
+                        alert('Đã xác nhận bàn giao xe thành công! Chuyến đi chuyển sang trạng thái Đang trong chuyến.');
+                        loadOwnerTrips();
+                        loadOwnerRevenue();
+                    } else {
+                        alert('Lỗi: ' + (d?.message || 'Không thể xác nhận bàn giao'));
+                    }
+                } catch(e) {
+                    alert('Lỗi kết nối máy chủ.');
+                } finally {
+                    handoverBtn.disabled = false;
+                }
+            });
+            actionsRow.appendChild(handoverBtn);
+        } else if (req.status === 'Ongoing') {
+            const completeBtn = document.createElement('button');
+            completeBtn.type = 'button';
+            completeBtn.style.cssText = 'background: #2563eb; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            completeBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Nhận lại xe & Hoàn tất chuyến';
+            completeBtn.addEventListener('click', async () => {
+                const remaining = Number(req.priceLockedTotal || 0) - Number(req.depositAmount || 0);
+                if (!confirm(`Xác nhận đã nhận lại xe và quyết toán số tiền thuê còn lại (${remaining.toLocaleString('vi-VN')} đ) từ khách ${req.renterName}? Hệ thống sẽ hoàn tất chuyến đi và ghi nhận doanh thu.`)) return;
+                completeBtn.disabled = true;
+                try {
+                    const r = await fetch(`/api/bookings/${req.bookingId}/return`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'Return' })
+                    });
+                    const d = await r.json();
+                    if (r.ok && d.isSuccess) {
+                        alert('Đã hoàn tất chuyến đi thành công! Doanh thu đã được ghi nhận.');
+                        loadOwnerTrips();
+                        loadOwnerRevenue();
+                    } else {
+                        alert('Lỗi: ' + (d?.message || 'Không thể hoàn tất chuyến'));
+                    }
+                } catch(e) {
+                    alert('Lỗi kết nối máy chủ.');
+                } finally {
+                    completeBtn.disabled = false;
+                }
+            });
+            actionsRow.appendChild(completeBtn);
+
+            if (req.hasDispute) {
+                const dispBadge = document.createElement('span');
+                dispBadge.style.cssText = 'font-size: 13px; color: #dc2626; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
+                dispBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Đang khiếu nại (Chờ xử lý)';
+                actionsRow.appendChild(dispBadge);
+            } else {
+                const disputeBtn = document.createElement('button');
+                disputeBtn.type = 'button';
+                disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+                disputeBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sự cố';
+                disputeBtn.addEventListener('click', async () => {
+                    const desc = prompt('Nhập chi tiết sự cố phát sinh (tối thiểu 10 ký tự):');
+                    if (!desc) return;
+                    if (desc.trim().length < 10) {
+                        alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');
+                        return;
+                    }
+                    disputeBtn.disabled = true;
+                    try {
+                        const r = await fetch(`/api/bookings/${req.bookingId}/dispute`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ description: desc.trim() })
+                        });
+                        const d = await r.json();
+                        if (r.ok && d.isSuccess) {
+                            alert(d.message || 'Khiếu nại đã được gửi thành công.');
+                            loadOwnerTrips();
+                        } else {
+                            alert('Lỗi: ' + (d?.message || 'Không thể gửi khiếu nại'));
+                        }
+                    } catch(e) {
+                        alert('Lỗi kết nối máy chủ.');
+                    } finally {
+                        disputeBtn.disabled = false;
+                    }
+                });
+                actionsRow.appendChild(disputeBtn);
+            }
+        } else if (req.status === 'Completed') {
+            if (!req.hasReviewed) {
+                const reviewBtn = document.createElement('button');
+                reviewBtn.type = 'button';
+                reviewBtn.style.cssText = 'background: #f59e0b; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+                reviewBtn.innerHTML = '<i class="fa-solid fa-star"></i> Đánh giá khách thuê';
+                reviewBtn.addEventListener('click', () => {
+                    openOwnerReviewModal(req);
+                });
+                actionsRow.appendChild(reviewBtn);
+            } else {
+                const reviewedBadge = document.createElement('span');
+                reviewedBadge.style.cssText = 'font-size: 12.5px; color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
+                reviewedBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã gửi đánh giá';
+                actionsRow.appendChild(reviewedBadge);
+            }
+        }
+
+        const detailLink = document.createElement('a');
+        detailLink.href = `/booking/${req.bookingId}`;
+        detailLink.style.cssText = 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 7px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; transition: all 0.2s;';
+        detailLink.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Chi tiết đơn thuê';
+        detailLink.addEventListener('mouseenter', () => { detailLink.style.background = '#2563eb'; detailLink.style.color = '#fff'; });
+        detailLink.addEventListener('mouseleave', () => { detailLink.style.background = '#eff6ff'; detailLink.style.color = '#2563eb'; });
+        actionsRow.appendChild(detailLink);
+
+        info.append(topRow, details, actionsRow);
+        card.append(thumb, info);
+        listEl.appendChild(card);
+    });
 }
+
+async function loadOwnerBookingRequests() {
+    await loadOwnerTrips();
+}
+
+document.querySelectorAll('.owner-trip-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.owner-trip-tab').forEach(t => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        loadOwnerTrips(tab.dataset.tripStatus || 'all');
+    });
+});
 
 
 
