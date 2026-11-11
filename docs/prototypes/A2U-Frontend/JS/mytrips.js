@@ -12,7 +12,11 @@ const accountKeys = {
     gender: 'azuCarGender',
     licenseNumber: 'azuCarLicenseNumber',
     licenseHolder: 'azuCarLicenseHolder',
-    licenseBirthday: 'azuCarLicenseBirthday'
+    licenseBirthday: 'azuCarLicenseBirthday',
+    hasDriverLicense: 'azuCarHasDriverLicense',
+    licenseClass: 'azuCarLicenseClass',
+    licenseExpiryDate: 'azuCarLicenseExpiryDate',
+    licenseImageFront: 'azuCarLicenseImageFront'
 };
 
 function formatDate(value) {
@@ -441,6 +445,9 @@ function renderAccountData() {
     if (profileBirthday) profileBirthday.textContent = formatDate(sessionStorage.getItem(accountKeys.birthday)) || 'Chưa cập nhật';
     if (profileGender) profileGender.textContent = sessionStorage.getItem(accountKeys.gender) || 'Chưa cập nhật';
     if (accountTripCount) accountTripCount.textContent = String(window.AzuStore.getTrips().length);
+
+    renderLicenseData();
+    syncUserProfile();
 }
 
 // Profile Form & Dialog
@@ -488,17 +495,85 @@ const licenseUpload = document.getElementById('license-upload');
 const uploadPrompt = document.getElementById('upload-prompt');
 const licenseSaveButton = document.getElementById('license-save-button');
 
+function renderLicenseData() {
+    const licenseStatusBadge = document.getElementById('license-status-badge') || document.querySelector('.license-heading .status');
+    const hasDl = sessionStorage.getItem(accountKeys.hasDriverLicense) === 'true';
+    const licenseNum = sessionStorage.getItem(accountKeys.licenseNumber) || '';
+    const licenseHolder = sessionStorage.getItem(accountKeys.licenseHolder) || sessionStorage.getItem(accountKeys.fullName) || sessionStorage.getItem(accountKeys.name) || '';
+    const licenseBirthday = sessionStorage.getItem(accountKeys.licenseBirthday) || sessionStorage.getItem(accountKeys.birthday) || '1995-01-01';
+    const userName = sessionStorage.getItem(accountKeys.username) || '';
+    let licenseImage = sessionStorage.getItem(accountKeys.licenseImageFront) || '';
+    if (!licenseImage && hasDl && userName) {
+        licenseImage = `/seed/license-${userName.toLowerCase()}.jpg`;
+    }
+
+    if (licenseStatusBadge) {
+        if (hasDl) {
+            licenseStatusBadge.className = 'status status-verified';
+            licenseStatusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã xác thực';
+        } else {
+            licenseStatusBadge.className = 'status status-unverified';
+            licenseStatusBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Chưa xác thực';
+        }
+    }
+
+    if (licenseForm) {
+        if (licenseForm.elements.number) licenseForm.elements.number.value = licenseNum;
+        if (licenseForm.elements.holder) licenseForm.elements.holder.value = licenseHolder;
+        if (licenseForm.elements.birthday) licenseForm.elements.birthday.value = licenseBirthday;
+    }
+
+    if (licenseImagePreview) {
+        if (licenseImage) {
+            licenseImagePreview.src = licenseImage;
+            licenseImagePreview.hidden = false;
+            if (uploadPrompt) uploadPrompt.hidden = true;
+        } else {
+            licenseImagePreview.hidden = true;
+            if (uploadPrompt) uploadPrompt.hidden = false;
+        }
+    }
+}
+
+async function syncUserProfile() {
+    try {
+        const res = await fetch('/api/auth/me', { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const json = await res.json();
+            if (json.isSuccess && json.data) {
+                const u = json.data;
+                const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
+                sessionStorage.setItem(accountKeys.name, displayName);
+                sessionStorage.setItem(accountKeys.fullName, (u.fullName && u.fullName.trim()) || '');
+                if (u.userName) sessionStorage.setItem(accountKeys.username, u.userName);
+                if (u.phoneNumber) sessionStorage.setItem(accountKeys.phone, u.phoneNumber);
+                if (u.email) sessionStorage.setItem(accountKeys.email, u.email);
+                sessionStorage.setItem(accountKeys.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
+                if (u.licenseNumber) sessionStorage.setItem(accountKeys.licenseNumber, u.licenseNumber);
+                if (u.licenseClass) sessionStorage.setItem(accountKeys.licenseClass, u.licenseClass);
+                if (u.licenseExpiryDate) sessionStorage.setItem(accountKeys.licenseExpiryDate, u.licenseExpiryDate);
+                if (u.licenseImageFront) {
+                    sessionStorage.setItem(accountKeys.licenseImageFront, u.licenseImageFront);
+                } else if (u.hasDriverLicense && u.userName) {
+                    sessionStorage.setItem(accountKeys.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
+                }
+                renderLicenseData();
+            }
+        }
+    } catch (e) {
+        console.warn('Sync profile error:', e);
+    }
+}
+
 if (licenseForm) {
-    licenseForm.elements.number.value = sessionStorage.getItem(accountKeys.licenseNumber) || '';
-    licenseForm.elements.holder.value = sessionStorage.getItem(accountKeys.licenseHolder) || '';
-    licenseForm.elements.birthday.value = sessionStorage.getItem(accountKeys.licenseBirthday) || '1970-01-01';
+    renderLicenseData();
 }
 
 function setLicenseEditing(isEditing) {
     licenseInputs.forEach(input => { input.disabled = !isEditing; });
     if (licenseImageInput) {
         licenseImageInput.disabled = !isEditing;
-        licenseImageInput.required = isEditing;
+        licenseImageInput.required = isEditing && !sessionStorage.getItem(accountKeys.hasDriverLicense);
     }
     licenseUpload?.classList.toggle('is-disabled', !isEditing);
     if (licenseSaveButton) licenseSaveButton.hidden = !isEditing;
@@ -513,23 +588,14 @@ function setLicenseEditing(isEditing) {
 licenseEditButton?.addEventListener('click', () => {
     const isEditing = licenseInputs.some(input => !input.disabled);
     if (isEditing) {
-        if (licenseForm) {
-            licenseForm.elements.number.value = sessionStorage.getItem(accountKeys.licenseNumber) || '';
-            licenseForm.elements.holder.value = sessionStorage.getItem(accountKeys.licenseHolder) || '';
-            licenseForm.elements.birthday.value = sessionStorage.getItem(accountKeys.licenseBirthday) || '1970-01-01';
-        }
+        renderLicenseData();
         if (licenseImageInput) licenseImageInput.value = '';
-        if (licenseImagePreview) {
-            licenseImagePreview.src = '';
-            licenseImagePreview.hidden = true;
-        }
-        if (uploadPrompt) uploadPrompt.hidden = false;
         setLicenseEditing(false);
         return;
     }
 
     setLicenseEditing(true);
-    licenseForm?.elements.number.focus();
+    licenseForm?.elements.number?.focus();
 });
 
 licenseImageInput?.addEventListener('change', () => {
@@ -562,10 +628,24 @@ licenseForm?.addEventListener('submit', (e) => {
     if (!licenseForm.reportValidity()) return;
 
     const values = new FormData(licenseForm);
-    sessionStorage.setItem(accountKeys.licenseNumber, String(values.get('number') || '').trim());
-    sessionStorage.setItem(accountKeys.licenseHolder, String(values.get('holder') || '').trim());
-    sessionStorage.setItem(accountKeys.licenseBirthday, String(values.get('birthday') || ''));
+    const num = String(values.get('number') || '').trim();
+    const holder = String(values.get('holder') || '').trim();
+    const bday = String(values.get('birthday') || '');
+
+    sessionStorage.setItem(accountKeys.licenseNumber, num);
+    sessionStorage.setItem(accountKeys.licenseHolder, holder);
+    sessionStorage.setItem(accountKeys.licenseBirthday, bday);
+    sessionStorage.setItem(accountKeys.hasDriverLicense, 'true');
+
+    const userName = sessionStorage.getItem(accountKeys.username) || 'renter1';
+    if (!sessionStorage.getItem(accountKeys.licenseImageFront)) {
+        sessionStorage.setItem(accountKeys.licenseImageFront, `/seed/license-${userName.toLowerCase()}.jpg`);
+    }
+
+    renderLicenseData();
     setLicenseEditing(false);
+    alert('Đã cập nhật và lưu thông tin Giấy phép lái xe thành công!');
+    window.dispatchEvent(new CustomEvent('azu:auth-changed'));
 });
 
 // Dialog Close Buttons & ESC
@@ -592,6 +672,117 @@ document.addEventListener('keydown', (e) => {
 // Trips Logic
 let trips = window.AzuStore.getTrips();
 let activeTripType = 'current';
+let reviewModal;
+let activeReviewTrip;
+
+function closeReviewModal() {
+    if (!reviewModal) return;
+    if (activeReviewTrip) {
+        sessionStorage.setItem(`review-prompt-dismissed-${activeReviewTrip.bookingId}`, 'true');
+    }
+    reviewModal.hidden = true;
+    activeReviewTrip = null;
+}
+
+function ensureReviewModal() {
+    if (reviewModal) return reviewModal;
+
+    reviewModal = document.createElement('div');
+    reviewModal.className = 'review-modal-backdrop';
+    reviewModal.hidden = true;
+    reviewModal.innerHTML = `
+        <form class="review-modal" aria-labelledby="review-modal-title">
+            <button class="review-modal-close" type="button" aria-label="Đóng popup đánh giá"><i class="fa-solid fa-xmark"></i></button>
+            <h2 id="review-modal-title">Chuyến đi đã hoàn tất</h2>
+            <p class="review-modal-vehicle"></p>
+            <label class="review-rating-label">Trải nghiệm của bạn thế nào?</label>
+            <div class="review-stars" role="group" aria-label="Chọn số sao đánh giá">
+                ${[1, 2, 3, 4, 5].map(rating => `<button type="button" class="review-star" data-rating="${rating}" aria-label="${rating} sao" aria-pressed="false"><i class="fa-solid fa-star"></i></button>`).join('')}
+            </div>
+            <p class="review-rating-hint" aria-live="polite">Chọn số sao</p>
+            <label class="review-comment-label" for="review-comment">Nhận xét <span>(không bắt buộc)</span></label>
+            <textarea id="review-comment" maxlength="1000" rows="3" placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
+            <p class="review-error" role="alert" hidden></p>
+            <button class="review-submit" type="submit" disabled>Gửi đánh giá</button>
+        </form>`;
+    document.body.appendChild(reviewModal);
+
+    const form = reviewModal.querySelector('form');
+    const stars = Array.from(reviewModal.querySelectorAll('.review-star'));
+    const ratingHint = reviewModal.querySelector('.review-rating-hint');
+    const submitButton = reviewModal.querySelector('.review-submit');
+    const errorMessage = reviewModal.querySelector('.review-error');
+    const ratingLabels = ['', 'Rất tệ', 'Chưa tốt', 'Bình thường', 'Tốt', 'Tuyệt vời'];
+    let selectedRating = 0;
+
+    const setRating = rating => {
+        selectedRating = rating;
+        stars.forEach(star => {
+            const isSelected = Number(star.dataset.rating) <= rating;
+            star.classList.toggle('is-selected', isSelected);
+            star.setAttribute('aria-pressed', String(Number(star.dataset.rating) === rating));
+        });
+        ratingHint.textContent = ratingLabels[rating] || 'Chọn số sao';
+        submitButton.disabled = rating === 0;
+        errorMessage.hidden = true;
+    };
+
+    stars.forEach(star => star.addEventListener('click', () => setRating(Number(star.dataset.rating))));
+    reviewModal.querySelector('.review-modal-close').addEventListener('click', closeReviewModal);
+    reviewModal.addEventListener('click', event => {
+        if (event.target === reviewModal) closeReviewModal();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && !reviewModal.hidden) closeReviewModal();
+    });
+
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+        if (!activeReviewTrip || selectedRating < 1) return;
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'Đang gửi...';
+        errorMessage.hidden = true;
+        try {
+            const response = await fetch(`/api/bookings/${activeReviewTrip.bookingId}/review`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    rating: selectedRating,
+                    comment: reviewModal.querySelector('#review-comment').value.trim()
+                })
+            });
+            const result = await response.json();
+            if (!response.ok || !result.isSuccess) {
+                throw new Error(result?.message || 'Không thể gửi đánh giá. Vui lòng thử lại.');
+            }
+
+            reviewModal.hidden = true;
+            activeReviewTrip = null;
+            alert(result?.message || 'Cảm ơn bạn đã gửi đánh giá cho chuyến đi!');
+            renderTrips();
+        } catch (error) {
+            errorMessage.textContent = error.message || 'Lỗi kết nối máy chủ.';
+            errorMessage.hidden = false;
+            submitButton.disabled = false;
+        } finally {
+            submitButton.textContent = 'Gửi đánh giá';
+        }
+    });
+
+    reviewModal.resetRating = () => setRating(0);
+    return reviewModal;
+}
+
+function openReviewModal(trip) {
+    const modal = ensureReviewModal();
+    activeReviewTrip = trip;
+    modal.querySelector('.review-modal-vehicle').textContent = trip.vehicleName || 'Cảm ơn bạn đã sử dụng dịch vụ AZU Car';
+    modal.querySelector('#review-comment').value = '';
+    modal.querySelector('.review-error').hidden = true;
+    modal.resetRating();
+    modal.hidden = false;
+}
 
 function tripIsCurrent(trip) {
     const returnDate = String(trip.return || '').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
@@ -741,10 +932,142 @@ async function renderTrips() {
 
         info.append(title, meta, statusSpan, price, depositSmall);
 
+        const actionsDiv = document.createElement('div');
+        actionsDiv.style.cssText = 'margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
+
+        // 1. Nhận xe
+        if (trip.status === 'Accepted') {
+            const pickupBtn = document.createElement('button');
+            pickupBtn.type = 'button';
+            pickupBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            pickupBtn.innerHTML = '<i class="fa-solid fa-key"></i> Bàn giao / Nhận xe';
+            pickupBtn.addEventListener('click', async () => {
+                const conf = confirm(`Xác nhận bạn đã nhận bàn giao xe ${trip.vehicleName}? Chuyến đi sẽ chính thức bắt đầu.`);
+                if (!conf) return;
+                pickupBtn.disabled = true;
+                try {
+                    const r = await fetch(`/api/bookings/${trip.bookingId}/pickup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'Pickup' })
+                    });
+                    const d = await r.json();
+                    if (r.ok && d.isSuccess) {
+                        alert('Xác nhận nhận xe thành công! Chúc bạn có một hành trình an toàn và vui vẻ.');
+                        renderTrips();
+                    } else {
+                        alert('Lỗi: ' + (d?.message || 'Không thể xác nhận nhận xe'));
+                    }
+                } catch (e) {
+                    alert('Lỗi kết nối máy chủ.');
+                } finally {
+                    pickupBtn.disabled = false;
+                }
+            });
+            actionsDiv.appendChild(pickupBtn);
+        }
+
+        // 2. Trả xe
+        if (trip.status === 'Ongoing') {
+            const returnBtn = document.createElement('button');
+            returnBtn.type = 'button';
+            returnBtn.style.cssText = 'background: #2563eb; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            returnBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Xác nhận trả xe';
+            returnBtn.addEventListener('click', async () => {
+                const conf = confirm(`Xác nhận hoàn tất chuyến đi và trả lại xe ${trip.vehicleName} cho chủ xe?`);
+                if (!conf) return;
+                returnBtn.disabled = true;
+                try {
+                    const r = await fetch(`/api/bookings/${trip.bookingId}/return`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'Return' })
+                    });
+                    const d = await r.json();
+                    if (r.ok && d.isSuccess) {
+                        if (String(d.data?.status || '').toLowerCase() === 'completed') {
+                            openReviewModal(trip);
+                        } else {
+                            alert('Đã xác nhận trả xe. Chuyến đi sẽ hoàn tất sau khi chủ xe xác nhận.');
+                        }
+                        renderTrips();
+                    } else {
+                        alert('Lỗi: ' + (d?.message || 'Không thể xác nhận trả xe'));
+                    }
+                } catch (e) {
+                    alert('Lỗi kết nối máy chủ.');
+                } finally {
+                    returnBtn.disabled = false;
+                }
+            });
+            actionsDiv.appendChild(returnBtn);
+        }
+
+        // 2b. Khiếu nại sự cố
+        if (trip.status === 'Ongoing' || trip.status === 'InTrip' || trip.status === 'Returned') {
+            if (trip.hasDispute) {
+                const disputeBadge = document.createElement('span');
+                disputeBadge.style.cssText = 'font-size: 13px; color: #dc2626; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
+                disputeBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Đang khiếu nại (Chờ xử lý)';
+                actionsDiv.appendChild(disputeBadge);
+            } else {
+                const disputeBtn = document.createElement('button');
+                disputeBtn.type = 'button';
+                disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+                disputeBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sự cố';
+                disputeBtn.addEventListener('click', async () => {
+                    const desc = prompt('Nhập chi tiết sự cố phát sinh (tối thiểu 10 ký tự):');
+                    if (!desc) return;
+                    if (desc.trim().length < 10) {
+                        alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');
+                        return;
+                    }
+                    disputeBtn.disabled = true;
+                    try {
+                        const r = await fetch(`/api/bookings/${trip.bookingId}/dispute`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ description: desc.trim() })
+                        });
+                        const d = await r.json();
+                        if (r.ok && d.isSuccess) {
+                            alert(d.message || 'Khiếu nại đã được gửi thành công.');
+                            renderTrips();
+                        } else {
+                            alert('Lỗi: ' + (d?.message || 'Không thể gửi khiếu nại'));
+                        }
+                    } catch (e) {
+                        alert('Lỗi kết nối máy chủ.');
+                    } finally {
+                        disputeBtn.disabled = false;
+                    }
+                });
+                actionsDiv.appendChild(disputeBtn);
+            }
+        }
+
+        // 3. Đánh giá
+        if (trip.status === 'Completed') {
+            if (!trip.hasReviewed) {
+                const reviewBtn = document.createElement('button');
+                reviewBtn.type = 'button';
+                reviewBtn.style.cssText = 'background: #f59e0b; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+                reviewBtn.innerHTML = '<i class="fa-solid fa-star"></i> Đánh giá chuyến đi';
+                reviewBtn.addEventListener('click', () => openReviewModal(trip));
+                actionsDiv.appendChild(reviewBtn);
+            } else {
+                const reviewedBadge = document.createElement('span');
+                reviewedBadge.style.cssText = 'font-size: 13px; color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
+                reviewedBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã gửi đánh giá';
+                actionsDiv.appendChild(reviewedBadge);
+            }
+        }
+
+        // 4. Hủy chuyến
         if (trip.status === 'Pending' || trip.status === 'Accepted') {
             const cancelBtn = document.createElement('button');
             cancelBtn.type = 'button';
-            cancelBtn.style.cssText = 'margin-top: 10px; background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            cancelBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
             cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Hủy chuyến này';
             cancelBtn.addEventListener('click', async () => {
                 const reason = prompt('Nhập lý do hủy chuyến:');
@@ -769,12 +1092,25 @@ async function renderTrips() {
                     cancelBtn.disabled = false;
                 }
             });
-            info.appendChild(cancelBtn);
+            actionsDiv.appendChild(cancelBtn);
+        }
+
+        if (actionsDiv.children.length > 0) {
+            info.appendChild(actionsDiv);
         }
 
         card.append(image, info);
         tripsList.append(card);
     });
+
+    const unreviewedTrip = apiTrips.find(trip =>
+        trip.status === 'Completed' &&
+        !trip.hasReviewed &&
+        sessionStorage.getItem(`review-prompt-dismissed-${trip.bookingId}`) !== 'true'
+    );
+    if (unreviewedTrip && (!reviewModal || reviewModal.hidden)) {
+        openReviewModal(unreviewedTrip);
+    }
 }
 
 document.querySelectorAll('.trip-tab').forEach(tab => {

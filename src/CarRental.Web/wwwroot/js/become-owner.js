@@ -370,18 +370,23 @@ function renderOwnerCars() {
 
 
 
+        const vehId = car.vehicleId || car.id;
+        const carPostUrl = vehId ? `/find?vehicleId=${vehId}` : `/find?keyword=${encodeURIComponent(car.model || car.name || '')}`;
+
         const title = document.createElement('h3');
-
         title.style.margin = '0';
-
         title.style.fontSize = '15px';
-
         title.style.fontWeight = '700';
 
-        title.style.color = '#1e293b';
+        const titleLink = document.createElement('a');
+        titleLink.href = carPostUrl;
+        titleLink.target = '_blank';
+        titleLink.textContent = car.name;
+        titleLink.style.cssText = 'color: #1e293b; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
+        titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#00a550'; });
+        titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1e293b'; });
 
-        title.textContent = car.name;
-
+        title.appendChild(titleLink);
         titleWrap.appendChild(title);
 
 
@@ -498,40 +503,17 @@ function renderOwnerCars() {
 
 
 
-        const vehId = car.vehicleId || car.id;
-        const viewPostBtn = document.createElement('a');
-        viewPostBtn.href = vehId ? `/find?vehicleId=${vehId}` : `/find?keyword=${encodeURIComponent(car.model || car.name || '')}`;
-        viewPostBtn.target = '_blank';
-
-        viewPostBtn.className = 'small-button';
-
-        viewPostBtn.style.cssText = 'text-decoration: none; padding: 6px 12px; font-size: 13px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 8px; color: #1e293b; background: #fff; display: inline-flex; align-items: center; gap: 6px;';
-
-        viewPostBtn.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> Xem bài đăng';
-
-
-
         const calBtn = document.createElement('button');
-
         calBtn.type = 'button';
-
         calBtn.className = 'small-button';
-
         calBtn.style.cssText = 'padding: 6px 12px; font-size: 13px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 8px; color: #1e293b; background: #fff; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;';
-
         calBtn.innerHTML = '<i class="fa-solid fa-calendar-days"></i> Lịch xe';
-
         calBtn.addEventListener('click', () => {
-
             switchSection('lich-xe');
-
             window.history.pushState(null, '', '#lich-xe');
-
         });
 
-
-
-        rightGroup.append(status, viewPostBtn, calBtn);
+        rightGroup.append(status, calBtn);
 
         card.append(leftGroup, rightGroup);
 

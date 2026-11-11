@@ -34,6 +34,10 @@
                 <a href="/become-owner" id="owner-nav-link" class="@(isOwnerPage ? "active" : "")">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</a>
                 <a href="/account#trips" id="trips-nav-link" class="@(isTripsPage ? "active" : "")">Chuyến của tôi</a>
                 <a href="/support" id="support-nav-link" class="@(isSupportPage ? "active" : "")">Trợ giúp</a>
+                @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+                {
+                    <a href="/admin/index.html" id="admin-nav-link" style="color: #c49a49; font-weight: 700;"><i class="fa-solid fa-gauge-high"></i> Quản trị</a>
+                }
             </nav>
 
             <div class="nav-actions">

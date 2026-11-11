@@ -147,6 +147,23 @@ public class BookingService : IBookingService
             return ServiceResult<BookingDetailDto>.Fail(msg, ErrorCodes.Forbidden);
         }
 
+        // check driver license
+        var license = await _db.DriverLicenses.AsNoTracking()
+            .FirstOrDefaultAsync(dl => dl.UserId == renterUserId, ct);
+        if (license == null || string.IsNullOrWhiteSpace(license.LicenseNumber))
+        {
+            return ServiceResult<BookingDetailDto>.Fail(
+                "Tài khoản của bạn chưa xác thực Giấy phép lái xe (GPLX). Vui lòng cập nhật GPLX tại mục Tài khoản trước khi đặt xe.",
+                ErrorCodes.Validation);
+        }
+
+        if (license.ExpiryDate < DateOnly.FromDateTime(now))
+        {
+            return ServiceResult<BookingDetailDto>.Fail(
+                "Giấy phép lái xe (GPLX) của bạn đã hết hạn. Vui lòng cập nhật GPLX mới để tiếp tục thuê xe.",
+                ErrorCodes.Validation);
+        }
+
         // find vehicle & listing
         var listing = await _db.VehicleListings
             .Include(l => l.Vehicle)

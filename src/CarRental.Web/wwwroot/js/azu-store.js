@@ -10,7 +10,12 @@
         trips: 'azuCarTrips',
         ownerCars: 'azuCarOwnerCars',
         returnTo: 'azuCarReturnTo',
-        selectedCar: 'azuCarSelectedCar'
+        selectedCar: 'azuCarSelectedCar',
+        hasDriverLicense: 'azuCarHasDriverLicense',
+        licenseNumber: 'azuCarLicenseNumber',
+        licenseClass: 'azuCarLicenseClass',
+        licenseExpiryDate: 'azuCarLicenseExpiryDate',
+        licenseImageFront: 'azuCarLicenseImageFront'
     };
 
     function currentPage() {
@@ -132,6 +137,15 @@
                     writeJson(KEYS.roles, u.roles || []);
                     if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
                     if (u.email) sessionStorage.setItem(KEYS.email, u.email);
+                    if (u.hasDriverLicense !== undefined) sessionStorage.setItem(KEYS.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
+                    if (u.licenseNumber) sessionStorage.setItem(KEYS.licenseNumber, u.licenseNumber);
+                    if (u.licenseClass) sessionStorage.setItem(KEYS.licenseClass, u.licenseClass);
+                    if (u.licenseExpiryDate) sessionStorage.setItem(KEYS.licenseExpiryDate, u.licenseExpiryDate);
+                    if (u.licenseImageFront) {
+                        sessionStorage.setItem(KEYS.licenseImageFront, u.licenseImageFront);
+                    } else if (u.hasDriverLicense && u.userName) {
+                        sessionStorage.setItem(KEYS.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
+                    }
                     syncHeaderAuth();
                     window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
                     syncRoleUi();
@@ -154,6 +168,11 @@
                 sessionStorage.removeItem(KEYS.roles);
                 sessionStorage.removeItem(KEYS.phone);
                 sessionStorage.removeItem(KEYS.email);
+                sessionStorage.removeItem(KEYS.hasDriverLicense);
+                sessionStorage.removeItem(KEYS.licenseNumber);
+                sessionStorage.removeItem(KEYS.licenseClass);
+                sessionStorage.removeItem(KEYS.licenseExpiryDate);
+                sessionStorage.removeItem(KEYS.licenseImageFront);
                 syncHeaderAuth();
                 syncRoleUi();
             }
@@ -183,6 +202,15 @@
             writeJson(KEYS.roles, u.roles || []);
             if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
             if (u.email) sessionStorage.setItem(KEYS.email, u.email);
+            if (u.hasDriverLicense !== undefined) sessionStorage.setItem(KEYS.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
+            if (u.licenseNumber) sessionStorage.setItem(KEYS.licenseNumber, u.licenseNumber);
+            if (u.licenseClass) sessionStorage.setItem(KEYS.licenseClass, u.licenseClass);
+            if (u.licenseExpiryDate) sessionStorage.setItem(KEYS.licenseExpiryDate, u.licenseExpiryDate);
+            if (u.licenseImageFront) {
+                sessionStorage.setItem(KEYS.licenseImageFront, u.licenseImageFront);
+            } else if (u.hasDriverLicense && u.userName) {
+                sessionStorage.setItem(KEYS.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
+            }
             syncHeaderAuth();
             window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
             syncRoleUi();
@@ -215,6 +243,15 @@
             writeJson(KEYS.roles, u.roles || []);
             if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
             if (u.email) sessionStorage.setItem(KEYS.email, u.email);
+            if (u.hasDriverLicense !== undefined) sessionStorage.setItem(KEYS.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
+            if (u.licenseNumber) sessionStorage.setItem(KEYS.licenseNumber, u.licenseNumber);
+            if (u.licenseClass) sessionStorage.setItem(KEYS.licenseClass, u.licenseClass);
+            if (u.licenseExpiryDate) sessionStorage.setItem(KEYS.licenseExpiryDate, u.licenseExpiryDate);
+            if (u.licenseImageFront) {
+                sessionStorage.setItem(KEYS.licenseImageFront, u.licenseImageFront);
+            } else if (u.hasDriverLicense && u.userName) {
+                sessionStorage.setItem(KEYS.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
+            }
             syncHeaderAuth();
             window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
             syncRoleUi();
@@ -235,6 +272,11 @@
         sessionStorage.removeItem(KEYS.roles);
         sessionStorage.removeItem(KEYS.phone);
         sessionStorage.removeItem(KEYS.email);
+        sessionStorage.removeItem(KEYS.hasDriverLicense);
+        sessionStorage.removeItem(KEYS.licenseNumber);
+        sessionStorage.removeItem(KEYS.licenseClass);
+        sessionStorage.removeItem(KEYS.licenseExpiryDate);
+        sessionStorage.removeItem(KEYS.licenseImageFront);
         syncHeaderAuth();
         window.location.assign('/');
     }
@@ -280,12 +322,32 @@
         });
     }
 
+    function getUser() {
+        const rawRoles = readJson(KEYS.roles, []);
+        return {
+            userId: sessionStorage.getItem(KEYS.userId) || '',
+            name: sessionStorage.getItem(KEYS.fullName) || sessionStorage.getItem(KEYS.name) || '',
+            fullName: sessionStorage.getItem(KEYS.fullName) || sessionStorage.getItem(KEYS.name) || '',
+            userName: sessionStorage.getItem(KEYS.username) || '',
+            email: sessionStorage.getItem(KEYS.email) || '',
+            phone: sessionStorage.getItem(KEYS.phone) || '',
+            hasDriverLicense: sessionStorage.getItem(KEYS.hasDriverLicense) === 'true',
+            licenseNumber: sessionStorage.getItem(KEYS.licenseNumber) || '',
+            licenseClass: sessionStorage.getItem(KEYS.licenseClass) || '',
+            licenseExpiryDate: sessionStorage.getItem(KEYS.licenseExpiryDate) || '',
+            licenseImageFront: sessionStorage.getItem(KEYS.licenseImageFront) || '',
+            roles: Array.isArray(rawRoles) ? rawRoles : []
+        };
+    }
+
     global.AzuStore = {
         KEYS,
         currentPage,
         currentUrl,
         isLoggedIn,
         isOwner,
+        isAdminOrStaff,
+        getUser,
         syncRoleUi,
         rememberReturnTo,
         consumeReturnTo,

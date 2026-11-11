@@ -65,7 +65,7 @@
       const d = resData.data;
 
       // Update 4 metric cards
-      const metrics = container.querySelectorAll('.admin-metrics .stat-card, .admin-metrics .metric');
+      const metrics = container.querySelectorAll('.admin-metrics .stat-card, .admin-metrics .metric, .admin-metrics .admin-metric');
       if (metrics.length >= 4) {
         // 0: Tổng GMV
         const gmvVal = metrics[0].querySelector('strong, b, .metric__value');

@@ -112,6 +112,7 @@ app.MapControllerRoute("find", "find", new { controller = "Home", action = "Find
 app.MapControllerRoute("become-owner", "become-owner", new { controller = "Home", action = "BecomeOwner" });
 app.MapControllerRoute("carregistermode", "carregistermode", new { controller = "Home", action = "CarRegisterMode" });
 app.MapControllerRoute("account", "account", new { controller = "Home", action = "Account" });
+app.MapControllerRoute("booking-detail", "booking/{id:int}", new { controller = "Home", action = "BookingDetail" });
 app.MapControllerRoute("my-trips", "my-trips", new { controller = "Home", action = "MyTrips" });
 app.MapControllerRoute("support", "support", new { controller = "Home", action = "Support" });
 app.MapControllerRoute("chatbot", "chatbot", new { controller = "Home", action = "Chatbot" });

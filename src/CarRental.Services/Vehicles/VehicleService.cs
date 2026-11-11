@@ -460,6 +460,20 @@ public class VehicleService : IVehicleService
         }
     }
 
+    private static string NormalizeCity(string? city)
+    {
+        if (string.IsNullOrWhiteSpace(city)) return "TP. Đà Nẵng";
+        var trimmed = city.Trim();
+        if (trimmed.Equals("TP. Da Nang", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.Equals("TP Da Nang", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.Equals("Da Nang", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.Equals("Đà Nẵng", StringComparison.OrdinalIgnoreCase))
+        {
+            return "TP. Đà Nẵng";
+        }
+        return trimmed;
+    }
+
     public async Task<ServiceResult<VehicleDetailDto>> CreateVehicleAsync(
         string ownerId, CreateVehicleRequest request, CancellationToken ct = default)
     {
@@ -510,7 +524,7 @@ public class VehicleService : IVehicleService
                 Vehicle = vehicle,
                 PricePerDay = request.PricePerDay,
                 Location = request.Location.Trim(),
-                City = request.City.Trim(),
+                City = NormalizeCity(request.City),
                 District = request.District.Trim(),
                 Latitude = request.Latitude,
                 Longitude = request.Longitude,
@@ -577,7 +591,7 @@ public class VehicleService : IVehicleService
             }
 
             if (request.PricePerDay.HasValue) listing.PricePerDay = request.PricePerDay.Value;
-            if (!string.IsNullOrWhiteSpace(request.City)) listing.City = request.City.Trim();
+            if (!string.IsNullOrWhiteSpace(request.City)) listing.City = NormalizeCity(request.City);
             if (!string.IsNullOrWhiteSpace(request.District)) listing.District = request.District.Trim();
             if (!string.IsNullOrWhiteSpace(request.Location)) listing.Location = request.Location.Trim();
             if (request.Latitude.HasValue) listing.Latitude = request.Latitude.Value;
@@ -782,18 +796,23 @@ public class VehicleService : IVehicleService
     {
         try
         {
-            var summaries = await _db.VehicleListings
+            var rawList = await _db.VehicleListings
                 .AsNoTracking()
                 .Where(l => l.ModerationStatus == ListingModerationStatuses.Public &&
                             l.Vehicle.Status == VehicleStatuses.Approved)
-                .GroupBy(l => l.City)
+                .Select(l => l.City)
+                .ToListAsync(ct);
+
+            var summaries = rawList
+                .Select(c => NormalizeCity(c))
+                .GroupBy(c => c)
                 .Select(g => new CitySummaryDto
                 {
                     City = g.Key,
                     CarCount = g.Count()
                 })
                 .OrderByDescending(x => x.CarCount)
-                .ToListAsync(ct);
+                .ToList();
 
             return ServiceResult<IReadOnlyList<CitySummaryDto>>.Success(summaries);
         }

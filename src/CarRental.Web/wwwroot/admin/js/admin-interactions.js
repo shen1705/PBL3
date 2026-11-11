@@ -37,6 +37,9 @@ const pageTabGroups = {
 
 const setupAdminWorkspace = () => {
   if (!adminMain) return;
+  const realPages = ['owners', 'listings', 'disputes', 'users', 'fees', 'revenue'];
+  if (realPages.includes(adminMain.dataset.page)) return;
+
   const groups = pageTabGroups[adminMain.dataset.page];
   if (!groups) return;
 
@@ -237,6 +240,9 @@ const textForDetail = element => element.innerText
 document.addEventListener("click", event => {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return;
+
+  const realPages = ['owners', 'listings', 'disputes', 'users', 'fees', 'revenue'];
+  if (realPages.includes(adminMain?.dataset.page)) return;
 
   const overviewTab = target.closest("[data-overview-tab]");
   if (overviewTab) return;

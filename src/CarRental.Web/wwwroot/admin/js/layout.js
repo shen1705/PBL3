@@ -61,16 +61,35 @@ function renderHeader() {
       <button class="header__icon-button header__notification" type="button" aria-label="Thông báo" data-admin-notifications>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
       </button>
-      <div class="header__user">
+      <div class="header__user" id="headerUserBtn" style="cursor: pointer; position: relative;">
         <span class="header__avatar">MA</span>
         <div>
           <strong>Minh Anh</strong>
           <small>Quản trị viên</small>
         </div>
         <svg class="header__chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+        <div id="headerUserDropdown" style="display: none; position: absolute; top: calc(100% + 8px); right: 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); min-width: 170px; padding: 6px 0; z-index: 100;">
+          <a href="/account" style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 13px; color: #1e293b; text-decoration: none;">👤 Tài khoản của tôi</a>
+          <a href="/" style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 13px; color: #1e293b; text-decoration: none;">🏠 Trang chủ AZU Car</a>
+          <div style="height: 1px; background: #e2e8f0; margin: 4px 0;"></div>
+          <a href="/logout" style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 13px; color: #ef4444; text-decoration: none; font-weight: 600;">🚪 Đăng xuất</a>
+        </div>
       </div>
     </div>
   `;
+
+  const userBtn = document.getElementById("headerUserBtn");
+  const userDropdown = document.getElementById("headerUserDropdown");
+  if (userBtn && userDropdown) {
+    userBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isShow = userDropdown.style.display === "block";
+      userDropdown.style.display = isShow ? "none" : "block";
+    });
+    document.addEventListener("click", () => {
+      userDropdown.style.display = "none";
+    });
+  }
 }
 
 renderHeader();

@@ -12,7 +12,11 @@ const accountKeys = {
     gender: 'azuCarGender',
     licenseNumber: 'azuCarLicenseNumber',
     licenseHolder: 'azuCarLicenseHolder',
-    licenseBirthday: 'azuCarLicenseBirthday'
+    licenseBirthday: 'azuCarLicenseBirthday',
+    hasDriverLicense: 'azuCarHasDriverLicense',
+    licenseClass: 'azuCarLicenseClass',
+    licenseExpiryDate: 'azuCarLicenseExpiryDate',
+    licenseImageFront: 'azuCarLicenseImageFront'
 };
 
 function formatDate(value) {
@@ -441,6 +445,9 @@ function renderAccountData() {
     if (profileBirthday) profileBirthday.textContent = formatDate(sessionStorage.getItem(accountKeys.birthday)) || 'Chưa cập nhật';
     if (profileGender) profileGender.textContent = sessionStorage.getItem(accountKeys.gender) || 'Chưa cập nhật';
     if (accountTripCount) accountTripCount.textContent = String(window.AzuStore.getTrips().length);
+
+    renderLicenseData();
+    syncUserProfile();
 }
 
 // Profile Form & Dialog
@@ -488,17 +495,85 @@ const licenseUpload = document.getElementById('license-upload');
 const uploadPrompt = document.getElementById('upload-prompt');
 const licenseSaveButton = document.getElementById('license-save-button');
 
+function renderLicenseData() {
+    const licenseStatusBadge = document.getElementById('license-status-badge') || document.querySelector('.license-heading .status');
+    const hasDl = sessionStorage.getItem(accountKeys.hasDriverLicense) === 'true';
+    const licenseNum = sessionStorage.getItem(accountKeys.licenseNumber) || '';
+    const licenseHolder = sessionStorage.getItem(accountKeys.licenseHolder) || sessionStorage.getItem(accountKeys.fullName) || sessionStorage.getItem(accountKeys.name) || '';
+    const licenseBirthday = sessionStorage.getItem(accountKeys.licenseBirthday) || sessionStorage.getItem(accountKeys.birthday) || '1995-01-01';
+    const userName = sessionStorage.getItem(accountKeys.username) || '';
+    let licenseImage = sessionStorage.getItem(accountKeys.licenseImageFront) || '';
+    if (!licenseImage && hasDl && userName) {
+        licenseImage = `/seed/license-${userName.toLowerCase()}.jpg`;
+    }
+
+    if (licenseStatusBadge) {
+        if (hasDl) {
+            licenseStatusBadge.className = 'status status-verified';
+            licenseStatusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã xác thực';
+        } else {
+            licenseStatusBadge.className = 'status status-unverified';
+            licenseStatusBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Chưa xác thực';
+        }
+    }
+
+    if (licenseForm) {
+        if (licenseForm.elements.number) licenseForm.elements.number.value = licenseNum;
+        if (licenseForm.elements.holder) licenseForm.elements.holder.value = licenseHolder;
+        if (licenseForm.elements.birthday) licenseForm.elements.birthday.value = licenseBirthday;
+    }
+
+    if (licenseImagePreview) {
+        if (licenseImage) {
+            licenseImagePreview.src = licenseImage;
+            licenseImagePreview.hidden = false;
+            if (uploadPrompt) uploadPrompt.hidden = true;
+        } else {
+            licenseImagePreview.hidden = true;
+            if (uploadPrompt) uploadPrompt.hidden = false;
+        }
+    }
+}
+
+async function syncUserProfile() {
+    try {
+        const res = await fetch('/api/auth/me', { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const json = await res.json();
+            if (json.isSuccess && json.data) {
+                const u = json.data;
+                const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
+                sessionStorage.setItem(accountKeys.name, displayName);
+                sessionStorage.setItem(accountKeys.fullName, (u.fullName && u.fullName.trim()) || '');
+                if (u.userName) sessionStorage.setItem(accountKeys.username, u.userName);
+                if (u.phoneNumber) sessionStorage.setItem(accountKeys.phone, u.phoneNumber);
+                if (u.email) sessionStorage.setItem(accountKeys.email, u.email);
+                sessionStorage.setItem(accountKeys.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
+                if (u.licenseNumber) sessionStorage.setItem(accountKeys.licenseNumber, u.licenseNumber);
+                if (u.licenseClass) sessionStorage.setItem(accountKeys.licenseClass, u.licenseClass);
+                if (u.licenseExpiryDate) sessionStorage.setItem(accountKeys.licenseExpiryDate, u.licenseExpiryDate);
+                if (u.licenseImageFront) {
+                    sessionStorage.setItem(accountKeys.licenseImageFront, u.licenseImageFront);
+                } else if (u.hasDriverLicense && u.userName) {
+                    sessionStorage.setItem(accountKeys.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
+                }
+                renderLicenseData();
+            }
+        }
+    } catch (e) {
+        console.warn('Sync profile error:', e);
+    }
+}
+
 if (licenseForm) {
-    licenseForm.elements.number.value = sessionStorage.getItem(accountKeys.licenseNumber) || '';
-    licenseForm.elements.holder.value = sessionStorage.getItem(accountKeys.licenseHolder) || '';
-    licenseForm.elements.birthday.value = sessionStorage.getItem(accountKeys.licenseBirthday) || '1970-01-01';
+    renderLicenseData();
 }
 
 function setLicenseEditing(isEditing) {
     licenseInputs.forEach(input => { input.disabled = !isEditing; });
     if (licenseImageInput) {
         licenseImageInput.disabled = !isEditing;
-        licenseImageInput.required = isEditing;
+        licenseImageInput.required = isEditing && !sessionStorage.getItem(accountKeys.hasDriverLicense);
     }
     licenseUpload?.classList.toggle('is-disabled', !isEditing);
     if (licenseSaveButton) licenseSaveButton.hidden = !isEditing;
@@ -513,23 +588,14 @@ function setLicenseEditing(isEditing) {
 licenseEditButton?.addEventListener('click', () => {
     const isEditing = licenseInputs.some(input => !input.disabled);
     if (isEditing) {
-        if (licenseForm) {
-            licenseForm.elements.number.value = sessionStorage.getItem(accountKeys.licenseNumber) || '';
-            licenseForm.elements.holder.value = sessionStorage.getItem(accountKeys.licenseHolder) || '';
-            licenseForm.elements.birthday.value = sessionStorage.getItem(accountKeys.licenseBirthday) || '1970-01-01';
-        }
+        renderLicenseData();
         if (licenseImageInput) licenseImageInput.value = '';
-        if (licenseImagePreview) {
-            licenseImagePreview.src = '';
-            licenseImagePreview.hidden = true;
-        }
-        if (uploadPrompt) uploadPrompt.hidden = false;
         setLicenseEditing(false);
         return;
     }
 
     setLicenseEditing(true);
-    licenseForm?.elements.number.focus();
+    licenseForm?.elements.number?.focus();
 });
 
 licenseImageInput?.addEventListener('change', () => {
@@ -562,10 +628,24 @@ licenseForm?.addEventListener('submit', (e) => {
     if (!licenseForm.reportValidity()) return;
 
     const values = new FormData(licenseForm);
-    sessionStorage.setItem(accountKeys.licenseNumber, String(values.get('number') || '').trim());
-    sessionStorage.setItem(accountKeys.licenseHolder, String(values.get('holder') || '').trim());
-    sessionStorage.setItem(accountKeys.licenseBirthday, String(values.get('birthday') || ''));
+    const num = String(values.get('number') || '').trim();
+    const holder = String(values.get('holder') || '').trim();
+    const bday = String(values.get('birthday') || '');
+
+    sessionStorage.setItem(accountKeys.licenseNumber, num);
+    sessionStorage.setItem(accountKeys.licenseHolder, holder);
+    sessionStorage.setItem(accountKeys.licenseBirthday, bday);
+    sessionStorage.setItem(accountKeys.hasDriverLicense, 'true');
+
+    const userName = sessionStorage.getItem(accountKeys.username) || 'renter1';
+    if (!sessionStorage.getItem(accountKeys.licenseImageFront)) {
+        sessionStorage.setItem(accountKeys.licenseImageFront, `/seed/license-${userName.toLowerCase()}.jpg`);
+    }
+
+    renderLicenseData();
     setLicenseEditing(false);
+    alert('Đã cập nhật và lưu thông tin Giấy phép lái xe thành công!');
+    window.dispatchEvent(new CustomEvent('azu:auth-changed'));
 });
 
 // Dialog Close Buttons & ESC

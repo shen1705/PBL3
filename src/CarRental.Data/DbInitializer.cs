@@ -303,6 +303,23 @@ public static class DbInitializer
             }
         }
 
+        // normalize locations
+        var nonAccentDaNangListings = await db.VehicleListings
+            .Where(l => l.City == "TP. Da Nang" || l.City == "Da Nang" || l.City == "TP Da Nang")
+            .ToListAsync();
+        foreach (var l in nonAccentDaNangListings)
+        {
+            l.City = "TP. Đà Nẵng";
+            if (!string.IsNullOrEmpty(l.Location))
+            {
+                l.Location = l.Location.Replace("TP. Da Nang", "TP. Đà Nẵng")
+                                       .Replace("TP Da Nang", "TP. Đà Nẵng")
+                                       .Replace("Quan Hai Chau", "Hải Châu")
+                                       .Replace("Hai Chau", "Hải Châu");
+            }
+            if (l.District == "Hai Chau") l.District = "Hải Châu";
+        }
+
         await db.SaveChangesAsync();
 
         // refresh ids

@@ -9,11 +9,6 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        if (User.Identity?.IsAuthenticated == true &&
-            (User.IsInRole(RoleNames.Admin) || User.IsInRole(RoleNames.Staff)))
-        {
-            return Redirect("/admin/users.html");
-        }
         return View();
     }
 
@@ -26,6 +21,12 @@ public class HomeController : Controller
     public IActionResult CarRegisterMode() => View();
 
     public IActionResult Account() => View();
+
+    public IActionResult BookingDetail(int id)
+    {
+        ViewData["BookingId"] = id;
+        return View();
+    }
 
     public IActionResult MyTrips() => RedirectPermanent("/account#trips");
 
