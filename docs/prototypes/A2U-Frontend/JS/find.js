@@ -1431,7 +1431,7 @@ function renderAvailabilityCalendar() {
 
     if (selectionText) {
         if (calSelectedStart && calSelectedEnd) {
-            const days = Math.max(1, Math.round((calSelectedEnd - calSelectedStart) / 86400000));
+            const days = Math.max(1, Math.round((calSelectedEnd.getTime() - calSelectedStart.getTime()) / 86400000) + 1);
             selectionText.innerHTML = `Đang chọn: <strong>${formatVNShortDate(calSelectedStart)}</strong> đến <strong>${formatVNShortDate(calSelectedEnd)}</strong> (${days} ngày)`;
             if (resetBtn) resetBtn.style.display = 'inline-flex';
         } else if (calSelectedStart) {
@@ -1776,7 +1776,7 @@ function openCarPopup(car) {
 function updatePricingCalculation(overrideDailyVND) {
     let days = 1;
     if (calSelectedStart && calSelectedEnd) {
-        days = Math.max(1, Math.round((calSelectedEnd.getTime() - calSelectedStart.getTime()) / 86400000));
+        days = Math.max(1, Math.round((calSelectedEnd.getTime() - calSelectedStart.getTime()) / 86400000) + 1);
     }
 
     let rawDaily = overrideDailyVND;
@@ -1929,7 +1929,9 @@ async function refreshBookingPrice() {
     }
 
     const rawDaily = currentPopupCar.rawPrice || 700000;
-    const days = Math.max(1, Math.round((dates.end - dates.start) / (1000 * 3600 * 24)));
+    const sZero = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate());
+    const eZero = new Date(dates.end.getFullYear(), dates.end.getMonth(), dates.end.getDate());
+    const days = Math.max(1, Math.round((eZero.getTime() - sZero.getTime()) / 86400000) + 1);
     const subtotal = rawDaily * days;
     const delivery = deliveryMethod === 'delivery' ? 100000 : 0;
     const ins = 50000 * days;
@@ -2174,7 +2176,11 @@ function openPaymentSimulationModal() {
 
     const paySimCarMeta = document.getElementById('paySimCarMeta');
     if (paySimCarMeta) {
-        const days = Math.max(1, Math.round((new Date(pendingBookingData.payload.endDate) - new Date(pendingBookingData.payload.startDate)) / 86400000));
+        const sDate = new Date(pendingBookingData.payload.startDate);
+        const eDate = new Date(pendingBookingData.payload.endDate);
+        const sZero = new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate());
+        const eZero = new Date(eDate.getFullYear(), eDate.getMonth(), eDate.getDate());
+        const days = Math.max(1, Math.round((eZero.getTime() - sZero.getTime()) / 86400000) + 1);
         paySimCarMeta.textContent = `Thuê xe ${pendingBookingData.display.carName} • ${days} ngày • Ký quỹ 25%`;
     }
 

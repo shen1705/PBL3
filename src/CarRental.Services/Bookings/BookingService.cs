@@ -85,7 +85,8 @@ public class BookingService : IBookingService
         if (listing == null)
             return ServiceResult<BookingPriceCalculationDto>.Fail("Không tìm thấy thông tin tin đăng xe.", ErrorCodes.NotFound);
 
-        int rentalDays = (int)Math.Ceiling((request.EndDate - request.StartDate).TotalDays);
+        // Tính số ngày thuê theo lịch (bao gồm cả ngày nhận xe và ngày trả xe)
+        int rentalDays = (int)Math.Round((request.EndDate.Date - request.StartDate.Date).TotalDays) + 1;
         if (rentalDays < 1) rentalDays = 1;
 
         decimal rentalSubtotal = listing.PricePerDay * rentalDays;
@@ -189,7 +190,7 @@ public class BookingService : IBookingService
             return ServiceResult<BookingDetailDto>.Fail(avail.Message ?? "Xe đã có đơn thuê hoặc bận trong khoảng thời gian này.", ErrorCodes.Conflict);
 
         // calculate price
-        int rentalDays = (int)Math.Ceiling((request.EndDate - request.StartDate).TotalDays);
+        int rentalDays = (int)Math.Round((request.EndDate.Date - request.StartDate.Date).TotalDays) + 1;
         if (rentalDays < 1) rentalDays = 1;
 
         decimal rentalSubtotal = listing.PricePerDay * rentalDays;
