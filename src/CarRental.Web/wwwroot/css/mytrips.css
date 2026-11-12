@@ -261,9 +261,45 @@ body {
 
 /* Danh sách chuyến đi */
 .trips-tabs[hidden],
+.trips-history-filters[hidden],
 .trips-list[hidden],
 .trips-empty-state[hidden] {
     display: none;
+}
+
+.trips-history-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: -8px 0 18px 0;
+    flex-wrap: wrap;
+}
+
+.history-filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 14px;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.history-filter-pill:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+.history-filter-pill.active {
+    background: #1c2635;
+    color: #fff;
+    border-color: #1c2635;
 }
 
 .trips-list {
@@ -494,6 +530,18 @@ body {
 
 .trip-detail-action.is-primary:hover:not(:disabled) {
     background: #334155;
+}
+
+.trip-detail-action.is-danger {
+    border-color: #dc2626;
+    background: #dc2626;
+    color: #fff;
+}
+
+.trip-detail-action.is-danger:hover:not(:disabled) {
+    border-color: #b91c1c;
+    background: #b91c1c;
+    color: #fff;
 }
 
 .trip-detail-action-feedback {

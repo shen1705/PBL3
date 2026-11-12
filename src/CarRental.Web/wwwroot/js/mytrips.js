@@ -681,6 +681,7 @@ document.addEventListener('keydown', (e) => {
 // Trips Logic
 let trips = window.AzuStore.getTrips();
 let activeTripType = 'current';
+let activeHistoryFilter = 'all';
 let reviewModal;
 let activeReviewTrip;
 
@@ -981,11 +982,11 @@ function renderTripDetail(booking, tab = 'overview') {
         if (status === 'Pending') {
             title = 'Đang chờ chủ xe duyệt';
             description = 'Lịch xe đang được giữ trong thời gian chờ phản hồi.';
-            actions = '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="cancel">Hủy đơn</button>';
+            actions = '<button type="button" class="trip-detail-action is-danger" data-trip-detail-action="cancel">Hủy đơn</button>';
         } else if (status === 'Accepted') {
             title = userConfirmedPickup ? 'Chờ xác nhận nhận xe' : 'Đơn đã được duyệt';
             description = userConfirmedPickup ? 'Bạn đã xác nhận, chờ bên còn lại hoàn tất bàn giao.' : 'Kiểm tra xe và mở biên bản nhận xe để xác nhận.';
-            actions = `${userConfirmedPickup ? '' : '<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">Mở biên bản nhận xe</button>'}${canCancel ? '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="cancel">Hủy đơn</button>' : ''}`;
+            actions = `${userConfirmedPickup ? '' : '<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">Mở biên bản nhận xe</button>'}${canCancel ? '<button type="button" class="trip-detail-action is-danger" data-trip-detail-action="cancel">Hủy đơn</button>' : ''}`;
         } else if (status === 'Ongoing') {
             title = userConfirmedReturn ? 'Chờ xác nhận trả xe' : 'Chuyến đang diễn ra';
             description = userConfirmedReturn ? 'Bạn đã xác nhận trả xe, chờ bên còn lại hoàn tất.' : 'Mở biên bản trả xe để ghi nhận tình trạng và xác nhận.';
@@ -1224,6 +1225,7 @@ async function openTripDetails(bookingId) {
     const tripsHeading = document.getElementById('trips-title')?.closest('.section-page-heading');
     if (tripsHeading) tripsHeading.hidden = true;
     document.querySelector('.trips-tabs')?.setAttribute('hidden', '');
+    document.getElementById('trips-history-filters')?.setAttribute('hidden', '');
     tripsList.hidden = true;
     tripsEmpty.hidden = true;
     tripDetailView.hidden = false;
@@ -1282,6 +1284,16 @@ async function renderTrips() {
     if (tripsHeading) tripsHeading.hidden = false;
     if (tripDetailView) tripDetailView.hidden = true;
     document.querySelector('.trips-tabs')?.removeAttribute('hidden');
+
+    const historyFiltersEl = document.getElementById('trips-history-filters');
+    if (historyFiltersEl) {
+        if (activeTripType === 'past') {
+            historyFiltersEl.removeAttribute('hidden');
+        } else {
+            historyFiltersEl.setAttribute('hidden', '');
+        }
+    }
+
     tripsList.replaceChildren();
     const loadingEl = document.createElement('div');
     loadingEl.style.padding = '32px 16px';
@@ -1294,9 +1306,10 @@ async function renderTrips() {
 
     let apiTrips = [];
     try {
+        const queryStatus = activeTripType === 'current' ? 'current' : 'past';
         const [renterResponse, ownerResponse] = await Promise.all([
-            fetch(`/api/bookings/my-trips?status=${encodeURIComponent(activeTripType)}`),
-            fetch(`/api/bookings/owner-requests?status=${encodeURIComponent(activeTripType)}`)
+            fetch(`/api/bookings/my-trips?status=${encodeURIComponent(queryStatus)}`),
+            fetch(`/api/bookings/owner-requests?status=${encodeURIComponent(queryStatus)}`)
         ]);
         const [renterResult, ownerResult] = await Promise.all([
             renterResponse.ok ? renterResponse.json() : null,
@@ -1313,11 +1326,26 @@ async function renderTrips() {
         console.warn('Không thể tải danh sách chuyến từ API, dùng dữ liệu local:', e);
     }
 
+    if (activeTripType === 'past' && activeHistoryFilter !== 'all') {
+        if (activeHistoryFilter === 'Completed') {
+            apiTrips = apiTrips.filter(t => t.status === 'Completed');
+        } else if (activeHistoryFilter === 'Cancelled') {
+            apiTrips = apiTrips.filter(t => ['Cancelled', 'Rejected', 'Expired'].includes(t.status));
+        }
+    }
+
     tripsList.replaceChildren();
 
     if (apiTrips.length === 0) {
         const localTrips = window.AzuStore?.getTrips ? window.AzuStore.getTrips() : [];
-        const visibleTrips = localTrips.filter(trip => tripIsCurrent(trip) === (activeTripType === 'current'));
+        let visibleTrips = localTrips.filter(trip => tripIsCurrent(trip) === (activeTripType === 'current'));
+        if (activeTripType === 'past' && activeHistoryFilter !== 'all') {
+            if (activeHistoryFilter === 'Completed') {
+                visibleTrips = visibleTrips.filter(t => (t.status || '').toLowerCase() === 'completed');
+            } else if (activeHistoryFilter === 'Cancelled') {
+                visibleTrips = visibleTrips.filter(t => ['cancelled', 'rejected', 'expired'].includes((t.status || '').toLowerCase()));
+            }
+        }
 
         if (!visibleTrips.length) {
             tripsList.hidden = true;
@@ -1325,12 +1353,20 @@ async function renderTrips() {
             if (emptyTripsTitle) {
                 emptyTripsTitle.textContent = activeTripType === 'current'
                     ? 'Bạn chưa có chuyến đi nào'
-                    : 'Chưa có chuyến đi trong lịch sử';
+                    : activeHistoryFilter === 'Completed'
+                        ? 'Chưa có chuyến đi hoàn tất nào'
+                        : activeHistoryFilter === 'Cancelled'
+                            ? 'Chưa có chuyến đi đã hủy nào'
+                            : 'Chưa có chuyến đi trong lịch sử';
             }
             if (emptyTripsDescription) {
                 emptyTripsDescription.textContent = activeTripType === 'current'
                     ? 'Hãy lên kế hoạch cho chuyến hành trình sắp tới và trải nghiệm dịch vụ xe tự lái cao cấp từ AZU Car ngay hôm nay.'
-                    : 'Các chuyến đi đã hoàn tất sẽ được lưu lại tại đây.';
+                    : activeHistoryFilter === 'Completed'
+                        ? 'Các chuyến đi hoàn tất thành công sẽ được hiển thị tại đây.'
+                        : activeHistoryFilter === 'Cancelled'
+                            ? 'Các đơn thuê bị hủy hoặc hết hạn sẽ được hiển thị tại đây.'
+                            : 'Các chuyến đi đã hoàn tất sẽ được lưu lại tại đây.';
             }
             return;
         }
@@ -1614,8 +1650,10 @@ async function renderTrips() {
         if (trip.status === 'Pending' || trip.status === 'Accepted') {
             const cancelBtn = document.createElement('button');
             cancelBtn.type = 'button';
-            cancelBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            cancelBtn.style.cssText = 'background: #dc2626; color: #fff; border: 1px solid #dc2626; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;';
             cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Hủy chuyến này';
+            cancelBtn.addEventListener('mouseenter', () => { cancelBtn.style.background = '#b91c1c'; });
+            cancelBtn.addEventListener('mouseleave', () => { cancelBtn.style.background = '#dc2626'; });
             cancelBtn.addEventListener('click', async () => {
                 const reason = prompt('Nhập lý do hủy chuyến:');
                 if (reason === null) return;
@@ -1676,6 +1714,22 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
             item.classList.toggle('active', isActive);
             item.setAttribute('aria-selected', String(isActive));
         });
+        if (activeTripType === 'past') {
+            activeHistoryFilter = 'all';
+            document.querySelectorAll('.history-filter-pill').forEach(pill => {
+                pill.classList.toggle('active', (pill.dataset.historyFilter || 'all') === 'all');
+            });
+        }
+        renderTrips();
+    });
+});
+
+document.querySelectorAll('.history-filter-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+        document.querySelectorAll('.history-filter-pill').forEach(item => {
+            item.classList.toggle('active', item === pill);
+        });
+        activeHistoryFilter = pill.dataset.historyFilter || 'all';
         renderTrips();
     });
 });

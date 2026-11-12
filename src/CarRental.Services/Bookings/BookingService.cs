@@ -288,7 +288,17 @@ public class BookingService : IBookingService
                                          b.Status == BookingStatuses.Accepted ||
                                          b.Status == BookingStatuses.Ongoing);
             }
-            else if (filter == "completed" || filter == "history" || filter == "past")
+            else if (filter == "completed")
+            {
+                query = query.Where(b => b.Status == BookingStatuses.Completed);
+            }
+            else if (filter == "cancelled" || filter == "canceled")
+            {
+                query = query.Where(b => b.Status == BookingStatuses.Cancelled ||
+                                         b.Status == BookingStatuses.Rejected ||
+                                         b.Status == BookingStatuses.Expired);
+            }
+            else if (filter == "history" || filter == "past")
             {
                 query = query.Where(b => b.Status == BookingStatuses.Completed ||
                                          b.Status == BookingStatuses.Cancelled ||
@@ -379,6 +389,16 @@ public class BookingService : IBookingService
                 query = query.Where(b => b.Status == BookingStatuses.Pending ||
                                          b.Status == BookingStatuses.Accepted ||
                                          b.Status == BookingStatuses.Ongoing);
+            }
+            else if (filter == "completed")
+            {
+                query = query.Where(b => b.Status == BookingStatuses.Completed);
+            }
+            else if (filter == "cancelled" || filter == "canceled")
+            {
+                query = query.Where(b => b.Status == BookingStatuses.Cancelled ||
+                                         b.Status == BookingStatuses.Rejected ||
+                                         b.Status == BookingStatuses.Expired);
             }
             else if (filter == "history" || filter == "past")
             {

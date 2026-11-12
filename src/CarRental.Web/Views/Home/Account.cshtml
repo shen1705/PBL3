@@ -158,6 +158,13 @@
                     <button class="trip-tab" id="past-trips-tab" type="button" role="tab" aria-selected="false" data-trip-type="past">Lịch sử chuyến</button>
                 </div>
 
+                <div class="trips-history-filters" id="trips-history-filters" hidden>
+                    <span style="font-size: 13px; color: #64748b; font-weight: 600; margin-right: 4px;">Trạng thái:</span>
+                    <button type="button" class="history-filter-pill active" data-history-filter="all">Tất cả</button>
+                    <button type="button" class="history-filter-pill" data-history-filter="Completed">Hoàn tất</button>
+                    <button type="button" class="history-filter-pill" data-history-filter="Cancelled">Đã hủy</button>
+                </div>
+
                 <section class="trips-list" id="trips-list" hidden aria-live="polite"></section>
                 <section class="trips-empty-state" id="trips-empty" aria-labelledby="empty-trips-title">
                     <div class="empty-art" aria-hidden="true">
