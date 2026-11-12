@@ -219,6 +219,11 @@ namespace CarRental.Data.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
 
+                    b.Property<decimal?>("DeliveryFee")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)")
+                        .HasColumnName("delivery_fee");
+
                     b.Property<decimal>("DepositAmount")
                         .HasPrecision(12, 2)
                         .HasColumnType("decimal(12,2)")
@@ -227,6 +232,11 @@ namespace CarRental.Data.Migrations
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("end_date");
+
+                    b.Property<decimal?>("InsuranceFee")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)")
+                        .HasColumnName("insurance_fee");
 
                     b.Property<int>("ListingId")
                         .HasColumnType("int")
@@ -237,6 +247,11 @@ namespace CarRental.Data.Migrations
                         .HasColumnType("decimal(12,2)")
                         .HasColumnName("price_locked_total");
 
+                    b.Property<decimal?>("PricePerDayAtBooking")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)")
+                        .HasColumnName("price_per_day_at_booking");
+
                     b.Property<string>("RejectReason")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
@@ -245,6 +260,11 @@ namespace CarRental.Data.Migrations
                     b.Property<int>("RentalDays")
                         .HasColumnType("int")
                         .HasColumnName("rental_days");
+
+                    b.Property<decimal?>("RentalSubtotal")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)")
+                        .HasColumnName("rental_subtotal");
 
                     b.Property<string>("RenterId")
                         .IsRequired()
@@ -273,6 +293,10 @@ namespace CarRental.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("status");
+
+                    b.Property<DateTime?>("TermsAcceptedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("terms_accepted_at");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int")
@@ -484,6 +508,25 @@ namespace CarRental.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("confirmed_by");
+
+                    b.Property<string>("FuelLevel")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("fuel_level");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("notes");
+
+                    b.Property<int?>("Odometer")
+                        .HasColumnType("int")
+                        .HasColumnName("odometer");
+
+                    b.Property<string>("RemainingPaymentMethod")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("remaining_payment_method");
 
                     b.Property<string>("Type")
                         .IsRequired()

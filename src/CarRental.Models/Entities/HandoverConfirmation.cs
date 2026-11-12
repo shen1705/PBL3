@@ -15,6 +15,13 @@ public class HandoverConfirmation
     [Required, MaxLength(255)]
     public string ConfirmedBy { get; set; } = string.Empty;
     public DateTime ConfirmedAt { get; set; } = DateTime.UtcNow;
+    public int? Odometer { get; set; }
+    [MaxLength(20)]
+    public string? FuelLevel { get; set; }
+    [MaxLength(1000)]
+    public string? Notes { get; set; }
+    [MaxLength(20)]
+    public string? RemainingPaymentMethod { get; set; }
 
     public Booking Booking { get; set; } = null!;
     public ApplicationUser Confirmer { get; set; } = null!;

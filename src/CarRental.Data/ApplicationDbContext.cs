@@ -163,6 +163,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             b.HasKey(x => x.BookingId);
             b.Property(x => x.PriceLockedTotal).HasPrecision(12, 2);
             b.Property(x => x.DepositAmount).HasPrecision(12, 2);
+            b.Property(x => x.PricePerDayAtBooking).HasPrecision(12, 2);
+            b.Property(x => x.RentalSubtotal).HasPrecision(12, 2);
+            b.Property(x => x.DeliveryFee).HasPrecision(12, 2);
+            b.Property(x => x.InsuranceFee).HasPrecision(12, 2);
             b.HasIndex(x => x.SourceHoldId).IsUnique();
             b.HasIndex(x => new { x.VehicleId, x.Status, x.StartDate, x.EndDate });
             b.HasIndex(x => new { x.Status, x.ResponseDeadline });

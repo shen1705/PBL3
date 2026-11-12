@@ -1,0 +1,171 @@
+/* AZU Car v4 — scale to approved mockup; official AZU symbol from PBL3/develop. */
+:root{--gold:#c99d51;--gold-dark:#99651a;--gold-light:#fbf0df;}
+body{font-size:14px;background:radial-gradient(ellipse 690px 400px at 86% 18%,rgba(241,210,175,.16),transparent 74%),#f7f5f4;}
+/* Sidebar content fits a normal laptop viewport without its own scroll track. */
+.sidebar{width:250px;min-width:250px;height:100dvh;}
+.brand{height:79px;min-height:79px;gap:9px;padding:0 22px;font-size:24px;letter-spacing:-.75px;font-weight:750;}
+.brand-logo{width:41px;height:41px;display:block;flex:0 0 41px;object-fit:contain;}
+.brand-name{display:inline-flex;align-items:baseline;gap:4px;white-space:nowrap;}
+.brand-name strong{font-weight:800;}
+.brand-name .gold{font-weight:550;color:#c7994f;}
+.nav-groups{padding:13px 12px 6px;overflow-y:auto;scrollbar-width:none;}
+.nav-groups::-webkit-scrollbar{display:none;}
+.nav-group{margin-bottom:12px;}
+.nav-group:not(:last-child){padding-bottom:10px;}
+.nav-group p{font-size:11px;letter-spacing:.7px;margin:7px 12px 9px;}
+.nav-link{font-size:14px;min-height:44px;padding:10px 13px;gap:12px;border-radius:8px;}
+.nav-link svg{width:20px;height:20px;stroke-width:1.8;}
+.nav-link.active:before{top:8px;bottom:8px;width:3px;}
+.nav-count{font-size:10px;min-width:21px;}
+.sidebar-foot{padding:8px 12px 12px;}
+.sidebar-foot:before{margin:0 10px 7px;}
+.sidebar-foot .nav-link{min-height:43px;}
+/* Header and general typography match the reference proportions. */
+.topbar{height:78px;padding:0 32px;}
+.breadcrumb{font-size:14px;gap:5px;}
+.crumb-home svg{width:20px;height:20px;}
+.topbar-actions{gap:18px;}
+.icon-btn svg{width:21px;height:21px;}
+.profile .avatar{width:41px;height:41px;}
+.profile-text strong{font-size:14px;}.profile-text small{font-size:12px;}
+.demo-chip{font-size:10px;padding:6px 9px;}
+main{padding:30px 32px 45px;min-height:calc(100vh - 115px);}
+.hero{min-height:64px;margin-bottom:18px;}
+.hero h1,.overview-top .hero h1{font-size:37px;letter-spacing:-1.15px;font-weight:800;margin-bottom:7px;line-height:1.22;}
+.hero p{font-size:14px;line-height:1.5;}
+.overview-top{padding-top:4px;min-height:132px;margin-bottom:0;}
+.overview-top:before{inset:-30px -32px -45px 40%;}
+.overview-top:after{right:-32px;top:-30px;height:195px;width:min(555px,52%);opacity:.8;}
+.overview-top .hero-actions{bottom:4px;}
+.overview-top .hero-actions .btn{padding:8px 11px;min-height:34px;font-size:12px;}
+/* KPI cards: enough room for labels on 1366–1600px desktops. */
+.stats-grid{gap:14px;margin:0 0 29px;}
+.stat-card{min-height:149px;gap:12px;padding:21px 17px;border-radius:14px;box-shadow:0 7px 18px rgba(34,43,56,.055);}
+.stat-icon{width:43px;height:43px;flex:0 0 43px;border-radius:10px;}
+.stat-icon svg{width:22px;height:22px;}
+.stat-content{min-width:0;}
+.stat-top{font-size:14px;min-height:24px;line-height:1.3;font-weight:550;}
+.stat-value{font-size:27px;line-height:1.2;white-space:nowrap;letter-spacing:-.85px;margin:8px 0 8px;}
+.stat-foot{font-size:11px;line-height:1.4;}
+/* Pending queue sizes: closer to reference image. */
+.panel{padding:20px 20px;border-radius:14px;}
+.panel-heading h2{font-size:22px;letter-spacing:-.3px;}
+.panel-heading small{font-size:11px;}
+.pending-panel{padding:19px 19px 20px;}
+.pending-panel .panel-heading{margin-bottom:18px;}
+.pending-panel .badge.pending{font-size:14px;padding:4px 10px;}
+.pending-grid{gap:13px;}
+.pending-tile{min-height:83px;padding:15px 17px;gap:12px;border-radius:11px;}
+.pending-tile>svg{width:28px;height:28px;}
+.tile-copy{gap:6px;}
+.tile-copy strong{font-size:15px;}.tile-copy small{font-size:12px;}
+.pending-tile .number{font-size:23px;}
+.pending-tile .chevron{font-size:23px;}
+.overview-more{margin-top:16px;}
+.overview-more summary{font-size:12px;padding:9px 12px;}
+#content:not(:has(.overview-top)) .hero h1{font-size:29px;}
+#content:not(:has(.overview-top)) .stat-card{min-height:118px;padding:17px 15px;}
+#content:not(:has(.overview-top)) .stat-value{font-size:25px;}
+footer{font-size:10px;}
+@media (max-width:1370px) and (min-width:1081px){
+ .sidebar{width:235px;min-width:235px;}
+ .topbar{padding:0 26px;}
+ main{padding:27px 25px 40px;}
+ .stat-card{padding:17px 12px;gap:9px;}
+ .stat-icon{width:38px;height:38px;flex-basis:38px;}
+ .stat-value{font-size:24px;}
+ .stat-top{font-size:12px;}
+ .stat-foot{font-size:10px;}
+ .pending-tile{padding:13px 12px;gap:9px;}
+}
+@media(max-width:1080px){
+ .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+ .stat-value{font-size:28px;}
+ .pending-grid{grid-template-columns:1fr;}
+ .sidebar{width:225px;min-width:225px;}
+}
+@media(max-width:740px){
+ .sidebar{width:260px;min-width:260px;}
+ .topbar{height:68px;padding:0 12px;}
+ main{padding:19px 15px 40px;}
+ .hero h1,.overview-top .hero h1{font-size:28px;}
+ .hero p{font-size:12px;}
+ .overview-top{min-height:109px;}
+ .overview-top:after{display:none;}
+ .stat-card{padding:15px 12px;min-height:126px;display:block;}
+ .stat-icon{width:32px;height:32px;}
+ .stat-top{font-size:12px;min-height:0;}
+ .stat-value{font-size:22px;white-space:normal;}
+ .stat-foot{font-size:10px;}
+ .pending-tile{min-height:72px;}
+}
+@media (max-height:720px) and (min-width:741px){
+ .brand{height:69px;min-height:69px;}
+ .nav-groups{padding-top:6px;}
+ .nav-group{margin-bottom:5px;}
+ .nav-group:not(:last-child){padding-bottom:4px;}
+ .nav-link{min-height:39px;padding:8px 13px;}
+ .nav-group p{margin:4px 12px 6px;}
+}
+/* Align original AZU emblem and wordmark with approved identity placement. */
+@media(min-width:741px){.brand{padding-left:37px;padding-right:14px;}}
+
+/* v4.1 refinements: proper chevrons + revenue chart */
+.profile-chevron{display:inline-flex;align-items:center;justify-content:center;color:#556273;padding-left:8px;line-height:0}
+.profile-chevron svg{width:18px;height:18px;display:block}
+.pending-tile .chevron,.summary-chevron,.inline-chevron{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:#667586}
+.pending-tile .chevron svg{width:18px;height:18px}
+.summary-chevron svg,.inline-chevron svg{width:16px;height:16px}
+.overview-more summary{gap:8px}
+.overview-more summary .summary-chevron{margin-left:4px}
+.overview-more[open] summary .summary-chevron{transform:rotate(180deg)}
+.inline-link{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;color:#9a6a24;font-weight:650;padding:0}
+.revenue-layout{align-items:stretch}
+.revenue-chart-panel{overflow:hidden}
+.chart-legend{display:flex;flex-wrap:wrap;gap:14px;margin:-2px 0 12px;font-size:12px;color:#637386}
+.legend-item{display:inline-flex;align-items:center;gap:7px}
+.legend-swatch,.mini-tag{width:12px;height:12px;border-radius:3px;display:inline-block;vertical-align:middle}
+.legend-swatch.total,.mini-tag.total{background:linear-gradient(180deg,#dbb36b,#c99d51)}
+.legend-swatch.commission,.mini-tag.commission{background:#e8f0f6;border:1px solid #cfd9e2}
+.bar-chart{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:end;min-height:260px;padding:18px 12px 8px;border:1px solid #edeff3;border-radius:12px;background:linear-gradient(180deg,#fcfcfd,#f8f9fb)}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.bar-value{font-size:11px;color:#697789;font-weight:650;white-space:nowrap}
+.bar-track{height:170px;width:42px;border-radius:12px;background:linear-gradient(180deg,#f3f5f7,#eceff3);display:flex;align-items:flex-end;padding:4px;position:relative}
+.bar-fill{width:100%;border-radius:9px 9px 8px 8px;background:linear-gradient(180deg,#dfb974 0%,#c99d51 100%);box-shadow:0 6px 12px rgba(201,157,81,.22)}
+.bar-col small{font-size:12px;color:#607083;font-weight:700}
+.chart-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.chart-meta div{padding:12px 14px;border-radius:10px;background:#faf8f5;border:1px solid #efe8de}
+.chart-meta strong{display:block;font-size:18px;margin-bottom:4px;color:#1a2940}
+.chart-meta span{font-size:12px;color:#6c7888}
+.source-note{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:10px;background:#f6f8fa;border:1px solid #e8edf2;font-size:12px;color:#5c6f81;margin-top:10px}
+.source-note svg{width:16px;height:16px;flex:0 0 16px}
+@media(max-width:1080px){
+  .bar-chart{grid-template-columns:repeat(3,minmax(0,1fr));min-height:auto}
+  .bar-track{height:140px}
+  .chart-meta{grid-template-columns:1fr}
+}
+@media(max-width:740px){
+  .bar-chart{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px 8px}
+  .bar-track{width:34px;height:110px}
+  .chart-legend{font-size:11px;gap:10px}
+}
+
+/* v4.2 visual fixes: documented order-based demo data */
+.bar-chart{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.commission-label{display:block;white-space:nowrap;text-align:center;color:#496b82;background:#e8f0f6;border:1px solid #d3e0ea;border-radius:7px;padding:5px 6px;font-size:10px;font-weight:750;line-height:1.2}
+@media(max-width:1080px){.bar-chart{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:740px){.bar-chart{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* v4.3: chỉ tinh chỉnh sidebar theo yêu cầu, không ảnh hưởng nội dung trang khác. */
+.nav-logout {border-top:1px solid #e9edf1; margin:12px 9px 0; padding:10px 0 0;}
+.nav-logout .nav-link {color:#a83631; font-weight:600;}
+.nav-logout .nav-link:hover {background:#fff4f2;}
+.nav-demo-note {display:flex;align-items:flex-start;gap:9px;margin:14px 11px 8px;padding:11px 10px;background:#f8f7f4;border:1px solid #ebe6dc;border-radius:9px;color:#637183;}
+.nav-demo-dot {width:7px;height:7px;flex:0 0 7px;margin-top:6px;border-radius:50%;background:#c99d51;}
+.nav-demo-note strong {display:block;font-size:11px;line-height:1.35;color:#425269;letter-spacing:.15px;}
+.nav-demo-note small {display:block;margin-top:4px;font-size:10px;line-height:1.3;color:#788797;}
+/* Sidebar footer remains a subtle version label, never a distant logout action. */
+.sidebar-foot {border:0;padding:2px 15px 10px;}
+.sidebar-foot small {font-size:10px;color:#a1aab4;padding:0 10px;}
+.sidebar-foot:before {display:none;}
+@media (max-width:740px) {.nav-demo-note{margin-bottom:6px;}}

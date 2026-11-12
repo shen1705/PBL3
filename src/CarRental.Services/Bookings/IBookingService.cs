@@ -18,6 +18,8 @@ public interface IBookingService
 
     Task<ServiceResult<BookingDetailDto>> GetBookingDetailAsync(int bookingId, string currentUserId, CancellationToken ct = default);
 
+    Task<ServiceResult<BookingDetailDto>> AcceptTermsAsync(int bookingId, string renterUserId, CancellationToken ct = default);
+
     Task<ServiceResult<BookingDetailDto>> RespondToBookingAsync(int bookingId, RespondBookingRequest request, string ownerUserId, CancellationToken ct = default);
 
     Task<ServiceResult<BookingDetailDto>> CancelBookingAsync(int bookingId, CancelBookingRequest request, string currentUserId, CancellationToken ct = default);

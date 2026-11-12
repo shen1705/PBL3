@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CarRental.Models.DTOs.Vehicles;
 
 namespace CarRental.Models.DTOs.Bookings;
 
@@ -13,6 +14,11 @@ public class BookingDetailDto
     public string? CoverImageUrl { get; set; }
     public string? City { get; set; }
     public string? District { get; set; }
+    public string VehicleStatus { get; set; } = string.Empty;
+    public string ListingModerationStatus { get; set; } = string.Empty;
+    public bool IsVehicleAvailableForRent { get; set; }
+    public List<DateRangeDto> BlockedRanges { get; set; } = new();
+    public List<DateRangeDto> BookedRanges { get; set; } = new();
 
     // Renter
     public string RenterId { get; set; } = string.Empty;
@@ -33,9 +39,17 @@ public class BookingDetailDto
     public decimal PriceLockedTotal { get; set; }
     public decimal DepositAmount { get; set; }
     public decimal RemainingAmount => PriceLockedTotal > DepositAmount ? PriceLockedTotal - DepositAmount : 0m;
+    public decimal? PricePerDayAtBooking { get; set; }
+    public decimal? RentalSubtotal { get; set; }
+    public decimal? DeliveryFee { get; set; }
+    public decimal? InsuranceFee { get; set; }
+    public string? DepositStatus { get; set; }
+    public string? DepositReferenceCode { get; set; }
+    public DateTime? DepositPaidAt { get; set; }
 
     // Lifecycle Timestamps
     public DateTime CreatedAt { get; set; }
+    public DateTime? TermsAcceptedAt { get; set; }
     public DateTime ResponseDeadline { get; set; }
     public DateTime? AcceptedAt { get; set; }
     public DateTime? RespondedAt { get; set; }

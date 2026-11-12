@@ -10,4 +10,8 @@ public class HandoverConfirmationDto
     public string ConfirmedBy { get; set; } = string.Empty;
     public string ConfirmerName { get; set; } = string.Empty;
     public DateTime ConfirmedAt { get; set; }
+    public int? Odometer { get; set; }
+    public string? FuelLevel { get; set; }
+    public string? Notes { get; set; }
+    public string? RemainingPaymentMethod { get; set; }
 }

@@ -20,6 +20,11 @@ public class Booking
     public string Status { get; set; } = BookingStatuses.Pending;
     public decimal PriceLockedTotal { get; set; }
     public decimal DepositAmount { get; set; }
+    public decimal? PricePerDayAtBooking { get; set; }
+    public decimal? RentalSubtotal { get; set; }
+    public decimal? DeliveryFee { get; set; }
+    public decimal? InsuranceFee { get; set; }
+    public DateTime? TermsAcceptedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime ResponseDeadline { get; set; }
     public DateTime? AcceptedAt { get; set; }

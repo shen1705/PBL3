@@ -128,6 +128,28 @@ public class BookingsController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize]
+    [HttpPost("api/bookings/{id:int}/accept-terms")]
+    public async Task<IActionResult> AcceptTerms(int id, CancellationToken ct)
+    {
+        var userId = _currentUser.UserId;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập.", errorCode = ErrorCodes.Unauthorized });
+
+        var result = await _bookingService.AcceptTermsAsync(id, userId, ct);
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == ErrorCodes.NotFound)
+                return NotFound(result);
+            if (result.ErrorCode == ErrorCodes.Forbidden)
+                return StatusCode(StatusCodes.Status403Forbidden, result);
+
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
     // Phản hồi đơn thuê
     [Authorize]
     [HttpPut("api/bookings/{id:int}/respond")]
