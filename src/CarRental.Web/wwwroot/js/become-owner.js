@@ -507,10 +507,9 @@ function renderOwnerCars() {
         calBtn.type = 'button';
         calBtn.className = 'small-button';
         calBtn.style.cssText = 'padding: 6px 12px; font-size: 13px; font-weight: 600; border: 1px solid #cbd5e1; border-radius: 8px; color: #1e293b; background: #fff; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;';
-        calBtn.innerHTML = '<i class="fa-solid fa-calendar-days"></i> Lịch xe';
+        calBtn.innerHTML = '<i class="fa-solid fa-calendar-days" style="color: #ea580c;"></i> Lịch xe';
         calBtn.addEventListener('click', () => {
-            switchSection('lich-xe');
-            window.history.pushState(null, '', '#lich-xe');
+            switchToCarCalendar(car.vehicleId);
         });
 
         rightGroup.append(status, calBtn);
@@ -774,7 +773,10 @@ function switchSection(targetId) {
 
     if (cleanId === 'cam-nang') resolvedId = 'cam-nang-content';
 
-    if (cleanId === 'lich-xe') resolvedId = 'lich-xe-content';
+    if (cleanId === 'lich-xe' || cleanId === 'lich-xe-content') {
+        resolvedId = 'lich-xe-content';
+        if (isOwner) populateCalendarVehicleSelect();
+    }
 
     if (cleanId === 'danh-sach-xe') {
 
@@ -1406,218 +1408,326 @@ if (window.location.hash) {
 
 
 
-// calendar
-
+// calendar & vehicle schedule
 const calendarDays = document.getElementById('calendarDays');
-
-const calendarFrom = document.getElementById('calendarFrom');
-
-const calendarTo = document.getElementById('calendarTo');
-
 const calendarMonthLabel = document.getElementById('calendarMonthLabel');
-
 let displayedMonth = new Date();
-
-
+let currentCalendarVehicleId = null;
+let currentVehicleDetail = null;
 
 function toLocalDateValue(date) {
-
     const year = date.getFullYear();
-
     const month = String(date.getMonth() + 1).padStart(2, '0');
-
     const day = String(date.getDate()).padStart(2, '0');
-
     return `${year}-${month}-${day}`;
-
 }
 
+async function populateCalendarVehicleSelect(selectedVehicleId) {
+    const sel = document.getElementById('calendarVehicleSelect');
+    if (!sel) return;
 
+    if (!cachedOwnerCars || cachedOwnerCars.length === 0) {
+        await loadOwnerCars();
+    }
+
+    sel.replaceChildren();
+    if (!cachedOwnerCars || cachedOwnerCars.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Bạn chưa có xe nào để quản lý lịch';
+        sel.appendChild(opt);
+        return;
+    }
+
+    cachedOwnerCars.forEach(car => {
+        const opt = document.createElement('option');
+        opt.value = car.vehicleId;
+        opt.textContent = `${car.licensePlate || 'Chưa biển'} - ${car.name}`;
+        if (selectedVehicleId && String(selectedVehicleId) === String(car.vehicleId)) {
+            opt.selected = true;
+        }
+        sel.appendChild(opt);
+    });
+
+    const targetId = selectedVehicleId || sel.value || cachedOwnerCars[0].vehicleId;
+    sel.value = targetId;
+    await loadVehicleSchedule(targetId);
+}
+
+async function loadVehicleSchedule(vehicleId) {
+    if (!vehicleId) return;
+    currentCalendarVehicleId = vehicleId;
+
+    const car = (cachedOwnerCars || []).find(c => String(c.vehicleId) === String(vehicleId));
+    if (car) {
+        const thumb = document.getElementById('calVehicleThumb');
+        const nameEl = document.getElementById('calVehicleName');
+        const plateEl = document.getElementById('calVehiclePlate');
+        const priceEl = document.getElementById('calVehiclePrice');
+        const statusEl = document.getElementById('calVehicleStatus');
+
+        if (thumb) thumb.src = car.coverImageUrl || '/images/logo_transparent.png';
+        if (nameEl) nameEl.textContent = car.name;
+        if (plateEl) plateEl.textContent = car.licensePlate || 'Chưa có biển';
+        if (priceEl) priceEl.textContent = Number(car.pricePerDay || 0).toLocaleString('vi-VN') + ' đ/ngày';
+        if (statusEl) {
+            statusEl.textContent = car.moderationStatus === 'Public' ? 'Đang hoạt động' : (car.status || 'Chờ duyệt');
+            statusEl.style.color = car.moderationStatus === 'Public' ? '#16a34a' : '#ea580c';
+        }
+    }
+
+    try {
+        const resp = await fetch(`/api/vehicles/${vehicleId}`);
+        if (!resp.ok) return;
+        const resData = await resp.json();
+        const detail = resData?.data || resData;
+        currentVehicleDetail = detail;
+
+        renderCalendar();
+        renderBlockedRangesList(detail.blockedRanges || []);
+    } catch(e) {
+        console.warn('Lỗi khi tải lịch xe:', e);
+    }
+}
+
+function renderBlockedRangesList(blockedRanges) {
+    const listEl = document.getElementById('blockedRangesList');
+    const countEl = document.getElementById('blockedRangesCount');
+    if (!listEl) return;
+
+    if (countEl) countEl.textContent = String(blockedRanges.length);
+    listEl.replaceChildren();
+
+    if (blockedRanges.length === 0) {
+        listEl.innerHTML = '<p style="font-size: 12.5px; color: #94a3b8; margin: 0;">Chưa có khoảng lịch bận nào.</p>';
+        return;
+    }
+
+    blockedRanges.forEach(b => {
+        const startStr = new Date(b.startDate).toLocaleDateString('vi-VN');
+        const endStr = new Date(b.endDate).toLocaleDateString('vi-VN');
+        const item = document.createElement('div');
+        item.style.cssText = 'background: #fff; border: 1px solid #fee2e2; border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px;';
+
+        const textDiv = document.createElement('div');
+        textDiv.innerHTML = `
+            <div style="font-weight: 700; font-size: 13px; color: #991b1b;"><i class="fa-solid fa-lock" style="font-size: 11px;"></i> ${startStr} - ${endStr}</div>
+            <div style="font-size: 12px; color: #64748b;">${b.reason || 'Chủ xe bận'}</div>
+        `;
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.style.cssText = 'background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;';
+        delBtn.textContent = 'Mở khóa';
+        delBtn.title = 'Gỡ bỏ lịch bận này';
+        delBtn.addEventListener('click', async () => {
+            if (!b.id) {
+                alert('Không tìm thấy mã lịch bận.');
+                return;
+            }
+            if (!confirm(`Bạn có chắc muốn mở khóa khoảng lịch ${startStr} - ${endStr}?`)) return;
+            try {
+                delBtn.disabled = true;
+                const delResp = await fetch(`/api/vehicles/unavailabilities/${b.id}`, { method: 'DELETE' });
+                const delResData = await delResp.json();
+                if (delResp.ok && delResData.isSuccess) {
+                    alert('Đã mở khóa lịch thành công!');
+                    await loadVehicleSchedule(currentCalendarVehicleId);
+                } else {
+                    alert('Lỗi: ' + (delResData?.message || 'Không thể mở khóa lịch.'));
+                }
+            } catch(e) {
+                alert('Lỗi kết nối máy chủ.');
+            } finally {
+                delBtn.disabled = false;
+            }
+        });
+
+        item.append(textDiv, delBtn);
+        listEl.appendChild(item);
+    });
+}
 
 function renderCalendar() {
-
     if (!calendarDays || !calendarMonthLabel) return;
 
-
-
     const year = displayedMonth.getFullYear();
-
     const month = displayedMonth.getMonth();
-
     const monthStart = new Date(year, month, 1);
-
     const firstWeekday = (monthStart.getDay() + 6) % 7;
-
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-
     const cellCount = Math.ceil((firstWeekday + daysInMonth) / 7) * 7;
 
-
-
     calendarMonthLabel.textContent = new Intl.DateTimeFormat('vi-VN', {
-
         month: 'long',
-
         year: 'numeric'
-
     }).format(monthStart);
 
     calendarDays.replaceChildren();
 
-
+    const blocked = currentVehicleDetail?.blockedRanges || [];
+    const booked = currentVehicleDetail?.bookedRanges || [];
+    const todayMid = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime();
 
     for (let cellIndex = 0; cellIndex < cellCount; cellIndex++) {
-
         const date = new Date(year, month, cellIndex - firstWeekday + 1);
-
         const dayCell = document.createElement('div');
-
         dayCell.className = 'calendar-day';
-
         dayCell.setAttribute('role', 'gridcell');
-
         dayCell.classList.toggle('is-adjacent', date.getMonth() !== month);
 
-
-
         const dayNumber = document.createElement('span');
-
         dayNumber.className = 'calendar-day-number';
-
         dayNumber.textContent = String(date.getDate());
-
         dayCell.appendChild(dayNumber);
 
-
-
         if (date.getMonth() === month) {
+            const dateMid = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+            const isPast = dateMid < todayMid;
 
-            const availability = document.createElement('span');
-
-            availability.className = 'calendar-availability';
-
-
-
-            // check bookings
-
-            const dateMidnight = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-
-            const matchedBooking = cachedOwnerBookings.find(b => {
-
-                if (b.status === 'Cancelled' || b.status === 'Rejected' || b.status === 'Expired') return false;
-
-                const bStart = new Date(b.startDate);
-
-                const bEnd = new Date(b.endDate);
-
-                const startMid = new Date(bStart.getFullYear(), bStart.getMonth(), bStart.getDate()).getTime();
-
-                const endMid = new Date(bEnd.getFullYear(), bEnd.getMonth(), bEnd.getDate()).getTime();
-
-                return dateMidnight >= startMid && dateMidnight <= endMid;
-
+            const matchedBooked = booked.find(b => {
+                const bS = new Date(b.startDate);
+                const bE = new Date(b.endDate);
+                const sMid = new Date(bS.getFullYear(), bS.getMonth(), bS.getDate()).getTime();
+                const eMid = new Date(bE.getFullYear(), bE.getMonth(), bE.getDate()).getTime();
+                return dateMid >= sMid && dateMid <= eMid;
             });
 
+            const matchedBlocked = blocked.find(b => {
+                const bS = new Date(b.startDate);
+                const bE = new Date(b.endDate);
+                const sMid = new Date(bS.getFullYear(), bS.getMonth(), bS.getDate()).getTime();
+                const eMid = new Date(bE.getFullYear(), bE.getMonth(), bE.getDate()).getTime();
+                return dateMid >= sMid && dateMid <= eMid;
+            });
 
+            const availability = document.createElement('span');
+            availability.className = 'calendar-availability';
 
-            if (matchedBooking) {
-
-                if (matchedBooking.status === 'Pending') {
-
-                    availability.textContent = 'Chờ duyệt';
-
-                    dayCell.style.background = '#fef3c7';
-
-                    dayCell.style.color = '#92400e';
-
-                } else if (matchedBooking.status === 'Accepted' || matchedBooking.status === 'Ongoing') {
-
-                    availability.textContent = 'Có chuyến';
-
-                    dayCell.style.background = '#dbeafe';
-
-                    dayCell.style.color = '#1e40af';
-
-                } else {
-
-                    availability.textContent = 'Bận';
-
-                    dayCell.style.background = '#fee2e2';
-
-                    dayCell.style.color = '#991b1b';
-
-                }
-
+            if (isPast) {
+                dayCell.style.background = '#f8fafc';
+                dayCell.style.color = '#94a3b8';
+                availability.textContent = 'Đã qua';
+                availability.style.background = '#f1f5f9';
+                availability.style.color = '#94a3b8';
+            } else if (matchedBooked) {
+                dayCell.style.background = '#dbeafe';
+                dayCell.style.color = '#1e40af';
+                dayCell.style.border = '1px solid #93c5fd';
+                availability.textContent = 'Có chuyến';
+                availability.style.background = '#bfdbfe';
+                availability.style.color = '#1e3a8a';
+                dayCell.title = 'Đã có khách thuê đặt chuyến';
+            } else if (matchedBlocked) {
+                dayCell.style.background = '#fee2e2';
+                dayCell.style.color = '#991b1b';
+                dayCell.style.border = '1px solid #fca5a5';
+                availability.innerHTML = '<i class="fa-solid fa-lock" style="font-size: 8px;"></i> Đã khóa';
+                availability.style.background = '#fecaca';
+                availability.style.color = '#7f1d1d';
+                dayCell.title = `Chủ xe tự khóa: ${matchedBlocked.reason || 'Bận'}`;
             } else {
-
+                dayCell.style.background = '#ffffff';
+                dayCell.style.color = '#16a34a';
+                dayCell.style.cursor = 'pointer';
                 availability.textContent = 'Trống';
+                availability.style.background = '#dcfce7';
+                availability.style.color = '#15803d';
 
+                dayCell.addEventListener('click', () => {
+                    const dateStr = toLocalDateValue(date);
+                    const startInp = document.getElementById('blockStartDate');
+                    const endInp = document.getElementById('blockEndDate');
+                    if (startInp) startInp.value = dateStr;
+                    if (endInp) endInp.value = dateStr;
+                    dayCell.style.outline = '2px solid #ea580c';
+                    setTimeout(() => { dayCell.style.outline = 'none'; }, 1000);
+                });
             }
 
             dayCell.appendChild(availability);
-
         }
 
-
-
         calendarDays.appendChild(dayCell);
-
     }
-
 }
 
-
-
-if (calendarFrom && calendarTo) {
-
-    const today = new Date();
-
-    calendarFrom.value = toLocalDateValue(today);
-
-    calendarTo.value = toLocalDateValue(today);
-
-    displayedMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-
-
-    [calendarFrom, calendarTo].forEach(input => {
-
-        input.addEventListener('change', () => {
-
-            const selectedDate = new Date(`${input.value}T00:00:00`);
-
-            if (!Number.isNaN(selectedDate.getTime())) {
-
-                displayedMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-
-                renderCalendar();
-
-            }
-
-        });
-
-    });
-
+function switchToCarCalendar(vehicleId) {
+    switchSection('lich-xe');
+    window.history.pushState(null, '', '#lich-xe');
+    populateCalendarVehicleSelect(vehicleId);
 }
-
-
 
 document.getElementById('previousMonth')?.addEventListener('click', () => {
-
     displayedMonth = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() - 1, 1);
-
     renderCalendar();
-
 });
 
-
-
 document.getElementById('nextMonth')?.addEventListener('click', () => {
-
     displayedMonth = new Date(displayedMonth.getFullYear(), displayedMonth.getMonth() + 1, 1);
-
     renderCalendar();
+});
 
+document.getElementById('calendarVehicleSelect')?.addEventListener('change', (e) => {
+    loadVehicleSchedule(e.target.value);
+});
+
+document.getElementById('quickReasonSelect')?.addEventListener('change', (e) => {
+    const val = e.target.value;
+    const input = document.getElementById('blockReasonInput');
+    if (input) {
+        if (val === 'custom') {
+            input.value = '';
+            input.focus();
+        } else {
+            input.value = val;
+        }
+    }
+});
+
+document.getElementById('btnSubmitBlockSchedule')?.addEventListener('click', async () => {
+    const vehicleId = document.getElementById('calendarVehicleSelect')?.value;
+    const startDate = document.getElementById('blockStartDate')?.value;
+    const endDate = document.getElementById('blockEndDate')?.value;
+    const reason = document.getElementById('blockReasonInput')?.value.trim();
+
+    if (!vehicleId) {
+        alert('Vui lòng chọn xe để khóa lịch.');
+        return;
+    }
+    if (!startDate || !endDate) {
+        alert('Vui lòng chọn ngày bắt đầu và ngày kết thúc.');
+        return;
+    }
+    if (new Date(endDate) < new Date(startDate)) {
+        alert('Ngày kết thúc không được trước ngày bắt đầu.');
+        return;
+    }
+
+    const btn = document.getElementById('btnSubmitBlockSchedule');
+    btn.disabled = true;
+    try {
+        const resp = await fetch(`/api/vehicles/${vehicleId}/unavailabilities`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                startDate: startDate + 'T00:00:00',
+                endDate: endDate + 'T23:59:59',
+                reason: reason || 'Chủ xe bận'
+            })
+        });
+        const resData = await resp.json();
+        if (resp.ok && resData.isSuccess) {
+            alert('Đã khóa lịch xe thành công!');
+            await loadVehicleSchedule(vehicleId);
+        } else {
+            alert('Lỗi: ' + (resData?.message || 'Không thể khóa lịch. Vui lòng kiểm tra lại.'));
+        }
+    } catch(e) {
+        alert('Lỗi kết nối máy chủ.');
+    } finally {
+        btn.disabled = false;
+    }
 });
 
 
@@ -2188,12 +2298,8 @@ function openOwnerReviewModal(req) {
 applyRolePermissions();
 
 if (window.AzuStore?.isOwner && window.AzuStore.isOwner()) {
-
-    renderCalendar();
-
-    loadOwnerBookingRequests();
-
+    populateCalendarVehicleSelect();
+    loadOwnerTrips();
     loadOwnerRevenue();
-
 }
 

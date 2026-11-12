@@ -356,45 +356,105 @@ public static class DbInitializer
             }
         }
 
-        // busy schedule
-        if (listings.TryGetValue("V5", out var v5Listing) &&
-            !await db.VehicleUnavailabilities.AnyAsync(x => x.VehicleId == v5Listing.VehicleId))
+        // busy schedule & vehicle unavailabilities
+        if (!await db.VehicleUnavailabilities.AnyAsync(x => x.Reason != null && x.Reason.Contains("40.000km")))
         {
-            db.VehicleUnavailabilities.Add(new VehicleUnavailability
+            var oldUnavailabilities = await db.VehicleUnavailabilities.ToListAsync();
+            db.VehicleUnavailabilities.RemoveRange(oldUnavailabilities);
+
+            if (listings.TryGetValue("V1", out var v1Listing))
             {
-                VehicleId = v5Listing.VehicleId,
-                StartDate = today.AddDays(15),
-                EndDate = today.AddDays(20),
-                Reason = "Chủ xe bảo dưỡng định kỳ (dữ liệu thử)"
-            });
+                db.VehicleUnavailabilities.Add(new VehicleUnavailability
+                {
+                    VehicleId = v1Listing.VehicleId,
+                    StartDate = today.AddDays(14),
+                    EndDate = today.AddDays(16),
+                    Reason = "Bảo dưỡng định kỳ 40.000km và thay dầu máy"
+                });
+            }
+
+            if (listings.TryGetValue("V3", out var v3Listing))
+            {
+                db.VehicleUnavailabilities.Add(new VehicleUnavailability
+                {
+                    VehicleId = v3Listing.VehicleId,
+                    StartDate = today.AddDays(12),
+                    EndDate = today.AddDays(15),
+                    Reason = "Chủ xe đi công tác ngoại tỉnh"
+                });
+            }
+
+            if (listings.TryGetValue("V5", out var v5Listing))
+            {
+                db.VehicleUnavailabilities.Add(new VehicleUnavailability
+                {
+                    VehicleId = v5Listing.VehicleId,
+                    StartDate = today.AddDays(18),
+                    EndDate = today.AddDays(22),
+                    Reason = "Đăng kiểm và bảo trì hệ thống lái"
+                });
+            }
+
+            await db.SaveChangesAsync();
         }
 
-        if (listings.TryGetValue("V11", out var v11Listing) &&
-            !await db.VehicleUnavailabilities.AnyAsync(x => x.VehicleId == v11Listing.VehicleId))
+        // seed comprehensive business scenarios (15 test bookings)
+        bool needSeedBookings = !await db.Disputes.AnyAsync(d => d.ResolutionAction == ResolutionActions.CancelOwnerFault);
+        if (needSeedBookings)
         {
-            db.VehicleUnavailabilities.Add(new VehicleUnavailability
-            {
-                VehicleId = v11Listing.VehicleId,
-                StartDate = today.AddDays(25),
-                EndDate = today.AddDays(28),
-                Reason = "Chủ xe bận công tác (dữ liệu thử)"
-            });
-        }
+            // clean up previous seed data to guarantee 100% data integrity
+            var oldTx = await db.MockBankTransactions.ToListAsync();
+            db.MockBankTransactions.RemoveRange(oldTx);
+            var oldPayments = await db.Payments.ToListAsync();
+            db.Payments.RemoveRange(oldPayments);
+            var oldReviews = await db.Reviews.ToListAsync();
+            db.Reviews.RemoveRange(oldReviews);
+            var oldDisputes = await db.Disputes.ToListAsync();
+            db.Disputes.RemoveRange(oldDisputes);
+            var oldHandovers = await db.HandoverConfirmations.ToListAsync();
+            db.HandoverConfirmations.RemoveRange(oldHandovers);
+            var oldBookings = await db.Bookings.ToListAsync();
+            db.Bookings.RemoveRange(oldBookings);
+            var oldHolds = await db.DepositHolds.ToListAsync();
+            db.DepositHolds.RemoveRange(oldHolds);
+            await db.SaveChangesAsync();
 
-        // seed bookings
-        if (!await db.Bookings.AnyAsync())
-        {
-            void AddBooking(string renterKey, string vehicleKey, int fromDay, int toDay, string status)
-            {
-                if (!listings.TryGetValue(vehicleKey, out var listing)) return;
+            var escrowAcc = await db.MockBankAccounts.FirstAsync(x => x.AccountNumber == "ESCROW-0001");
+            var bankAccounts = await db.MockBankAccounts.Where(x => x.UserId != null).ToDictionaryAsync(x => x.UserId!, x => x);
+            var staff1 = u["staff1"];
+            var admin1 = u["admin1"];
 
+            Booking CreateBookingRecord(
+                string renterKey,
+                string vehicleKey,
+                int fromDay,
+                int toDay,
+                string status,
+                bool delivery = false,
+                DateTime? customCreated = null,
+                DateTime? customResponseDeadline = null,
+                string? rejectReason = null,
+                string? cancelReason = null,
+                string? cancelledByKey = null,
+                DateTime? customAcceptedAt = null,
+                DateTime? customCancelledAt = null,
+                DateTime? customCompletedAt = null)
+            {
+                var listing = listings[vehicleKey];
                 var renter = u[renterKey];
                 var start = today.AddDays(fromDay);
                 var end = today.AddDays(toDay);
-                var days = toDay - fromDay;
-                var total = listing.PricePerDay * days;
-                var deposit = total * BusinessRules.DepositRate;
-                var created = fromDay < 0 ? start.AddDays(-5) : now.AddDays(-1);
+                var rentalDays = (end.Date - start.Date).Days + 1;
+                if (rentalDays < 1) rentalDays = 1;
+
+                var rentalSubtotal = listing.PricePerDay * rentalDays;
+                var deliveryFee = delivery ? 100_000m : 0m;
+                var insuranceFee = 50_000m * rentalDays;
+                var total = rentalSubtotal + deliveryFee + insuranceFee;
+                var deposit = Math.Round(total * BusinessRules.DepositRate);
+
+                var created = customCreated ?? (fromDay < 0 ? start.AddDays(-5) : now.AddHours(-10));
+                var deadline = customResponseDeadline ?? created.AddHours(BusinessRules.ResponseDeadlineHours);
 
                 var hold = new DepositHold
                 {
@@ -402,12 +462,15 @@ public static class DbInitializer
                     Listing = listing,
                     StartDate = start,
                     EndDate = end,
-                    RentalDays = days,
+                    RentalDays = rentalDays,
                     PriceLockedTotal = total,
                     DepositAmount = deposit,
-                    Status = DepositHoldStatuses.Converted,
+                    Status = (status is BookingStatuses.Cancelled or BookingStatuses.Rejected or BookingStatuses.Expired)
+                        ? DepositHoldStatuses.Cancelled
+                        : DepositHoldStatuses.Converted,
                     CreatedAt = created
                 };
+
                 var booking = new Booking
                 {
                     Renter = renter,
@@ -416,489 +479,530 @@ public static class DbInitializer
                     SourceHold = hold,
                     StartDate = start,
                     EndDate = end,
-                    RentalDays = days,
+                    RentalDays = rentalDays,
                     Status = status,
                     PriceLockedTotal = total,
                     DepositAmount = deposit,
                     PricePerDayAtBooking = listing.PricePerDay,
-                    RentalSubtotal = total,
-                    DeliveryFee = 0m,
-                    InsuranceFee = 0m,
+                    RentalSubtotal = rentalSubtotal,
+                    DeliveryFee = deliveryFee,
+                    InsuranceFee = insuranceFee,
+                    TermsAcceptedAt = created,
                     CreatedAt = created,
-                    ResponseDeadline = created.AddHours(BusinessRules.ResponseDeadlineHours)
+                    ResponseDeadline = deadline,
+                    RespondedAt = (status is BookingStatuses.Accepted or BookingStatuses.Ongoing or BookingStatuses.Completed)
+                        ? (customAcceptedAt ?? created.AddHours(2))
+                        : (status == BookingStatuses.Rejected ? created.AddHours(3) : null),
+                    AcceptedAt = (status is BookingStatuses.Accepted or BookingStatuses.Ongoing or BookingStatuses.Completed)
+                        ? (customAcceptedAt ?? created.AddHours(2))
+                        : null,
+                    RejectReason = rejectReason,
+                    CompletedAt = customCompletedAt ?? (status == BookingStatuses.Completed ? end : null),
+                    CancelledAt = customCancelledAt ?? (status == BookingStatuses.Cancelled ? (created.AddHours(4)) : null),
+                    CancelledBy = cancelledByKey != null ? u[cancelledByKey].Id : (status == BookingStatuses.Cancelled ? renter.Id : null),
+                    CancelReason = cancelReason
                 };
-
-                if (status is BookingStatuses.Accepted or BookingStatuses.Ongoing or BookingStatuses.Completed)
-                {
-                    booking.RespondedAt = created.AddHours(2);
-                    booking.AcceptedAt = created.AddHours(2);
-                }
-                if (status == BookingStatuses.Rejected)
-                {
-                    booking.RespondedAt = created.AddHours(2);
-                    booking.RejectReason = "Xe đã có lịch (dữ liệu thử)";
-                }
-                if (status == BookingStatuses.Cancelled)
-                {
-                    booking.CancelledAt = created.AddHours(3);
-                    booking.CancelledBy = renter.Id;
-                    booking.CancelReason = "Đổi kế hoạch (dữ liệu thử)";
-                }
-                if (status == BookingStatuses.Completed)
-                {
-                    booking.CompletedAt = end;
-                }
 
                 db.Bookings.Add(booking);
+                return booking;
             }
 
-            // Hà Nội bookings
-            AddBooking("renter1", "V1",   3,   6, BookingStatuses.Accepted);
-            AddBooking("renter2", "V1",  10,  12, BookingStatuses.Pending);
-            AddBooking("renter3", "V1", -10,  -7, BookingStatuses.Completed);
+            // 15 Comprehensive Test Bookings
+            // BK01: Completed, Hà Nội, V1 (Vios), renter1. 2-way 5-star public reviews
+            var bk01 = CreateBookingRecord("renter1", "V1", -12, -9, BookingStatuses.Completed);
 
-            AddBooking("renter1", "V2",   3,   6, BookingStatuses.Cancelled);
-            AddBooking("renter2", "V2",  -5,  -3, BookingStatuses.Expired);
-            AddBooking("renter3", "V2",  12,  14, BookingStatuses.Rejected);
+            // BK02: Completed, Hà Nội, V3 (CX-5), renter2. Double-blind (renter2 reviewed, owner2 hasn't)
+            var bk02 = CreateBookingRecord("renter2", "V3", -4, -2, BookingStatuses.Completed, delivery: true);
 
-            AddBooking("renter1", "V3",  -1,   2, BookingStatuses.Ongoing);
-            AddBooking("renter2", "V3",   2,   4, BookingStatuses.Accepted);
+            // BK03: Completed, TP. Đà Nẵng, V7 (Cross), renter3. Settled revenue for owner1
+            var bk03 = CreateBookingRecord("renter3", "V7", -15, -12, BookingStatuses.Completed);
 
-            AddBooking("renter3", "V5",   7,   9, BookingStatuses.Accepted);
+            // BK04: Completed, TP. Đà Nẵng, V9 (e34), renter1. Electric vehicle settled for owner2
+            var bk04 = CreateBookingRecord("renter1", "V9", -8, -5, BookingStatuses.Completed, delivery: true);
 
-            // Đà Nẵng bookings
-            AddBooking("renter1", "V7", -15, -12, BookingStatuses.Completed);
-            AddBooking("renter2", "V8",   1,   5, BookingStatuses.Accepted);
-            AddBooking("renter3", "V9",  -4,  -1, BookingStatuses.Completed);
+            // BK05: Ongoing, TP. Đà Nẵng, V8 (Xpander), renter2. Pickup confirmed yesterday
+            var bk05 = CreateBookingRecord("renter2", "V8", -1, 2, BookingStatuses.Ongoing);
+
+            // BK06: Ongoing + Open Dispute, TP. Đà Nẵng, V11 (Santa Fe), renter3. AC failure & check engine
+            var bk06 = CreateBookingRecord("renter3", "V11", -2, 1, BookingStatuses.Ongoing, delivery: true);
+
+            // BK07: Completed + ForceComplete Dispute, TP. HCM, V13 (Vios), renter1. Scratch dispute resolved
+            var bk07 = CreateBookingRecord("renter1", "V13", -7, -4, BookingStatuses.Completed);
+
+            // BK08: Cancelled + CancelOwnerFault Dispute, Hà Nội, V2 (Accent), renter2. Owner no-show penalty 195k
+            var bk08 = CreateBookingRecord("renter2", "V2", -3, -1, BookingStatuses.Cancelled,
+                cancelledByKey: "admin1",
+                cancelReason: "Hủy bởi Admin do lỗi chủ xe: Chủ xe tự ý hủy hẹn và vi phạm nghiêm trọng cam kết bàn giao xe.",
+                customCancelledAt: today.AddDays(-3).AddHours(5));
+
+            // BK09: Pending (10h remaining), TP. HCM, V14 (CX-30), renter1.
+            var bk09 = CreateBookingRecord("renter1", "V14", 4, 7, BookingStatuses.Pending, delivery: true,
+                customCreated: now.AddHours(-2),
+                customResponseDeadline: now.AddHours(10));
+
+            // BK10: Pending (Urgent - 1h remaining), TP. Đà Nẵng, V10 (City), renter2.
+            var bk10 = CreateBookingRecord("renter2", "V10", 2, 4, BookingStatuses.Pending,
+                customCreated: now.AddHours(-11),
+                customResponseDeadline: now.AddHours(1));
+
+            // BK11: Accepted (Ready for pickup), Hà Nội, V1 (Vios), renter3.
+            var bk11 = CreateBookingRecord("renter3", "V1", 2, 5, BookingStatuses.Accepted,
+                customCreated: now.AddHours(-8),
+                customAcceptedAt: now.AddHours(-6));
+
+            // BK12: Cancelled by Renter, Hà Nội, V4 (VF 8), renter1.
+            var bk12 = CreateBookingRecord("renter1", "V4", 6, 9, BookingStatuses.Cancelled,
+                customCreated: now.AddDays(-2),
+                customCancelledAt: now.AddDays(-1),
+                cancelledByKey: "renter1",
+                cancelReason: "Gia đình có việc bận đột xuất nên dời lịch trình sang tuần sau.");
+
+            // BK13: Rejected by Owner, Hà Nội, V5 (Transit), renter2.
+            var bk13 = CreateBookingRecord("renter2", "V5", 8, 11, BookingStatuses.Rejected,
+                customCreated: now.AddDays(-3),
+                rejectReason: "Xe đã xếp lịch đưa đón đoàn du lịch ký hợp đồng dài hạn trước đó, rất tiếc không phục vụ được quý khách đợt này.");
+
+            // BK14: Expired (past 12h deadline), TP. HCM, V15 (CR-V), renter3.
+            var bk14 = CreateBookingRecord("renter3", "V15", 5, 8, BookingStatuses.Expired,
+                customCreated: now.AddHours(-20),
+                customResponseDeadline: now.AddHours(-8));
+
+            // BK15: Completed, TP. HCM, V14 (CX-30), renter4. Settled revenue for owner2
+            var bk15 = CreateBookingRecord("renter4", "V14", -20, -17, BookingStatuses.Completed);
 
             await db.SaveChangesAsync();
-        }
 
-        // handovers
-        if (!await db.HandoverConfirmations.AnyAsync())
-        {
-            var bV1Completed = await db.Bookings.Include(b => b.Vehicle)
-                .FirstOrDefaultAsync(b => b.Status == BookingStatuses.Completed && b.Vehicle.LicensePlate == "30A-123.45");
-            var bV3Ongoing = await db.Bookings.Include(b => b.Vehicle)
-                .FirstOrDefaultAsync(b => b.Status == BookingStatuses.Ongoing && b.Vehicle.LicensePlate == "30F-345.67");
-            var bV7Completed = await db.Bookings.Include(b => b.Vehicle)
-                .FirstOrDefaultAsync(b => b.Status == BookingStatuses.Completed && b.Vehicle.LicensePlate == "43A-111.22");
-            var bV9Completed = await db.Bookings.Include(b => b.Vehicle)
-                .FirstOrDefaultAsync(b => b.Status == BookingStatuses.Completed && b.Vehicle.LicensePlate == "43B-333.44");
-
-            if (bV1Completed != null)
+            // Handover Confirmations
+            void AddFullHandovers(Booking b, ApplicationUser renter, ApplicationUser owner, int startOdo, int endOdo)
             {
-                var owner1 = u["owner1"];
                 db.HandoverConfirmations.AddRange(
-                    new HandoverConfirmation { BookingId = bV1Completed.BookingId, Type = HandoverTypes.Pickup, ConfirmedBy = bV1Completed.RenterId, ConfirmedAt = bV1Completed.StartDate },
-                    new HandoverConfirmation { BookingId = bV1Completed.BookingId, Type = HandoverTypes.Pickup, ConfirmedBy = owner1.Id, ConfirmedAt = bV1Completed.StartDate.AddMinutes(5) },
-                    new HandoverConfirmation { BookingId = bV1Completed.BookingId, Type = HandoverTypes.Return, ConfirmedBy = bV1Completed.RenterId, ConfirmedAt = bV1Completed.EndDate },
-                    new HandoverConfirmation { BookingId = bV1Completed.BookingId, Type = HandoverTypes.Return, ConfirmedBy = owner1.Id, ConfirmedAt = bV1Completed.EndDate.AddMinutes(10) }
-                );
-            }
-
-            if (bV3Ongoing != null)
-            {
-                var owner2 = u["owner2"];
-                db.HandoverConfirmations.AddRange(
-                    new HandoverConfirmation { BookingId = bV3Ongoing.BookingId, Type = HandoverTypes.Pickup, ConfirmedBy = bV3Ongoing.RenterId, ConfirmedAt = bV3Ongoing.StartDate },
-                    new HandoverConfirmation { BookingId = bV3Ongoing.BookingId, Type = HandoverTypes.Pickup, ConfirmedBy = owner2.Id, ConfirmedAt = bV3Ongoing.StartDate.AddMinutes(5) }
-                );
-            }
-
-            if (bV7Completed != null)
-            {
-                var owner1 = u["owner1"];
-                db.HandoverConfirmations.AddRange(
-                    new HandoverConfirmation { BookingId = bV7Completed.BookingId, Type = HandoverTypes.Pickup, ConfirmedBy = bV7Completed.RenterId, ConfirmedAt = bV7Completed.StartDate },
-                    new HandoverConfirmation { BookingId = bV7Completed.BookingId, Type = HandoverTypes.Pickup, ConfirmedBy = owner1.Id, ConfirmedAt = bV7Completed.StartDate.AddMinutes(5) },
-                    new HandoverConfirmation { BookingId = bV7Completed.BookingId, Type = HandoverTypes.Return, ConfirmedBy = bV7Completed.RenterId, ConfirmedAt = bV7Completed.EndDate },
-                    new HandoverConfirmation { BookingId = bV7Completed.BookingId, Type = HandoverTypes.Return, ConfirmedBy = owner1.Id, ConfirmedAt = bV7Completed.EndDate.AddMinutes(10) }
-                );
-            }
-
-            if (bV9Completed != null)
-            {
-                var owner2 = u["owner2"];
-                db.HandoverConfirmations.AddRange(
-                    new HandoverConfirmation { BookingId = bV9Completed.BookingId, Type = HandoverTypes.Pickup, ConfirmedBy = bV9Completed.RenterId, ConfirmedAt = bV9Completed.StartDate },
-                    new HandoverConfirmation { BookingId = bV9Completed.BookingId, Type = HandoverTypes.Pickup, ConfirmedBy = owner2.Id, ConfirmedAt = bV9Completed.StartDate.AddMinutes(5) },
-                    new HandoverConfirmation { BookingId = bV9Completed.BookingId, Type = HandoverTypes.Return, ConfirmedBy = bV9Completed.RenterId, ConfirmedAt = bV9Completed.EndDate },
-                    new HandoverConfirmation { BookingId = bV9Completed.BookingId, Type = HandoverTypes.Return, ConfirmedBy = owner2.Id, ConfirmedAt = bV9Completed.EndDate.AddMinutes(10) }
-                );
-            }
-
-            await db.SaveChangesAsync();
-        }
-
-        // payments & transactions
-        if (!await db.Payments.AnyAsync())
-        {
-            var escrowAcc = await db.MockBankAccounts.FirstAsync(x => x.AccountNumber == "ESCROW-0001");
-            var bankAccounts = await db.MockBankAccounts.Where(x => x.UserId != null).ToDictionaryAsync(x => x.UserId!, x => x);
-
-            var allBookings = await db.Bookings.Include(b => b.Vehicle).ToListAsync();
-            foreach (var bk in allBookings)
-            {
-                if (!bankAccounts.TryGetValue(bk.RenterId, out var renterAcc)) continue;
-                if (!bankAccounts.TryGetValue(bk.Vehicle.OwnerId, out var ownerAcc)) continue;
-
-                var commission = bk.PriceLockedTotal * BusinessRules.DefaultCommissionRate;
-
-                if (bk.Status == BookingStatuses.Completed)
-                {
-                    var payment = new Payment
+                    new HandoverConfirmation
                     {
-                        BookingId = bk.BookingId,
-                        DepositStatus = DepositStatuses.Refunded,
-                        CommissionRate = BusinessRules.DefaultCommissionRate,
-                        CommissionAmount = commission,
-                        RevenueRecordedAt = bk.EndDate.AddHours(1)
-                    };
-                    db.Payments.Add(payment);
-
-                    // deposit tx
-                    db.MockBankTransactions.Add(new MockBankTransaction
-                    {
-                        ReferenceCode = ReferenceCodes.Deposit(bk.SourceHoldId),
-                        Payment = payment,
-                        FromAccount = renterAcc,
-                        ToAccount = escrowAcc,
-                        TransactionType = MockTransactionTypes.Deposit,
-                        Amount = bk.DepositAmount,
-                        Status = MockTransactionStatuses.Succeeded,
-                        CreatedAt = bk.CreatedAt
-                    });
-
-                    // payout tx
-                    db.MockBankTransactions.Add(new MockBankTransaction
-                    {
-                        ReferenceCode = ReferenceCodes.Settle(bk.BookingId),
-                        Payment = payment,
-                        FromAccount = escrowAcc,
-                        ToAccount = ownerAcc,
-                        TransactionType = MockTransactionTypes.Transfer,
-                        Amount = bk.DepositAmount - commission,
-                        Status = MockTransactionStatuses.Succeeded,
-                        CreatedAt = bk.EndDate.AddMinutes(30)
-                    });
-
-                    // refund tx
-                    db.MockBankTransactions.Add(new MockBankTransaction
-                    {
-                        ReferenceCode = ReferenceCodes.Refund(bk.BookingId),
-                        Payment = payment,
-                        FromAccount = escrowAcc,
-                        ToAccount = renterAcc,
-                        TransactionType = MockTransactionTypes.Refund,
-                        Amount = bk.DepositAmount,
-                        Status = MockTransactionStatuses.Succeeded,
-                        CreatedAt = bk.EndDate.AddHours(1)
-                    });
-                }
-                else if (bk.Status is BookingStatuses.Accepted or BookingStatuses.Ongoing)
-                {
-                    var payment = new Payment
-                    {
-                        BookingId = bk.BookingId,
-                        DepositStatus = DepositStatuses.Held,
-                        CommissionRate = BusinessRules.DefaultCommissionRate,
-                        CommissionAmount = null,
-                        RevenueRecordedAt = null
-                    };
-                    db.Payments.Add(payment);
-
-                    db.MockBankTransactions.Add(new MockBankTransaction
-                    {
-                        ReferenceCode = ReferenceCodes.Deposit(bk.SourceHoldId),
-                        Payment = payment,
-                        FromAccount = renterAcc,
-                        ToAccount = escrowAcc,
-                        TransactionType = MockTransactionTypes.Deposit,
-                        Amount = bk.DepositAmount,
-                        Status = MockTransactionStatuses.Succeeded,
-                        CreatedAt = bk.CreatedAt
-                    });
-                }
-                else if (bk.Status == BookingStatuses.Cancelled)
-                {
-                    var payment = new Payment
-                    {
-                        BookingId = bk.BookingId,
-                        DepositStatus = DepositStatuses.Refunded,
-                        CommissionRate = BusinessRules.DefaultCommissionRate,
-                        CommissionAmount = null,
-                        RevenueRecordedAt = null
-                    };
-                    db.Payments.Add(payment);
-
-                    db.MockBankTransactions.Add(new MockBankTransaction
-                    {
-                        ReferenceCode = ReferenceCodes.Deposit(bk.SourceHoldId),
-                        Payment = payment,
-                        FromAccount = renterAcc,
-                        ToAccount = escrowAcc,
-                        TransactionType = MockTransactionTypes.Deposit,
-                        Amount = bk.DepositAmount,
-                        Status = MockTransactionStatuses.Succeeded,
-                        CreatedAt = bk.CreatedAt
-                    });
-
-                    db.MockBankTransactions.Add(new MockBankTransaction
-                    {
-                        ReferenceCode = ReferenceCodes.Refund(bk.BookingId),
-                        Payment = payment,
-                        FromAccount = escrowAcc,
-                        ToAccount = renterAcc,
-                        TransactionType = MockTransactionTypes.Refund,
-                        Amount = bk.DepositAmount,
-                        Status = MockTransactionStatuses.Succeeded,
-                        CreatedAt = bk.CancelledAt ?? bk.CreatedAt.AddHours(3)
-                    });
-                }
-            }
-
-            await db.SaveChangesAsync();
-        }
-
-        // reviews
-        if (!await db.Reviews.AnyAsync())
-        {
-            var bV1Completed = await db.Bookings.Include(b => b.Vehicle)
-                .FirstOrDefaultAsync(b => b.Status == BookingStatuses.Completed && b.Vehicle.LicensePlate == "30A-123.45");
-            var bV7Completed = await db.Bookings.Include(b => b.Vehicle)
-                .FirstOrDefaultAsync(b => b.Status == BookingStatuses.Completed && b.Vehicle.LicensePlate == "43A-111.22");
-
-            if (bV1Completed != null)
-            {
-                db.Reviews.AddRange(
-                    new Review
-                    {
-                        BookingId = bV1Completed.BookingId,
-                        ReviewerId = bV1Completed.RenterId,
-                        RevieweeId = bV1Completed.Vehicle.OwnerId,
-                        Rating = 5,
-                        Comment = "Xe Toyota Vios đi rất êm, máy móc vận hành trơn tru và tiết kiệm nhiên liệu. Chủ xe bàn giao xe sạch sẽ, đúng giờ. 10/10!",
-                        IsPublic = true,
-                        CreatedAt = bV1Completed.EndDate.AddHours(2)
+                        BookingId = b.BookingId,
+                        Type = HandoverTypes.Pickup,
+                        ConfirmedBy = renter.Id,
+                        ConfirmedAt = b.StartDate,
+                        Odometer = startOdo,
+                        FuelLevel = "Full",
+                        Notes = "Nhận xe đúng giờ, kiểm tra xe hoạt động bình thường."
                     },
-                    new Review
+                    new HandoverConfirmation
                     {
-                        BookingId = bV1Completed.BookingId,
-                        ReviewerId = bV1Completed.Vehicle.OwnerId,
-                        RevieweeId = bV1Completed.RenterId,
-                        Rating = 5,
-                        Comment = "Khách thuê rất lịch sự, giữ gìn xe sạch sẽ và giao trả xe đúng hẹn. Rất mong được tiếp tục đón tiếp anh trong các chuyến đi tới!",
-                        IsPublic = true,
-                        CreatedAt = bV1Completed.EndDate.AddHours(3)
+                        BookingId = b.BookingId,
+                        Type = HandoverTypes.Pickup,
+                        ConfirmedBy = owner.Id,
+                        ConfirmedAt = b.StartDate.AddMinutes(5),
+                        Odometer = startOdo,
+                        FuelLevel = "Full",
+                        Notes = "Bàn giao xe sạch sẽ và đầy đủ giấy tờ xe."
+                    },
+                    new HandoverConfirmation
+                    {
+                        BookingId = b.BookingId,
+                        Type = HandoverTypes.Return,
+                        ConfirmedBy = renter.Id,
+                        ConfirmedAt = b.EndDate,
+                        Odometer = endOdo,
+                        FuelLevel = "Full",
+                        Notes = "Trả xe đúng hạn, xe vận hành rất tốt.",
+                        RemainingPaymentMethod = "Cash"
+                    },
+                    new HandoverConfirmation
+                    {
+                        BookingId = b.BookingId,
+                        Type = HandoverTypes.Return,
+                        ConfirmedBy = owner.Id,
+                        ConfirmedAt = b.EndDate.AddMinutes(10),
+                        Odometer = endOdo,
+                        FuelLevel = "Full",
+                        Notes = "Đã nhận lại đủ chìa khóa, xe nguyên vẹn và sạch sẽ.",
+                        RemainingPaymentMethod = "Cash"
                     }
                 );
             }
 
-            if (bV7Completed != null)
-            {
-                db.Reviews.AddRange(
-                    new Review
-                    {
-                        BookingId = bV7Completed.BookingId,
-                        ReviewerId = bV7Completed.RenterId,
-                        RevieweeId = bV7Completed.Vehicle.OwnerId,
-                        Rating = 5,
-                        Comment = "Chuyến đi Đà Nẵng tuyệt vời! Xe Corolla Cross gầm cao, đi đèo dốc và đường ven biển rất đầm chắc và thoải mái cho cả gia đình.",
-                        IsPublic = true,
-                        CreatedAt = bV7Completed.EndDate.AddHours(2)
-                    },
-                    new Review
-                    {
-                        BookingId = bV7Completed.BookingId,
-                        ReviewerId = bV7Completed.Vehicle.OwnerId,
-                        RevieweeId = bV7Completed.RenterId,
-                        Rating = 5,
-                        Comment = "Khách hàng tuyệt vời, lái xe cẩn thận, trả xe đúng giờ quy định.",
-                        IsPublic = true,
-                        CreatedAt = bV7Completed.EndDate.AddHours(3)
-                    }
-                );
-            }
+            AddFullHandovers(bk01, u["renter1"], u["owner1"], 18200, 18650);
+            AddFullHandovers(bk02, u["renter2"], u["owner2"], 12100, 12480);
+            AddFullHandovers(bk03, u["renter3"], u["owner1"], 15300, 15820);
+            AddFullHandovers(bk04, u["renter1"], u["owner2"], 9200, 9650);
+            AddFullHandovers(bk07, u["renter1"], u["owner1"], 21400, 21860);
+            AddFullHandovers(bk15, u["renter4"], u["owner2"], 10500, 10920);
 
-            await db.SaveChangesAsync();
-        }
-
-        // disputes
-        if (!await db.Disputes.AnyAsync())
-        {
-            var bV9Completed = await db.Bookings.Include(b => b.Vehicle)
-                .FirstOrDefaultAsync(b => b.Status == BookingStatuses.Completed && b.Vehicle.LicensePlate == "43B-333.44");
-            var bV2Cancelled = await db.Bookings.Include(b => b.Vehicle)
-                .FirstOrDefaultAsync(b => b.Status == BookingStatuses.Cancelled && b.Vehicle.LicensePlate == "30E-234.56");
-            var staff1 = u["staff1"];
-
-            if (bV9Completed != null)
-            {
-                // resolved dispute
-                db.Disputes.Add(new Dispute
+            // Pickup only for Ongoing
+            db.HandoverConfirmations.AddRange(
+                new HandoverConfirmation
                 {
-                    BookingId = bV9Completed.BookingId,
-                    RaisedBy = bV9Completed.RenterId,
-                    Description = "Chủ xe yêu cầu cấn trừ 500.000đ tiền cọc vì vết xước ở cản trước, tuy nhiên vết xước này đã có từ trước khi bàn giao xe.",
-                    EvidenceImage = "/seed/dispute-evidence-1.jpg",
-                    Status = DisputeStatuses.Resolved,
-                    CreatedAt = bV9Completed.EndDate.AddHours(1),
-                    ResolvedBy = staff1.Id,
-                    ResolvedAt = bV9Completed.EndDate.AddHours(6),
-                    ResolutionAction = ResolutionActions.ForceComplete,
-                    ResolutionNotes = "Đã đối chiếu ảnh chụp lúc nhận xe tại biên bản bàn giao: vết xước đã tồn tại trước chuyến đi. Chấp thuận hoàn cọc đầy đủ cho khách thuê."
-                });
-            }
-
-            if (bV2Cancelled != null)
-            {
-                // open dispute
-                db.Disputes.Add(new Dispute
+                    BookingId = bk05.BookingId,
+                    Type = HandoverTypes.Pickup,
+                    ConfirmedBy = u["renter2"].Id,
+                    ConfirmedAt = bk05.StartDate,
+                    Odometer = 24150,
+                    FuelLevel = "Full",
+                    Notes = "Xe sạch sẽ, đã kiểm tra thân vỏ không trầy xước."
+                },
+                new HandoverConfirmation
                 {
-                    BookingId = bV2Cancelled.BookingId,
-                    RaisedBy = bV2Cancelled.RenterId,
-                    Description = "Chủ xe không phản hồi tin nhắn và cuộc gọi vào sáng ngày nhận xe, buộc tôi phải hủy đơn và thuê xe khác ngoài đường.",
-                    EvidenceImage = "/seed/dispute-evidence-2.jpg",
-                    Status = DisputeStatuses.Open,
-                    CreatedAt = now.AddHours(-14),
-                    ResolvedBy = null,
-                    ResolvedAt = null,
-                    ResolutionAction = null,
-                    ResolutionNotes = null
-                });
-            }
-
-            await db.SaveChangesAsync();
-        }
-
-        // ensure open dispute for admin testing
-        if (!await db.Disputes.AnyAsync(d => d.Status == DisputeStatuses.Open))
-        {
-            var openCandidate = await db.Bookings.Include(b => b.Vehicle)
-                .FirstOrDefaultAsync(b => !b.Disputes.Any() && (b.Status == BookingStatuses.Cancelled || b.Status == BookingStatuses.Ongoing || b.Status == BookingStatuses.Completed));
-            if (openCandidate != null)
-            {
-                db.Disputes.Add(new Dispute
+                    BookingId = bk05.BookingId,
+                    Type = HandoverTypes.Pickup,
+                    ConfirmedBy = u["owner1"].Id,
+                    ConfirmedAt = bk05.StartDate.AddMinutes(5),
+                    Odometer = 24150,
+                    FuelLevel = "Full",
+                    Notes = "Bàn giao xe thành công cho bạn Bình."
+                },
+                new HandoverConfirmation
                 {
-                    BookingId = openCandidate.BookingId,
-                    RaisedBy = openCandidate.RenterId,
-                    Description = "Chủ xe giao xe trễ 2 tiếng so với thỏa thuận và khi nhận thì bình xăng chỉ còn 1/4 vạch, yêu cầu sàn can thiệp hỗ trợ trừ tiền phụ phí.",
-                    EvidenceImage = "/seed/dispute-evidence-2.jpg",
-                    Status = DisputeStatuses.Open,
-                    CreatedAt = now.AddHours(-10)
-                });
-                await db.SaveChangesAsync();
-            }
-        }
-
-        // ensure pending booking for owner test
-        if (!await db.Bookings.AnyAsync(b => b.Status == BookingStatuses.Pending))
-        {
-            var pListing = await db.VehicleListings.Include(l => l.Vehicle)
-                .FirstOrDefaultAsync(l => l.ModerationStatus == ListingModerationStatuses.Public);
-            if (pListing != null)
-            {
-                var renter1 = u["renter1"];
-                var pStart = today.AddDays(5);
-                var pEnd = today.AddDays(8);
-                var pDays = 3;
-                var pTotal = pListing.PricePerDay * pDays;
-                var pHold = new DepositHold
+                    BookingId = bk06.BookingId,
+                    Type = HandoverTypes.Pickup,
+                    ConfirmedBy = u["renter3"].Id,
+                    ConfirmedAt = bk06.StartDate,
+                    Odometer = 38500,
+                    FuelLevel = "Full",
+                    Notes = "Nhận xe tại điểm hẹn."
+                },
+                new HandoverConfirmation
                 {
-                    Renter = renter1,
-                    Listing = pListing,
-                    StartDate = pStart,
-                    EndDate = pEnd,
-                    RentalDays = pDays,
-                    PriceLockedTotal = pTotal,
-                    DepositAmount = pTotal * BusinessRules.DepositRate,
-                    Status = DepositHoldStatuses.Converted,
-                    CreatedAt = now
+                    BookingId = bk06.BookingId,
+                    Type = HandoverTypes.Pickup,
+                    ConfirmedBy = u["owner3"].Id,
+                    ConfirmedAt = bk06.StartDate.AddMinutes(5),
+                    Odometer = 38500,
+                    FuelLevel = "Full",
+                    Notes = "Đã bàn giao xe và giấy tờ."
+                }
+            );
+
+            // Payments & Bank Transactions
+            void AddCompletedPayment(Booking b, string renterKey, string ownerKey)
+            {
+                var renterAcc = bankAccounts[u[renterKey].Id];
+                var ownerAcc = bankAccounts[u[ownerKey].Id];
+                var commission = Math.Round(b.PriceLockedTotal * BusinessRules.DefaultCommissionRate);
+
+                var payment = new Payment
+                {
+                    BookingId = b.BookingId,
+                    DepositStatus = DepositStatuses.Refunded,
+                    CommissionRate = BusinessRules.DefaultCommissionRate,
+                    CommissionAmount = commission,
+                    RevenueRecordedAt = b.EndDate.AddHours(1)
                 };
-                db.Bookings.Add(new Booking
+                db.Payments.Add(payment);
+
+                // Deposit tx
+                db.MockBankTransactions.Add(new MockBankTransaction
                 {
-                    Renter = renter1,
-                    Listing = pListing,
-                    Vehicle = pListing.Vehicle,
-                    SourceHold = pHold,
-                    StartDate = pStart,
-                    EndDate = pEnd,
-                    RentalDays = pDays,
-                    Status = BookingStatuses.Pending,
-                    PriceLockedTotal = pTotal,
-                    DepositAmount = pTotal * BusinessRules.DepositRate,
-                    PricePerDayAtBooking = pListing.PricePerDay,
-                    RentalSubtotal = pTotal,
-                    DeliveryFee = 0m,
-                    InsuranceFee = 0m,
-                    CreatedAt = now,
-                    ResponseDeadline = now.AddHours(BusinessRules.ResponseDeadlineHours)
+                    ReferenceCode = ReferenceCodes.Deposit(b.SourceHoldId),
+                    Payment = payment,
+                    FromAccount = renterAcc,
+                    ToAccount = escrowAcc,
+                    TransactionType = MockTransactionTypes.Deposit,
+                    Amount = b.DepositAmount,
+                    Status = MockTransactionStatuses.Succeeded,
+                    CreatedAt = b.CreatedAt
                 });
-                await db.SaveChangesAsync();
+
+                // Payout / Settle tx
+                db.MockBankTransactions.Add(new MockBankTransaction
+                {
+                    ReferenceCode = ReferenceCodes.Settle(b.BookingId),
+                    Payment = payment,
+                    FromAccount = escrowAcc,
+                    ToAccount = ownerAcc,
+                    TransactionType = MockTransactionTypes.Transfer,
+                    Amount = b.PriceLockedTotal - commission,
+                    Status = MockTransactionStatuses.Succeeded,
+                    CreatedAt = b.EndDate.AddMinutes(30)
+                });
+
+                // Refund deposit tx
+                db.MockBankTransactions.Add(new MockBankTransaction
+                {
+                    ReferenceCode = ReferenceCodes.Refund(b.BookingId),
+                    Payment = payment,
+                    FromAccount = escrowAcc,
+                    ToAccount = renterAcc,
+                    TransactionType = MockTransactionTypes.Refund,
+                    Amount = b.DepositAmount,
+                    Status = MockTransactionStatuses.Succeeded,
+                    CreatedAt = b.EndDate.AddHours(1)
+                });
             }
-        }
 
-        // ensure completed booking for owner review test
-        if (!await db.Bookings.AnyAsync(b => b.Status == BookingStatuses.Completed && !b.Reviews.Any(r => r.ReviewerId == b.Vehicle.OwnerId)))
-        {
-            var cListing = await db.VehicleListings.Include(l => l.Vehicle)
-                .FirstOrDefaultAsync(l => l.ModerationStatus == ListingModerationStatuses.Public);
-            if (cListing != null)
+            AddCompletedPayment(bk01, "renter1", "owner1");
+            AddCompletedPayment(bk02, "renter2", "owner2");
+            AddCompletedPayment(bk03, "renter3", "owner1");
+            AddCompletedPayment(bk04, "renter1", "owner2");
+            AddCompletedPayment(bk07, "renter1", "owner1");
+            AddCompletedPayment(bk15, "renter4", "owner2");
+
+            void AddActivePayment(Booking b, string renterKey)
             {
-                var renter2 = u["renter2"];
-                var cStart = today.AddDays(-5);
-                var cEnd = today.AddDays(-2);
-                var cDays = 3;
-                var cTotal = cListing.PricePerDay * cDays;
-                var cHold = new DepositHold
+                var renterAcc = bankAccounts[u[renterKey].Id];
+                var payment = new Payment
                 {
-                    Renter = renter2,
-                    Listing = cListing,
-                    StartDate = cStart,
-                    EndDate = cEnd,
-                    RentalDays = cDays,
-                    PriceLockedTotal = cTotal,
-                    DepositAmount = cTotal * BusinessRules.DepositRate,
-                    Status = DepositHoldStatuses.Converted,
-                    CreatedAt = cStart.AddDays(-2)
+                    BookingId = b.BookingId,
+                    DepositStatus = DepositStatuses.Held,
+                    CommissionRate = BusinessRules.DefaultCommissionRate,
+                    CommissionAmount = null,
+                    RevenueRecordedAt = null
                 };
-                var cBooking = new Booking
-                {
-                    Renter = renter2,
-                    Listing = cListing,
-                    Vehicle = cListing.Vehicle,
-                    SourceHold = cHold,
-                    StartDate = cStart,
-                    EndDate = cEnd,
-                    RentalDays = cDays,
-                    Status = BookingStatuses.Completed,
-                    PriceLockedTotal = cTotal,
-                    DepositAmount = cTotal * BusinessRules.DepositRate,
-                    PricePerDayAtBooking = cListing.PricePerDay,
-                    RentalSubtotal = cTotal,
-                    DeliveryFee = 0m,
-                    InsuranceFee = 0m,
-                    CreatedAt = cStart.AddDays(-2),
-                    AcceptedAt = cStart.AddDays(-1),
-                    CompletedAt = cEnd
-                };
-                db.Bookings.Add(cBooking);
-                await db.SaveChangesAsync();
+                db.Payments.Add(payment);
 
-                // renter reviewed first (double-blind test)
-                db.Reviews.Add(new Review
+                db.MockBankTransactions.Add(new MockBankTransaction
                 {
-                    BookingId = cBooking.BookingId,
-                    ReviewerId = renter2.Id,
-                    RevieweeId = cListing.Vehicle.OwnerId,
+                    ReferenceCode = ReferenceCodes.Deposit(b.SourceHoldId),
+                    Payment = payment,
+                    FromAccount = renterAcc,
+                    ToAccount = escrowAcc,
+                    TransactionType = MockTransactionTypes.Deposit,
+                    Amount = b.DepositAmount,
+                    Status = MockTransactionStatuses.Succeeded,
+                    CreatedAt = b.CreatedAt
+                });
+            }
+
+            AddActivePayment(bk05, "renter2");
+            AddActivePayment(bk06, "renter3");
+            AddActivePayment(bk11, "renter3");
+
+            // BK12: Cancelled by Renter
+            var r1Acc = bankAccounts[u["renter1"].Id];
+            var bk12Payment = new Payment
+            {
+                BookingId = bk12.BookingId,
+                DepositStatus = DepositStatuses.Refunded,
+                CommissionRate = BusinessRules.DefaultCommissionRate,
+                CommissionAmount = null,
+                RevenueRecordedAt = null
+            };
+            db.Payments.Add(bk12Payment);
+            db.MockBankTransactions.Add(new MockBankTransaction
+            {
+                ReferenceCode = ReferenceCodes.Deposit(bk12.SourceHoldId),
+                Payment = bk12Payment,
+                FromAccount = r1Acc,
+                ToAccount = escrowAcc,
+                TransactionType = MockTransactionTypes.Deposit,
+                Amount = bk12.DepositAmount,
+                Status = MockTransactionStatuses.Succeeded,
+                CreatedAt = bk12.CreatedAt
+            });
+            db.MockBankTransactions.Add(new MockBankTransaction
+            {
+                ReferenceCode = ReferenceCodes.Refund(bk12.BookingId),
+                Payment = bk12Payment,
+                FromAccount = escrowAcc,
+                ToAccount = r1Acc,
+                TransactionType = MockTransactionTypes.Refund,
+                Amount = bk12.DepositAmount,
+                Status = MockTransactionStatuses.Succeeded,
+                CreatedAt = bk12.CancelledAt ?? bk12.CreatedAt.AddHours(3)
+            });
+
+            // BK08: Cancelled with Owner Fault penalty
+            var r2Acc = bankAccounts[u["renter2"].Id];
+            var o1Acc = bankAccounts[u["owner1"].Id];
+            var bk08Penalty = 195_000m;
+            var bk08Payment = new Payment
+            {
+                BookingId = bk08.BookingId,
+                DepositStatus = DepositStatuses.Refunded,
+                CommissionRate = 0,
+                CommissionAmount = 0,
+                PenaltyAmount = bk08Penalty
+            };
+            db.Payments.Add(bk08Payment);
+            db.MockBankTransactions.Add(new MockBankTransaction
+            {
+                ReferenceCode = ReferenceCodes.Deposit(bk08.SourceHoldId),
+                Payment = bk08Payment,
+                FromAccount = r2Acc,
+                ToAccount = escrowAcc,
+                TransactionType = MockTransactionTypes.Deposit,
+                Amount = bk08.DepositAmount,
+                Status = MockTransactionStatuses.Succeeded,
+                CreatedAt = bk08.CreatedAt
+            });
+            db.MockBankTransactions.Add(new MockBankTransaction
+            {
+                ReferenceCode = ReferenceCodes.Refund(bk08.BookingId),
+                Payment = bk08Payment,
+                FromAccount = escrowAcc,
+                ToAccount = r2Acc,
+                TransactionType = MockTransactionTypes.Refund,
+                Amount = bk08.DepositAmount,
+                Status = MockTransactionStatuses.Succeeded,
+                CreatedAt = bk08.CancelledAt ?? bk08.CreatedAt.AddHours(4)
+            });
+            db.MockBankTransactions.Add(new MockBankTransaction
+            {
+                ReferenceCode = ReferenceCodes.Penalty(bk08.BookingId),
+                Payment = bk08Payment,
+                FromAccount = o1Acc,
+                ToAccount = escrowAcc,
+                TransactionType = MockTransactionTypes.Penalty,
+                Amount = bk08Penalty,
+                Status = MockTransactionStatuses.Succeeded,
+                CreatedAt = bk08.CancelledAt ?? bk08.CreatedAt.AddHours(4)
+            });
+
+            // Reviews
+            // BK01: 2-way 5-star public reviews
+            db.Reviews.AddRange(
+                new Review
+                {
+                    BookingId = bk01.BookingId,
+                    ReviewerId = u["renter1"].Id,
+                    RevieweeId = u["owner1"].Id,
                     Rating = 5,
-                    Comment = "Chuyến đi rất êm ái, xe mới và chủ xe nhiệt tình hỗ trợ!",
-                    IsPublic = false,
-                    CreatedAt = cEnd.AddHours(1)
-                });
-                await db.SaveChangesAsync();
-            }
+                    Comment = "Xe Toyota Vios đi rất êm, máy móc vận hành trơn tru và tiết kiệm nhiên liệu. Chủ xe bàn giao xe sạch sẽ, đúng giờ. 10/10!",
+                    IsPublic = true,
+                    CreatedAt = bk01.EndDate.AddHours(2)
+                },
+                new Review
+                {
+                    BookingId = bk01.BookingId,
+                    ReviewerId = u["owner1"].Id,
+                    RevieweeId = u["renter1"].Id,
+                    Rating = 5,
+                    Comment = "Khách thuê rất lịch sự, giữ gìn xe sạch sẽ và giao trả xe đúng hẹn. Rất mong được tiếp tục đón tiếp anh trong các chuyến đi tới!",
+                    IsPublic = true,
+                    CreatedAt = bk01.EndDate.AddHours(3)
+                }
+            );
+
+            // BK02: Double-Blind Review test! Renter reviewed 5-star, Owner hasn't reviewed yet -> IsPublic = false
+            db.Reviews.Add(new Review
+            {
+                BookingId = bk02.BookingId,
+                ReviewerId = u["renter2"].Id,
+                RevieweeId = u["owner2"].Id,
+                Rating = 5,
+                Comment = "Xe Mazda CX-5 lái rất đầm chắc, âm thanh Bose nghe hay, chủ xe chu đáo chuẩn bị cả nước hoa và khăn ướt.",
+                IsPublic = false,
+                CreatedAt = bk02.EndDate.AddHours(1)
+            });
+
+            // BK03: 2-way 5-star public reviews
+            db.Reviews.AddRange(
+                new Review
+                {
+                    BookingId = bk03.BookingId,
+                    ReviewerId = u["renter3"].Id,
+                    RevieweeId = u["owner1"].Id,
+                    Rating = 5,
+                    Comment = "Chuyến đi công tác Đà Nẵng rất thuận lợi nhờ xe Corolla Cross gầm cao, máy êm và tiết kiệm xăng.",
+                    IsPublic = true,
+                    CreatedAt = bk03.EndDate.AddHours(2)
+                },
+                new Review
+                {
+                    BookingId = bk03.BookingId,
+                    ReviewerId = u["owner1"].Id,
+                    RevieweeId = u["renter3"].Id,
+                    Rating = 5,
+                    Comment = "Khách thuê giao tiếp nhã nhặn, tuân thủ đúng giờ giấc bàn giao xe.",
+                    IsPublic = true,
+                    CreatedAt = bk03.EndDate.AddHours(3)
+                }
+            );
+
+            // BK04: 2-way 5-star public reviews
+            db.Reviews.AddRange(
+                new Review
+                {
+                    BookingId = bk04.BookingId,
+                    ReviewerId = u["renter1"].Id,
+                    RevieweeId = u["owner2"].Id,
+                    Rating = 5,
+                    Comment = "Trải nghiệm xe điện VinFast VF e34 tại Đà Nẵng cực kỳ thú vị! Trạm sạc nhiều, xe tăng tốc mượt mà.",
+                    IsPublic = true,
+                    CreatedAt = bk04.EndDate.AddHours(2)
+                },
+                new Review
+                {
+                    BookingId = bk04.BookingId,
+                    ReviewerId = u["owner2"].Id,
+                    RevieweeId = u["renter1"].Id,
+                    Rating = 5,
+                    Comment = "Khách trả xe với mức pin 90%, xe sạch sẽ không một hạt bụi. Rất cảm ơn bạn!",
+                    IsPublic = true,
+                    CreatedAt = bk04.EndDate.AddHours(3)
+                }
+            );
+
+            // BK15: 2-way 5-star public reviews
+            db.Reviews.AddRange(
+                new Review
+                {
+                    BookingId = bk15.BookingId,
+                    ReviewerId = u["renter4"].Id,
+                    RevieweeId = u["owner2"].Id,
+                    Rating = 5,
+                    Comment = "Xe CX-30 rất mới, chạy phố Sài Gòn linh hoạt và kiểu dáng rất đẹp.",
+                    IsPublic = true,
+                    CreatedAt = bk15.EndDate.AddHours(2)
+                },
+                new Review
+                {
+                    BookingId = bk15.BookingId,
+                    ReviewerId = u["owner2"].Id,
+                    RevieweeId = u["renter4"].Id,
+                    Rating = 5,
+                    Comment = "Khách hàng thân thiện, trả xe đúng giờ.",
+                    IsPublic = true,
+                    CreatedAt = bk15.EndDate.AddHours(3)
+                }
+            );
+
+            // Disputes
+            // BK06: Ongoing with Open Dispute (AC broken & Check Engine)
+            db.Disputes.Add(new Dispute
+            {
+                BookingId = bk06.BookingId,
+                RaisedBy = u["renter3"].Id,
+                Description = "Khi nhận xe chạy được khoảng 30km trên cao tốc thì hệ thống điều hòa ngừng làm mát, khoang xe phả hơi nóng bức bí và bảng taplo xuất hiện đèn báo check-engine nhấp nháy. Tôi đã liên hệ chủ xe nhiều lần nhưng không được phản hồi, đề nghị Ban quản trị sàn can thiệp khẩn cấp hỗ trợ giải quyết sự cố kỹ thuật này.",
+                EvidenceImage = "/seed/dispute-evidence-1.jpg",
+                Status = DisputeStatuses.Open,
+                CreatedAt = now.AddHours(-16),
+                ResolvedBy = null,
+                ResolvedAt = null,
+                ResolutionAction = null,
+                ResolutionNotes = null
+            });
+
+            // BK07: Completed with Resolved Dispute (ForceComplete - Scratch Dispute)
+            db.Disputes.Add(new Dispute
+            {
+                BookingId = bk07.BookingId,
+                RaisedBy = u["renter1"].Id,
+                Description = "Chủ xe yêu cầu giữ lại 500.000đ tiền đặt cọc vì lý do có vết trầy xước ở mép cản dưới bên phụ. Tôi khẳng định vết xước này đã có sẵn khi nhận xe và đã được chụp lại trong biên bản bàn giao ban đầu.",
+                EvidenceImage = "/seed/dispute-evidence-2.jpg",
+                Status = DisputeStatuses.Resolved,
+                CreatedAt = bk07.EndDate.AddHours(1),
+                ResolvedBy = staff1.Id,
+                ResolvedAt = bk07.EndDate.AddHours(4),
+                ResolutionAction = ResolutionActions.ForceComplete,
+                ResolutionNotes = "Đã đối chiếu hình ảnh chụp lúc nhận xe trong biên bản bàn giao: vết trầy xước cản dưới đã có từ trước chuyến đi. Quyết định hoàn đủ 100% cọc cho khách thuê và hoàn tất thanh toán doanh thu cho chủ xe theo quy định sàn."
+            });
+
+            // BK08: Cancelled with Resolved Dispute (CancelOwnerFault - Owner No-show & Penalty)
+            db.Disputes.Add(new Dispute
+            {
+                BookingId = bk08.BookingId,
+                RaisedBy = u["renter2"].Id,
+                Description = "Sáng ngày nhận xe, tôi đến điểm hẹn đúng giờ nhưng chủ xe không có mặt, tắt máy điện thoại không liên lạc được và sau đó nhắn báo bận cho mượn xe ngoài. Hành vi này làm hỏng toàn bộ lịch trình công tác của đoàn chúng tôi.",
+                EvidenceImage = "/seed/dispute-evidence-2.jpg",
+                Status = DisputeStatuses.Resolved,
+                CreatedAt = bk08.StartDate.AddHours(1),
+                ResolvedBy = admin1.Id,
+                ResolvedAt = bk08.StartDate.AddHours(4),
+                ResolutionAction = ResolutionActions.CancelOwnerFault,
+                ResolutionNotes = "Xác minh chủ xe tự ý hủy hẹn và vi phạm nghiêm trọng cam kết bàn giao xe. Phán quyết hủy đơn, hoàn trả 100% tiền đặt cọc cho khách thuê và áp dụng chế tài phạt vi phạm 10% giá trị hợp đồng (195.000đ) đối với chủ xe."
+            });
+
+            await db.SaveChangesAsync();
         }
     }
 }

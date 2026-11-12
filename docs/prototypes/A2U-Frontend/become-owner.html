@@ -137,73 +137,88 @@
 
             <!-- Section 2: Lịch xe -->
             <section class="content-section calendar-content" id="lich-xe-content" aria-labelledby="calendar-page-title" hidden>
-                <div class="calendar-page-heading">
-                    <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
-                    <h1 id="calendar-page-title">Lịch xe</h1>
+                <div class="calendar-page-heading" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
+                        <h1 id="calendar-page-title" style="margin: 0; font-size: 22px; font-weight: 800; color: #1e293b;">Lịch xe & Khóa lịch bận</h1>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label for="calendarVehicleSelect" style="font-weight: 700; font-size: 13.5px; color: #334155;"><i class="fa-solid fa-car" style="color: #2563eb;"></i> Chọn xe:</label>
+                        <select id="calendarVehicleSelect" style="padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; font-size: 13.5px; background: #fff; min-width: 260px; color: #1e293b; cursor: pointer;">
+                            <option value="">-- Đang tải danh sách xe --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="selectedVehicleSummaryCard" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <img id="calVehicleThumb" src="Images/logo_transparent.png" alt="Xe" style="width: 72px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        <div>
+                            <h3 id="calVehicleName" style="margin: 0 0 4px 0; font-size: 16px; font-weight: 800; color: #0f172a;">Đang tải...</h3>
+                            <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b;">
+                                <span id="calVehiclePlate" style="background: #e2e8f0; color: #1e293b; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-family: monospace;">---</span>
+                                <span>&bull;</span>
+                                <span id="calVehiclePrice" style="color: #16a34a; font-weight: 700;">--- đ/ngày</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #64748b;">
+                        <span>Trạng thái: <strong id="calVehicleStatus" style="color: #16a34a;">Đang hoạt động</strong></span>
+                    </div>
                 </div>
 
                 <div class="calendar-layout">
                     <aside class="calendar-sidebar">
-                        <section class="calendar-panel calendar-date-panel" aria-labelledby="calendar-date-title">
-                            <h2 id="calendar-date-title">Thời gian</h2>
-                            <label for="calendarFrom">Từ ngày</label>
-                            <input id="calendarFrom" type="date">
-                            <label for="calendarTo">Đến ngày</label>
-                            <input id="calendarTo" type="date">
+                        <section class="calendar-panel calendar-date-panel" aria-labelledby="calendar-block-form-title" style="border: 1px solid #fed7aa; background: #fffaf5;">
+                            <h2 id="calendar-block-form-title" style="margin: 0 0 12px; font-size: 15px; font-weight: 700; color: #9a3412; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-lock" style="color: #ea580c;"></i> Khóa lịch xe thủ công
+                            </h2>
+                            <p style="font-size: 12px; color: #64748b; margin: 0 0 12px; line-height: 1.4;">Chặn khách đặt xe trong thời gian xe đi bảo dưỡng, sửa chữa hoặc bạn có việc riêng.</p>
+
+                            <label for="blockStartDate" style="font-weight: 600; font-size: 12px; color: #475569; display: block; margin-bottom: 4px;">Từ ngày</label>
+                            <input id="blockStartDate" type="date" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; margin-bottom: 10px; box-sizing: border-box;">
+
+                            <label for="blockEndDate" style="font-weight: 600; font-size: 12px; color: #475569; display: block; margin-bottom: 4px;">Đến ngày</label>
+                            <input id="blockEndDate" type="date" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; margin-bottom: 10px; box-sizing: border-box;">
+
+                            <label for="blockReasonInput" style="font-weight: 600; font-size: 12px; color: #475569; display: block; margin-bottom: 4px;">Lý do khóa lịch</label>
+                            <select id="quickReasonSelect" style="width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12.5px; margin-bottom: 8px; background: #fff; box-sizing: border-box;">
+                                <option value="Bảo dưỡng định kỳ">Bảo dưỡng định kỳ</option>
+                                <option value="Đi công tác / Việc riêng">Đi công tác / Việc riêng</option>
+                                <option value="Kiểm tra kỹ thuật định kỳ">Kiểm tra kỹ thuật định kỳ</option>
+                                <option value="Nghỉ lễ / Tết">Nghỉ lễ / Tết</option>
+                                <option value="custom">-- Nhập lý do khác --</option>
+                            </select>
+                            <input id="blockReasonInput" type="text" placeholder="Nhập lý do cụ thể..." value="Bảo dưỡng định kỳ" style="width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; margin-bottom: 14px; box-sizing: border-box;">
+
+                            <button id="btnSubmitBlockSchedule" type="button" style="width: 100%; background: #ea580c; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 700; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;">
+                                <i class="fa-solid fa-lock"></i> Xác nhận khóa lịch
+                            </button>
+                        </section>
+
+                        <section class="calendar-panel" aria-labelledby="blocked-list-title" style="padding: 14px;">
+                            <h2 id="blocked-list-title" style="margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #1e293b; display: flex; align-items: center; justify-content: space-between;">
+                                <span><i class="fa-regular fa-calendar-xmark" style="color: #dc2626;"></i> Lịch đã tự khóa</span>
+                                <span id="blockedRangesCount" style="font-size: 12px; background: #fee2e2; color: #991b1b; padding: 1px 7px; border-radius: 10px;">0</span>
+                            </h2>
+                            <div id="blockedRangesList" style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;">
+                                <p style="font-size: 12.5px; color: #94a3b8; margin: 0;">Chưa có khoảng lịch bận nào.</p>
+                            </div>
                         </section>
 
                         <section class="calendar-panel calendar-legend" aria-labelledby="calendar-legend-title">
-                            <h2 id="calendar-legend-title">Trạng thái lịch</h2>
+                            <h2 id="calendar-legend-title">Chú thích màu lịch</h2>
                             <ul>
-                                <li><span class="legend-dot is-payment"></span>Chờ thanh toán</li>
-                                <li><span class="legend-dot is-pending"></span>Chờ duyệt</li>
-                                <li><span class="legend-dot is-free"></span>Trống lịch</li>
-                                <li><span class="legend-dot is-busy"></span>Bận lịch</li>
-                                <li><span class="legend-dot is-trip"></span>Chuyến AZU Car</li>
+                                <li><span class="legend-dot" style="background: #ffffff; border: 1px solid #cbd5e1;"></span>Trống lịch (Sẵn sàng)</li>
+                                <li><span class="legend-dot" style="background: #dbeafe; border: 1px solid #93c5fd;"></span>Có đơn thuê (Booking)</li>
+                                <li><span class="legend-dot" style="background: #fee2e2; border: 1px solid #fca5a5;"></span>Chủ xe tự khóa (Bận)</li>
+                                <li><span class="legend-dot" style="background: #f1f5f9;"></span>Ngày đã qua</li>
                             </ul>
                         </section>
                     </aside>
 
                     <div class="calendar-main">
-                        <div class="calendar-filters" aria-label="Bộ lọc lịch xe">
-                            <label>Sắp xếp
-                                <select id="calendarSort">
-                                    <option>Trống lịch (Mặc định)</option>
-                                    <option>Lịch bận trước</option>
-                                </select>
-                            </label>
-                            <label>Truyền động
-                                <select id="calendarTransmission">
-                                    <option>Tất cả</option>
-                                    <option>Tự động</option>
-                                    <option>Số sàn</option>
-                                </select>
-                            </label>
-                            <label>Dòng xe
-                                <select id="calendarCategory">
-                                    <option>Tất cả</option>
-                                    <option>Xe 4 chỗ</option>
-                                    <option>Xe 7 chỗ</option>
-                                    <option>SUV</option>
-                                </select>
-                            </label>
-                            <label>Hãng xe
-                                <select id="calendarBrand">
-                                    <option>Tất cả</option>
-                                    <option>Toyota</option>
-                                    <option>Honda</option>
-                                    <option>VinFast</option>
-                                </select>
-                            </label>
-                        </div>
-
                         <section class="calendar-panel calendar-schedule" aria-label="Lịch trống xe">
-                            <div class="calendar-empty-summary">
-                                <span class="calendar-empty-icon"><i class="fa-regular fa-calendar"></i></span>
-                                <h2>Không có lịch bận nào</h2>
-                                <p>Tất cả các ngày trong khoảng thời gian này đều trống lịch và sẵn sàng cho thuê.</p>
-                            </div>
-
                             <div class="calendar-month-controls">
                                 <button type="button" id="previousMonth" aria-label="Tháng trước"><i class="fa-solid fa-chevron-left"></i></button>
                                 <h3 id="calendarMonthLabel"></h3>
