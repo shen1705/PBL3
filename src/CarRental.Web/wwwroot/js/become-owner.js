@@ -984,7 +984,7 @@ const DOC_TEMPLATES = {
 
         subtitle: 'Mẫu số 01/HĐ-AZU • Xác thực điện tử VNeID Mức 2',
 
-        badge: 'Hợp đồng mẫu',
+        badge: 'Hợp đồng cho thuê',
 
         content: `
 
