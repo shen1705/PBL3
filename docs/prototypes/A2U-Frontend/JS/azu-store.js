@@ -85,14 +85,18 @@
         const ownerNavLinks = document.querySelectorAll('#owner-nav-link');
         ownerNavLinks.forEach(el => {
             el.textContent = userIsOwner ? 'Quản lý xe' : 'Trở thành chủ xe';
+            el.href = userIsOwner ? '/owner' : '/become-owner';
+        });
+
+        const navBecomeOwners = document.querySelectorAll('#nav-become-owner');
+        navBecomeOwners.forEach(el => {
+            el.href = userIsOwner ? '/owner' : '/become-owner';
         });
 
         const navBecomeOwnerTexts = document.querySelectorAll('#nav-become-owner-text, .nav-become-owner-text');
         navBecomeOwnerTexts.forEach(el => {
             el.textContent = userIsOwner ? 'Quản lý xe' : 'Trở thành chủ xe';
         });
-
-
 
         window.dispatchEvent(new CustomEvent('azu:role-changed', { detail: { isOwner: userIsOwner } }));
     }

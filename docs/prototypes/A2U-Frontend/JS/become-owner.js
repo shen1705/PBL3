@@ -2015,61 +2015,44 @@ async function loadOwnerRevenue() {
 
 
         const data = resData.data;
+        const gross = data.grossRentalRevenue ?? data.grossRevenue ?? 0;
+        const comm = data.totalCommissionPaid ?? data.platformCommission ?? 0;
+        const net = data.netEarnings ?? 0;
+        const count = data.totalCompletedTrips ?? data.completedTripsCount ?? 0;
 
-        grossEl.textContent = Number(data.grossRevenue || 0).toLocaleString('vi-VN') + ' đ';
-
-        commEl.textContent = Number(data.platformCommission || 0).toLocaleString('vi-VN') + ' đ';
-
-        netEl.textContent = Number(data.netEarnings || 0).toLocaleString('vi-VN') + ' đ';
-
-        countEl.textContent = String(data.completedTripsCount || 0);
-
-
+        grossEl.textContent = Number(gross).toLocaleString('vi-VN') + ' đ';
+        commEl.textContent = Number(comm).toLocaleString('vi-VN') + ' đ';
+        netEl.textContent = Number(net).toLocaleString('vi-VN') + ' đ';
+        countEl.textContent = String(count);
 
         if (Array.isArray(data.trips) && data.trips.length > 0) {
-
             if (emptyMsgEl) emptyMsgEl.style.display = 'none';
-
             if (tableEl) tableEl.style.display = 'table';
-
             if (bodyEl) {
-
                 bodyEl.replaceChildren();
-
                 data.trips.forEach(t => {
-
                     const tr = document.createElement('tr');
-
-                    tr.style.cssText = 'border-bottom: 1px solid #f1f5f9;';
-
+                    tr.style.cssText = 'border-bottom: 1px solid #f1f5f9; transition: background 0.15s;';
+                    tr.addEventListener('mouseenter', () => tr.style.background = '#f8fafc');
+                    tr.addEventListener('mouseleave', () => tr.style.background = 'transparent');
                     const startStr = new Date(t.startDate).toLocaleDateString('vi-VN');
-
                     const endStr = new Date(t.endDate).toLocaleDateString('vi-VN');
+                    const total = t.totalAmount ?? t.priceLockedTotal ?? 0;
+                    const commAmount = t.commissionAmount ?? 0;
+                    const netEarning = t.netEarning ?? t.netEarnings ?? 0;
 
                     tr.innerHTML = `
-
-                        <td style="padding: 10px 12px; font-weight: 600; color: #1e293b;">#${t.bookingId}</td>
-
-                        <td style="padding: 10px 12px; color: #334155;">${t.vehicleName}</td>
-
+                        <td style="padding: 10px 12px; font-weight: 600;"><a href="/booking/${t.bookingId}" class="booking-link" style="color: #2563eb; text-decoration: none; font-weight: 700;">#${t.bookingId}</a></td>
+                        <td style="padding: 10px 12px; color: #334155;"><a href="/booking/${t.bookingId}" class="booking-link" style="color: #1e293b; text-decoration: none; font-weight: 600;">${t.vehicleName}</a></td>
                         <td style="padding: 10px 12px; color: #334155;">${t.renterName}</td>
-
-                        <td style="padding: 10px 12px; color: #64748b;">${startStr} - ${endStr}</td>
-
-                        <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: #0f172a;">${Number(t.priceLockedTotal || 0).toLocaleString('vi-VN')} đ</td>
-
-                        <td style="padding: 10px 12px; text-align: right; color: #dc2626;">-${Number(t.commissionAmount || 0).toLocaleString('vi-VN')} đ</td>
-
-                        <td style="padding: 10px 12px; text-align: right; font-weight: 700; color: #16a34a;">+${Number(t.netEarnings || 0).toLocaleString('vi-VN')} đ</td>
-
+                        <td style="padding: 10px 12px; color: #64748b;">${startStr} - ${endStr} (${t.rentalDays} ngày)</td>
+                        <td style="padding: 10px 12px; text-align: right; font-weight: 600; color: #0f172a;">${Number(total).toLocaleString('vi-VN')} đ</td>
+                        <td style="padding: 10px 12px; text-align: right; color: #dc2626;">-${Number(commAmount).toLocaleString('vi-VN')} đ</td>
+                        <td style="padding: 10px 12px; text-align: right; font-weight: 700; color: #16a34a;">+${Number(netEarning).toLocaleString('vi-VN')} đ</td>
                     `;
-
                     bodyEl.appendChild(tr);
-
                 });
-
             }
-
         } else {
 
             if (emptyMsgEl) emptyMsgEl.style.display = 'block';

@@ -327,6 +327,7 @@ public class VehicleService : IVehicleService
                 .OrderBy(u => u.StartDate)
                 .Select(u => new DateRangeDto
                 {
+                    Id = u.UnavailabilityId,
                     StartDate = u.StartDate,
                     EndDate = u.EndDate,
                     Reason = u.Reason
@@ -338,6 +339,7 @@ public class VehicleService : IVehicleService
                 .OrderBy(b => b.StartDate)
                 .Select(b => new DateRangeDto
                 {
+                    Id = b.BookingId,
                     StartDate = b.StartDate,
                     EndDate = b.EndDate,
                     Reason = "Đã có khách đặt"
@@ -718,8 +720,8 @@ public class VehicleService : IVehicleService
     {
         try
         {
-            if (request.EndDate <= request.StartDate)
-                return ServiceResult<int>.Fail("Ngày kết thúc phải sau ngày bắt đầu.", ErrorCodes.Validation);
+            if (request.EndDate.Date < request.StartDate.Date)
+                return ServiceResult<int>.Fail("Ngày kết thúc không được trước ngày bắt đầu.", ErrorCodes.Validation);
 
             var vehicle = await _db.Vehicles
                 .Include(v => v.Bookings)
@@ -731,12 +733,17 @@ public class VehicleService : IVehicleService
             if (vehicle.OwnerId != ownerId)
                 return ServiceResult<int>.Fail("Bạn không có quyền khóa lịch của xe này.", ErrorCodes.Forbidden);
 
+            var start = request.StartDate.Date;
+            var end = request.EndDate.Date == request.StartDate.Date
+                ? request.StartDate.Date.AddDays(1).AddSeconds(-1)
+                : request.EndDate.Date.AddDays(1).AddSeconds(-1);
+
             // check conflicting bookings
             var lockingStatuses = BookingStatuses.Locking.ToArray();
             var hasConflict = vehicle.Bookings.Any(b =>
                 lockingStatuses.Contains(b.Status) &&
-                b.StartDate < request.EndDate &&
-                b.EndDate > request.StartDate);
+                b.StartDate < end &&
+                b.EndDate > start);
 
             if (hasConflict)
             {
@@ -747,9 +754,9 @@ public class VehicleService : IVehicleService
             var unavailability = new VehicleUnavailability
             {
                 VehicleId = vehicleId,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                Reason = request.Reason?.Trim()
+                StartDate = start,
+                EndDate = end,
+                Reason = string.IsNullOrWhiteSpace(request.Reason) ? "Chủ xe bận" : request.Reason.Trim()
             };
 
             _db.VehicleUnavailabilities.Add(unavailability);

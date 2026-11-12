@@ -109,6 +109,7 @@ app.MapStaticAssets();
 // Friendly routes
 app.MapControllerRoute("about", "about", new { controller = "Home", action = "About" });
 app.MapControllerRoute("find", "find", new { controller = "Home", action = "Find" });
+app.MapControllerRoute("owner", "owner", new { controller = "Home", action = "Owner" });
 app.MapControllerRoute("become-owner", "become-owner", new { controller = "Home", action = "BecomeOwner" });
 app.MapControllerRoute("carregistermode", "carregistermode", new { controller = "Home", action = "CarRegisterMode" });
 app.MapControllerRoute("account", "account", new { controller = "Home", action = "Account" });
@@ -121,6 +122,7 @@ app.MapControllerRoute("chatbot", "chatbot", new { controller = "Home", action =
 app.MapGet("/index.html", () => Results.Redirect("/", permanent: true));
 app.MapGet("/about.html", () => Results.Redirect("/about", permanent: true));
 app.MapGet("/find.html", () => Results.Redirect("/find", permanent: true));
+app.MapGet("/owner.html", () => Results.Redirect("/owner", permanent: true));
 app.MapGet("/become-owner.html", () => Results.Redirect("/become-owner", permanent: true));
 app.MapGet("/carregistermode.html", () => Results.Redirect("/carregistermode", permanent: true));
 app.MapGet("/account.html", () => Results.Redirect("/account", permanent: true));

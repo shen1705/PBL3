@@ -17,19 +17,16 @@
                 </div>
                 <nav class="trips-side-nav">
                     <a class="trips-side-link" href="/account" id="nav-account"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
-                    <a class="trips-side-link active" href="/become-owner" id="nav-become-owner" aria-current="page" aria-expanded="true" aria-controls="owner-submenu"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span><i class="fa-solid fa-chevron-down owner-menu-chevron" aria-hidden="true"></i></a>
+                    <a class="trips-side-link active" href="@(User.IsInRole("Owner") ? "/owner" : "/become-owner")" id="nav-become-owner" aria-current="page" aria-expanded="true" aria-controls="owner-submenu"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span><i class="fa-solid fa-chevron-down owner-menu-chevron" aria-hidden="true"></i></a>
                     <div class="owner-submenu" id="owner-submenu">
                         <a class="side-link owner-only" href="#danh-sach-xe-content"><span>Danh sách xe</span></a>
                         <a class="side-link owner-only" href="#quan-ly-chuyen-content"><span>Quản lý chuyến</span></a>
                         <a class="side-link owner-only" href="#lich-xe-content"><span>Lịch xe</span></a>
                         <a class="side-link owner-only" href="#doanh-thu-content"><span>Doanh thu cho thuê</span></a>
                         <a class="side-link owner-only" href="#hop-dong-content"><span>Hợp đồng</span></a>
-                        <a class="side-link" href="#bao-mat-content"><span>Chính sách bảo vệ dữ liệu</span></a>
                         <a class="side-link" href="#cam-nang-content"><span>Cẩm nang cho thuê xe</span></a>
                     </div>
                     <a class="trips-side-link" href="/account#trips" id="nav-trips"><i class="fa-regular fa-calendar-days"></i><span>Chuyến của tôi</span></a>
-                    <a class="trips-side-link" href="/account#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
-                    <a class="trips-side-link" href="/account#privacy" id="nav-privacy"><i class="fa-solid fa-shield-halved"></i><span>Chính sách bảo vệ dữ liệu</span></a>
                     <a class="trips-side-link" href="/account#password" id="nav-password"><i class="fa-solid fa-lock"></i><span>Đổi mật khẩu</span></a>
                     <a class="trips-side-link trips-logout" id="trip-logout" href="/"><i class="fa-solid fa-arrow-right-from-bracket"></i><span>Đăng xuất</span></a>
                 </nav>

@@ -2074,6 +2074,23 @@ document.getElementById('btnRentCarSubmit')?.addEventListener('click', () => {
     openBookingModal();
 });
 
+// sync popup state on login
+window.addEventListener('azu:auth-changed', (e) => {
+    const user = e.detail;
+    if (user && currentPopupCar) {
+        const myUserId = user.userId || sessionStorage.getItem('azuCarUserId');
+        const isMyCar = myUserId && currentPopupCar.ownerId && String(myUserId) === String(currentPopupCar.ownerId);
+        const selfBadge = document.getElementById('popupOwnerSelfBadge');
+        const btnRent = document.getElementById('btnRentCarSubmit');
+        const btnOwnerManage = document.getElementById('btnOwnerManageCar');
+        if (selfBadge) selfBadge.style.display = isMyCar ? 'inline-flex' : 'none';
+        if (btnRent && btnOwnerManage) {
+            btnRent.style.display = isMyCar ? 'none' : 'flex';
+            btnOwnerManage.style.display = isMyCar ? 'flex' : 'none';
+        }
+    }
+});
+
 // close booking modal
 closeBookingModalBtn?.addEventListener('click', closeBookingModal);
 btnBackToCar?.addEventListener('click', closeBookingModal);

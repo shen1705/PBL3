@@ -16,7 +16,16 @@ public class HomeController : Controller
 
     public IActionResult Find() => View();
 
-    public IActionResult BecomeOwner() => View();
+    public IActionResult Owner() => View("BecomeOwner");
+
+    public IActionResult BecomeOwner()
+    {
+        if (User.IsInRole(RoleNames.Owner))
+        {
+            return Redirect("/owner");
+        }
+        return View();
+    }
 
     public IActionResult CarRegisterMode() => View();
 

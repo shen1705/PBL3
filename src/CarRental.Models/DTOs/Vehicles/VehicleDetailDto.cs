@@ -5,6 +5,7 @@ namespace CarRental.Models.DTOs.Vehicles;
 
 public class DateRangeDto
 {
+    public int? Id { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public string? Reason { get; set; }

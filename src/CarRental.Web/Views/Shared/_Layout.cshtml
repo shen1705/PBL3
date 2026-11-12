@@ -17,7 +17,7 @@
     @{
     var reqPath = Context.Request.Path.Value?.ToLowerInvariant() ?? "";
     var isAboutPage = reqPath.StartsWith("/about");
-    var isOwnerPage = reqPath.StartsWith("/become-owner") || reqPath.StartsWith("/carregistermode");
+    var isOwnerPage = reqPath.StartsWith("/become-owner") || reqPath.StartsWith("/owner") || reqPath.StartsWith("/carregistermode");
     var isTripsPage = reqPath.StartsWith("/mytrips") || reqPath.StartsWith("/account");
     var isSupportPage = reqPath.StartsWith("/support");
     var isFindPage = reqPath.StartsWith("/find");
@@ -31,7 +31,7 @@
             <nav class="nav-links" aria-label="Điều hướng chính">
                 <a href="/find" id="find-nav-link" class="nav-find-car-btn"><i class="fa-solid fa-magnifying-glass"></i> Tìm xe</a>
                 <a href="/about" id="about-nav-link" class="@(isAboutPage ? "active" : "")">Về AZU Car</a>
-                <a href="/become-owner" id="owner-nav-link" class="@(isOwnerPage ? "active" : "")">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</a>
+                <a href="@(User.IsInRole("Owner") ? "/owner" : "/become-owner")" id="owner-nav-link" class="@(isOwnerPage ? "active" : "")">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</a>
                 <a href="/account#trips" id="trips-nav-link" class="@(isTripsPage ? "active" : "")">Chuyến của tôi</a>
                 <a href="/support" id="support-nav-link" class="@(isSupportPage ? "active" : "")">Trợ giúp</a>
                 @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
@@ -72,7 +72,7 @@
                 <ul>
                     <li><a href="/about">Về chúng tôi</a></li>
                     <li><a href="/about#features">Tính năng</a></li>
-                    <li><a href="/account#privacy">Chính sách bảo mật</a></li>
+                    <li><a href="/account#privacy">Chính sách bảo vệ dữ liệu</a></li>
                 </ul>
             </div>
             <div class="footer-col">
