@@ -13,15 +13,21 @@ const sampleDataNote = document.getElementById('sampleDataNote');
 // default city
 let selectedLocation = savedLocation || urlLocation || document.getElementById('filterLocationText')?.textContent.trim() || 'TP. Đà Nẵng';
 
+function resolveVehicleImage(car) {
+    const currentImage = car.coverImageUrl || '';
+    const vehicleName = `${car.brand || ''} ${car.model || ''} ${car.name || ''}`;
+    return window.AzuVehicleImages?.resolve(vehicleName, currentImage) || currentImage;
+}
+
 const sampleCars = [
-    { name: 'TOYOTA VIOS G 2024', city: 'Hà Nội', district: 'Quận Cầu Giấy', price: '650K', rating: '4.9', trips: 18, year: 2024, seats: 5, image: 'photo-1552519507-da3b142c6e3d' },
-    { name: 'HONDA CITY RS 2023', city: 'Hà Nội', district: 'Quận Đống Đa', price: '680K', rating: '5.0', trips: 12, year: 2023, seats: 5, image: 'photo-1541899481282-d53bffe3c35d' },
-    { name: 'MAZDA CX-5 PREMIUM 2024', city: 'Hà Nội', district: 'Quận Nam Từ Liêm', price: '1.050K', rating: '4.8', trips: 21, year: 2024, seats: 5, image: 'photo-1511919884226-fd3cad34687c' },
-    { name: 'MITSUBISHI XPANDER 2023', city: 'Hà Nội', district: 'Quận Long Biên', price: '850K', rating: '4.9', trips: 15, year: 2023, seats: 7, image: 'photo-1502877338535-766e1452684a' },
-    { name: 'KIA SONET PREMIUM 2024', city: 'TP. Hồ Chí Minh', district: 'Quận 1', price: '720K', rating: '4.9', trips: 16, year: 2024, seats: 5, image: 'photo-1533473359331-0135ef1b58bf' },
-    { name: 'TOYOTA VIOS G 2023', city: 'TP. Hồ Chí Minh', district: 'Quận Bình Thạnh', price: '630K', rating: '4.8', trips: 20, year: 2023, seats: 5, image: 'photo-1553440569-bcc63803a83d' },
-    { name: 'HONDA CR-V L 2024', city: 'TP. Hồ Chí Minh', district: 'TP. Thủ Đức', price: '1.250K', rating: '5.0', trips: 11, year: 2024, seats: 7, image: 'photo-1617814076367-b759c7d7e738' },
-    { name: 'FORD TERRITORY TITANIUM 2024', city: 'TP. Hồ Chí Minh', district: 'Quận 7', price: '1.100K', rating: '4.9', trips: 14, year: 2024, seats: 5, image: 'photo-1555215695-3004980ad54e' }
+    { name: 'TOYOTA VIOS G 2024', city: 'Hà Nội', district: 'Quận Cầu Giấy', price: '650K', rating: '4.9', trips: 18, year: 2024, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/2/25/Toyota_Vios_%28XP150%29_sedan_front_view.jpg' },
+    { name: 'HONDA CITY RS 2023', city: 'Hà Nội', district: 'Quận Đống Đa', price: '680K', rating: '5.0', trips: 12, year: 2023, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/d/dd/Honda_City_2020.jpg' },
+    { name: 'MAZDA CX-5 PREMIUM 2024', city: 'Hà Nội', district: 'Quận Nam Từ Liêm', price: '1.050K', rating: '4.8', trips: 21, year: 2024, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Mazda_CX-5_Newground_1X7A6786.jpg' },
+    { name: 'MITSUBISHI XPANDER 2023', city: 'Hà Nội', district: 'Quận Long Biên', price: '850K', rating: '4.9', trips: 15, year: 2023, seats: 7, image: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Mitsubishi_Xpander_Sport_%28depan%29%2C_Palangkaraya.jpg' },
+    { name: 'KIA SONET PREMIUM 2024', city: 'TP. Hồ Chí Minh', district: 'Quận 1', price: '720K', rating: '4.9', trips: 16, year: 2024, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/7/75/2021_Kia_Sonet_1.5_Premiere_%28Indonesia%29_front_view_02.jpg' },
+    { name: 'TOYOTA VIOS G 2023', city: 'TP. Hồ Chí Minh', district: 'Quận Bình Thạnh', price: '630K', rating: '4.8', trips: 20, year: 2023, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/2/25/Toyota_Vios_%28XP150%29_sedan_front_view.jpg' },
+    { name: 'HONDA CR-V L 2024', city: 'TP. Hồ Chí Minh', district: 'TP. Thủ Đức', price: '1.250K', rating: '5.0', trips: 11, year: 2024, seats: 7, image: 'https://upload.wikimedia.org/wikipedia/commons/0/01/Honda_CR-V%2C_Auto_2024%2C_Zurich_%28PANA0740%29.jpg' },
+    { name: 'FORD TERRITORY TITANIUM 2024', city: 'TP. Hồ Chí Minh', district: 'Quận 7', price: '1.100K', rating: '4.9', trips: 14, year: 2024, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/f/f8/Ford_Territory_003.jpg' }
 ];
 
 function createSampleCarCard(car) {
@@ -43,7 +49,14 @@ function createSampleCarCard(car) {
     const imageWrapper = document.createElement('div');
     imageWrapper.className = 'car-img-wrapper';
     const image = document.createElement('img');
-    image.src = `https://images.unsplash.com/${car.image}?auto=format&fit=crop&q=80&w=600`;
+    image.src = window.AzuVehicleImages?.resolve(car.name, car.image) || car.image;
+    image.addEventListener('error', () => {
+        image.src = window.AzuVehicleImages?.placeholder || '';
+    }, { once: true });
+    image.onerror = () => {
+        image.onerror = null;
+        image.src = vehicleImagePlaceholder;
+    };
     image.alt = car.name;
     imageWrapper.appendChild(image);
 
@@ -158,7 +171,14 @@ function createCarCardFromApi(car) {
     }
 
     const image = document.createElement('img');
-    image.src = car.coverImageUrl || 'images/car-default.png';
+    image.src = resolveVehicleImage(car);
+    image.addEventListener('error', () => {
+        image.src = window.AzuVehicleImages?.placeholder || '';
+    }, { once: true });
+    image.onerror = () => {
+        image.onerror = null;
+        image.src = vehicleImagePlaceholder;
+    };
     image.alt = car.name;
     imageWrapper.appendChild(image);
 
@@ -1307,10 +1327,11 @@ function openCarPopup(car) {
     const thumb2 = document.getElementById('popupThumb2');
     const thumb3 = document.getElementById('popupThumb3');
 
-    if (mainImg) mainImg.src = car.image;
-    if (thumb1) thumb1.src = car.image;
-    if (thumb2) thumb2.src = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600';
-    if (thumb3) thumb3.src = 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600';
+    const resolvedCarImage = resolveVehicleImage(car);
+    if (mainImg) mainImg.src = resolvedCarImage;
+    if (thumb1) thumb1.src = resolvedCarImage;
+    if (thumb2) thumb2.src = resolvedCarImage;
+    if (thumb3) thumb3.src = resolvedCarImage;
 
     // owner info
     const ownerNameEl = document.getElementById('popupOwnerName');

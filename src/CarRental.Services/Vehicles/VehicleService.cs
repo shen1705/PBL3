@@ -30,35 +30,6 @@ public class VehicleService : IVehicleService
         _logger = logger;
     }
 
-    private static string ResolveImageUrl(string? rawPath, string brand, string model)
-    {
-        if (!string.IsNullOrWhiteSpace(rawPath) &&
-            (rawPath.StartsWith("http://") || rawPath.StartsWith("https://") || rawPath.StartsWith("/")))
-        {
-            return rawPath;
-        }
-
-        var normalized = $"{brand} {model}".ToUpperInvariant();
-        if (normalized.Contains("VIOS") || normalized.Contains("COROLLA"))
-            return "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("CITY") || normalized.Contains("ACCENT"))
-            return "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("CX-5") || normalized.Contains("CX-30"))
-            return "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("XPANDER"))
-            return "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("VF"))
-            return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("CR-V") || normalized.Contains("SANTA FE"))
-            return "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("TRANSIT") || normalized.Contains("CARNIVAL"))
-            return "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("MORNING") || normalized.Contains("SONET"))
-            return "https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&q=80&w=600";
-
-        return "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600";
-    }
-
     public async Task<ServiceResult<PagedResult<VehicleCardDto>>> SearchVehiclesAsync(
         VehicleSearchFilter filter, CancellationToken ct = default)
     {
@@ -183,12 +154,12 @@ public class VehicleService : IVehicleService
                 "price-desc" => query.OrderByDescending(v => v.Listings.OrderBy(l => l.PricePerDay).Select(l => l.PricePerDay).FirstOrDefault()),
                 "popular" => query.OrderByDescending(v => v.Bookings.Count(b => b.Status == BookingStatuses.Completed)),
                 _ => query.OrderByDescending(v => v.Bookings
-                          .Where(b => b.Status == BookingStatuses.Completed)
-                          .SelectMany(b => b.Reviews)
-                          .Where(r => r.RevieweeId == v.OwnerId && r.IsPublic)
-                          .Average(r => (double?)r.Rating) ?? 0.0)
-                          .ThenByDescending(v => v.Bookings.Count(b => b.Status == BookingStatuses.Completed))
-            };
+                            .Where(b => b.Status == BookingStatuses.Completed)
+                            .SelectMany(b => b.Reviews)
+                            .Where(r => r.RevieweeId == v.OwnerId && r.IsPublic)
+                            .Average(r => (double?)r.Rating) ?? 0.0)
+                            .ThenByDescending(v => v.Bookings.Count(b => b.Status == BookingStatuses.Completed))
+                };
 
             // paging
             var pageNumber = filter.PageNumber < 1 ? 1 : filter.PageNumber;
@@ -207,11 +178,11 @@ public class VehicleService : IVehicleService
             var items = vehicles.Select(v =>
             {
                 var listing = v.Listings.FirstOrDefault(l => l.ModerationStatus == ListingModerationStatuses.Public)
-                           ?? v.Listings.FirstOrDefault();
+                            ?? v.Listings.FirstOrDefault();
 
                 var rawCover = listing?.Images.OrderBy(i => i.SortOrder).FirstOrDefault(i => i.IsCover)?.ImagePath
                             ?? listing?.Images.OrderBy(i => i.SortOrder).FirstOrDefault()?.ImagePath;
-                var coverImage = ResolveImageUrl(rawCover, v.Brand, v.Model);
+                var coverImage = VehicleImageResolver.Resolve(rawCover, v.Brand, v.Model);
 
                 var completedBookings = v.Bookings.Where(b => b.Status == BookingStatuses.Completed).ToList();
                 var publicReviews = completedBookings
@@ -313,14 +284,14 @@ public class VehicleService : IVehicleService
                 .Select(i => new ListingImageDto
                 {
                     ImageId = i.ImageId,
-                    ImagePath = ResolveImageUrl(i.ImagePath, v.Brand, v.Model),
+                    ImagePath = VehicleImageResolver.Resolve(i.ImagePath, v.Brand, v.Model),
                     SortOrder = i.SortOrder,
                     IsCover = i.IsCover
                 }).ToList() ?? new List<ListingImageDto>();
 
             var coverImage = images.FirstOrDefault(i => i.IsCover)?.ImagePath
-                          ?? images.FirstOrDefault()?.ImagePath
-                          ?? ResolveImageUrl(null, v.Brand, v.Model);
+                            ?? images.FirstOrDefault()?.ImagePath
+                            ?? VehicleImageResolver.Resolve(null, v.Brand, v.Model);
 
             var blockedRanges = v.Unavailabilities
                 .Where(u => u.EndDate >= now)
@@ -413,7 +384,7 @@ public class VehicleService : IVehicleService
                 var listing = v.Listings.OrderByDescending(l => l.ListingId).FirstOrDefault();
                 var rawCover = listing?.Images.OrderBy(i => i.SortOrder).FirstOrDefault(i => i.IsCover)?.ImagePath
                             ?? listing?.Images.OrderBy(i => i.SortOrder).FirstOrDefault()?.ImagePath;
-                var coverImage = ResolveImageUrl(rawCover, v.Brand, v.Model);
+                var coverImage = VehicleImageResolver.Resolve(rawCover, v.Brand, v.Model);
 
                 var completedBookings = v.Bookings.Where(b => b.Status == BookingStatuses.Completed).ToList();
                 var publicReviews = completedBookings

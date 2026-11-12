@@ -63,8 +63,11 @@ const accountTripCount = document.getElementById('account-trip-count');
 // Trips elements
 const tripsList = document.getElementById('trips-list');
 const tripsEmpty = document.getElementById('trips-empty');
+const tripDetailView = document.getElementById('trip-detail-view');
 const emptyTripsTitle = document.getElementById('empty-trips-title');
 const emptyTripsDescription = document.getElementById('empty-trips-description');
+let currentTripDetail = null;
+let currentTripDetailTab = 'overview';
 
 // switch views
 function showView(viewName) {
@@ -735,9 +738,454 @@ function getStatusBadgeInfo(status) {
     }
 }
 
+function escapeTripHtml(value) {
+    return String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+}
+
+function formatTripDate(value, includeTime = false) {
+    if (!value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleString('vi-VN', includeTime
+        ? { dateStyle: 'medium', timeStyle: 'short' }
+        : { dateStyle: 'medium' });
+}
+
+function formatTripMoney(value) {
+    return `${Number(value || 0).toLocaleString('vi-VN')} đ`;
+}
+
+function tripDetailRow(label, value) {
+    return `<div class="trip-detail-row"><span>${escapeTripHtml(label)}</span><strong>${escapeTripHtml(value || '—')}</strong></div>`;
+}
+
+function maskLicensePlate(value) {
+    let visibleCharacters = 0;
+    return Array.from(String(value || '')).map(character => {
+        if (!/[A-Za-z0-9]/.test(character)) return character;
+        visibleCharacters += 1;
+        return visibleCharacters <= 3 ? character : '•';
+    }).join('');
+}
+
+function renderRentalMonth(year, month, booking) {
+    const startDate = new Date(booking.startDate);
+    const endDate = new Date(booking.endDate);
+    const firstDay = new Date(year, month, 1);
+    const startOffset = (firstDay.getDay() + 6) % 7;
+    const dayCount = new Date(year, month + 1, 0).getDate();
+    const startKey = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime();
+    const endKey = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate()).getTime();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const rangeContainsDay = (ranges, dateKey) => (ranges || []).some(range => {
+        const rangeStart = new Date(range.startDate);
+        const rangeEnd = new Date(range.endDate);
+        return dateKey >= new Date(rangeStart.getFullYear(), rangeStart.getMonth(), rangeStart.getDate()).getTime() &&
+            dateKey <= new Date(rangeEnd.getFullYear(), rangeEnd.getMonth(), rangeEnd.getDate()).getTime();
+    });
+    const cells = Array.from({ length: startOffset }, () => '<span class="trip-calendar-day is-empty"></span>');
+
+    for (let day = 1; day <= dayCount; day++) {
+        const dateKey = new Date(year, month, day).getTime();
+        const isRentalDay = dateKey >= startKey && dateKey <= endKey;
+        const isBusy = rangeContainsDay(booking.bookedRanges, dateKey);
+        const isOwnerBlocked = rangeContainsDay(booking.blockedRanges, dateKey);
+        const isAvailable = booking.isVehicleAvailableForRent && dateKey >= today.getTime() && !isBusy && !isOwnerBlocked && !isRentalDay;
+        const classes = [
+            'trip-calendar-day',
+            isRentalDay ? 'is-current-booking' : '',
+            !isRentalDay && isBusy ? 'is-busy' : '',
+            !isRentalDay && !isBusy && isOwnerBlocked ? 'is-owner-blocked' : '',
+            isAvailable ? 'is-available' : '',
+            dateKey < today.getTime() ? 'is-past' : '',
+            dateKey === startKey ? 'is-start' : '',
+            dateKey === endKey ? 'is-end' : ''
+        ].filter(Boolean).join(' ');
+        cells.push(`<span class="${classes}">${day}</span>`);
+    }
+
+    return `<section class="trip-calendar-month" aria-label="${escapeTripHtml(new Date(year, month, 1).toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' }))}">
+        <strong>${escapeTripHtml(new Date(year, month, 1).toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' }))}</strong>
+        <div class="trip-calendar-grid"><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>${cells.join('')}</div>
+    </section>`;
+}
+
+function renderRentalCalendar(booking) {
+    const startDate = new Date(booking.startDate);
+    const endDate = new Date(booking.endDate);
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) return '';
+
+    const months = [];
+    const monthCursor = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    const lastMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+    while (monthCursor <= lastMonth) {
+        months.push([monthCursor.getFullYear(), monthCursor.getMonth()]);
+        monthCursor.setMonth(monthCursor.getMonth() + 1);
+    }
+    const listingActive = booking.isVehicleAvailableForRent;
+    return `<div class="trip-availability-status ${listingActive ? 'is-active' : 'is-inactive'}">
+        <i class="fa-solid ${listingActive ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i>
+        ${listingActive ? 'Xe đang hoạt động cho thuê' : 'Tin xe hiện không hoạt động cho thuê'}
+    </div>
+    <div class="trip-rental-months">${months.map(([year, month]) => renderRentalMonth(year, month, booking)).join('')}</div>
+    <div class="trip-calendar-legend">
+        <span><i class="is-available"></i> Còn trống</span>
+        <span><i class="is-current-booking"></i> Đơn của bạn</span>
+        <span><i class="is-busy"></i> Có đơn khác</span>
+        <span><i class="is-owner-blocked"></i> Chủ xe đã khóa ngày</span>
+    </div>`;
+}
+
+function renderTripDetail(booking, tab = 'overview') {
+    const status = booking.status || '';
+    const badge = getStatusBadgeInfo(status);
+    const isAccepted = ['Accepted', 'Ongoing', 'Completed', 'Returned', 'InRental', 'Approved'].includes(status);
+    const hasBeenAccepted = isAccepted || Boolean(booking.acceptedAt);
+    const isCancelled = ['Cancelled', 'Rejected', 'Expired'].includes(status);
+    const statusIndex = status === 'Completed' ? 3 : status === 'Ongoing' ? 2 : isAccepted ? 1 : 0;
+    const steps = ['Chờ duyệt', 'Đã duyệt', 'Đang thuê', 'Hoàn tất'];
+    const milestones = [
+        formatTripDate(booking.createdAt, true),
+        booking.acceptedAt ? formatTripDate(booking.acceptedAt, true) : 'Chờ chủ xe',
+        booking.hasPickupConfirmed ? 'Đã xác nhận nhận xe' : 'Chưa nhận xe',
+        booking.completedAt ? formatTripDate(booking.completedAt, true) : 'Chưa hoàn tất'
+    ];
+    const stepMarkup = steps.map((label, index) => `
+        <div class="trip-progress-step ${index <= statusIndex && !isCancelled ? 'is-reached' : ''}">
+            <span class="trip-progress-dot">${index + 1}</span>
+            <strong>${label}</strong>
+            <small>${escapeTripHtml(milestones[index])}</small>
+        </div>`).join('');
+    const handovers = Array.isArray(booking.handovers) ? booking.handovers : [];
+    const currentUserId = sessionStorage.getItem('azuCarUserId') || '';
+    const userConfirmed = type => handovers.some(item =>
+        String(item.type).toLowerCase() === type.toLowerCase() && item.confirmedBy === currentUserId);
+    const userConfirmedPickup = userConfirmed('Pickup');
+    const userConfirmedReturn = userConfirmed('Return');
+    const canCancel = status === 'Pending' ||
+        (status === 'Accepted' && new Date() < new Date(booking.startDate));
+    const renderHandover = (type, title, allowed) => {
+        const confirmations = handovers.filter(item => String(item.type).toLowerCase() === type.toLowerCase());
+        const action = type.toLowerCase();
+        const userConfirmation = confirmations.find(item => item.confirmedBy === currentUserId);
+        const isComplete = confirmations.length >= 2;
+        const statusText = userConfirmation
+            ? 'Bạn đã xác nhận'
+            : isComplete ? 'Hai bên đã xác nhận' : confirmations.length ? 'Chờ bên còn lại' : 'Chưa xác nhận';
+        const formMarkup = allowed && !userConfirmation ? `<form class="trip-handover-form" data-handover-form="${action}">
+            <label>Số công-tơ-mét (km)<input name="odometer" type="number" min="0" inputmode="numeric" placeholder="Không bắt buộc"></label>
+            <label>Mức nhiên liệu<select name="fuelLevel"><option value="">Chọn mức</option><option>1/4 bình</option><option>1/2 bình</option><option>3/4 bình</option><option>Đầy bình</option></select></label>
+            <label>Thanh toán phần còn lại<select name="remainingPaymentMethod"><option value="cash">Tiền mặt</option><option value="transfer">Chuyển khoản</option></select></label>
+            <label class="trip-handover-notes">Ghi chú tình trạng<textarea name="notes" maxlength="1000" rows="2" placeholder="Không bắt buộc"></textarea></label>
+            <button type="button" class="trip-detail-action is-primary" data-trip-detail-action="${action}">Xác nhận ${action === 'pickup' ? 'nhận xe' : 'trả xe'}</button>
+        </form>` : '';
+        return `<article class="trip-handover-card">
+            <div class="trip-detail-title-row"><h3>${title}</h3><span class="trip-detail-state ${userConfirmation ? 'is-done' : ''}">${statusText}</span></div>
+            ${confirmations.length ? confirmations.map(item => `<p>${escapeTripHtml(item.confirmerName || 'Thành viên')} · ${escapeTripHtml(formatTripDate(item.confirmedAt, true))}${item.odometer != null ? ` · ${escapeTripHtml(item.odometer)} km` : ''}${item.fuelLevel ? ` · ${escapeTripHtml(item.fuelLevel)}` : ''}${item.remainingPaymentMethod ? ` · ${item.remainingPaymentMethod === 'transfer' ? 'Chuyển khoản' : 'Tiền mặt'}` : ''}</p>${item.notes ? `<p>${escapeTripHtml(item.notes)}</p>` : ''}`).join('') : '<p>Chưa có xác nhận.</p>'}
+            ${formMarkup}
+        </article>`;
+    };
+    const renderTasks = () => {
+        let title = 'Đơn thuê đã kết thúc';
+        let description = 'Bạn có thể xem lại thông tin và biên bản của chuyến này.';
+        let actions = '';
+
+        if (status === 'Pending') {
+            title = 'Đang chờ chủ xe duyệt';
+            description = 'Lịch xe đang được giữ trong thời gian chờ phản hồi.';
+            actions = '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="cancel">Hủy đơn</button>';
+        } else if (status === 'Accepted') {
+            title = userConfirmedPickup ? 'Chờ xác nhận nhận xe' : 'Đơn đã được duyệt';
+            description = userConfirmedPickup ? 'Bạn đã xác nhận, chờ bên còn lại hoàn tất bàn giao.' : 'Kiểm tra xe và mở biên bản nhận xe để xác nhận.';
+            actions = `${userConfirmedPickup ? '' : '<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">Mở biên bản nhận xe</button>'}${canCancel ? '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="cancel">Hủy đơn</button>' : ''}`;
+        } else if (status === 'Ongoing') {
+            title = userConfirmedReturn ? 'Chờ xác nhận trả xe' : 'Chuyến đang diễn ra';
+            description = userConfirmedReturn ? 'Bạn đã xác nhận trả xe, chờ bên còn lại hoàn tất.' : 'Mở biên bản trả xe để ghi nhận tình trạng và xác nhận.';
+            actions = `${userConfirmedReturn ? '' : '<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">Mở biên bản trả xe</button>'}${booking.hasDispute ? `<span class="trip-detail-state">Khiếu nại: ${escapeTripHtml(booking.disputeStatus || 'Đang xử lý')}</span>` : '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="dispute">Báo sự cố</button>'}`;
+        } else if (status === 'Completed' && !booking.hasReviewed) {
+            title = 'Chuyến đã hoàn tất';
+            description = 'Chia sẻ đánh giá về chuyến đi.';
+            actions = '<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="review">Đánh giá chuyến đi</button>';
+        }
+
+        return `<section class="trip-detail-task" aria-labelledby="trip-detail-task-title">
+            <div><h3 id="trip-detail-task-title">${title}</h3><p>${description}</p></div>
+            <div class="trip-detail-task-actions">${actions}</div>
+            <p class="trip-detail-action-feedback" role="status" aria-live="polite"></p>
+        </section>`;
+    };
+
+    let tabContent = '';
+    if (tab === 'handover') {
+        tabContent = `<div class="trip-handover-grid">
+            ${renderHandover('Pickup', 'Nhận xe', ['Accepted', 'Ongoing'].includes(status))}
+            ${renderHandover('Return', 'Trả xe', status === 'Ongoing')}
+        </div>
+        ${booking.hasDispute ? `<div class="trip-detail-notice is-warning">Đơn có khiếu nại: ${escapeTripHtml(booking.disputeStatus || 'Đang xử lý')}.</div>` : ''}`;
+    } else if (tab === 'contract') {
+        const reviews = Array.isArray(booking.reviews) ? booking.reviews : [];
+        tabContent = `<div class="trip-detail-section">
+            <h3>Thông tin hợp đồng</h3>
+            ${tripDetailRow('Mã chuyến', `#${booking.bookingId}`)}
+            ${tripDetailRow('Người thuê', booking.renterName)}
+            ${tripDetailRow('Chủ xe', booking.ownerName)}
+            ${tripDetailRow('Nhận xe', formatTripDate(booking.startDate, true))}
+            ${tripDetailRow('Trả xe', formatTripDate(booking.endDate, true))}
+            ${tripDetailRow('Tổng thời gian thuê', `${booking.rentalDays || 0} ngày`)}
+            ${booking.pricePerDayAtBooking != null ? tripDetailRow('Giá thuê cơ bản mỗi ngày', formatTripMoney(booking.pricePerDayAtBooking)) : ''}
+            ${tripDetailRow('Tổng giá thuê', formatTripMoney(booking.priceLockedTotal))}
+            ${tripDetailRow('Ngày đặt', formatTripDate(booking.createdAt, true))}
+            ${booking.responseDeadline ? tripDetailRow('Hạn phản hồi', formatTripDate(booking.responseDeadline, true)) : ''}
+            ${booking.rejectReason ? tripDetailRow('Lý do từ chối', booking.rejectReason) : ''}
+            ${booking.cancelReason ? tripDetailRow('Lý do hủy', booking.cancelReason) : ''}
+            <div class="trip-detail-clauses">
+                <h4>Điều khoản áp dụng</h4>
+                <ul>
+                    <li>Tiền cọc trực tuyến bằng 25% tổng giá thuê; phần còn lại hai bên thanh toán trực tiếp.</li>
+                    <li>Chỉ có thể hủy khi đơn đang chờ duyệt hoặc đã được duyệt; đơn đã duyệt không thể hủy từ thời điểm nhận xe.</li>
+                    <li>Nếu chủ xe không bàn giao xe, gửi báo sự cố kèm thông tin/bằng chứng để Staff xác minh. Nếu xác định lỗi chủ xe, đơn được xử lý theo quy trình khiếu nại và tiền cọc được hoàn theo kết quả xử lý.</li>
+                </ul>
+            </div>
+            <div class="trip-terms-consent">
+                ${booking.termsAcceptedAt
+                    ? `<span class="trip-terms-confirmed"><i class="fa-solid fa-circle-check"></i> Đã đồng ý lúc ${escapeTripHtml(formatTripDate(booking.termsAcceptedAt, true))}</span>`
+                    : `<label><input type="checkbox" data-trip-terms-checkbox><span>Tôi đã đọc và đồng ý với các điều khoản trên.</span></label><button type="button" class="trip-detail-action is-primary" data-trip-detail-action="accept-terms" disabled>Xác nhận đồng ý</button>`}
+            </div>
+            <button type="button" class="trip-detail-action is-secondary trip-print-contract" data-trip-detail-action="print"><i class="fa-solid fa-print"></i> In / Lưu PDF</button>
+        </div>
+        ${reviews.length ? `<div class="trip-detail-section"><h3>Đánh giá</h3>${reviews.map(review => `<p class="trip-detail-review"><strong>${escapeTripHtml(review.rating)} / 5</strong> · ${escapeTripHtml(review.comment || 'Không có nhận xét.')}</p>`).join('')}</div>` : ''}`;
+    } else {
+        const vehicleName = booking.vehicleName || 'Xe thuê';
+        const image = window.AzuVehicleImages?.resolve(vehicleName, booking.coverImageUrl || '') || booking.coverImageUrl || '';
+        const hasPriceBreakdown = booking.pricePerDayAtBooking != null &&
+            booking.rentalSubtotal != null && booking.deliveryFee != null && booking.insuranceFee != null;
+        const rentalSubtotal = hasPriceBreakdown ? Number(booking.rentalSubtotal) : Number(booking.priceLockedTotal || 0);
+        const extraFees = hasPriceBreakdown ? Number(booking.deliveryFee) + Number(booking.insuranceFee) : null;
+        const feeNotes = hasPriceBreakdown
+            ? [
+                Number(booking.deliveryFee) > 0 ? `Giao xe ${formatTripMoney(booking.deliveryFee)}` : '',
+                Number(booking.insuranceFee) > 0 ? `Bảo hiểm ${formatTripMoney(booking.insuranceFee)}` : ''
+            ].filter(Boolean).join(' · ') || 'Chưa phát sinh'
+            : 'Chi tiết phí chưa được lưu cho đơn cũ';
+        const rawDepositStatus = String(booking.depositStatus || '').toLowerCase();
+        const depositLabel = rawDepositStatus === 'refunded'
+            ? 'Đã hoàn cọc'
+            : rawDepositStatus === 'forfeited'
+                ? 'Đã xử lý theo đơn'
+                : rawDepositStatus === 'cancelled' || rawDepositStatus === 'canceled'
+                    ? 'Đã giải phóng'
+                    : status === 'Pending'
+                        ? 'Đang giữ · chờ duyệt'
+                        : status === 'Completed'
+                            ? 'Đã quyết toán'
+                            : 'Đang giữ';
+        const depositRecordedAt = booking.depositPaidAt || booking.createdAt;
+        const depositReference = booking.depositReferenceCode
+            ? `Mã ${booking.depositReferenceCode}`
+            : `Mã đơn #${booking.bookingId}`;
+        tabContent = `<div class="trip-detail-columns">
+            <div class="trip-detail-section">
+                <div class="trip-detail-vehicle">
+                    ${image ? `<img src="${escapeTripHtml(image)}" alt="${escapeTripHtml(vehicleName)}">` : '<div class="trip-detail-image-placeholder"><i class="fa-solid fa-car-side"></i></div>'}
+                    <div><h3>${escapeTripHtml(vehicleName)}</h3><p>${escapeTripHtml(booking.city || 'Chưa có địa điểm')}${booking.district ? ` · ${escapeTripHtml(booking.district)}` : ''}</p>
+                    ${booking.licensePlate ? `<p class="trip-detail-plate"><span>Biển số</span><strong>${escapeTripHtml(hasBeenAccepted ? booking.licensePlate : maskLicensePlate(booking.licensePlate))}</strong><small>${hasBeenAccepted ? 'Đã hiển thị sau khi chủ xe duyệt' : 'Hiện rõ sau khi chủ xe duyệt đơn'}</small></p>` : ''}</div>
+                </div>
+                <h3>Lịch trình</h3>
+                ${tripDetailRow('Nhận xe', formatTripDate(booking.startDate, true))}
+                ${tripDetailRow('Trả xe', formatTripDate(booking.endDate, true))}
+                ${tripDetailRow('Thời gian thuê', `${booking.rentalDays || 0} ngày`)}
+                <details class="trip-rental-calendar"><summary>Lịch hoạt động &amp; ngày bận</summary>${renderRentalCalendar(booking)}</details>
+                ${tripDetailRow('Hình thức nhận xe', booking.deliveryMethod || 'Nhận tại địa điểm xe')}
+                ${booking.deliveryAddress ? tripDetailRow('Địa chỉ giao xe', booking.deliveryAddress) : ''}
+                <h3 class="trip-detail-subheading">Liên hệ chủ xe</h3>
+                ${tripDetailRow('Chủ xe', booking.ownerName)}
+                ${tripDetailRow('Điện thoại', hasBeenAccepted ? (booking.ownerPhone || 'Chưa cung cấp') : 'Hiển thị sau khi chủ xe duyệt')}
+            </div>
+            <aside class="trip-detail-payment">
+                <h3>Cọc &amp; thanh toán</h3>
+                <div class="trip-payment-line">
+                    <div><span>Giá thuê</span><small>${hasPriceBreakdown ? `${formatTripMoney(booking.pricePerDayAtBooking)} × ${booking.rentalDays || 0} ngày` : 'Giá đã khóa theo đơn thuê'}</small></div>
+                    <strong>${formatTripMoney(rentalSubtotal)}</strong>
+                </div>
+                <div class="trip-payment-line">
+                    <div><span>Phụ phí phát sinh</span><small>${escapeTripHtml(feeNotes)}</small></div>
+                    <strong>${extraFees == null ? '—' : formatTripMoney(extraFees)}</strong>
+                </div>
+                <div class="trip-payment-total"><span>Tổng giá trị thuê</span><strong>${formatTripMoney(booking.priceLockedTotal)}</strong></div>
+                <div class="trip-payment-deposit">
+                    <div class="trip-payment-line"><div><span>Tiền cọc (25%)</span><small class="trip-payment-status">${escapeTripHtml(depositLabel)}</small></div><strong>${formatTripMoney(booking.depositAmount)}</strong></div>
+                    <small class="trip-payment-meta">Thanh toán mô phỏng · ${escapeTripHtml(formatTripDate(depositRecordedAt, true))} · ${escapeTripHtml(depositReference)}</small>
+                </div>
+                <div class="trip-payment-line trip-payment-remaining">
+                    <div><span>Bạn trả trực tiếp cho chủ xe</span><small>Ngoài hệ thống · hai bên tự thỏa thuận thời điểm và cách trả</small></div>
+                    <strong>${formatTripMoney(booking.remainingAmount)}</strong>
+                </div>
+                <p class="trip-payment-note">Khi chủ xe từ chối, đơn hết hạn hoặc có sự cố, trạng thái và tiền cọc được xử lý theo kết quả của đơn.</p>
+            </aside>
+        </div>
+        ${isCancelled ? `<div class="trip-detail-notice is-warning">${escapeTripHtml(booking.cancelReason || booking.rejectReason || badge.text)}</div>` : ''}`;
+    }
+
+    return `<div class="trip-detail-heading">
+        <button class="trip-detail-back" type="button" data-trip-detail-back><i class="fa-solid fa-arrow-left"></i> Quay lại chuyến của tôi</button>
+        <div class="trip-detail-title-row"><h2>Chi tiết chuyến #${escapeTripHtml(booking.bookingId)}</h2><span class="trip-status" style="background:${badge.bg};color:${badge.color}">${escapeTripHtml(badge.text)}</span></div>
+    </div>
+    <div class="trip-progress" aria-label="Tiến trình chuyến thuê">${stepMarkup}</div>
+    ${renderTasks()}
+    <div class="trip-detail-tabs" role="tablist" aria-label="Thông tin chuyến">
+        <button type="button" role="tab" aria-selected="${tab === 'overview'}" data-trip-detail-tab="overview">Tổng quan</button>
+        <button type="button" role="tab" aria-selected="${tab === 'handover'}" data-trip-detail-tab="handover">Giao &amp; trả xe</button>
+        <button type="button" role="tab" aria-selected="${tab === 'contract'}" data-trip-detail-tab="contract">Hợp đồng</button>
+    </div>
+    ${tabContent}`;
+}
+
+function renderCurrentTripDetail() {
+    if (!tripDetailView || !currentTripDetail) return;
+    tripDetailView.innerHTML = renderTripDetail(currentTripDetail, currentTripDetailTab);
+    const detailImage = tripDetailView.querySelector('.trip-detail-vehicle img');
+    detailImage?.addEventListener('error', () => {
+        detailImage.src = window.AzuVehicleImages?.placeholder || '';
+    }, { once: true });
+}
+
+async function handleTripDetailAction(action, button) {
+    if (!currentTripDetail) return;
+    if (action === 'print') {
+        window.print();
+        return;
+    }
+    if (action === 'handover') {
+        currentTripDetailTab = 'handover';
+        renderCurrentTripDetail();
+        return;
+    }
+    if (action === 'review') {
+        openReviewModal(currentTripDetail);
+        return;
+    }
+
+    const bookingId = currentTripDetail.bookingId;
+    let url = '';
+    let body = {};
+    if (action === 'accept-terms') {
+        const consent = tripDetailView.querySelector('[data-trip-terms-checkbox]');
+        if (!consent?.checked) return;
+        url = `/api/bookings/${bookingId}/accept-terms`;
+    } else if (action === 'pickup' || action === 'return') {
+        url = `/api/bookings/${bookingId}/${action}`;
+        const form = tripDetailView.querySelector(`[data-handover-form="${action}"]`);
+        const odometerValue = form?.elements.namedItem('odometer')?.value;
+        body = {
+            type: action === 'pickup' ? 'Pickup' : 'Return',
+            odometer: odometerValue ? Number(odometerValue) : null,
+            fuelLevel: form?.elements.namedItem('fuelLevel')?.value || null,
+            notes: form?.elements.namedItem('notes')?.value.trim() || null,
+            remainingPaymentMethod: form?.elements.namedItem('remainingPaymentMethod')?.value || 'cash'
+        };
+    } else if (action === 'cancel') {
+        const reason = prompt('Nhập lý do hủy đơn:');
+        if (reason === null) return;
+        url = `/api/bookings/${bookingId}/cancel`;
+        body = { reason: reason.trim() || 'Khách thuê chủ động hủy chuyến' };
+    } else if (action === 'dispute') {
+        const description = prompt('Mô tả sự cố phát sinh (tối thiểu 10 ký tự):');
+        if (!description) return;
+        if (description.trim().length < 10) {
+            alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');
+            return;
+        }
+        url = `/api/bookings/${bookingId}/dispute`;
+        body = { description: description.trim() };
+    }
+
+    if (!url) return;
+    button.disabled = true;
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        const result = await response.json();
+        if (!response.ok || !result?.isSuccess) {
+            throw new Error(result?.message || 'Không thể cập nhật chuyến.');
+        }
+        if (result.data && typeof result.data === 'object' && result.data.bookingId) {
+            currentTripDetail = result.data;
+        } else {
+            const detailResponse = await fetch(`/api/bookings/${bookingId}`);
+            const detailResult = await detailResponse.json();
+            if (!detailResponse.ok || !detailResult?.isSuccess || !detailResult.data) {
+                throw new Error(detailResult?.message || 'Đã cập nhật nhưng không thể tải lại chi tiết chuyến.');
+            }
+            currentTripDetail = detailResult.data;
+        }
+        renderCurrentTripDetail();
+    } catch (error) {
+        const feedback = tripDetailView?.querySelector('.trip-detail-action-feedback');
+        if (feedback) feedback.textContent = error.message || 'Lỗi kết nối máy chủ.';
+        button.disabled = false;
+    }
+}
+
+async function openTripDetails(bookingId) {
+    if (!tripDetailView) return;
+    currentTripDetail = null;
+    currentTripDetailTab = 'overview';
+    document.querySelector('.trips-tabs')?.setAttribute('hidden', '');
+    tripsList.hidden = true;
+    tripsEmpty.hidden = true;
+    tripDetailView.hidden = false;
+    tripDetailView.innerHTML = '<p class="trip-detail-loading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải chi tiết chuyến...</p>';
+
+    try {
+        const response = await fetch(`/api/bookings/${encodeURIComponent(bookingId)}`);
+        const result = await response.json();
+        if (!response.ok || !result?.isSuccess || !result.data) {
+            throw new Error(result?.message || 'Không thể tải chi tiết chuyến.');
+        }
+        currentTripDetail = result.data;
+        renderCurrentTripDetail();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+        tripDetailView.innerHTML = `<button class="trip-detail-back" type="button" data-trip-detail-back><i class="fa-solid fa-arrow-left"></i> Quay lại chuyến của tôi</button><p class="trip-detail-error">${escapeTripHtml(error.message || 'Không thể tải chi tiết chuyến.')}</p>`;
+    }
+}
+
+tripDetailView?.addEventListener('click', event => {
+    const actionButton = event.target.closest('[data-trip-detail-action]');
+    if (actionButton) {
+        handleTripDetailAction(actionButton.dataset.tripDetailAction, actionButton);
+        return;
+    }
+
+    const backButton = event.target.closest('[data-trip-detail-back]');
+    if (backButton) {
+        renderTrips();
+        return;
+    }
+
+    const tabButton = event.target.closest('[data-trip-detail-tab]');
+    if (tabButton && currentTripDetail) {
+        currentTripDetailTab = tabButton.dataset.tripDetailTab;
+        renderCurrentTripDetail();
+    }
+});
+
+tripDetailView?.addEventListener('change', event => {
+    if (!event.target.matches('[data-trip-terms-checkbox]')) return;
+    const acceptButton = tripDetailView.querySelector('[data-trip-detail-action="accept-terms"]');
+    if (acceptButton) acceptButton.disabled = !event.target.checked;
+});
+
 async function renderTrips() {
     if (!tripsList || !tripsEmpty) return;
 
+    if (tripDetailView) tripDetailView.hidden = true;
+    document.querySelector('.trips-tabs')?.removeAttribute('hidden');
     tripsList.replaceChildren();
     const loadingEl = document.createElement('div');
     loadingEl.style.padding = '32px 16px';
@@ -750,13 +1198,21 @@ async function renderTrips() {
 
     let apiTrips = [];
     try {
-        const resp = await fetch(`/api/bookings/my-trips?status=${activeTripType}`);
-        if (resp.ok) {
-            const resData = await resp.json();
-            if (resData && resData.isSuccess && Array.isArray(resData.data)) {
-                apiTrips = resData.data;
-            }
-        }
+        const [renterResponse, ownerResponse] = await Promise.all([
+            fetch(`/api/bookings/my-trips?status=${encodeURIComponent(activeTripType)}`),
+            fetch(`/api/bookings/owner-requests?status=${encodeURIComponent(activeTripType)}`)
+        ]);
+        const [renterResult, ownerResult] = await Promise.all([
+            renterResponse.ok ? renterResponse.json() : null,
+            ownerResponse.ok ? ownerResponse.json() : null
+        ]);
+        const renterTrips = renterResult?.isSuccess && Array.isArray(renterResult.data) ? renterResult.data : [];
+        const ownerTrips = ownerResult?.isSuccess && Array.isArray(ownerResult.data) ? ownerResult.data : [];
+        const tripsById = new Map(renterTrips.map(trip => [trip.bookingId, trip]));
+        ownerTrips.forEach(trip => {
+            if (!tripsById.has(trip.bookingId)) tripsById.set(trip.bookingId, trip);
+        });
+        apiTrips = Array.from(tripsById.values());
     } catch (e) {
         console.warn('Không thể tải danh sách chuyến từ API, dùng dữ liệu local:', e);
     }
@@ -792,7 +1248,10 @@ async function renderTrips() {
             card.style.position = 'relative';
 
             const image = document.createElement('img');
-            image.src = trip.image || 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600';
+            image.src = window.AzuVehicleImages?.resolve(trip.name, trip.image || '') || trip.image || '';
+            image.addEventListener('error', () => {
+                image.src = window.AzuVehicleImages?.placeholder || '';
+            }, { once: true });
             image.alt = trip.name || 'Xe đã đặt';
 
             const info = document.createElement('div');
@@ -816,18 +1275,26 @@ async function renderTrips() {
     tripsList.hidden = false;
     tripsEmpty.hidden = true;
 
+    const currentUserId = sessionStorage.getItem('azuCarUserId') || '';
     apiTrips.forEach(trip => {
+        const isOwnerTrip = Boolean(currentUserId && trip.ownerId === currentUserId && trip.renterId !== currentUserId);
         const card = document.createElement('article');
         card.className = 'trip-card';
         card.style.position = 'relative';
 
         const image = document.createElement('img');
-        image.src = trip.coverImageUrl || 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600';
+        image.src = window.AzuVehicleImages?.resolve(trip.vehicleName, trip.coverImageUrl || '') || trip.coverImageUrl || '';
+        image.addEventListener('error', () => {
+            image.src = window.AzuVehicleImages?.placeholder || '';
+        }, { once: true });
         image.alt = trip.vehicleName;
 
         const info = document.createElement('div');
         const title = document.createElement('h2');
         title.innerHTML = `${trip.vehicleName} ${trip.licensePlate ? `<small style="font-size: 13px; color: #64748b; font-weight: normal;">(${trip.licensePlate})</small>` : ''}`;
+        const perspective = document.createElement('span');
+        perspective.className = 'trip-role-label';
+        perspective.textContent = isOwnerTrip ? `Bạn là chủ xe · Khách thuê: ${trip.renterName || 'Khách thuê'}` : `Bạn là người thuê · Chủ xe: ${trip.ownerName || 'Chủ xe'}`;
 
         const startStr = new Date(trip.startDate).toLocaleDateString('vi-VN');
         const endStr = new Date(trip.endDate).toLocaleDateString('vi-VN');
@@ -850,10 +1317,51 @@ async function renderTrips() {
         depositSmall.style.marginTop = '4px';
         depositSmall.textContent = `Đã cọc trực tuyến: ${Number(trip.depositAmount || 0).toLocaleString('vi-VN')} đ (25%)`;
 
-        info.append(title, meta, statusSpan, price, depositSmall);
+        info.append(title, perspective, meta, statusSpan, price, depositSmall);
 
         const actionsDiv = document.createElement('div');
         actionsDiv.style.cssText = 'margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
+
+        const detailBtn = document.createElement('button');
+        detailBtn.type = 'button';
+        detailBtn.className = 'trip-detail-open';
+        detailBtn.textContent = 'Xem chi tiết';
+        detailBtn.addEventListener('click', () => openTripDetails(trip.bookingId));
+        actionsDiv.appendChild(detailBtn);
+
+        if (isOwnerTrip && trip.status === 'Pending') {
+            const respondToRequest = async (accept, button) => {
+                const reason = accept ? null : prompt('Nhập lý do từ chối đơn:');
+                if (!accept && reason === null) return;
+                button.disabled = true;
+                try {
+                    const response = await fetch(`/api/bookings/${trip.bookingId}/respond`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ accept, reason })
+                    });
+                    const result = await response.json();
+                    if (!response.ok || !result?.isSuccess) throw new Error(result?.message || 'Không thể cập nhật đơn.');
+                    renderTrips();
+                } catch (error) {
+                    alert(error.message || 'Lỗi kết nối máy chủ.');
+                    button.disabled = false;
+                }
+            };
+
+            const acceptButton = document.createElement('button');
+            acceptButton.type = 'button';
+            acceptButton.className = 'trip-detail-action is-primary';
+            acceptButton.textContent = 'Duyệt đơn';
+            acceptButton.addEventListener('click', () => respondToRequest(true, acceptButton));
+
+            const rejectButton = document.createElement('button');
+            rejectButton.type = 'button';
+            rejectButton.className = 'trip-detail-action is-secondary';
+            rejectButton.textContent = 'Từ chối';
+            rejectButton.addEventListener('click', () => respondToRequest(false, rejectButton));
+            actionsDiv.append(acceptButton, rejectButton);
+        }
 
         // 1. Nhận xe
         if (trip.status === 'Accepted') {

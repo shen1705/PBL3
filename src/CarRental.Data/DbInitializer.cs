@@ -381,6 +381,10 @@ public static class DbInitializer
                     Status = status,
                     PriceLockedTotal = total,
                     DepositAmount = deposit,
+                    PricePerDayAtBooking = listing.PricePerDay,
+                    RentalSubtotal = total,
+                    DeliveryFee = 0m,
+                    InsuranceFee = 0m,
                     CreatedAt = created,
                     ResponseDeadline = created.AddHours(BusinessRules.ResponseDeadlineHours)
                 };
@@ -785,6 +789,10 @@ public static class DbInitializer
                     Status = BookingStatuses.Pending,
                     PriceLockedTotal = pTotal,
                     DepositAmount = pTotal * BusinessRules.DepositRate,
+                    PricePerDayAtBooking = pListing.PricePerDay,
+                    RentalSubtotal = pTotal,
+                    DeliveryFee = 0m,
+                    InsuranceFee = 0m,
                     CreatedAt = now,
                     ResponseDeadline = now.AddHours(BusinessRules.ResponseDeadlineHours)
                 });
@@ -828,6 +836,10 @@ public static class DbInitializer
                     Status = BookingStatuses.Completed,
                     PriceLockedTotal = cTotal,
                     DepositAmount = cTotal * BusinessRules.DepositRate,
+                    PricePerDayAtBooking = cListing.PricePerDay,
+                    RentalSubtotal = cTotal,
+                    DeliveryFee = 0m,
+                    InsuranceFee = 0m,
                     CreatedAt = cStart.AddDays(-2),
                     AcceptedAt = cStart.AddDays(-1),
                     CompletedAt = cEnd

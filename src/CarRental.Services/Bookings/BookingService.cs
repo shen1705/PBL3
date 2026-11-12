@@ -7,9 +7,11 @@ using CarRental.Data;
 using CarRental.Models.Common;
 using CarRental.Models.Constants;
 using CarRental.Models.DTOs.Bookings;
+using CarRental.Models.DTOs.Vehicles;
 using CarRental.Models.Entities;
 using CarRental.Services.Abstractions;
 using CarRental.Services.Availability;
+using CarRental.Services.Vehicles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -32,35 +34,6 @@ public class BookingService : IBookingService
         _availabilityService = availabilityService;
         _clock = clock;
         _logger = logger;
-    }
-
-    private static string ResolveImageUrl(string? rawPath, string brand, string model)
-    {
-        if (!string.IsNullOrWhiteSpace(rawPath) &&
-            (rawPath.StartsWith("http://") || rawPath.StartsWith("https://") || rawPath.StartsWith("/")))
-        {
-            return rawPath;
-        }
-
-        var normalized = $"{brand} {model}".ToUpperInvariant();
-        if (normalized.Contains("VIOS") || normalized.Contains("COROLLA"))
-            return "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("CITY") || normalized.Contains("ACCENT"))
-            return "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("CX-5") || normalized.Contains("CX-30"))
-            return "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("XPANDER"))
-            return "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("VF"))
-            return "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("CR-V") || normalized.Contains("SANTA FE"))
-            return "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("TRANSIT") || normalized.Contains("CARNIVAL"))
-            return "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=600";
-        if (normalized.Contains("MORNING") || normalized.Contains("SONET"))
-            return "https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&q=80&w=600";
-
-        return "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600";
     }
 
     private static string? GetFirstImage(VehicleListing? listing)
@@ -210,6 +183,10 @@ public class BookingService : IBookingService
             Status = BookingStatuses.Pending,
             PriceLockedTotal = total,
             DepositAmount = depositAmount,
+            PricePerDayAtBooking = listing.PricePerDay,
+            RentalSubtotal = rentalSubtotal,
+            DeliveryFee = deliveryFee,
+            InsuranceFee = insuranceFee,
             CreatedAt = now,
             ResponseDeadline = now.AddHours(BusinessRules.ResponseDeadlineHours)
         };
@@ -221,7 +198,7 @@ public class BookingService : IBookingService
             booking.BookingId, listing.VehicleId, renterUserId);
 
         var firstImage = GetFirstImage(listing);
-        var coverUrl = ResolveImageUrl(firstImage, listing.Vehicle.Brand, listing.Vehicle.Model);
+        var coverUrl = VehicleImageResolver.Resolve(firstImage, listing.Vehicle.Brand, listing.Vehicle.Model);
 
         var detail = new BookingDetailDto
         {
@@ -246,6 +223,10 @@ public class BookingService : IBookingService
             Status = booking.Status,
             PriceLockedTotal = booking.PriceLockedTotal,
             DepositAmount = booking.DepositAmount,
+            PricePerDayAtBooking = booking.PricePerDayAtBooking,
+            RentalSubtotal = booking.RentalSubtotal,
+            DeliveryFee = booking.DeliveryFee,
+            InsuranceFee = booking.InsuranceFee,
             CreatedAt = booking.CreatedAt,
             ResponseDeadline = booking.ResponseDeadline,
             DeliveryMethod = request.DeliveryMethod,
@@ -270,6 +251,8 @@ public class BookingService : IBookingService
             .Where(b => b.RenterId == renterUserId)
             .Include(b => b.Vehicle)
                 .ThenInclude(v => v.Owner)
+            .Include(b => b.Vehicle)
+                .ThenInclude(v => v.Unavailabilities)
             .Include(b => b.Listing)
                 .ThenInclude(l => l.Images)
             .Include(b => b.HandoverConfirmations)
@@ -305,7 +288,7 @@ public class BookingService : IBookingService
         var result = list.Select(b =>
         {
             var firstImg = GetFirstImage(b.Listing);
-            var coverUrl = ResolveImageUrl(firstImg, b.Vehicle.Brand, b.Vehicle.Model);
+            var coverUrl = VehicleImageResolver.Resolve(firstImg, b.Vehicle.Brand, b.Vehicle.Model);
 
             return new BookingSummaryDto
             {
@@ -373,9 +356,18 @@ public class BookingService : IBookingService
             {
                 query = query.Where(b => b.Status == BookingStatuses.Pending);
             }
-            else if (filter == "active" || filter == "current")
+            else if (filter == "active" || filter == "current" || filter == "ongoing")
             {
-                query = query.Where(b => b.Status == BookingStatuses.Accepted || b.Status == BookingStatuses.Ongoing);
+                query = query.Where(b => b.Status == BookingStatuses.Pending ||
+                                         b.Status == BookingStatuses.Accepted ||
+                                         b.Status == BookingStatuses.Ongoing);
+            }
+            else if (filter == "history" || filter == "past")
+            {
+                query = query.Where(b => b.Status == BookingStatuses.Completed ||
+                                         b.Status == BookingStatuses.Cancelled ||
+                                         b.Status == BookingStatuses.Rejected ||
+                                         b.Status == BookingStatuses.Expired);
             }
             else
             {
@@ -388,7 +380,7 @@ public class BookingService : IBookingService
         var result = list.Select(b =>
         {
             var firstImg = GetFirstImage(b.Listing);
-            var coverUrl = ResolveImageUrl(firstImg, b.Vehicle.Brand, b.Vehicle.Model);
+            var coverUrl = VehicleImageResolver.Resolve(firstImg, b.Vehicle.Brand, b.Vehicle.Model);
 
             return new BookingSummaryDto
             {
@@ -435,6 +427,8 @@ public class BookingService : IBookingService
             .Include(b => b.Renter)
             .Include(b => b.Vehicle)
                 .ThenInclude(v => v.Owner)
+            .Include(b => b.Vehicle)
+                .ThenInclude(v => v.Unavailabilities)
             .Include(b => b.Listing)
                 .ThenInclude(l => l.Images)
             .Include(b => b.HandoverConfirmations)
@@ -444,6 +438,9 @@ public class BookingService : IBookingService
             .Include(b => b.Reviews)
                 .ThenInclude(r => r.Reviewee)
             .Include(b => b.Disputes)
+            .Include(b => b.SourceHold)
+            .Include(b => b.Payment)
+                .ThenInclude(p => p!.Transactions)
             .FirstOrDefaultAsync(b => b.BookingId == bookingId, ct);
 
         if (booking == null)
@@ -453,9 +450,32 @@ public class BookingService : IBookingService
             return ServiceResult<BookingDetailDto>.Fail("Bạn không có quyền truy cập thông tin đơn thuê này.", ErrorCodes.Forbidden);
 
         var firstImg = GetFirstImage(booking.Listing);
-        var coverUrl = ResolveImageUrl(firstImg, booking.Vehicle.Brand, booking.Vehicle.Model);
+        var coverUrl = VehicleImageResolver.Resolve(firstImg, booking.Vehicle.Brand, booking.Vehicle.Model);
+        var matchesLegacyBasePrice = !booking.PricePerDayAtBooking.HasValue &&
+            booking.Listing != null &&
+            booking.PriceLockedTotal == booking.Listing.PricePerDay * booking.RentalDays;
+        var depositTransaction = booking.Payment?.Transactions
+            .Where(transaction => transaction.TransactionType == MockTransactionTypes.Deposit &&
+                                  transaction.Status == MockTransactionStatuses.Succeeded)
+            .OrderByDescending(transaction => transaction.CreatedAt)
+            .FirstOrDefault();
 
         var now = _clock.UtcNow;
+        var lockingStatuses = BookingStatuses.Locking.ToArray();
+        var bookedRanges = await _db.Bookings
+            .AsNoTracking()
+            .Where(b => b.VehicleId == booking.VehicleId &&
+                        b.BookingId != bookingId &&
+                        lockingStatuses.Contains(b.Status) &&
+                        b.EndDate >= now)
+            .OrderBy(b => b.StartDate)
+            .Select(b => new DateRangeDto
+            {
+                StartDate = b.StartDate,
+                EndDate = b.EndDate,
+                Reason = "Xe đã có đơn thuê"
+            })
+            .ToListAsync(ct);
 
         var dto = new BookingDetailDto
         {
@@ -467,6 +487,20 @@ public class BookingService : IBookingService
             CoverImageUrl = coverUrl,
             City = booking.Listing?.City,
             District = booking.Listing?.District,
+            VehicleStatus = booking.Vehicle.Status,
+            ListingModerationStatus = booking.Listing?.ModerationStatus ?? string.Empty,
+            IsVehicleAvailableForRent = booking.Vehicle.Status == VehicleStatuses.Approved &&
+                                        booking.Listing?.ModerationStatus == ListingModerationStatuses.Public,
+            BlockedRanges = booking.Vehicle.Unavailabilities
+                .Where(range => range.EndDate >= now)
+                .OrderBy(range => range.StartDate)
+                .Select(range => new DateRangeDto
+                {
+                    StartDate = range.StartDate,
+                    EndDate = range.EndDate,
+                    Reason = range.Reason ?? "Chủ xe khóa lịch"
+                }).ToList(),
+            BookedRanges = bookedRanges,
             RenterId = booking.RenterId,
             RenterName = booking.Renter?.FullName ?? booking.Renter?.UserName ?? "Khách thuê",
             RenterPhone = booking.Renter?.PhoneNumber,
@@ -480,7 +514,15 @@ public class BookingService : IBookingService
             Status = booking.Status,
             PriceLockedTotal = booking.PriceLockedTotal,
             DepositAmount = booking.DepositAmount,
+            PricePerDayAtBooking = booking.PricePerDayAtBooking ?? (matchesLegacyBasePrice ? booking.Listing!.PricePerDay : null),
+            RentalSubtotal = booking.RentalSubtotal ?? (matchesLegacyBasePrice ? booking.PriceLockedTotal : null),
+            DeliveryFee = booking.DeliveryFee ?? (matchesLegacyBasePrice ? 0m : null),
+            InsuranceFee = booking.InsuranceFee ?? (matchesLegacyBasePrice ? 0m : null),
+            DepositStatus = booking.Payment?.DepositStatus ?? booking.SourceHold?.Status,
+            DepositReferenceCode = depositTransaction?.ReferenceCode,
+            DepositPaidAt = depositTransaction?.CreatedAt,
             CreatedAt = booking.CreatedAt,
+            TermsAcceptedAt = booking.TermsAcceptedAt,
             ResponseDeadline = booking.ResponseDeadline,
             AcceptedAt = booking.AcceptedAt,
             RespondedAt = booking.RespondedAt,
@@ -501,7 +543,11 @@ public class BookingService : IBookingService
                 Type = h.Type,
                 ConfirmedBy = h.ConfirmedBy,
                 ConfirmerName = h.Confirmer?.FullName ?? h.Confirmer?.UserName ?? "Thành viên",
-                ConfirmedAt = h.ConfirmedAt
+                ConfirmedAt = h.ConfirmedAt,
+                Odometer = h.Odometer,
+                FuelLevel = h.FuelLevel,
+                Notes = h.Notes,
+                RemainingPaymentMethod = h.RemainingPaymentMethod
             }).ToList(),
             Reviews = booking.Reviews
                 .Where(r => r.ReviewerId == currentUserId || r.IsPublic || (booking.CompletedAt.HasValue && booking.CompletedAt.Value <= now.AddDays(-7)))
@@ -521,6 +567,27 @@ public class BookingService : IBookingService
         };
 
         return ServiceResult<BookingDetailDto>.Success(dto);
+    }
+
+    public async Task<ServiceResult<BookingDetailDto>> AcceptTermsAsync(
+        int bookingId,
+        string renterUserId,
+        CancellationToken ct = default)
+    {
+        var booking = await _db.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingId, ct);
+        if (booking == null)
+            return ServiceResult<BookingDetailDto>.Fail("Không tìm thấy đơn thuê xe.", ErrorCodes.NotFound);
+
+        if (booking.RenterId != renterUserId)
+            return ServiceResult<BookingDetailDto>.Fail("Chỉ người thuê của đơn mới có thể xác nhận điều khoản.", ErrorCodes.Forbidden);
+
+        if (booking.Status != BookingStatuses.Pending && booking.Status != BookingStatuses.Accepted)
+            return ServiceResult<BookingDetailDto>.Fail("Đơn này không còn ở trạng thái có thể xác nhận điều khoản.", ErrorCodes.InvalidState);
+
+        booking.TermsAcceptedAt ??= _clock.UtcNow;
+        await _db.SaveChangesAsync(ct);
+
+        return await GetBookingDetailAsync(bookingId, renterUserId, ct);
     }
 
     public async Task<ServiceResult<BookingDetailDto>> RespondToBookingAsync(
@@ -689,10 +756,21 @@ public class BookingService : IBookingService
                 BookingId = bookingId,
                 Type = HandoverTypes.Pickup,
                 ConfirmedBy = currentUserId,
-                ConfirmedAt = now
+                ConfirmedAt = now,
+                Odometer = request.Odometer,
+                FuelLevel = request.FuelLevel,
+                Notes = request.Notes?.Trim(),
+                RemainingPaymentMethod = request.RemainingPaymentMethod
             };
             _db.HandoverConfirmations.Add(conf);
             booking.HandoverConfirmations.Add(conf);
+        }
+        else
+        {
+            existingConf.Odometer = request.Odometer ?? existingConf.Odometer;
+            existingConf.FuelLevel = request.FuelLevel ?? existingConf.FuelLevel;
+            existingConf.Notes = request.Notes?.Trim() ?? existingConf.Notes;
+            existingConf.RemainingPaymentMethod = request.RemainingPaymentMethod ?? existingConf.RemainingPaymentMethod;
         }
 
         // set ongoing
@@ -748,10 +826,21 @@ public class BookingService : IBookingService
                 BookingId = bookingId,
                 Type = HandoverTypes.Return,
                 ConfirmedBy = currentUserId,
-                ConfirmedAt = now
+                ConfirmedAt = now,
+                Odometer = request.Odometer,
+                FuelLevel = request.FuelLevel,
+                Notes = request.Notes?.Trim(),
+                RemainingPaymentMethod = request.RemainingPaymentMethod
             };
             _db.HandoverConfirmations.Add(conf);
             booking.HandoverConfirmations.Add(conf);
+        }
+        else
+        {
+            existingConf.Odometer = request.Odometer ?? existingConf.Odometer;
+            existingConf.FuelLevel = request.FuelLevel ?? existingConf.FuelLevel;
+            existingConf.Notes = request.Notes?.Trim() ?? existingConf.Notes;
+            existingConf.RemainingPaymentMethod = request.RemainingPaymentMethod ?? existingConf.RemainingPaymentMethod;
         }
 
         // check complete condition
