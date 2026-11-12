@@ -33,8 +33,7 @@ public class HomeController : Controller
 
     public IActionResult BookingDetail(int id)
     {
-        ViewData["BookingId"] = id;
-        return View();
+        return Redirect($"/account?bookingId={id}#trips");
     }
 
     public IActionResult MyTrips() => RedirectPermanent("/account#trips");

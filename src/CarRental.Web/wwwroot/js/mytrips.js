@@ -127,8 +127,14 @@ function showView(viewName) {
 
 function handleHashNavigation() {
     const hash = window.location.hash;
-    if (hash === '#trips' || hash === '#orders') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingIdParam = urlParams.get('bookingId') || urlParams.get('id');
+
+    if (hash === '#trips' || hash === '#orders' || bookingIdParam) {
         showView('trips');
+        if (bookingIdParam) {
+            openTripDetails(bookingIdParam);
+        }
     } else if (hash === '#address') {
         showView('address');
     } else if (hash === '#privacy') {
@@ -1244,6 +1250,12 @@ tripDetailView?.addEventListener('click', event => {
 
     const backButton = event.target.closest('[data-trip-detail-back]');
     if (backButton) {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('bookingId') || url.searchParams.has('id')) {
+            url.searchParams.delete('bookingId');
+            url.searchParams.delete('id');
+            history.replaceState(null, '', url.pathname + (url.search ? url.search : '') + '#trips');
+        }
         renderTrips();
         return;
     }
@@ -1384,12 +1396,16 @@ async function renderTrips() {
         const info = document.createElement('div');
         const title = document.createElement('h2');
         const titleLink = document.createElement('a');
-        titleLink.href = `/booking/${trip.bookingId}`;
+        titleLink.href = `/account?bookingId=${trip.bookingId}#trips`;
         titleLink.textContent = trip.vehicleName;
         titleLink.title = 'Xem chi tiết đơn thuê xe';
         titleLink.style.cssText = 'color: #1c2635; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
         titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#2563eb'; });
         titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1c2635'; });
+        titleLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openTripDetails(trip.bookingId);
+        });
 
         title.appendChild(titleLink);
         if (trip.licensePlate) {
@@ -1427,13 +1443,6 @@ async function renderTrips() {
 
         const actionsDiv = document.createElement('div');
         actionsDiv.style.cssText = 'margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
-
-        const detailBtn = document.createElement('button');
-        detailBtn.type = 'button';
-        detailBtn.className = 'trip-detail-open';
-        detailBtn.textContent = 'Xem chi tiết';
-        detailBtn.addEventListener('click', () => openTripDetails(trip.bookingId));
-        actionsDiv.appendChild(detailBtn);
 
         if (isOwnerTrip && trip.status === 'Pending') {
             const respondToRequest = async (accept, button) => {
@@ -1629,13 +1638,15 @@ async function renderTrips() {
             actionsDiv.appendChild(cancelBtn);
         }
 
-        const detailLink = document.createElement('a');
-        detailLink.href = `/booking/${trip.bookingId}`;
-        detailLink.style.cssText = 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; transition: all 0.2s;';
-        detailLink.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Chi tiết đơn thuê';
-        detailLink.addEventListener('mouseenter', () => { detailLink.style.background = '#2563eb'; detailLink.style.color = '#fff'; });
-        detailLink.addEventListener('mouseleave', () => { detailLink.style.background = '#eff6ff'; detailLink.style.color = '#2563eb'; });
-        actionsDiv.appendChild(detailLink);
+        const detailBtn = document.createElement('button');
+        detailBtn.type = 'button';
+        detailBtn.className = 'trip-detail-open';
+        detailBtn.style.cssText = 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; transition: all 0.2s; font-family: inherit;';
+        detailBtn.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Xem chi tiết';
+        detailBtn.addEventListener('mouseenter', () => { detailBtn.style.background = '#2563eb'; detailBtn.style.color = '#fff'; });
+        detailBtn.addEventListener('mouseleave', () => { detailBtn.style.background = '#eff6ff'; detailBtn.style.color = '#2563eb'; });
+        detailBtn.addEventListener('click', () => openTripDetails(trip.bookingId));
+        actionsDiv.appendChild(detailBtn);
 
         if (actionsDiv.children.length > 0) {
             info.appendChild(actionsDiv);

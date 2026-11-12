@@ -809,7 +809,7 @@ async function renderTrips() {
         const info = document.createElement('div');
         const title = document.createElement('h2');
         const titleLink = document.createElement('a');
-        titleLink.href = `/booking/${trip.bookingId}`;
+        titleLink.href = `/account?bookingId=${trip.bookingId}#trips`;
         titleLink.textContent = trip.vehicleName;
         titleLink.title = 'Xem chi tiết đơn thuê xe';
         titleLink.style.cssText = 'color: #1c2635; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
@@ -1036,9 +1036,9 @@ async function renderTrips() {
         }
 
         const detailLink = document.createElement('a');
-        detailLink.href = `/booking/${trip.bookingId}`;
+        detailLink.href = `/account?bookingId=${trip.bookingId}#trips`;
         detailLink.style.cssText = 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; transition: all 0.2s;';
-        detailLink.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Chi tiết đơn thuê';
+        detailLink.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Xem chi tiết';
         detailLink.addEventListener('mouseenter', () => { detailLink.style.background = '#2563eb'; detailLink.style.color = '#fff'; });
         detailLink.addEventListener('mouseleave', () => { detailLink.style.background = '#eff6ff'; detailLink.style.color = '#2563eb'; });
         actionsDiv.appendChild(detailLink);
