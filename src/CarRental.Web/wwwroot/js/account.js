@@ -1037,10 +1037,11 @@ async function renderTrips() {
 
         const detailLink = document.createElement('a');
         detailLink.href = `/account?bookingId=${trip.bookingId}#trips`;
-        detailLink.style.cssText = 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; transition: all 0.2s;';
-        detailLink.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Xem chi tiết';
-        detailLink.addEventListener('mouseenter', () => { detailLink.style.background = '#2563eb'; detailLink.style.color = '#fff'; });
-        detailLink.addEventListener('mouseleave', () => { detailLink.style.background = '#eff6ff'; detailLink.style.color = '#2563eb'; });
+        detailLink.className = 'trip-detail-open';
+        detailLink.style.cssText = 'color: #8f6b24; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; font-weight: 600; margin-left: auto; cursor: pointer; background: transparent; border: 0;';
+        detailLink.textContent = 'Xem chi tiết';
+        detailLink.addEventListener('mouseenter', () => { detailLink.style.color = '#6f5018'; });
+        detailLink.addEventListener('mouseleave', () => { detailLink.style.color = '#8f6b24'; });
         actionsDiv.appendChild(detailLink);
 
         if (actionsDiv.children.length > 0) {

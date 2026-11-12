@@ -1221,6 +1221,8 @@ async function openTripDetails(bookingId) {
     if (!tripDetailView) return;
     currentTripDetail = null;
     currentTripDetailTab = 'overview';
+    const tripsHeading = document.getElementById('trips-title')?.closest('.section-page-heading');
+    if (tripsHeading) tripsHeading.hidden = true;
     document.querySelector('.trips-tabs')?.setAttribute('hidden', '');
     tripsList.hidden = true;
     tripsEmpty.hidden = true;
@@ -1276,6 +1278,8 @@ tripDetailView?.addEventListener('change', event => {
 async function renderTrips() {
     if (!tripsList || !tripsEmpty) return;
 
+    const tripsHeading = document.getElementById('trips-title')?.closest('.section-page-heading');
+    if (tripsHeading) tripsHeading.hidden = false;
     if (tripDetailView) tripDetailView.hidden = true;
     document.querySelector('.trips-tabs')?.removeAttribute('hidden');
     tripsList.replaceChildren();
@@ -1641,10 +1645,8 @@ async function renderTrips() {
         const detailBtn = document.createElement('button');
         detailBtn.type = 'button';
         detailBtn.className = 'trip-detail-open';
-        detailBtn.style.cssText = 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-left: auto; transition: all 0.2s; font-family: inherit;';
-        detailBtn.innerHTML = '<i class="fa-solid fa-file-invoice"></i> Xem chi tiết';
-        detailBtn.addEventListener('mouseenter', () => { detailBtn.style.background = '#2563eb'; detailBtn.style.color = '#fff'; });
-        detailBtn.addEventListener('mouseleave', () => { detailBtn.style.background = '#eff6ff'; detailBtn.style.color = '#2563eb'; });
+        detailBtn.textContent = 'Xem chi tiết';
+        detailBtn.style.marginLeft = 'auto';
         detailBtn.addEventListener('click', () => openTripDetails(trip.bookingId));
         actionsDiv.appendChild(detailBtn);
 
