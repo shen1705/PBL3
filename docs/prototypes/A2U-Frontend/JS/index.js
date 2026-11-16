@@ -1051,7 +1051,16 @@ document.addEventListener('DOMContentLoaded', function() {
             let rTime = returnTimeSelect ? returnTimeSelect.value : "20:00";
 
             modalPreviewText.innerText = `${pTime}, ${startStr} - ${rTime}, ${endStr}`;
-            if (modalSubPreviewText) modalSubPreviewText.innerHTML = `Thời gian thuê: <span style="color: #1d5194; font-weight: 700;">Nhiều ngày</span>`;
+            if (modalSubPreviewText) {
+                if (endDateObj) {
+                    const sZero = new Date(startDateObj.getFullYear(), startDateObj.getMonth(), startDateObj.getDate());
+                    const eZero = new Date(endDateObj.getFullYear(), endDateObj.getMonth(), endDateObj.getDate());
+                    const days = Math.max(1, Math.round((eZero.getTime() - sZero.getTime()) / 86400000) + 1);
+                    modalSubPreviewText.innerHTML = `Thời gian thuê: <span style="color: #1d5194; font-weight: 700;">${days} ngày</span>`;
+                } else {
+                    modalSubPreviewText.innerHTML = `Thời gian thuê: <span style="color: #1d5194; font-weight: 700;">Chọn ngày trả</span>`;
+                }
+            }
         }
     }
 

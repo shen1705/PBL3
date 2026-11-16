@@ -67,7 +67,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (overrides.seats) params.set('seats', overrides.seats);
         if (overrides.carType) params.set('carType', overrides.carType);
         if (overrides.fuel) params.set('fuel', overrides.fuel);
-        window.location.href = `find.html?${params.toString()}`;
+        const findUrl = window.location.pathname.endsWith('.html') ? 'find.html' : '/find';
+        window.location.href = `${findUrl}?${params.toString()}`;
     }
 
     function openCarDetail(car) {
@@ -1071,7 +1072,16 @@ document.addEventListener('DOMContentLoaded', function() {
             let rTime = returnTimeSelect ? returnTimeSelect.value : "20:00";
 
             modalPreviewText.innerText = `${pTime}, ${startStr} - ${rTime}, ${endStr}`;
-            if (modalSubPreviewText) modalSubPreviewText.innerHTML = `Thời gian thuê: <span style="color: #1d5194; font-weight: 700;">Nhiều ngày</span>`;
+            if (modalSubPreviewText) {
+                if (endDateObj) {
+                    const sZero = new Date(startDateObj.getFullYear(), startDateObj.getMonth(), startDateObj.getDate());
+                    const eZero = new Date(endDateObj.getFullYear(), endDateObj.getMonth(), endDateObj.getDate());
+                    const days = Math.max(1, Math.round((eZero.getTime() - sZero.getTime()) / 86400000) + 1);
+                    modalSubPreviewText.innerHTML = `Thời gian thuê: <span style="color: #1d5194; font-weight: 700;">${days} ngày</span>`;
+                } else {
+                    modalSubPreviewText.innerHTML = `Thời gian thuê: <span style="color: #1d5194; font-weight: 700;">Chọn ngày trả</span>`;
+                }
+            }
         }
     }
 
@@ -1157,7 +1167,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const searchBtn = document.querySelector('.btn-search-main');
     if (searchBtn) {
-        searchBtn.addEventListener('click', () => goToFind());
+        searchBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            goToFind();
+        });
     }
 
     // view all cars
