@@ -571,6 +571,15 @@ async function syncUserProfile() {
                     sessionStorage.setItem(accountKeys.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
                 }
                 renderLicenseData();
+                try {
+                    const countResp = await fetch('/api/bookings/my-trips');
+                    if (countResp.ok) {
+                        const countResult = await countResp.json();
+                        if (countResult?.isSuccess && Array.isArray(countResult.data) && accountTripCount) {
+                            accountTripCount.textContent = String(countResult.data.length);
+                        }
+                    }
+                } catch (_) {}
             }
         }
     } catch (e) {
@@ -1355,21 +1364,21 @@ async function renderTrips() {
         const queryStatus = activeTripType === 'current'
             ? 'current'
             : (activeHistoryFilter === 'Completed' ? 'completed' : activeHistoryFilter === 'Cancelled' ? 'cancelled' : 'past');
-        const [renterResponse, ownerResponse] = await Promise.all([
-            fetch(`/api/bookings/my-trips?status=${encodeURIComponent(queryStatus)}`),
-            fetch(`/api/bookings/owner-requests?status=${encodeURIComponent(queryStatus)}`)
-        ]);
-        const [renterResult, ownerResult] = await Promise.all([
-            renterResponse.ok ? renterResponse.json() : null,
-            ownerResponse.ok ? ownerResponse.json() : null
-        ]);
-        const renterTrips = renterResult?.isSuccess && Array.isArray(renterResult.data) ? renterResult.data : [];
-        const ownerTrips = ownerResult?.isSuccess && Array.isArray(ownerResult.data) ? ownerResult.data : [];
-        const tripsById = new Map(renterTrips.map(trip => [trip.bookingId, trip]));
-        ownerTrips.forEach(trip => {
-            if (!tripsById.has(trip.bookingId)) tripsById.set(trip.bookingId, trip);
-        });
-        apiTrips = Array.from(tripsById.values());
+        const renterResponse = await fetch(`/api/bookings/my-trips?status=${encodeURIComponent(queryStatus)}`);
+        const renterResult = renterResponse.ok ? await renterResponse.json() : null;
+        apiTrips = renterResult?.isSuccess && Array.isArray(renterResult.data) ? renterResult.data : [];
+
+        if (accountTripCount) {
+            try {
+                const countResp = await fetch('/api/bookings/my-trips');
+                if (countResp.ok) {
+                    const countResult = await countResp.json();
+                    if (countResult?.isSuccess && Array.isArray(countResult.data)) {
+                        accountTripCount.textContent = String(countResult.data.length);
+                    }
+                }
+            } catch (_) {}
+        }
     } catch (e) {
         console.warn('Không thể tải danh sách chuyến từ API, dùng dữ liệu local:', e);
     }
@@ -1472,9 +1481,7 @@ async function renderTrips() {
     tripsList.hidden = false;
     tripsEmpty.hidden = true;
 
-    const currentUserId = sessionStorage.getItem('azuCarUserId') || '';
     apiTrips.forEach(trip => {
-        const isOwnerTrip = Boolean(currentUserId && trip.ownerId === currentUserId && trip.renterId !== currentUserId);
         const card = document.createElement('article');
         card.className = 'trip-card';
         card.style.position = 'relative';
@@ -1509,7 +1516,7 @@ async function renderTrips() {
         }
         const perspective = document.createElement('span');
         perspective.className = 'trip-role-label';
-        perspective.textContent = isOwnerTrip ? `Bạn là chủ xe · Khách thuê: ${trip.renterName || 'Khách thuê'}` : `Bạn là người thuê · Chủ xe: ${trip.ownerName || 'Chủ xe'}`;
+        perspective.textContent = `Chủ xe: ${trip.ownerName || 'Chủ xe'}`;
 
         const startStr = new Date(trip.startDate).toLocaleDateString('vi-VN');
         const endStr = new Date(trip.endDate).toLocaleDateString('vi-VN');
@@ -1537,46 +1544,12 @@ async function renderTrips() {
         const actionsDiv = document.createElement('div');
         actionsDiv.style.cssText = 'margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
 
-        if (isOwnerTrip && trip.status === 'Pending') {
-            const respondToRequest = async (accept, button) => {
-                const reason = accept ? null : prompt('Nhập lý do từ chối đơn:');
-                if (!accept && reason === null) return;
-                button.disabled = true;
-                try {
-                    const response = await fetch(`/api/bookings/${trip.bookingId}/respond`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ accept, reason })
-                    });
-                    const result = await response.json();
-                    if (!response.ok || !result?.isSuccess) throw new Error(result?.message || 'Không thể cập nhật đơn.');
-                    renderTrips();
-                } catch (error) {
-                    alert(error.message || 'Lỗi kết nối máy chủ.');
-                    button.disabled = false;
-                }
-            };
-
-            const acceptButton = document.createElement('button');
-            acceptButton.type = 'button';
-            acceptButton.className = 'trip-detail-action is-primary';
-            acceptButton.textContent = 'Duyệt đơn';
-            acceptButton.addEventListener('click', () => respondToRequest(true, acceptButton));
-
-            const rejectButton = document.createElement('button');
-            rejectButton.type = 'button';
-            rejectButton.className = 'trip-detail-action is-secondary';
-            rejectButton.textContent = 'Từ chối';
-            rejectButton.addEventListener('click', () => respondToRequest(false, rejectButton));
-            actionsDiv.append(acceptButton, rejectButton);
-        }
-
         // 1. Nhận xe
         if (trip.status === 'Accepted') {
             const pickupBtn = document.createElement('button');
             pickupBtn.type = 'button';
             pickupBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
-            pickupBtn.innerHTML = '<i class="fa-solid fa-key"></i> Bàn giao / Nhận xe';
+            pickupBtn.innerHTML = '<i class="fa-solid fa-key"></i> Xác nhận nhận xe';
             pickupBtn.addEventListener('click', async () => {
                 const conf = confirm(`Xác nhận bạn đã nhận bàn giao xe ${trip.vehicleName}? Chuyến đi sẽ chính thức bắt đầu.`);
                 if (!conf) return;
@@ -1700,8 +1673,7 @@ async function renderTrips() {
         }
 
         // 4. Hủy chuyến
-        const canCancelOnCard = (!isOwnerTrip && (trip.status === 'Pending' || trip.status === 'Accepted')) ||
-                                (isOwnerTrip && trip.status === 'Accepted');
+        const canCancelOnCard = trip.status === 'Pending' || trip.status === 'Accepted';
         if (canCancelOnCard) {
             const cancelBtn = document.createElement('button');
             cancelBtn.type = 'button';
@@ -1717,7 +1689,7 @@ async function renderTrips() {
                     const r = await fetch(`/api/bookings/${trip.bookingId}/cancel`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ reason: reason || (isOwnerTrip ? 'Chủ xe chủ động hủy đơn đã duyệt' : 'Khách thuê chủ động hủy chuyến') })
+                        body: JSON.stringify({ reason: reason.trim() || 'Khách thuê chủ động hủy chuyến' })
                     });
                     const d = await r.json();
                     if (r.ok && d.isSuccess) {
