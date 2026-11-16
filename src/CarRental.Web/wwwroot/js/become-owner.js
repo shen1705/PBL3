@@ -2010,7 +2010,7 @@ function renderOwnerTrips(items) {
                 disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
                 disputeBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sự cố';
                 disputeBtn.addEventListener('click', async () => {
-                    const desc = prompt('Nhập chi tiết sự cố phát sinh (tối thiểu 10 ký tự):');
+                    const desc = prompt('Nhập thông tin sự cố/vi phạm và đề xuất khoản phí (Ví dụ: Trả trễ 2h và thiếu xăng, đề xuất phạt 350.000đ; hoặc Phạt nguội quá tốc độ ngày 15/10, đề xuất phạt 1.000.000đ):');
                     if (!desc) return;
                     if (desc.trim().length < 10) {
                         alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');

@@ -179,7 +179,7 @@ public static class SettingKeys
 public static class BusinessRules
 {
     public const decimal DepositRate = 0.25m;             // deposit = 25% price_locked_total
-    public const decimal OwnerCancelPenaltyRate = 0.40m;  // Owner penalty 40% price_locked_total
+    public const decimal OwnerCancelPenaltyRate = 0.08m;  // Owner penalty 8% price_locked_total (dieu chinh ve 8%)
     public const decimal DefaultCommissionRate = 0.05m;   // commission 
     public const int ResponseDeadlineHours = 24;          // owner response time 
 }
