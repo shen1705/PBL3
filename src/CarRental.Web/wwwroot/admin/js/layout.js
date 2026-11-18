@@ -67,7 +67,6 @@ function renderHeader() {
           <strong>Minh Anh</strong>
           <small>Quản trị viên</small>
         </div>
-        <svg class="header__chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
         <div id="headerUserDropdown" style="display: none; position: absolute; top: calc(100% + 8px); right: 0; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,0.1); min-width: 170px; padding: 6px 0; z-index: 100;">
           <a href="/account" style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 13px; color: #1e293b; text-decoration: none;">👤 Tài khoản của tôi</a>
           <a href="/" style="display: flex; align-items: center; gap: 8px; padding: 8px 14px; font-size: 13px; color: #1e293b; text-decoration: none;">🏠 Trang chủ AZU Car</a>

@@ -1124,7 +1124,7 @@ a {
 
 
 /* ==============================================
-   Cẩm nang cho thuê xe (Guide Card & Modals)
+    Cẩm nang cho thuê xe (Guide Card & Modals)
    ============================================== */
 .guide-card {
     position: relative;
@@ -1763,22 +1763,22 @@ a {
     justify-content: center;
     border: 0;
     border-radius: 22px;
-    background: #212529 !important;
+    background: #062c51 ;
     box-shadow: 0 4px 9px rgba(33, 37, 41, 0.18);
-    color: #fff !important;
+    color: #fff ;
     cursor: pointer;
     font-size: 14px;
     font-weight: 700;
     line-height: 1;
-    text-decoration: none !important;
+    text-decoration: none ;
     padding: 0 24px;
     box-sizing: border-box;
     transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
 .register-cta:hover {
-    background: #111827 !important;
-    color: #fff !important;
+    background: #333f5a ;
+    color: #fff;
     transform: translateY(-1px);
 }
 
@@ -1786,30 +1786,30 @@ a {
 .side-link.active,
 .owner-submenu .side-link.active,
 .trips-side-link.active {
-    background: #fff8e9 !important;
-    color: #b88a32 !important;
-    font-weight: 700 !important;
+    background: #fff8e9 ;
+    color: #b88a32 ;
+    font-weight: 700;
 }
 
 .side-link.active i,
 .owner-submenu .side-link.active i,
 .trips-side-link.active i {
-    color: #c49a49 !important;
+    color: #c49a49 ;
 }
 
 .side-link.active::before,
 .owner-submenu .side-link.active::before,
 .trips-side-link.active::before {
-    background: #c49a49 !important;
-    width: 4px !important;
+    background: #c49a49 ;
+    width: 4px ;
 }
 
 /* Tab loại xe (Xe tự lái) sáng vàng */
 .vehicle-tab.active {
-    border-color: #c49a49 !important;
-    background: #fff8e9 !important;
-    color: #b88a32 !important;
-    font-weight: 700 !important;
+    border-color: #c49a49 ;
+    background: #fff8e9 ;
+    color: #b88a32 ;
+    font-weight: 700 ;
 }
 
 /* Quản lý chuyến đi của chủ xe */
@@ -1831,6 +1831,6 @@ a {
 
 @media (max-width: 768px) {
     .owner-trip-card {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr ;
     }
 }

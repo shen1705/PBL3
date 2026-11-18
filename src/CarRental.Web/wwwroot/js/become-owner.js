@@ -2344,3 +2344,33 @@ if (window.AzuStore?.isOwner && window.AzuStore.isOwner()) {
     loadOwnerRevenue();
 }
 
+// Logout Modal
+const logoutBtn = document.getElementById('trip-logout');
+const logoutModal = document.getElementById('logout-modal');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
+
+logoutBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (logoutModal) logoutModal.hidden = false;
+});
+
+closeModalBtn?.addEventListener('click', () => {
+    if (logoutModal) logoutModal.hidden = true;
+});
+
+logoutModal?.addEventListener('click', (e) => {
+    if (e.target === logoutModal) {
+        logoutModal.hidden = true;
+    }
+});
+
+confirmLogoutBtn?.addEventListener('click', async () => {
+    if (window.AzuStore?.logout) {
+        await window.AzuStore.logout();
+    } else {
+        sessionStorage.clear();
+        window.location.href = '/';
+    }
+});
+

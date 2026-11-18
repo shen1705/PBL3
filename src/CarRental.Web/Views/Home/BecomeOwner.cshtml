@@ -484,6 +484,20 @@
     </div>
 
 
+    <!-- Modal Đăng xuất -->
+    <div class="dialog-backdrop" id="logout-modal" hidden>
+        <div class="register-dialog">
+            <button class="dialog-close" id="close-modal-btn" type="button" aria-label="Đóng">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2>Đăng xuất</h2>
+            <p>Bạn chắc chắn muốn đăng xuất không?</p>
+            <button class="primary-button dialog-contact" id="confirm-logout-btn" style="background: #212529; width: 100%;">
+                Đăng xuất
+            </button>
+        </div>
+    </div>
+
 @section Scripts {
     <script src="~/js/become-owner.js" asp-append-version="true"></script>
 }
