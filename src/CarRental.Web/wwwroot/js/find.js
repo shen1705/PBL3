@@ -134,6 +134,9 @@ function createCarCardFromApi(car) {
     card.dataset.priceK = Math.round(Number(car.pricePerDay) / 1000);
     card.dataset.city = (car.city || '').trim();
     card.dataset.district = (car.district || '').trim();
+    card.dataset.location = (car.location || '').trim();
+    card.dataset.description = (car.description || '').trim();
+    card.dataset.plate = (car.licensePlate || car.plate || '').trim();
     card.dataset.seats = car.seats || 5;
     card.dataset.trans = (car.transmission === 'Manual' || car.transmission === 'Số sàn') ? 'manual' : 'auto';
 
@@ -1290,6 +1293,12 @@ function carFromCard(card) {
         ownerId: card.dataset.ownerId || '',
         ownerName: card.dataset.ownerName || '',
         rawPrice: card.dataset.rawPrice ? Number(card.dataset.rawPrice) : null,
+        pricePerDay: card.dataset.rawPrice ? Number(card.dataset.rawPrice) : null,
+        city: card.dataset.city || '',
+        district: card.dataset.district || '',
+        location: card.dataset.location || location,
+        description: card.dataset.description || '',
+        licensePlate: card.dataset.plate || '',
         name: card.querySelector('h3')?.textContent.trim() || 'Xe AZU Car',
         image: card.querySelector('img')?.src || '',
         location,
@@ -1383,6 +1392,25 @@ function initVehicleCalendar(blockedRanges, bookedRanges) {
     calCurrentMonth = calSelectedStart.getMonth();
     calSelectionStep = 0;
     renderAvailabilityCalendar();
+    updateCalendarTriggerSummary();
+}
+
+function updateCalendarTriggerSummary() {
+    const summaryText = document.getElementById('calQuickSummaryText');
+    const datesText = document.getElementById('calQuickSelectedDatesText');
+    if (!summaryText || !datesText) return;
+
+    if (calSelectedStart && calSelectedEnd) {
+        const days = Math.max(1, Math.round((calSelectedEnd.getTime() - calSelectedStart.getTime()) / 86400000) + 1);
+        summaryText.innerHTML = `<span style="color: #00a550; font-weight: 700;"><i class="fa-solid fa-calendar-check"></i> Đã chọn ${days} ngày thuê</span>`;
+        datesText.textContent = `${formatVNShortDate(calSelectedStart)} - ${formatVNShortDate(calSelectedEnd)} (21:00)`;
+    } else if (calSelectedStart) {
+        summaryText.textContent = 'Đang chọn khoảng ngày thuê...';
+        datesText.textContent = `Nhận xe từ: ${formatVNShortDate(calSelectedStart)} (vui lòng chọn ngày trả xe)`;
+    } else {
+        summaryText.textContent = 'Lịch xe bận & trống';
+        datesText.textContent = 'Nhấp để xem chi tiết các ngày đã có người đặt và chọn ngày thuê';
+    }
 }
 
 function renderAvailabilityCalendar() {
@@ -1479,12 +1507,14 @@ function handleDayClick(clickedDate) {
         calSelectedEnd = null;
         calSelectionStep = 1;
         renderAvailabilityCalendar();
+        updateCalendarTriggerSummary();
     } else {
         if (clickedDate.getTime() <= calSelectedStart.getTime()) {
             calSelectedStart = clickedDate;
             calSelectedEnd = null;
             calSelectionStep = 1;
             renderAvailabilityCalendar();
+            updateCalendarTriggerSummary();
         } else {
             let hasBusyInRange = false;
             let checkD = new Date(calSelectedStart.getTime() + 86400000);
@@ -1512,6 +1542,7 @@ function handleDayClick(clickedDate) {
             const rawDaily = currentPopupCar?.rawPrice || 524000;
             updatePricingCalculation(rawDaily);
             renderAvailabilityCalendar();
+            updateCalendarTriggerSummary();
         }
     }
 }
@@ -1540,12 +1571,61 @@ document.getElementById('calResetSelectionBtn')?.addEventListener('click', () =>
     calSelectedEnd = null;
     calSelectionStep = 0;
     renderAvailabilityCalendar();
+    updateCalendarTriggerSummary();
+});
+
+// Modal Lịch xe bận & trống
+function openCarCalendarModal() {
+    const modal = document.getElementById('carCalendarModal');
+    if (!modal) return;
+    modal.hidden = false;
+    renderAvailabilityCalendar();
+}
+
+function closeCarCalendarModal() {
+    const modal = document.getElementById('carCalendarModal');
+    if (modal) modal.hidden = true;
+}
+
+document.getElementById('btnOpenCarCalendarModal')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openCarCalendarModal();
+});
+
+document.getElementById('closeCarCalendarModal')?.addEventListener('click', closeCarCalendarModal);
+document.getElementById('btnCloseCarCalendarBottom')?.addEventListener('click', closeCarCalendarModal);
+
+document.getElementById('carCalendarModal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('carCalendarModal')) {
+        closeCarCalendarModal();
+    }
+});
+
+document.getElementById('btnApplyCalendarSelection')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (calSelectedStart && calSelectedEnd) {
+        const widgetPickup = document.getElementById('widgetPickupTime');
+        const widgetReturn = document.getElementById('widgetReturnTime');
+        if (widgetPickup) widgetPickup.textContent = `21:00, ${formatVNShortDate(calSelectedStart)}`;
+        if (widgetReturn) widgetReturn.textContent = `21:00, ${formatVNShortDate(calSelectedEnd)}`;
+
+        const rawDaily = currentPopupCar?.rawPrice || 524000;
+        updatePricingCalculation(rawDaily);
+    }
+    updateCalendarTriggerSummary();
+    closeCarCalendarModal();
 });
 
 let currentPopupCar = null;
 
 function openCarPopup(car) {
     currentPopupCar = car;
+    if (typeof toggleOwnerListingEditMode === 'function') {
+        toggleOwnerListingEditMode(false);
+    }
+    if (typeof loadCustomListingAttributes === 'function') {
+        loadCustomListingAttributes(car.vehicleId);
+    }
 
     // car header
     const titleEl = document.getElementById('popupCarTitle');
@@ -1658,6 +1738,16 @@ function openCarPopup(car) {
                         } else {
                             btnRent.style.display = 'block';
                             btnOwnerManage.style.display = 'none';
+                        }
+                    }
+
+                    if (d) {
+                        Object.assign(currentPopupCar, d);
+                    }
+                    const sp = new URLSearchParams(window.location.search);
+                    if (sp.get('action') === 'edit' && isOwnerOfCar) {
+                        if (typeof toggleOwnerListingEditMode === 'function') {
+                            toggleOwnerListingEditMode(true);
                         }
                     }
 
@@ -1795,6 +1885,9 @@ function openCarPopup(car) {
 
     updatePricingCalculation(priceVND);
     initVehicleCalendar([], []);
+    if (typeof updateCalendarTriggerSummary === 'function') {
+        updateCalendarTriggerSummary();
+    }
 
     // open popup
     if (carDetailModal) {
@@ -1855,6 +1948,12 @@ document.querySelectorAll('input[name="deliveryOption"]').forEach(radio => {
 
 // close popup
 function closeCarModal() {
+    if (typeof toggleOwnerListingEditMode === 'function') {
+        toggleOwnerListingEditMode(false);
+    }
+    if (typeof closeCarCalendarModal === 'function') {
+        closeCarCalendarModal();
+    }
     if (carDetailModal) carDetailModal.hidden = true;
     document.body.style.overflow = '';
 }
@@ -1868,8 +1967,15 @@ carDetailModal?.addEventListener('click', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && carDetailModal && !carDetailModal.hidden) {
-        closeCarModal();
+    if (e.key === 'Escape') {
+        const calModal = document.getElementById('carCalendarModal');
+        if (calModal && !calModal.hidden) {
+            closeCarCalendarModal();
+            return;
+        }
+        if (carDetailModal && !carDetailModal.hidden) {
+            closeCarModal();
+        }
     }
 });
 
@@ -2205,6 +2311,500 @@ document.getElementById('btnAcceptSampleContract')?.addEventListener('click', ()
     const agreeCheck = document.getElementById('checkAgreeContract');
     if (agreeCheck) agreeCheck.checked = true;
     closeSampleContractModal();
+});
+
+// ==========================================
+// CHẾ ĐỘ CHỈNH SỬA BÀI ĐĂNG DÀNH CHO CHỦ XE (INLINE EDITING)
+// ==========================================
+let isOwnerEditModeActive = false;
+
+function loadCustomListingAttributes(vehicleId) {
+    if (!vehicleId) return;
+
+    // 1. Tài sản thế chấp
+    const savedCollateral = localStorage.getItem(`azu_car_collateral_${vehicleId}`);
+    const colEl = document.getElementById('popupCarCollateralText');
+    if (colEl) {
+        colEl.textContent = savedCollateral || 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.';
+    }
+
+    // 2. Điều khoản riêng
+    const savedTerms = localStorage.getItem(`azu_car_terms_${vehicleId}`);
+    const termsUl = document.getElementById('popupCarTermsList');
+    if (termsUl) {
+        if (savedTerms) {
+            try {
+                const list = JSON.parse(savedTerms);
+                if (Array.isArray(list) && list.length > 0) {
+                    termsUl.innerHTML = list.map(item => `<li>${item}</li>`).join('');
+                }
+            } catch (e) {}
+        } else {
+            termsUl.innerHTML = `
+                <li>Sử dụng xe đúng mục đích di chuyển an toàn.</li>
+                <li>Không sử dụng xe vào mục đích phi pháp, vi phạm pháp luật.</li>
+                <li>Không sử dụng xe thuê để cầm cố, thế chấp hoặc chuyển giao bên thứ ba.</li>
+                <li>Không hút thuốc, nhả kẹo cao su, xả rác bừa bãi trong xe.</li>
+                <li>Không chở hoa quả, thực phẩm tươi sống nặng mùi trong khoang xe.</li>
+            `;
+        }
+    }
+
+    // 3. Phụ phí có thể phát sinh
+    const savedFees = localStorage.getItem(`azu_car_extrafees_${vehicleId}`);
+    if (savedFees) {
+        try {
+            const fees = JSON.parse(savedFees);
+            if (fees.feeLimit && fees.limitKm) {
+                const d = document.getElementById('extraFeeLimitDesc');
+                const c = document.getElementById('extraFeeLimitCost');
+                if (d) d.textContent = `Phụ phí phát sinh nếu lộ trình di chuyển vượt quá ${fees.limitKm}km/ngày.`;
+                if (c) c.textContent = `${Number(fees.feeLimit).toLocaleString('vi-VN')}đ/km`;
+            }
+            if (fees.feeOvertime) {
+                const c = document.getElementById('extraFeeOvertimeCost');
+                if (c) c.textContent = `${Number(fees.feeOvertime).toLocaleString('vi-VN')}đ/giờ`;
+            }
+            if (fees.feeClean) {
+                const c = document.getElementById('extraFeeCleanCost');
+                if (c) c.textContent = `${Number(fees.feeClean).toLocaleString('vi-VN')}đ`;
+            }
+            if (fees.feeDeodor) {
+                const c = document.getElementById('extraFeeDeodorCost');
+                if (c) c.textContent = `${Number(fees.feeDeodor).toLocaleString('vi-VN')}đ`;
+            }
+        } catch (e) {}
+    } else {
+        const dLimit = document.getElementById('extraFeeLimitDesc');
+        const cLimit = document.getElementById('extraFeeLimitCost');
+        if (dLimit) dLimit.textContent = 'Phụ phí phát sinh nếu lộ trình di chuyển vượt quá 300km/ngày.';
+        if (cLimit) cLimit.textContent = '3.000đ/km';
+
+        const dOvertime = document.getElementById('extraFeeOvertimeDesc');
+        const cOvertime = document.getElementById('extraFeeOvertimeCost');
+        if (dOvertime) dOvertime.textContent = 'Phụ phí phát sinh khi hoàn trả xe trễ giờ. Thuê thêm 1 ngày nếu trễ quá 5 giờ.';
+        if (cOvertime) cOvertime.textContent = '70.000đ/giờ';
+
+        const cClean = document.getElementById('extraFeeCleanCost');
+        if (cClean) cClean.textContent = '80.000đ';
+
+        const cDeodor = document.getElementById('extraFeeDeodorCost');
+        if (cDeodor) cDeodor.textContent = '500.000đ';
+    }
+}
+
+function toggleSectionEditor(sectionName, showEditor) {
+    switch (sectionName) {
+        case 'location': {
+            const viewWrap = document.getElementById('viewCarLocWrapper');
+            const editWrap = document.getElementById('editCarLocWrapper');
+            if (viewWrap && editWrap) {
+                viewWrap.style.display = showEditor ? 'none' : 'block';
+                editWrap.style.display = showEditor ? 'block' : 'none';
+                if (showEditor && currentPopupCar) {
+                    const citySelect = document.getElementById('inlineCitySelect');
+                    if (citySelect && currentPopupCar.city) {
+                        const found = Array.from(citySelect.options).find(opt =>
+                            opt.value.toLowerCase().includes(currentPopupCar.city.toLowerCase()) ||
+                            currentPopupCar.city.toLowerCase().includes(opt.value.toLowerCase())
+                        );
+                        if (found) citySelect.value = found.value;
+                    }
+                    const distInput = document.getElementById('inlineDistrictInput');
+                    if (distInput) distInput.value = currentPopupCar.district || '';
+                    const locInput = document.getElementById('inlineLocationInput');
+                    if (locInput) locInput.value = currentPopupCar.location || '';
+                }
+            }
+            break;
+        }
+        case 'description': {
+            const viewWrap = document.getElementById('viewCarDescWrapper');
+            const editWrap = document.getElementById('editCarDescWrapper');
+            if (viewWrap && editWrap) {
+                viewWrap.style.display = showEditor ? 'none' : 'block';
+                editWrap.style.display = showEditor ? 'block' : 'none';
+                if (showEditor && currentPopupCar) {
+                    const descInput = document.getElementById('inlineEditDescText');
+                    if (descInput) {
+                        descInput.value = currentPopupCar.description || (document.getElementById('popupCarDescription')?.innerText.trim() || '');
+                    }
+                }
+            }
+            break;
+        }
+        case 'price': {
+            const editWrap = document.getElementById('inlineEditPriceWrapper');
+            if (editWrap) {
+                editWrap.style.display = showEditor ? 'block' : 'none';
+                if (showEditor && currentPopupCar) {
+                    const pInput = document.getElementById('inlineEditPriceInput');
+                    if (pInput) {
+                        const rawDaily = currentPopupCar.pricePerDay || currentPopupCar.rawPrice || 524000;
+                        pInput.value = rawDaily;
+                    }
+                }
+            }
+            break;
+        }
+        case 'collateral': {
+            const viewWrap = document.getElementById('viewCarCollateralWrapper');
+            const editWrap = document.getElementById('editCarCollateralWrapper');
+            if (viewWrap && editWrap) {
+                viewWrap.style.display = showEditor ? 'none' : 'block';
+                editWrap.style.display = showEditor ? 'block' : 'none';
+                if (showEditor && currentPopupCar) {
+                    const currentText = document.getElementById('popupCarCollateralText')?.textContent.trim() || '';
+                    const typeSel = document.getElementById('inlineCollateralTypeSelect');
+                    const customGrp = document.getElementById('inlineCollateralCustomGroup');
+                    const customInp = document.getElementById('inlineCollateralCustomInput');
+                    if (typeSel) {
+                        if (/không yêu cầu|miễn thế chấp/i.test(currentText)) {
+                            typeSel.value = 'none';
+                            if (customGrp) customGrp.style.display = 'none';
+                        } else if (/xe máy/i.test(currentText) && /tiền mặt/i.test(currentText)) {
+                            typeSel.value = 'bike_or_cash';
+                            if (customGrp) customGrp.style.display = 'none';
+                        } else if (/tiền mặt/i.test(currentText)) {
+                            typeSel.value = 'cash_only';
+                            if (customGrp) customGrp.style.display = 'none';
+                        } else {
+                            typeSel.value = 'custom';
+                            if (customGrp) customGrp.style.display = 'block';
+                            if (customInp) customInp.value = currentText;
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        case 'terms': {
+            const viewWrap = document.getElementById('viewCarTermsWrapper');
+            const editWrap = document.getElementById('editCarTermsWrapper');
+            if (viewWrap && editWrap) {
+                viewWrap.style.display = showEditor ? 'none' : 'block';
+                editWrap.style.display = showEditor ? 'block' : 'none';
+                if (showEditor) {
+                    const textarea = document.getElementById('inlineTermsTextarea');
+                    if (textarea) {
+                        const items = Array.from(document.querySelectorAll('#popupCarTermsList li')).map(li => li.textContent.trim()).filter(Boolean);
+                        textarea.value = items.join('\n');
+                    }
+                }
+            }
+            break;
+        }
+        case 'extra-fees': {
+            const viewWrap = document.getElementById('viewExtraFeesList');
+            const editWrap = document.getElementById('editExtraFeesEditor');
+            if (viewWrap && editWrap) {
+                viewWrap.style.display = showEditor ? 'none' : 'block';
+                editWrap.style.display = showEditor ? 'block' : 'none';
+                if (showEditor && currentPopupCar) {
+                    const feeLimitCostEl = document.getElementById('extraFeeLimitCost');
+                    const feeLimitDescEl = document.getElementById('extraFeeLimitDesc');
+                    const feeOvertimeCostEl = document.getElementById('extraFeeOvertimeCost');
+                    const feeCleanCostEl = document.getElementById('extraFeeCleanCost');
+                    const feeDeodorCostEl = document.getElementById('extraFeeDeodorCost');
+
+                    const limitKmMatch = feeLimitDescEl?.textContent.match(/(\d+)\s*km/);
+                    const limitVal = feeLimitCostEl ? parseInt(feeLimitCostEl.textContent.replace(/\D/g, ''), 10) : 3000;
+                    const overtimeVal = feeOvertimeCostEl ? parseInt(feeOvertimeCostEl.textContent.replace(/\D/g, ''), 10) : 70000;
+                    const cleanVal = feeCleanCostEl ? parseInt(feeCleanCostEl.textContent.replace(/\D/g, ''), 10) : 80000;
+                    const deodorVal = feeDeodorCostEl ? parseInt(feeDeodorCostEl.textContent.replace(/\D/g, ''), 10) : 500000;
+
+                    const inLimit = document.getElementById('inlineFeeLimitInput');
+                    const inLimitKm = document.getElementById('inlineFeeLimitKmInput');
+                    const inOvertime = document.getElementById('inlineFeeOvertimeInput');
+                    const inClean = document.getElementById('inlineFeeCleanInput');
+                    const inDeodor = document.getElementById('inlineFeeDeodorInput');
+
+                    if (inLimit) inLimit.value = limitVal || 3000;
+                    if (inLimitKm) inLimitKm.value = (limitKmMatch ? parseInt(limitKmMatch[1], 10) : 300);
+                    if (inOvertime) inOvertime.value = overtimeVal || 70000;
+                    if (inClean) inClean.value = cleanVal || 80000;
+                    if (inDeodor) inDeodor.value = deodorVal || 500000;
+                }
+            }
+            break;
+        }
+    }
+}
+
+function closeAllSectionEditors() {
+    ['location', 'description', 'price', 'collateral', 'terms', 'extra-fees'].forEach(sec => {
+        toggleSectionEditor(sec, false);
+    });
+}
+
+function toggleOwnerListingEditMode(enable) {
+    if (typeof enable === 'boolean') {
+        isOwnerEditModeActive = enable;
+    } else {
+        isOwnerEditModeActive = !isOwnerEditModeActive;
+    }
+
+    const banner = document.getElementById('ownerEditModeBanner');
+    const manageBtn = document.getElementById('btnOwnerManageCar');
+    const pencils = document.querySelectorAll('.btn-inline-pencil');
+
+    if (isOwnerEditModeActive) {
+        if (banner) banner.style.display = 'flex';
+        pencils.forEach(p => p.style.display = 'inline-flex');
+        if (manageBtn) {
+            manageBtn.innerHTML = '<i class="fa-solid fa-check"></i> Hoàn tất chỉnh sửa';
+            manageBtn.classList.add('active-edit-mode');
+        }
+    } else {
+        if (banner) banner.style.display = 'none';
+        pencils.forEach(p => p.style.display = 'none');
+        closeAllSectionEditors();
+        if (manageBtn) {
+            manageBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa';
+            manageBtn.classList.remove('active-edit-mode');
+        }
+    }
+}
+
+// Event Listeners for Owner Edit Mode
+document.getElementById('btnOwnerManageCar')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (!currentPopupCar) return;
+    toggleOwnerListingEditMode();
+});
+
+document.getElementById('btnExitEditBanner')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    toggleOwnerListingEditMode(false);
+});
+
+document.querySelectorAll('.btn-inline-pencil').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = btn.dataset.target;
+        if (target) {
+            toggleSectionEditor(target, true);
+        }
+    });
+});
+
+document.querySelectorAll('.btn-inline-cancel').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = btn.dataset.target;
+        if (target) {
+            toggleSectionEditor(target, false);
+        }
+    });
+});
+
+document.getElementById('inlineCollateralTypeSelect')?.addEventListener('change', (e) => {
+    const customGroup = document.getElementById('inlineCollateralCustomGroup');
+    if (customGroup) {
+        customGroup.style.display = (e.target.value === 'custom') ? 'block' : 'none';
+    }
+});
+
+document.querySelectorAll('.btn-inline-save').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const target = btn.dataset.target;
+        if (!target || !currentPopupCar || !currentPopupCar.vehicleId) return;
+
+        const originalBtnHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+
+        try {
+            if (target === 'location') {
+                const city = document.getElementById('inlineCitySelect')?.value || 'TP. Đà Nẵng';
+                const district = document.getElementById('inlineDistrictInput')?.value?.trim() || '';
+                const location = document.getElementById('inlineLocationInput')?.value?.trim() || '';
+
+                const payload = {
+                    pricePerDay: currentPopupCar.pricePerDay || currentPopupCar.rawPrice || 524000,
+                    city: city,
+                    district: district,
+                    location: location,
+                    description: currentPopupCar.description || ''
+                };
+
+                const res = await fetch(`/api/vehicles/${currentPopupCar.vehicleId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok && result.isSuccess) {
+                    currentPopupCar.city = city;
+                    currentPopupCar.district = district;
+                    currentPopupCar.location = location;
+
+                    const displayLoc = location || (district ? `${district}, ${city}` : city);
+                    const specificLoc = document.getElementById('popupCarSpecificLoc');
+                    if (specificLoc) specificLoc.textContent = displayLoc;
+                    const carLoc = document.getElementById('popupCarLoc');
+                    if (carLoc) carLoc.textContent = displayLoc;
+                    const hostLocEl = document.getElementById('bookHostLocation');
+                    if (hostLocEl) hostLocEl.textContent = `${displayLoc} (Miễn phí)`;
+                    const widgetCarLoc = document.getElementById('widgetCarLocShort');
+                    if (widgetCarLoc) widgetCarLoc.textContent = displayLoc;
+
+                    const carCard = Array.from(document.querySelectorAll('.car-card'))
+                        .find(c => c.dataset.vehicleId == currentPopupCar.vehicleId);
+                    if (carCard) {
+                        carCard.dataset.city = city;
+                        carCard.dataset.district = district;
+                        carCard.dataset.location = location;
+                        const cardLoc = carCard.querySelector('.car-location');
+                        if (cardLoc) cardLoc.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${displayLoc}`;
+                    }
+
+                    toggleSectionEditor('location', false);
+                    alert('Cập nhật vị trí xe thành công!');
+                } else {
+                    alert(result.message || 'Không thể cập nhật vị trí xe.');
+                }
+            } else if (target === 'description') {
+                const description = document.getElementById('inlineEditDescText')?.value?.trim() || '';
+                const payload = {
+                    pricePerDay: currentPopupCar.pricePerDay || currentPopupCar.rawPrice || 524000,
+                    city: currentPopupCar.city || 'TP. Đà Nẵng',
+                    district: currentPopupCar.district || '',
+                    location: currentPopupCar.location || '',
+                    description: description
+                };
+
+                const res = await fetch(`/api/vehicles/${currentPopupCar.vehicleId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok && result.isSuccess) {
+                    currentPopupCar.description = description;
+                    const descEl = document.getElementById('popupCarDescription');
+                    if (descEl) descEl.innerHTML = `<p>${(description || 'Chưa có mô tả chi tiết.').replace(/\n/g, '<br>')}</p>`;
+
+                    const carCard = Array.from(document.querySelectorAll('.car-card'))
+                        .find(c => c.dataset.vehicleId == currentPopupCar.vehicleId);
+                    if (carCard) {
+                        carCard.dataset.description = description;
+                    }
+
+                    toggleSectionEditor('description', false);
+                    alert('Cập nhật mô tả xe thành công!');
+                } else {
+                    alert(result.message || 'Không thể cập nhật mô tả xe.');
+                }
+            } else if (target === 'price') {
+                const newPrice = Number(document.getElementById('inlineEditPriceInput')?.value || 0);
+                if (newPrice < 100000) {
+                    alert('Giá thuê tối thiểu là 100.000đ/ngày.');
+                    return;
+                }
+
+                const payload = {
+                    pricePerDay: newPrice,
+                    city: currentPopupCar.city || 'TP. Đà Nẵng',
+                    district: currentPopupCar.district || '',
+                    location: currentPopupCar.location || '',
+                    description: currentPopupCar.description || ''
+                };
+
+                const res = await fetch(`/api/vehicles/${currentPopupCar.vehicleId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (res.ok && result.isSuccess) {
+                    currentPopupCar.pricePerDay = newPrice;
+                    currentPopupCar.rawPrice = newPrice;
+                    currentPopupCar.price = (Number(newPrice) / 1000).toLocaleString('vi-VN') + 'K';
+
+                    const widgetPriceBig = document.getElementById('widgetPriceBig');
+                    if (widgetPriceBig) widgetPriceBig.textContent = currentPopupCar.price;
+
+                    updatePricingCalculation(newPrice);
+
+                    const carCard = Array.from(document.querySelectorAll('.car-card'))
+                        .find(c => c.dataset.vehicleId == currentPopupCar.vehicleId);
+                    if (carCard) {
+                        carCard.dataset.rawPrice = newPrice;
+                        carCard.dataset.priceK = Math.round(newPrice / 1000);
+                        const cardPrice = carCard.querySelector('.price-number');
+                        if (cardPrice) cardPrice.innerHTML = `${Number(newPrice).toLocaleString('vi-VN')}đ<span class="price-unit">/ngày</span>`;
+                    }
+
+                    toggleSectionEditor('price', false);
+                    alert('Cập nhật đơn giá thuê thành công!');
+                } else {
+                    alert(result.message || 'Không thể cập nhật đơn giá thuê.');
+                }
+            } else if (target === 'collateral') {
+                const type = document.getElementById('inlineCollateralTypeSelect')?.value || 'none';
+                let colText = 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.';
+                if (type === 'bike_or_cash') {
+                    colText = 'Yêu cầu thế chấp: Xe máy (kèm cavet gốc chính chủ) hoặc 15.000.000đ Tiền mặt ký quỹ.';
+                } else if (type === 'cash_only') {
+                    colText = 'Yêu cầu thế chấp Tiền mặt ký quỹ: 15.000.000đ khi bàn giao nhận xe.';
+                } else if (type === 'custom') {
+                    colText = document.getElementById('inlineCollateralCustomInput')?.value?.trim() || colText;
+                }
+
+                const colEl = document.getElementById('popupCarCollateralText');
+                if (colEl) colEl.textContent = colText;
+
+                localStorage.setItem(`azu_car_collateral_${currentPopupCar.vehicleId}`, colText);
+                toggleSectionEditor('collateral', false);
+                alert('Cập nhật quy định thế chấp thành công!');
+            } else if (target === 'terms') {
+                const rawText = document.getElementById('inlineTermsTextarea')?.value || '';
+                const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
+                const termsUl = document.getElementById('popupCarTermsList');
+                if (termsUl && lines.length > 0) {
+                    termsUl.innerHTML = lines.map(item => `<li>${item}</li>`).join('');
+                }
+
+                localStorage.setItem(`azu_car_terms_${currentPopupCar.vehicleId}`, JSON.stringify(lines));
+                toggleSectionEditor('terms', false);
+                alert('Cập nhật điều khoản riêng thành công!');
+            } else if (target === 'extra-fees') {
+                const feeLimit = Number(document.getElementById('inlineFeeLimitInput')?.value || 3000);
+                const limitKm = Number(document.getElementById('inlineFeeLimitKmInput')?.value || 300);
+                const feeOvertime = Number(document.getElementById('inlineFeeOvertimeInput')?.value || 70000);
+                const feeClean = Number(document.getElementById('inlineFeeCleanInput')?.value || 80000);
+                const feeDeodor = Number(document.getElementById('inlineFeeDeodorInput')?.value || 500000);
+
+                const dLimit = document.getElementById('extraFeeLimitDesc');
+                const cLimit = document.getElementById('extraFeeLimitCost');
+                if (dLimit) dLimit.textContent = `Phụ phí phát sinh nếu lộ trình di chuyển vượt quá ${limitKm}km/ngày.`;
+                if (cLimit) cLimit.textContent = `${feeLimit.toLocaleString('vi-VN')}đ/km`;
+
+                const dOvertime = document.getElementById('extraFeeOvertimeDesc');
+                const cOvertime = document.getElementById('extraFeeOvertimeCost');
+                if (cOvertime) cOvertime.textContent = `${feeOvertime.toLocaleString('vi-VN')}đ/giờ`;
+
+                const cClean = document.getElementById('extraFeeCleanCost');
+                if (cClean) cClean.textContent = `${feeClean.toLocaleString('vi-VN')}đ`;
+
+                const cDeodor = document.getElementById('extraFeeDeodorCost');
+                if (cDeodor) cDeodor.textContent = `${feeDeodor.toLocaleString('vi-VN')}đ`;
+
+                const feesObj = { feeLimit, limitKm, feeOvertime, feeClean, feeDeodor };
+                localStorage.setItem(`azu_car_extrafees_${currentPopupCar.vehicleId}`, JSON.stringify(feesObj));
+                toggleSectionEditor('extra-fees', false);
+                alert('Cập nhật các khoản phụ phí thành công!');
+            }
+        } catch (err) {
+            console.error('Lỗi khi lưu thông tin bài đăng xe:', err);
+            alert('Có lỗi xảy ra khi lưu thông tin.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHtml;
+        }
+    });
 });
 
 // ==========================================

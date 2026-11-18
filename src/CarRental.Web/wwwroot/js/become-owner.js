@@ -371,7 +371,9 @@ function renderOwnerCars() {
 
 
         const vehId = car.vehicleId || car.id;
-        const carPostUrl = vehId ? `/find?vehicleId=${vehId}` : `/find?keyword=${encodeURIComponent(car.model || car.name || '')}`;
+        const carPostUrl = vehId
+            ? (window.location.pathname.includes('.html') ? `find.html?vehicleId=${vehId}` : `/find?vehicleId=${vehId}`)
+            : (window.location.pathname.includes('.html') ? `find.html?keyword=${encodeURIComponent(car.model || car.name || '')}` : `/find?keyword=${encodeURIComponent(car.model || car.name || '')}`);
 
         const title = document.createElement('h3');
         title.style.margin = '0';

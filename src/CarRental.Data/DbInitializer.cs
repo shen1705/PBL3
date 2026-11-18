@@ -398,8 +398,8 @@ public static class DbInitializer
             await db.SaveChangesAsync();
         }
 
-        // seed comprehensive business scenarios (15 test bookings)
-        bool needSeedBookings = !await db.Disputes.AnyAsync(d => d.ResolutionAction == ResolutionActions.CancelOwnerFault);
+                // seed comprehensive business scenarios (30 test bookings across Nov 2026, Dec 2026, Jan 2027)
+        bool needSeedBookings = !await db.Bookings.AnyAsync(b => b.StartDate.Year == 2027);
         if (needSeedBookings)
         {
             // clean up previous seed data to guarantee 100% data integrity
@@ -427,8 +427,8 @@ public static class DbInitializer
             Booking CreateBookingRecord(
                 string renterKey,
                 string vehicleKey,
-                int fromDay,
-                int toDay,
+                DateTime start,
+                DateTime end,
                 string status,
                 bool delivery = false,
                 DateTime? customCreated = null,
@@ -442,8 +442,6 @@ public static class DbInitializer
             {
                 var listing = listings[vehicleKey];
                 var renter = u[renterKey];
-                var start = today.AddDays(fromDay);
-                var end = today.AddDays(toDay);
                 var rentalDays = (end.Date - start.Date).Days + 1;
                 if (rentalDays < 1) rentalDays = 1;
 
@@ -453,7 +451,7 @@ public static class DbInitializer
                 var total = rentalSubtotal + deliveryFee + insuranceFee;
                 var deposit = Math.Round(total * BusinessRules.DepositRate);
 
-                var created = customCreated ?? (fromDay < 0 ? start.AddDays(-5) : now.AddHours(-10));
+                var created = customCreated ?? (start < now ? start.AddDays(-3) : (now < start ? now.AddHours(-6) : start.AddDays(-1)));
                 var deadline = customResponseDeadline ?? created.AddHours(BusinessRules.ResponseDeadlineHours);
 
                 var hold = new DepositHold
@@ -507,68 +505,41 @@ public static class DbInitializer
                 return booking;
             }
 
-            // 15 Comprehensive Test Bookings
-            // BK01: Completed, Hà Nội, V1 (Vios), renter1. 2-way 5-star public reviews
-            var bk01 = CreateBookingRecord("renter1", "V1", -12, -9, BookingStatuses.Completed);
+            // --- THÁNG 11/2026 (10 đơn) ---
+            var bkNov01 = CreateBookingRecord("renter1", "V1", new DateTime(2026, 11, 1), new DateTime(2026, 11, 4), BookingStatuses.Completed, delivery: true, customCreated: new DateTime(2026, 10, 28, 10, 0, 0), customAcceptedAt: new DateTime(2026, 10, 28, 14, 0, 0));
+            var bkNov02 = CreateBookingRecord("renter2", "V3", new DateTime(2026, 11, 5), new DateTime(2026, 11, 8), BookingStatuses.Completed, delivery: false, customCreated: new DateTime(2026, 11, 2, 9, 0, 0), customAcceptedAt: new DateTime(2026, 11, 2, 12, 0, 0));
+            var bkNov03 = CreateBookingRecord("renter3", "V7", new DateTime(2026, 11, 3), new DateTime(2026, 11, 6), BookingStatuses.Completed, delivery: false, customCreated: new DateTime(2026, 10, 31, 14, 0, 0), customAcceptedAt: new DateTime(2026, 10, 31, 16, 0, 0));
+            var bkNov04 = CreateBookingRecord("renter1", "V9", new DateTime(2026, 11, 8), new DateTime(2026, 11, 11), BookingStatuses.Completed, delivery: true, customCreated: new DateTime(2026, 11, 5, 8, 30, 0), customAcceptedAt: new DateTime(2026, 11, 5, 11, 0, 0));
+            var bkNov05 = CreateBookingRecord("renter2", "V13", new DateTime(2026, 11, 10), new DateTime(2026, 11, 13), BookingStatuses.Completed, delivery: false, customCreated: new DateTime(2026, 11, 7, 10, 0, 0), customAcceptedAt: new DateTime(2026, 11, 7, 13, 0, 0));
+            var bkNov06 = CreateBookingRecord("renter4", "V14", new DateTime(2026, 11, 2), new DateTime(2026, 11, 5), BookingStatuses.Completed, delivery: false, customCreated: new DateTime(2026, 10, 29, 9, 0, 0), customAcceptedAt: new DateTime(2026, 10, 29, 11, 0, 0));
+            var bkNov07 = CreateBookingRecord("renter2", "V8", new DateTime(2026, 11, 17), new DateTime(2026, 11, 20), BookingStatuses.Ongoing, delivery: false, customCreated: new DateTime(2026, 11, 15, 14, 0, 0), customAcceptedAt: new DateTime(2026, 11, 15, 16, 0, 0));
+            var bkNov08 = CreateBookingRecord("renter3", "V11", new DateTime(2026, 11, 16), new DateTime(2026, 11, 19), BookingStatuses.Ongoing, delivery: true, customCreated: new DateTime(2026, 11, 14, 8, 0, 0), customAcceptedAt: new DateTime(2026, 11, 14, 10, 0, 0));
+            var bkNov09 = CreateBookingRecord("renter1", "V10", new DateTime(2026, 11, 21), new DateTime(2026, 11, 24), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 17, 9, 0, 0), customAcceptedAt: new DateTime(2026, 11, 17, 11, 30, 0));
+            var bkNov10 = CreateBookingRecord("renter3", "V2", new DateTime(2026, 11, 24), new DateTime(2026, 11, 27), BookingStatuses.Pending, delivery: false, customCreated: new DateTime(2026, 11, 18, 9, 0, 0));
 
-            // BK02: Completed, Hà Nội, V3 (CX-5), renter2. Double-blind (renter2 reviewed, owner2 hasn't)
-            var bk02 = CreateBookingRecord("renter2", "V3", -4, -2, BookingStatuses.Completed, delivery: true);
+            // --- THÁNG 12/2026 (10 đơn) ---
+            var bkDec01 = CreateBookingRecord("renter2", "V1", new DateTime(2026, 12, 6), new DateTime(2026, 12, 9), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 18, 10, 0, 0), customAcceptedAt: new DateTime(2026, 11, 18, 12, 0, 0));
+            var bkDec02 = CreateBookingRecord("renter3", "V4", new DateTime(2026, 12, 10), new DateTime(2026, 12, 13), BookingStatuses.Accepted, delivery: true, customCreated: new DateTime(2026, 11, 17, 15, 0, 0), customAcceptedAt: new DateTime(2026, 11, 17, 17, 0, 0));
+            var bkDec03 = CreateBookingRecord("renter1", "V6", new DateTime(2026, 12, 4), new DateTime(2026, 12, 7), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 16, 10, 0, 0), customAcceptedAt: new DateTime(2026, 11, 16, 14, 0, 0));
+            var bkDec04 = CreateBookingRecord("renter2", "V7", new DateTime(2026, 12, 12), new DateTime(2026, 12, 16), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 17, 11, 0, 0), customAcceptedAt: new DateTime(2026, 11, 17, 14, 0, 0));
+            var bkDec05 = CreateBookingRecord("renter3", "V9", new DateTime(2026, 12, 18), new DateTime(2026, 12, 21), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 16, 16, 0, 0), customAcceptedAt: new DateTime(2026, 11, 16, 19, 0, 0));
+            var bkDec06 = CreateBookingRecord("renter1", "V12", new DateTime(2026, 12, 24), new DateTime(2026, 12, 27), BookingStatuses.Accepted, delivery: true, customCreated: new DateTime(2026, 11, 15, 10, 0, 0), customAcceptedAt: new DateTime(2026, 11, 15, 13, 0, 0));
+            var bkDec07 = CreateBookingRecord("renter2", "V14", new DateTime(2026, 12, 15), new DateTime(2026, 12, 18), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 17, 13, 0, 0), customAcceptedAt: new DateTime(2026, 11, 17, 15, 0, 0));
+            var bkDec08 = CreateBookingRecord("renter3", "V15", new DateTime(2026, 12, 20), new DateTime(2026, 12, 23), BookingStatuses.Pending, delivery: true, customCreated: new DateTime(2026, 11, 18, 11, 0, 0));
+            var bkDec09 = CreateBookingRecord("renter1", "V5", new DateTime(2026, 12, 15), new DateTime(2026, 12, 18), BookingStatuses.Cancelled, delivery: false, customCreated: new DateTime(2026, 11, 14, 9, 0, 0), customCancelledAt: new DateTime(2026, 11, 16, 10, 0, 0), cancelledByKey: "renter1", cancelReason: "Gia đình có việc bận đột xuất nên dời lịch trình công tác sang tháng 1.");
+            var bkDec10 = CreateBookingRecord("renter2", "V2", new DateTime(2026, 12, 8), new DateTime(2026, 12, 11), BookingStatuses.Rejected, delivery: false, customCreated: new DateTime(2026, 11, 15, 14, 0, 0), rejectReason: "Xe đã có lịch bảo dưỡng và bảo hiểm định kỳ đợt cuối năm, rất tiếc không phục vụ được bạn.");
 
-            // BK03: Completed, TP. Đà Nẵng, V7 (Cross), renter3. Settled revenue for owner1
-            var bk03 = CreateBookingRecord("renter3", "V7", -15, -12, BookingStatuses.Completed);
-
-            // BK04: Completed, TP. Đà Nẵng, V9 (e34), renter1. Electric vehicle settled for owner2
-            var bk04 = CreateBookingRecord("renter1", "V9", -8, -5, BookingStatuses.Completed, delivery: true);
-
-            // BK05: Ongoing, TP. Đà Nẵng, V8 (Xpander), renter2. Pickup confirmed yesterday
-            var bk05 = CreateBookingRecord("renter2", "V8", -1, 2, BookingStatuses.Ongoing);
-
-            // BK06: Ongoing + Open Dispute, TP. Đà Nẵng, V11 (Santa Fe), renter3. AC failure & check engine
-            var bk06 = CreateBookingRecord("renter3", "V11", -2, 1, BookingStatuses.Ongoing, delivery: true);
-
-            // BK07: Completed + ForceComplete Dispute, TP. HCM, V13 (Vios), renter1. Scratch dispute resolved
-            var bk07 = CreateBookingRecord("renter1", "V13", -7, -4, BookingStatuses.Completed);
-
-            // BK08: Cancelled + CancelOwnerFault Dispute, Hà Nội, V2 (Accent), renter2. Owner no-show penalty 195k
-            var bk08 = CreateBookingRecord("renter2", "V2", -3, -1, BookingStatuses.Cancelled,
-                cancelledByKey: "admin1",
-                cancelReason: "Hủy bởi Admin do lỗi chủ xe: Chủ xe tự ý hủy hẹn và vi phạm nghiêm trọng cam kết bàn giao xe.",
-                customCancelledAt: today.AddDays(-3).AddHours(5));
-
-            // BK09: Pending (10h remaining), TP. HCM, V14 (CX-30), renter1.
-            var bk09 = CreateBookingRecord("renter1", "V14", 4, 7, BookingStatuses.Pending, delivery: true,
-                customCreated: now.AddHours(-2),
-                customResponseDeadline: now.AddHours(10));
-
-            // BK10: Pending (Urgent - 1h remaining), TP. Đà Nẵng, V10 (City), renter2.
-            var bk10 = CreateBookingRecord("renter2", "V10", 2, 4, BookingStatuses.Pending,
-                customCreated: now.AddHours(-11),
-                customResponseDeadline: now.AddHours(1));
-
-            // BK11: Accepted (Ready for pickup), Hà Nội, V1 (Vios), renter3.
-            var bk11 = CreateBookingRecord("renter3", "V1", 2, 5, BookingStatuses.Accepted,
-                customCreated: now.AddHours(-8),
-                customAcceptedAt: now.AddHours(-6));
-
-            // BK12: Cancelled by Renter, Hà Nội, V4 (VF 8), renter1.
-            var bk12 = CreateBookingRecord("renter1", "V4", 6, 9, BookingStatuses.Cancelled,
-                customCreated: now.AddDays(-2),
-                customCancelledAt: now.AddDays(-1),
-                cancelledByKey: "renter1",
-                cancelReason: "Gia đình có việc bận đột xuất nên dời lịch trình sang tuần sau.");
-
-            // BK13: Rejected by Owner, Hà Nội, V5 (Transit), renter2.
-            var bk13 = CreateBookingRecord("renter2", "V5", 8, 11, BookingStatuses.Rejected,
-                customCreated: now.AddDays(-3),
-                rejectReason: "Xe đã xếp lịch đưa đón đoàn du lịch ký hợp đồng dài hạn trước đó, rất tiếc không phục vụ được quý khách đợt này.");
-
-            // BK14: Expired (past 12h deadline), TP. HCM, V15 (CR-V), renter3.
-            var bk14 = CreateBookingRecord("renter3", "V15", 5, 8, BookingStatuses.Expired,
-                customCreated: now.AddHours(-20),
-                customResponseDeadline: now.AddHours(-8));
-
-            // BK15: Completed, TP. HCM, V14 (CX-30), renter4. Settled revenue for owner2
-            var bk15 = CreateBookingRecord("renter4", "V14", -20, -17, BookingStatuses.Completed);
+            // --- THÁNG 01/2027 (10 đơn) ---
+            var bkJan01 = CreateBookingRecord("renter1", "V1", new DateTime(2027, 1, 1), new DateTime(2027, 1, 4), BookingStatuses.Accepted, delivery: true, customCreated: new DateTime(2026, 11, 16, 8, 0, 0), customAcceptedAt: new DateTime(2026, 11, 16, 10, 0, 0));
+            var bkJan02 = CreateBookingRecord("renter3", "V3", new DateTime(2027, 1, 2), new DateTime(2027, 1, 5), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 17, 9, 0, 0), customAcceptedAt: new DateTime(2026, 11, 17, 11, 0, 0));
+            var bkJan03 = CreateBookingRecord("renter2", "V5", new DateTime(2027, 1, 8), new DateTime(2027, 1, 12), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 16, 14, 0, 0), customAcceptedAt: new DateTime(2026, 11, 16, 17, 0, 0));
+            var bkJan04 = CreateBookingRecord("renter1", "V8", new DateTime(2027, 1, 5), new DateTime(2027, 1, 9), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 17, 10, 0, 0), customAcceptedAt: new DateTime(2026, 11, 17, 12, 0, 0));
+            var bkJan05 = CreateBookingRecord("renter3", "V10", new DateTime(2027, 1, 10), new DateTime(2027, 1, 13), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 15, 11, 0, 0), customAcceptedAt: new DateTime(2026, 11, 15, 14, 0, 0));
+            var bkJan06 = CreateBookingRecord("renter2", "V11", new DateTime(2027, 1, 15), new DateTime(2027, 1, 19), BookingStatuses.Accepted, delivery: true, customCreated: new DateTime(2026, 11, 16, 15, 0, 0), customAcceptedAt: new DateTime(2026, 11, 16, 18, 0, 0));
+            var bkJan07 = CreateBookingRecord("renter1", "V13", new DateTime(2027, 1, 8), new DateTime(2027, 1, 11), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 17, 14, 0, 0), customAcceptedAt: new DateTime(2026, 11, 17, 16, 0, 0));
+            var bkJan08 = CreateBookingRecord("renter3", "V14", new DateTime(2027, 1, 12), new DateTime(2027, 1, 15), BookingStatuses.Accepted, delivery: false, customCreated: new DateTime(2026, 11, 16, 9, 0, 0), customAcceptedAt: new DateTime(2026, 11, 16, 11, 0, 0));
+            var bkJan09 = CreateBookingRecord("renter2", "V15", new DateTime(2027, 1, 20), new DateTime(2027, 1, 24), BookingStatuses.Pending, delivery: false, customCreated: new DateTime(2026, 11, 18, 8, 30, 0));
+            var bkJan10 = CreateBookingRecord("renter1", "V4", new DateTime(2027, 1, 18), new DateTime(2027, 1, 21), BookingStatuses.Cancelled, delivery: false, customCreated: new DateTime(2026, 11, 14, 10, 0, 0), customCancelledAt: new DateTime(2026, 11, 15, 14, 0, 0), cancelledByKey: "admin1", cancelReason: "Hủy bởi Admin do lỗi chủ xe: Chủ xe tự ý đơn phương hủy thỏa thuận sau khi đã duyệt và nhận cọc của khách thuê.");
 
             await db.SaveChangesAsync();
 
@@ -584,7 +555,7 @@ public static class DbInitializer
                         ConfirmedAt = b.StartDate,
                         Odometer = startOdo,
                         FuelLevel = "Full",
-                        Notes = "Nhận xe đúng giờ, kiểm tra xe hoạt động bình thường."
+                        Notes = "Nhận xe đúng giờ, ngoại thất và nội thất sạch sẽ."
                     },
                     new HandoverConfirmation
                     {
@@ -594,7 +565,7 @@ public static class DbInitializer
                         ConfirmedAt = b.StartDate.AddMinutes(5),
                         Odometer = startOdo,
                         FuelLevel = "Full",
-                        Notes = "Bàn giao xe sạch sẽ và đầy đủ giấy tờ xe."
+                        Notes = "Đã bàn giao chìa khóa và giấy tờ xe đầy đủ cho khách."
                     },
                     new HandoverConfirmation
                     {
@@ -604,7 +575,7 @@ public static class DbInitializer
                         ConfirmedAt = b.EndDate,
                         Odometer = endOdo,
                         FuelLevel = "Full",
-                        Notes = "Trả xe đúng hạn, xe vận hành rất tốt.",
+                        Notes = "Trả xe đúng hạn, xe vận hành rất tốt và êm ái.",
                         RemainingPaymentMethod = "Cash"
                     },
                     new HandoverConfirmation
@@ -615,60 +586,60 @@ public static class DbInitializer
                         ConfirmedAt = b.EndDate.AddMinutes(10),
                         Odometer = endOdo,
                         FuelLevel = "Full",
-                        Notes = "Đã nhận lại đủ chìa khóa, xe nguyên vẹn và sạch sẽ.",
+                        Notes = "Đã nhận lại xe nguyên vẹn, nhận đủ tiền mặt còn lại.",
                         RemainingPaymentMethod = "Cash"
                     }
                 );
             }
 
-            AddFullHandovers(bk01, u["renter1"], u["owner1"], 18200, 18650);
-            AddFullHandovers(bk02, u["renter2"], u["owner2"], 12100, 12480);
-            AddFullHandovers(bk03, u["renter3"], u["owner1"], 15300, 15820);
-            AddFullHandovers(bk04, u["renter1"], u["owner2"], 9200, 9650);
-            AddFullHandovers(bk07, u["renter1"], u["owner1"], 21400, 21860);
-            AddFullHandovers(bk15, u["renter4"], u["owner2"], 10500, 10920);
+            AddFullHandovers(bkNov01, u["renter1"], u["owner1"], 18200, 18650);
+            AddFullHandovers(bkNov02, u["renter2"], u["owner2"], 12100, 12480);
+            AddFullHandovers(bkNov03, u["renter3"], u["owner1"], 15300, 15820);
+            AddFullHandovers(bkNov04, u["renter1"], u["owner2"], 9200, 9650);
+            AddFullHandovers(bkNov05, u["renter2"], u["owner1"], 21400, 21860);
+            AddFullHandovers(bkNov06, u["renter4"], u["owner2"], 10500, 10920);
 
             // Pickup only for Ongoing
             db.HandoverConfirmations.AddRange(
                 new HandoverConfirmation
                 {
-                    BookingId = bk05.BookingId,
+                    BookingId = bkNov07.BookingId,
                     Type = HandoverTypes.Pickup,
                     ConfirmedBy = u["renter2"].Id,
-                    ConfirmedAt = bk05.StartDate,
+                    ConfirmedAt = bkNov07.StartDate,
                     Odometer = 24150,
                     FuelLevel = "Full",
-                    Notes = "Xe sạch sẽ, đã kiểm tra thân vỏ không trầy xước."
+                    Notes = "Đã nhận xe, kiểm tra thân vỏ xe hoạt động tốt."
                 },
                 new HandoverConfirmation
                 {
-                    BookingId = bk05.BookingId,
+                    BookingId = bkNov07.BookingId,
                     Type = HandoverTypes.Pickup,
                     ConfirmedBy = u["owner1"].Id,
-                    ConfirmedAt = bk05.StartDate.AddMinutes(5),
+                    ConfirmedAt = bkNov07.StartDate.AddMinutes(5),
                     Odometer = 24150,
                     FuelLevel = "Full",
-                    Notes = "Bàn giao xe thành công cho bạn Bình."
+                    Notes = "Đã bàn giao xe và đầy đủ giấy tờ cho bạn Bình."
                 },
                 new HandoverConfirmation
                 {
-                    BookingId = bk06.BookingId,
+                    BookingId = bkNov08.BookingId,
                     Type = HandoverTypes.Pickup,
                     ConfirmedBy = u["renter3"].Id,
-                    ConfirmedAt = bk06.StartDate,
+                    ConfirmedAt = bkNov08.StartDate,
                     Odometer = 38500,
                     FuelLevel = "Full",
                     Notes = "Nhận xe tại điểm hẹn."
                 },
                 new HandoverConfirmation
                 {
-                    BookingId = bk06.BookingId,
+                    BookingId = bkNov08.BookingId,
                     Type = HandoverTypes.Pickup,
                     ConfirmedBy = u["owner3"].Id,
-                    ConfirmedAt = bk06.StartDate.AddMinutes(5),
+                    ConfirmedAt = bkNov08.StartDate.AddMinutes(5),
                     Odometer = 38500,
                     FuelLevel = "Full",
-                    Notes = "Đã bàn giao xe và giấy tờ."
+                    Notes = "Đã bàn giao xe và giấy tờ cho anh Cường."
                 }
             );
 
@@ -729,12 +700,12 @@ public static class DbInitializer
                 });
             }
 
-            AddCompletedPayment(bk01, "renter1", "owner1");
-            AddCompletedPayment(bk02, "renter2", "owner2");
-            AddCompletedPayment(bk03, "renter3", "owner1");
-            AddCompletedPayment(bk04, "renter1", "owner2");
-            AddCompletedPayment(bk07, "renter1", "owner1");
-            AddCompletedPayment(bk15, "renter4", "owner2");
+            AddCompletedPayment(bkNov01, "renter1", "owner1");
+            AddCompletedPayment(bkNov02, "renter2", "owner2");
+            AddCompletedPayment(bkNov03, "renter3", "owner1");
+            AddCompletedPayment(bkNov04, "renter1", "owner2");
+            AddCompletedPayment(bkNov05, "renter2", "owner1");
+            AddCompletedPayment(bkNov06, "renter4", "owner2");
 
             void AddActivePayment(Booking b, string renterKey)
             {
@@ -762,205 +733,227 @@ public static class DbInitializer
                 });
             }
 
-            AddActivePayment(bk05, "renter2");
-            AddActivePayment(bk06, "renter3");
-            AddActivePayment(bk11, "renter3");
+            // November active payments
+            AddActivePayment(bkNov07, "renter2");
+            AddActivePayment(bkNov08, "renter3");
+            AddActivePayment(bkNov09, "renter1");
+            AddActivePayment(bkNov10, "renter3");
 
-            // BK12: Cancelled by Renter
+            // December active payments
+            AddActivePayment(bkDec01, "renter2");
+            AddActivePayment(bkDec02, "renter3");
+            AddActivePayment(bkDec03, "renter1");
+            AddActivePayment(bkDec04, "renter2");
+            AddActivePayment(bkDec05, "renter3");
+            AddActivePayment(bkDec06, "renter1");
+            AddActivePayment(bkDec07, "renter2");
+            AddActivePayment(bkDec08, "renter3");
+
+            // January active payments
+            AddActivePayment(bkJan01, "renter1");
+            AddActivePayment(bkJan02, "renter3");
+            AddActivePayment(bkJan03, "renter2");
+            AddActivePayment(bkJan04, "renter1");
+            AddActivePayment(bkJan05, "renter3");
+            AddActivePayment(bkJan06, "renter2");
+            AddActivePayment(bkJan07, "renter1");
+            AddActivePayment(bkJan08, "renter3");
+            AddActivePayment(bkJan09, "renter2");
+
+            // Cancelled with refund: bkDec09
             var r1Acc = bankAccounts[u["renter1"].Id];
-            var bk12Payment = new Payment
+            var bkDec09Payment = new Payment
             {
-                BookingId = bk12.BookingId,
+                BookingId = bkDec09.BookingId,
                 DepositStatus = DepositStatuses.Refunded,
                 CommissionRate = BusinessRules.DefaultCommissionRate,
                 CommissionAmount = null,
                 RevenueRecordedAt = null
             };
-            db.Payments.Add(bk12Payment);
+            db.Payments.Add(bkDec09Payment);
             db.MockBankTransactions.Add(new MockBankTransaction
             {
-                ReferenceCode = ReferenceCodes.Deposit(bk12.SourceHoldId),
-                Payment = bk12Payment,
+                ReferenceCode = ReferenceCodes.Deposit(bkDec09.SourceHoldId),
+                Payment = bkDec09Payment,
                 FromAccount = r1Acc,
                 ToAccount = escrowAcc,
                 TransactionType = MockTransactionTypes.Deposit,
-                Amount = bk12.DepositAmount,
+                Amount = bkDec09.DepositAmount,
                 Status = MockTransactionStatuses.Succeeded,
-                CreatedAt = bk12.CreatedAt
+                CreatedAt = bkDec09.CreatedAt
             });
             db.MockBankTransactions.Add(new MockBankTransaction
             {
-                ReferenceCode = ReferenceCodes.Refund(bk12.BookingId),
-                Payment = bk12Payment,
+                ReferenceCode = ReferenceCodes.Refund(bkDec09.BookingId),
+                Payment = bkDec09Payment,
                 FromAccount = escrowAcc,
                 ToAccount = r1Acc,
                 TransactionType = MockTransactionTypes.Refund,
-                Amount = bk12.DepositAmount,
+                Amount = bkDec09.DepositAmount,
                 Status = MockTransactionStatuses.Succeeded,
-                CreatedAt = bk12.CancelledAt ?? bk12.CreatedAt.AddHours(3)
+                CreatedAt = bkDec09.CancelledAt ?? bkDec09.CreatedAt.AddHours(3)
             });
 
-            // BK08: Cancelled with Owner Fault penalty
-            var r2Acc = bankAccounts[u["renter2"].Id];
-            var o1Acc = bankAccounts[u["owner1"].Id];
-            var bk08Penalty = 195_000m;
-            var bk08Payment = new Payment
+            // Cancelled with Owner Fault penalty 8%: bkJan10
+            var o2Acc = bankAccounts[u["owner2"].Id];
+            var bkJan10Penalty = Math.Round(bkJan10.PriceLockedTotal * BusinessRules.OwnerCancelPenaltyRate);
+            var bkJan10Payment = new Payment
             {
-                BookingId = bk08.BookingId,
+                BookingId = bkJan10.BookingId,
                 DepositStatus = DepositStatuses.Refunded,
                 CommissionRate = 0,
                 CommissionAmount = 0,
-                PenaltyAmount = bk08Penalty
+                PenaltyAmount = bkJan10Penalty
             };
-            db.Payments.Add(bk08Payment);
+            db.Payments.Add(bkJan10Payment);
             db.MockBankTransactions.Add(new MockBankTransaction
             {
-                ReferenceCode = ReferenceCodes.Deposit(bk08.SourceHoldId),
-                Payment = bk08Payment,
-                FromAccount = r2Acc,
+                ReferenceCode = ReferenceCodes.Deposit(bkJan10.SourceHoldId),
+                Payment = bkJan10Payment,
+                FromAccount = r1Acc,
                 ToAccount = escrowAcc,
                 TransactionType = MockTransactionTypes.Deposit,
-                Amount = bk08.DepositAmount,
+                Amount = bkJan10.DepositAmount,
                 Status = MockTransactionStatuses.Succeeded,
-                CreatedAt = bk08.CreatedAt
+                CreatedAt = bkJan10.CreatedAt
             });
             db.MockBankTransactions.Add(new MockBankTransaction
             {
-                ReferenceCode = ReferenceCodes.Refund(bk08.BookingId),
-                Payment = bk08Payment,
+                ReferenceCode = ReferenceCodes.Refund(bkJan10.BookingId),
+                Payment = bkJan10Payment,
                 FromAccount = escrowAcc,
-                ToAccount = r2Acc,
+                ToAccount = r1Acc,
                 TransactionType = MockTransactionTypes.Refund,
-                Amount = bk08.DepositAmount,
+                Amount = bkJan10.DepositAmount,
                 Status = MockTransactionStatuses.Succeeded,
-                CreatedAt = bk08.CancelledAt ?? bk08.CreatedAt.AddHours(4)
+                CreatedAt = bkJan10.CancelledAt ?? bkJan10.CreatedAt.AddHours(4)
             });
             db.MockBankTransactions.Add(new MockBankTransaction
             {
-                ReferenceCode = ReferenceCodes.Penalty(bk08.BookingId),
-                Payment = bk08Payment,
-                FromAccount = o1Acc,
+                ReferenceCode = ReferenceCodes.Penalty(bkJan10.BookingId),
+                Payment = bkJan10Payment,
+                FromAccount = o2Acc,
                 ToAccount = escrowAcc,
                 TransactionType = MockTransactionTypes.Penalty,
-                Amount = bk08Penalty,
+                Amount = bkJan10Penalty,
                 Status = MockTransactionStatuses.Succeeded,
-                CreatedAt = bk08.CancelledAt ?? bk08.CreatedAt.AddHours(4)
+                CreatedAt = bkJan10.CancelledAt ?? bkJan10.CreatedAt.AddHours(4)
             });
 
             // Reviews
-            // BK01: 2-way 5-star public reviews
+            // BK-NOV-01: 2-way 5-star public reviews
             db.Reviews.AddRange(
                 new Review
                 {
-                    BookingId = bk01.BookingId,
+                    BookingId = bkNov01.BookingId,
                     ReviewerId = u["renter1"].Id,
                     RevieweeId = u["owner1"].Id,
                     Rating = 5,
                     Comment = "Xe Toyota Vios đi rất êm, máy móc vận hành trơn tru và tiết kiệm nhiên liệu. Chủ xe bàn giao xe sạch sẽ, đúng giờ. 10/10!",
                     IsPublic = true,
-                    CreatedAt = bk01.EndDate.AddHours(2)
+                    CreatedAt = bkNov01.EndDate.AddHours(2)
                 },
                 new Review
                 {
-                    BookingId = bk01.BookingId,
+                    BookingId = bkNov01.BookingId,
                     ReviewerId = u["owner1"].Id,
                     RevieweeId = u["renter1"].Id,
                     Rating = 5,
                     Comment = "Khách thuê rất lịch sự, giữ gìn xe sạch sẽ và giao trả xe đúng hẹn. Rất mong được tiếp tục đón tiếp anh trong các chuyến đi tới!",
                     IsPublic = true,
-                    CreatedAt = bk01.EndDate.AddHours(3)
+                    CreatedAt = bkNov01.EndDate.AddHours(3)
                 }
             );
 
-            // BK02: Double-Blind Review test! Renter reviewed 5-star, Owner hasn't reviewed yet -> IsPublic = false
+            // BK-NOV-02: Double-Blind Review test! Renter reviewed 5-star, Owner hasn't reviewed yet -> IsPublic = false
             db.Reviews.Add(new Review
             {
-                BookingId = bk02.BookingId,
+                BookingId = bkNov02.BookingId,
                 ReviewerId = u["renter2"].Id,
                 RevieweeId = u["owner2"].Id,
                 Rating = 5,
                 Comment = "Xe Mazda CX-5 lái rất đầm chắc, âm thanh Bose nghe hay, chủ xe chu đáo chuẩn bị cả nước hoa và khăn ướt.",
                 IsPublic = false,
-                CreatedAt = bk02.EndDate.AddHours(1)
+                CreatedAt = bkNov02.EndDate.AddHours(1)
             });
 
-            // BK03: 2-way 5-star public reviews
+            // BK-NOV-03: 2-way 5-star public reviews
             db.Reviews.AddRange(
                 new Review
                 {
-                    BookingId = bk03.BookingId,
+                    BookingId = bkNov03.BookingId,
                     ReviewerId = u["renter3"].Id,
                     RevieweeId = u["owner1"].Id,
                     Rating = 5,
                     Comment = "Chuyến đi công tác Đà Nẵng rất thuận lợi nhờ xe Corolla Cross gầm cao, máy êm và tiết kiệm xăng.",
                     IsPublic = true,
-                    CreatedAt = bk03.EndDate.AddHours(2)
+                    CreatedAt = bkNov03.EndDate.AddHours(2)
                 },
                 new Review
                 {
-                    BookingId = bk03.BookingId,
+                    BookingId = bkNov03.BookingId,
                     ReviewerId = u["owner1"].Id,
                     RevieweeId = u["renter3"].Id,
                     Rating = 5,
                     Comment = "Khách thuê giao tiếp nhã nhặn, tuân thủ đúng giờ giấc bàn giao xe.",
                     IsPublic = true,
-                    CreatedAt = bk03.EndDate.AddHours(3)
+                    CreatedAt = bkNov03.EndDate.AddHours(3)
                 }
             );
 
-            // BK04: 2-way 5-star public reviews
+            // BK-NOV-04: 2-way 5-star public reviews
             db.Reviews.AddRange(
                 new Review
                 {
-                    BookingId = bk04.BookingId,
+                    BookingId = bkNov04.BookingId,
                     ReviewerId = u["renter1"].Id,
                     RevieweeId = u["owner2"].Id,
                     Rating = 5,
                     Comment = "Trải nghiệm xe điện VinFast VF e34 tại Đà Nẵng cực kỳ thú vị! Trạm sạc nhiều, xe tăng tốc mượt mà.",
                     IsPublic = true,
-                    CreatedAt = bk04.EndDate.AddHours(2)
+                    CreatedAt = bkNov04.EndDate.AddHours(2)
                 },
                 new Review
                 {
-                    BookingId = bk04.BookingId,
+                    BookingId = bkNov04.BookingId,
                     ReviewerId = u["owner2"].Id,
                     RevieweeId = u["renter1"].Id,
                     Rating = 5,
                     Comment = "Khách trả xe với mức pin 90%, xe sạch sẽ không một hạt bụi. Rất cảm ơn bạn!",
                     IsPublic = true,
-                    CreatedAt = bk04.EndDate.AddHours(3)
+                    CreatedAt = bkNov04.EndDate.AddHours(3)
                 }
             );
 
-            // BK15: 2-way 5-star public reviews
+            // BK-NOV-06: 2-way 5-star public reviews
             db.Reviews.AddRange(
                 new Review
                 {
-                    BookingId = bk15.BookingId,
+                    BookingId = bkNov06.BookingId,
                     ReviewerId = u["renter4"].Id,
                     RevieweeId = u["owner2"].Id,
                     Rating = 5,
                     Comment = "Xe CX-30 rất mới, chạy phố Sài Gòn linh hoạt và kiểu dáng rất đẹp.",
                     IsPublic = true,
-                    CreatedAt = bk15.EndDate.AddHours(2)
+                    CreatedAt = bkNov06.EndDate.AddHours(2)
                 },
                 new Review
                 {
-                    BookingId = bk15.BookingId,
+                    BookingId = bkNov06.BookingId,
                     ReviewerId = u["owner2"].Id,
                     RevieweeId = u["renter4"].Id,
                     Rating = 5,
                     Comment = "Khách hàng thân thiện, trả xe đúng giờ.",
                     IsPublic = true,
-                    CreatedAt = bk15.EndDate.AddHours(3)
+                    CreatedAt = bkNov06.EndDate.AddHours(3)
                 }
             );
 
             // Disputes
-            // BK06: Ongoing with Open Dispute (AC broken & Check Engine)
+            // BK-NOV-08: Ongoing with Open Dispute (AC broken & Check Engine)
             db.Disputes.Add(new Dispute
             {
-                BookingId = bk06.BookingId,
+                BookingId = bkNov08.BookingId,
                 RaisedBy = u["renter3"].Id,
                 Description = "Khi nhận xe chạy được khoảng 30km trên cao tốc thì hệ thống điều hòa ngừng làm mát, khoang xe phả hơi nóng bức bí và bảng taplo xuất hiện đèn báo check-engine nhấp nháy. Tôi đã liên hệ chủ xe nhiều lần nhưng không được phản hồi, đề nghị Ban quản trị sàn can thiệp khẩn cấp hỗ trợ giải quyết sự cố kỹ thuật này.",
                 EvidenceImage = "/seed/dispute-evidence-1.jpg",
@@ -972,34 +965,34 @@ public static class DbInitializer
                 ResolutionNotes = null
             });
 
-            // BK07: Completed with Resolved Dispute (ForceComplete - Scratch Dispute)
+            // BK-NOV-05: Completed with Resolved Dispute (ForceComplete - Scratch Dispute)
             db.Disputes.Add(new Dispute
             {
-                BookingId = bk07.BookingId,
-                RaisedBy = u["renter1"].Id,
+                BookingId = bkNov05.BookingId,
+                RaisedBy = u["renter2"].Id,
                 Description = "Chủ xe yêu cầu giữ lại 500.000đ tiền đặt cọc vì lý do có vết trầy xước ở mép cản dưới bên phụ. Tôi khẳng định vết xước này đã có sẵn khi nhận xe và đã được chụp lại trong biên bản bàn giao ban đầu.",
                 EvidenceImage = "/seed/dispute-evidence-2.jpg",
                 Status = DisputeStatuses.Resolved,
-                CreatedAt = bk07.EndDate.AddHours(1),
+                CreatedAt = bkNov05.EndDate.AddHours(1),
                 ResolvedBy = staff1.Id,
-                ResolvedAt = bk07.EndDate.AddHours(4),
+                ResolvedAt = bkNov05.EndDate.AddHours(4),
                 ResolutionAction = ResolutionActions.ForceComplete,
                 ResolutionNotes = "Đã đối chiếu hình ảnh chụp lúc nhận xe trong biên bản bàn giao: vết trầy xước cản dưới đã có từ trước chuyến đi. Quyết định hoàn đủ 100% cọc cho khách thuê và hoàn tất thanh toán doanh thu cho chủ xe theo quy định sàn."
             });
 
-            // BK08: Cancelled with Resolved Dispute (CancelOwnerFault - Owner No-show & Penalty)
+            // BK-JAN-10: Cancelled with Resolved Dispute (CancelOwnerFault - Owner Fault Penalty 8%)
             db.Disputes.Add(new Dispute
             {
-                BookingId = bk08.BookingId,
-                RaisedBy = u["renter2"].Id,
-                Description = "Sáng ngày nhận xe, tôi đến điểm hẹn đúng giờ nhưng chủ xe không có mặt, tắt máy điện thoại không liên lạc được và sau đó nhắn báo bận cho mượn xe ngoài. Hành vi này làm hỏng toàn bộ lịch trình công tác của đoàn chúng tôi.",
+                BookingId = bkJan10.BookingId,
+                RaisedBy = u["renter1"].Id,
+                Description = "Chủ xe tự ý đơn phương hủy hợp đồng sau khi đã duyệt thỏa thuận thuê xe, gây gián đoạn lịch trình công tác của tôi.",
                 EvidenceImage = "/seed/dispute-evidence-2.jpg",
                 Status = DisputeStatuses.Resolved,
-                CreatedAt = bk08.StartDate.AddHours(1),
+                CreatedAt = bkJan10.CreatedAt.AddHours(1),
                 ResolvedBy = admin1.Id,
-                ResolvedAt = bk08.StartDate.AddHours(4),
+                ResolvedAt = bkJan10.CancelledAt ?? bkJan10.CreatedAt.AddHours(4),
                 ResolutionAction = ResolutionActions.CancelOwnerFault,
-                ResolutionNotes = "Xác minh chủ xe tự ý hủy hẹn và vi phạm nghiêm trọng cam kết bàn giao xe. Phán quyết hủy đơn, hoàn trả 100% tiền đặt cọc cho khách thuê và áp dụng chế tài phạt vi phạm 10% giá trị hợp đồng (195.000đ) đối với chủ xe."
+                ResolutionNotes = "Xác minh chủ xe tự ý hủy chuyến đã duyệt. Phán quyết hủy đơn, hoàn 100% tiền đặt cọc cho khách thuê và áp dụng chế tài phạt vi phạm 8% giá trị hợp đồng đối với chủ xe theo quy chế sàn."
             });
 
             await db.SaveChangesAsync();

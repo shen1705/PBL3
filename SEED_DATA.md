@@ -61,49 +61,65 @@ Tất cả dữ liệu mẫu được khởi tạo tự động trong môi trư�
 
 ---
 
-## 3. Danh sách 15 kịch bản đơn thuê xe kiểm thử toàn diện (`bookings`)
+## 3. Danh mục 30 kịch bản đơn thuê xe kiểm thử toàn diện (`bookings`)
 
-| Đơn | Xe & Thành phố | Khách thuê | Thời gian | Trạng thái | Bóc tách chi phí & Tiền cọc (30%) | Bàn giao (Handovers) | Đánh giá / Tranh chấp & Chế tài | Nghiệp vụ kiểm thử |
+Phân bổ đều đặn **10 đơn/tháng** qua 3 tháng trọng điểm: **Tháng 11/2026** (kèm đơn quá khứ & đang diễn ra), **Tháng 12/2026** (mùa cao điểm cuối năm), và **Tháng 01/2027** (Tết Dương lịch & cận Tết Nguyên Đán).
+
+### 3.1. Bảng 10 đơn thuê Tháng 11/2026 (Mốc thời gian hiện tại: 18/11/2026)
+
+| Mã đơn | Xe & Thành phố | Khách thuê | Thời gian | Trạng thái | Chi phí & Cọc (25%) | Bàn giao (Handovers) | Đánh giá & Tranh chấp | Mục đích kiểm thử tính năng |
 | :---: | :--- | :--- | :---: | :--- | :--- | :--- | :--- | :--- |
-| **BK01** | V1 (Vios, HN) | `renter1` | -12 đến -9<br>(4 ngày) | `Completed` | Gốc: 2.800.000 đ<br>Giao xe: 0 đ · BH: 200.000 đ<br>**Tổng: 3.000.000 đ**<br>Cọc: 900.000 đ | Đủ 4 biên bản (Pickup + Return)<br>Odo: 18.200 $\rightarrow$ 18.650 km | 2 Đánh giá 5★ công khai (`IsPublic = true`) | Luồng hoàn tất chuẩn, quyết toán doanh thu chủ xe 1 |
-| **BK02** | V3 (CX-5, HN) | `renter2` | -4 đến -2<br>(3 ngày) | `Completed` | Gốc: 3.300.000 đ<br>Giao xe: 100.000 đ · BH: 150.000 đ<br>**Tổng: 3.550.000 đ**<br>Cọc: 1.065.000 đ | Đủ 4 biên bản (giao tận nơi)<br>Odo: 12.100 $\rightarrow$ 12.480 km | Khách đã đánh giá 5★ (`IsPublic = false`). Chủ xe **chưa** đánh giá | **Đánh giá mù (Double-Blind)**: Test nút đánh giá chủ xe & hiển thị sau khi cả 2 đánh giá |
-| **BK03** | V7 (Cross, ĐN) | `renter3` | -15 đến -12<br>(4 ngày) | `Completed` | Gốc: 3.800.000 đ<br>Giao xe: 0 đ · BH: 200.000 đ<br>**Tổng: 4.000.000 đ**<br>Cọc: 1.200.000 đ | Đủ 4 biên bản (Pickup + Return)<br>Odo: 15.300 $\rightarrow$ 15.820 km | 2 Đánh giá 5★ công khai | Quyết toán doanh thu chuyến xe tại Đà Nẵng |
-| **BK04** | V9 (e34, ĐN) | `renter1` | -8 đến -5<br>(4 ngày) | `Completed` | Gốc: 3.000.000 đ<br>Giao xe: 100.000 đ · BH: 200.000 đ<br>**Tổng: 3.300.000 đ**<br>Cọc: 990.000 đ | Đủ 4 biên bản (giao tận nơi)<br>Odo: 9.200 $\rightarrow$ 9.650 km | 2 Đánh giá 5★ công khai | Xe điện VinFast, quyết toán doanh thu chủ xe 2 |
-| **BK05** | V8 (Xpander, ĐN) | `renter2` | -1 đến +2<br>(4 ngày) | `Ongoing` | Gốc: 3.400.000 đ<br>Giao xe: 0 đ · BH: 200.000 đ<br>**Tổng: 3.600.000 đ**<br>Cọc: 1.080.000 đ (Held) | Đã nhận xe hôm qua<br>Odo nhận: 24.150 km | Đang lưu thông bình thường | Kiểm thử chuyến đi đang diễn ra & xác nhận trả xe |
-| **BK06** | V11 (Santa Fe, ĐN) | `renter3` | -2 đến +1<br>(4 ngày) | `Ongoing` | Gốc: 5.600.000 đ<br>Giao xe: 100.000 đ · BH: 200.000 đ<br>**Tổng: 5.900.000 đ**<br>Cọc: 1.770.000 đ (Held) | Đã nhận xe<br>Odo nhận: 38.500 km | **Khiếu nại ĐANG MỞ (`Open Dispute`)**: Hỏng điều hòa giữa trưa 38°C, nổi đèn Check Engine | Kiểm thử Staff/Admin xử lý tranh chấp sự cố kỹ thuật trong chuyến đi |
-| **BK07** | V13 (Vios, HCM) | `renter1` | -7 đến -4<br>(4 ngày) | `Completed` | Gốc: 2.600.000 đ<br>Giao xe: 0 đ · BH: 200.000 đ<br>**Tổng: 2.800.000 đ**<br>Cọc: 840.000 đ | Đủ 4 biên bản (Pickup + Return)<br>Odo: 21.400 $\rightarrow$ 21.860 km | **Khiếu nại ĐÃ GIẢI QUYẾT (`ForceComplete`)**: Đối chiếu ảnh cấn trừ xước cản cũ | Phán quyết Staff can thiệp hoàn cọc đầy đủ cho khách thuê |
-| **BK08** | V2 (Accent, HN) | `renter2` | -3 đến -1<br>(3 ngày) | `Cancelled` | Gốc: 1.800.000 đ<br>Giao xe: 0 đ · BH: 150.000 đ<br>**Tổng: 1.950.000 đ**<br>Cọc: 585.000 đ | Chưa bàn giao | **Khiếu nại ĐÃ GIẢI QUYẾT (`CancelOwnerFault`)**: Phạt chủ xe **195.000 đ** (10%), hoàn cọc 100% | Phán quyết Admin xử phạt chủ xe bùng hẹn, kiểm thử khấu trừ phạt `PENALTY-8` |
-| **BK09** | V14 (CX-30, HCM) | `renter1` | +4 đến +7<br>(4 ngày) | `Pending` | Gốc: 3.400.000 đ<br>Giao xe: 100.000 đ · BH: 200.000 đ<br>**Tổng: 3.700.000 đ**<br>Cọc: 1.110.000 đ | Chưa bàn giao | Đơn mới gửi, còn **10 tiếng** phản hồi | Kiểm thử chủ xe duyệt / từ chối đơn đặt xe mới |
-| **BK10** | V10 (City, ĐN) | `renter2` | +2 đến +4<br>(3 ngày) | `Pending` | Gốc: 1.950.000 đ<br>Giao xe: 0 đ · BH: 150.000 đ<br>**Tổng: 2.100.000 đ**<br>Cọc: 630.000 đ | Chưa bàn giao | **Khẩn cấp: Chỉ còn 1 tiếng** trước khi hết hạn duyệt | Kiểm thử cảnh báo deadline duyệt đơn gấp cho chủ xe |
-| **BK11** | V1 (Vios, HN) | `renter3` | +2 đến +5<br>(4 ngày) | `Accepted` | Gốc: 2.800.000 đ<br>Giao xe: 0 đ · BH: 200.000 đ<br>**Tổng: 3.000.000 đ**<br>Cọc: 900.000 đ (Held) | Chưa đến hạn nhận xe | Chủ xe đã duyệt, tiền cọc đang được giữ an toàn (`Held`) | Kiểm thử quy trình chuẩn bị nhận xe & nút bàn giao xe |
-| **BK12** | V4 (VF 8, HN) | `renter1` | +6 đến +9<br>(4 ngày) | `Cancelled` | Gốc: 5.200.000 đ<br>Giao xe: 0 đ · BH: 200.000 đ<br>**Tổng: 5.400.000 đ**<br>Cọc: 1.620.000 đ | Đã hủy bởi khách | Khách dời lịch, tiền cọc đã hoàn trả (`REFUND-12`) | Kiểm thử hiển thị lịch sử hủy đơn từ phía khách thuê |
-| **BK13** | V5 (Transit, HN) | `renter2` | +8 đến +11<br>(4 ngày) | `Rejected` | Gốc: 6.000.000 đ<br>Giao xe: 0 đ · BH: 200.000 đ<br>**Tổng: 6.200.000 đ**<br>Cọc: 1.860.000 đ | Bị từ chối | Lý do: "Xe đã xếp lịch đưa đón đoàn du lịch ký hợp đồng dài hạn" | Kiểm thử hiển thị phản hồi từ chối của chủ xe |
-| **BK14** | V15 (CR-V, HCM) | `renter3` | +5 đến +8<br>(4 ngày) | `Expired` | Gốc: 4.800.000 đ<br>Giao xe: 0 đ · BH: 200.000 đ<br>**Tổng: 5.000.000 đ**<br>Cọc: 1.500.000 đ | Hết hạn duyệt | Quá 12 tiếng chủ xe không phản hồi, ký quỹ tự động giải tỏa | Kiểm thử xử lý đơn quá hạn phê duyệt |
-| **BK15** | V14 (CX-30, HCM) | `renter4` | -20 đến -17<br>(4 ngày) | `Completed` | Gốc: 3.400.000 đ<br>Giao xe: 0 đ · BH: 200.000 đ<br>**Tổng: 3.600.000 đ**<br>Cọc: 1.080.000 đ | Đủ 4 biên bản (Pickup + Return)<br>Odo: 10.500 $\rightarrow$ 10.920 km | 2 Đánh giá 5★ công khai | Doanh thu hoàn tất tại TP. Hồ Chí Minh cho chủ xe 2 |
+| **BK-NOV-01** | V1 (Vios, HN) | `renter1` | 01/11 - 04/11<br>(4 ngày) | `Completed` | Gốc: 2.800k · Giao: 100k · BH: 200k<br>**Tổng: 3.100.000 đ**<br>Cọc: 775.000 đ | Đủ 4 biên bản (Pickup + Return)<br>Odo: 18.200 $\rightarrow$ 18.650 km | 2 Đánh giá 5★ công khai (`IsPublic = true`) | Quyết toán doanh thu chuẩn (95% chủ xe, 5% sàn AZU) |
+| **BK-NOV-02** | V3 (CX-5, HN) | `renter2` | 05/11 - 08/11<br>(4 ngày) | `Completed` | Gốc: 4.400k · BH: 200k<br>**Tổng: 4.600.000 đ**<br>Cọc: 1.150.000 đ | Đủ 4 biên bản<br>Odo: 12.100 $\rightarrow$ 12.480 km | **Đánh giá mù đôi (Double-Blind):** Khách đã review 5★ (`IsPublic = false`), Chủ xe **chưa** review | Kiểm thử cơ chế ẩn đánh giá chờ cả 2 bên cùng hoàn tất |
+| **BK-NOV-03** | V7 (Cross, ĐN) | `renter3` | 03/11 - 06/11<br>(4 ngày) | `Completed` | Gốc: 3.800k · BH: 200k<br>**Tổng: 4.000.000 đ**<br>Cọc: 1.000.000 đ | Đủ 4 biên bản<br>Odo: 15.300 $\rightarrow$ 15.820 km | 2 Đánh giá 5★ công khai | Quyết toán doanh thu chuyến xe tại Đà Nẵng |
+| **BK-NOV-04** | V9 (e34, ĐN) | `renter1` | 08/11 - 11/11<br>(4 ngày) | `Completed` | Gốc: 3.000k · Giao: 100k · BH: 200k<br>**Tổng: 3.300.000 đ**<br>Cọc: 825.000 đ | Đủ 4 biên bản<br>Mức pin: 100% $\rightarrow$ 90% | 2 Đánh giá 5★ công khai | Kiểm thử quy trình thuê xe điện VinFast |
+| **BK-NOV-05** | V13 (Vios, HCM) | `renter2` | 10/11 - 13/11<br>(4 ngày) | `Completed` | Gốc: 2.600k · BH: 200k<br>**Tổng: 2.800.000 đ**<br>Cọc: 700.000 đ | Đủ 4 biên bản<br>Odo: 21.400 $\rightarrow$ 21.860 km | **Tranh chấp đã giải quyết (`ForceComplete`):** Cọ quẹt cản dưới, Admin hoàn cọc 100% cho khách | Kiểm thử Admin làm trọng tài phán quyết hoàn tất đơn |
+| **BK-NOV-06** | V14 (CX-30, HCM) | `renter4` | 02/11 - 05/11<br>(4 ngày) | `Completed` | Gốc: 3.400k · BH: 200k<br>**Tổng: 3.600.000 đ**<br>Cọc: 900.000 đ | Đủ 4 biên bản<br>Odo: 10.500 $\rightarrow$ 10.920 km | 2 Đánh giá 5★ công khai | Kiểm thử lịch sử chuyến của renter4 trước án phạt |
+| **BK-NOV-07** | V8 (Xpander, ĐN) | `renter2` | 17/11 - 20/11<br>(4 ngày) | `Ongoing` | Gốc: 3.400k · BH: 200k<br>**Tổng: 3.600.000 đ**<br>Cọc: 900.000 đ (Held) | Đã nhận xe hôm qua (17/11)<br>Odo nhận: 24.150 km | Đang lưu thông bình thường | Kiểm thử chuyến xe đang diễn ra & xác nhận trả xe |
+| **BK-NOV-08** | V11 (Santa Fe, ĐN) | `renter3` | 16/11 - 19/11<br>(4 ngày) | `Ongoing` | Gốc: 5.600k · Giao: 100k · BH: 200k<br>**Tổng: 5.900.000 đ**<br>Cọc: 1.475.000 đ (Held) | Đã nhận xe (16/11)<br>Odo nhận: 38.500 km | **Khiếu nại ĐANG MỞ (`Open Dispute`):** Hỏng điều hòa, nổi đèn Check Engine | Kiểm thử Staff/Admin xử lý tranh chấp sự cố kỹ thuật |
+| **BK-NOV-09** | V10 (City, ĐN) | `renter1` | 21/11 - 24/11<br>(4 ngày) | `Accepted` | Gốc: 2.600k · BH: 200k<br>**Tổng: 2.800.000 đ**<br>Cọc: 700.000 đ (Held) | Chưa bàn giao | Chờ đến ngày nhận xe | Kiểm thử chuyến sắp tới đã duyệt (Ready for pickup) |
+| **BK-NOV-10** | V2 (Accent, HN) | `renter3` | 24/11 - 27/11<br>(4 ngày) | `Pending` | Gốc: 2.400k · BH: 200k<br>**Tổng: 2.600.000 đ**<br>Cọc: 650.000 đ (Held) | Chưa bàn giao | Chờ chủ xe phản hồi | Kiểm thử chủ xe duyệt/từ chối đơn mới đặt |
+
+### 3.2. Bảng 10 đơn thuê Tháng 12/2026 (Mùa Giáng Sinh & Cao điểm cuối năm)
+
+| Mã đơn | Xe & Thành phố | Khách thuê | Thời gian | Trạng thái | Chi phí & Cọc (25%) | Bàn giao (Handovers) | Ghi chú & Nghiệp vụ kiểm thử |
+| :---: | :--- | :--- | :---: | :--- | :--- | :--- | :--- |
+| **BK-DEC-01** | V1 (Vios, HN) | `renter2` | 06/12 - 09/12 (4 ngày) | `Accepted` | Tổng: 3.000.000 đ · Cọc: 750.000 đ | Chưa bàn giao | Tránh lịch bảo dưỡng xe V1 từ 02/12 - 04/12 |
+| **BK-DEC-02** | V4 (VF 8, HN) | `renter3` | 10/12 - 13/12 (4 ngày) | `Accepted` | Tổng: 5.500.000 đ · Cọc: 1.375.000 đ | Chưa bàn giao | Giao xe tận nơi, xe điện hạng sang |
+| **BK-DEC-03** | V6 (Morning, HN) | `renter1` | 04/12 - 07/12 (4 ngày) | `Accepted` | Tổng: 2.000.000 đ · Cọc: 500.000 đ | Chưa bàn giao | Xe đô thị tiết kiệm 450k/ngày |
+| **BK-DEC-04** | V7 (Cross, ĐN) | `renter2` | 12/12 - 16/12 (5 ngày) | `Accepted` | Tổng: 5.000.000 đ · Cọc: 1.250.000 đ | Chưa bàn giao | Du lịch miền Trung dịp cuối năm |
+| **BK-DEC-05** | V9 (e34, ĐN) | `renter3` | 18/12 - 21/12 (4 ngày) | `Accepted` | Tổng: 3.200.000 đ · Cọc: 800.000 đ | Chưa bàn giao | Đặt xe điện VinFast tại Đà Nẵng |
+| **BK-DEC-06** | V12 (Carnival, ĐN) | `renter1` | 24/12 - 27/12 (4 ngày) | `Accepted` | Tổng: 6.700.000 đ · Cọc: 1.675.000 đ | Chưa bàn giao | Thuê xe 7 chỗ hạng VIP dịp Giáng Sinh Noel |
+| **BK-DEC-07** | V14 (CX-30, HCM) | `renter2` | 15/12 - 18/12 (4 ngày) | `Accepted` | Tổng: 3.600.000 đ · Cọc: 900.000 đ | Chưa bàn giao | Thuê xe phục vụ công việc tại TP. HCM |
+| **BK-DEC-08** | V15 (CR-V, HCM) | `renter3` | 20/12 - 23/12 (4 ngày) | `Pending` | Tổng: 5.100.000 đ · Cọc: 1.275.000 đ | Chưa bàn giao | Đơn mới tạo tháng 12 chờ chủ xe duyệt |
+| **BK-DEC-09** | V5 (Transit, HN) | `renter1` | 15/12 - 18/12 (4 ngày) | `Cancelled` | Tổng: 6.200.000 đ · Cọc: 1.550.000 đ | Đã hủy | **Khách tự hủy trước ngày đi**, hoàn cọc 100% |
+| **BK-DEC-10** | V2 (Accent, HN) | `renter2` | 08/12 - 11/12 (4 ngày) | `Rejected` | Tổng: 2.600.000 đ · Cọc: 650.000 đ | Đã từ chối | **Chủ xe từ chối** do xe bận việc cuối năm |
+
+### 3.3. Bảng 10 đơn thuê Tháng 01/2027 (Du xuân Tết Dương lịch & Chuẩn bị Tết Nguyên Đán)
+
+| Mã đơn | Xe & Thành phố | Khách thuê | Thời gian | Trạng thái | Chi phí & Cọc (25%) | Bàn giao (Handovers) | Ghi chú & Nghiệp vụ kiểm thử |
+| :---: | :--- | :--- | :---: | :--- | :--- | :--- | :--- |
+| **BK-JAN-01** | V1 (Vios, HN) | `renter1` | 01/01 - 04/01 (4 ngày) | `Accepted` | Tổng: 3.100.000 đ · Cọc: 775.000 đ | Chưa bàn giao | Thuê xe du xuân Tết Dương Lịch 2027 |
+| **BK-JAN-02** | V3 (CX-5, HN) | `renter3` | 02/01 - 05/01 (4 ngày) | `Accepted` | Tổng: 4.600.000 đ · Cọc: 1.150.000 đ | Chưa bàn giao | Chuyến du lịch đầu năm tại Hà Nội |
+| **BK-JAN-03** | V5 (Transit, HN) | `renter2` | 08/01 - 12/01 (5 ngày) | `Accepted` | Tổng: 7.750.000 đ · Cọc: 1.937.500 đ | Chưa bàn giao | Xe 16 chỗ phục vụ đoàn công tác đầu năm |
+| **BK-JAN-04** | V8 (Xpander, ĐN) | `renter1` | 05/01 - 09/01 (5 ngày) | `Accepted` | Tổng: 4.500.000 đ · Cọc: 1.125.000 đ | Chưa bàn giao | Xe 7 chỗ gia đình du lịch Đà Nẵng |
+| **BK-JAN-05** | V10 (City, ĐN) | `renter3` | 10/01 - 13/01 (4 ngày) | `Accepted` | Tổng: 2.800.000 đ · Cọc: 700.000 đ | Chưa bàn giao | Thuê xe tự lái nội thành |
+| **BK-JAN-06** | V11 (Santa Fe, ĐN) | `renter2` | 15/01 - 19/01 (5 ngày) | `Accepted` | Tổng: 7.350.000 đ · Cọc: 1.837.500 đ | Chưa bàn giao | Xe SUV máy dầu giao tận nơi |
+| **BK-JAN-07** | V13 (Vios, HCM) | `renter1` | 08/01 - 11/01 (4 ngày) | `Accepted` | Tổng: 2.800.000 đ · Cọc: 700.000 đ | Chưa bàn giao | Thuê xe tại TP. Hồ Chí Minh |
+| **BK-JAN-08** | V14 (CX-30, HCM) | `renter3` | 12/01 - 15/01 (4 ngày) | `Accepted` | Tổng: 3.600.000 đ · Cọc: 900.000 đ | Chưa bàn giao | Chuyến đi công tác đầu năm |
+| **BK-JAN-09** | V15 (CR-V, HCM) | `renter2` | 20/01 - 24/01 (5 ngày) | `Pending` | Tổng: 6.250.000 đ · Cọc: 1.562.500 đ | Chưa bàn giao | Đặt xe đi lễ chùa và chúc Tết đầu năm |
+| **BK-JAN-10** | V4 (VF 8, HN) | `renter1` | 18/01 - 21/01 (4 ngày) | `Cancelled` | Tổng: 5.400.000 đ · Cọc: 1.350.000 đ | Đã hủy | **Kiểm thử phạt 8% do lỗi chủ xe (`CancelOwnerFault`):** Chủ xe hủy đơn đã duyệt $\rightarrow$ Hoàn 100% cọc (1.350k) cho khách, phạt 8% (432k) trừ tài khoản chủ xe |
 
 ---
 
 ## 4. Chi tiết Bảng Tài chính & Ký Quỹ Giao dịch Giả Lập (`payments`, `mock_bank_transactions`)
 
-Hệ thống mô phỏng dòng tiền ký quỹ qua Ngân hàng mô phỏng:
-- **Tài khoản Ký quỹ Sàn:** `ESCROW-0001`
-- **Tài khoản Khách thuê:** `MOCK-RENTER1`, `MOCK-RENTER2`, `MOCK-RENTER3`, `MOCK-RENTER4`
-- **Tài khoản Chủ xe:** `MOCK-OWNER1`, `MOCK-OWNER2`, `MOCK-OWNER3`, `MOCK-OWNER4`
-
-| Đơn | Loại giao dịch | Mã tham chiếu | Tài khoản Nguồn $\rightarrow$ Đích | Số tiền (VNĐ) | Trạng thái | Diễn giải |
-| :---: | :--- | :--- | :--- | :---: | :---: | :--- |
-| **BK01** | `Deposit` | `DEPOSIT-1` | `MOCK-RENTER1` $\rightarrow$ `ESCROW-0001` | 900.000 đ | `Succeeded` | Khách thanh toán cọc khi tạo đơn |
-| | `Transfer` | `SETTLE-1` | `ESCROW-0001` $\rightarrow$ `MOCK-OWNER1` | 2.700.000 đ | `Succeeded` | Sàn quyết toán doanh thu ròng (đã trừ 10% hoa hồng) |
-| | `Refund` | `REFUND-1` | `ESCROW-0001` $\rightarrow$ `MOCK-RENTER1` | 900.000 đ | `Succeeded` | Hoàn cọc 100% cho khách sau khi trả xe |
-| **BK02** | `Deposit` | `DEPOSIT-2` | `MOCK-RENTER2` $\rightarrow$ `ESCROW-0001` | 1.065.000 đ | `Succeeded` | Cọc 30% chuyến CX-5 |
-| | `Transfer` | `SETTLE-2` | `ESCROW-0001` $\rightarrow$ `MOCK-OWNER2` | 3.195.000 đ | `Succeeded` | Quyết toán doanh thu ròng (3.550.000 - 355.000 hoa hồng) |
-| | `Refund` | `REFUND-2` | `ESCROW-0001` $\rightarrow$ `MOCK-RENTER2` | 1.065.000 đ | `Succeeded` | Hoàn cọc cho khách |
-| **BK06** | `Deposit` | `DEPOSIT-6` | `MOCK-RENTER3` $\rightarrow$ `ESCROW-0001` | 1.770.000 đ | `Succeeded` | Tiền cọc đang được giữ an toàn tại tài khoản Escrow trong khi có tranh chấp mở |
-| **BK08** | `Deposit` | `DEPOSIT-8` | `MOCK-RENTER2` $\rightarrow$ `ESCROW-0001` | 585.000 đ | `Succeeded` | Tiền cọc ban đầu của khách |
-| | `Refund` | `REFUND-8` | `ESCROW-0001` $\rightarrow$ `MOCK-RENTER2` | 585.000 đ | `Succeeded` | Admin phán quyết hoàn tiền cọc 100% cho khách |
-| | `Penalty` | `PENALTY-8` | `MOCK-OWNER1` $\rightarrow$ `ESCROW-0001` | 195.000 đ | `Succeeded` | Khấu trừ tiền phạt vi phạm hợp đồng (10%) từ chủ xe |
-| **BK12** | `Deposit` | `DEPOSIT-12` | `MOCK-RENTER1` $\rightarrow$ `ESCROW-0001` | 1.620.000 đ | `Succeeded` | Tiền cọc ban đầu |
-| | `Refund` | `REFUND-12` | `ESCROW-0001` $\rightarrow$ `MOCK-RENTER1` | 1.620.000 đ | `Succeeded` | Khách chủ động hủy đơn trước ngày đi, hoàn cọc đầy đủ |
+Hệ thống quản trị tài chính vận hành theo cơ chế ký quỹ Escrow bảo chứng trung gian:
+- **Tiền cọc bảo chứng:** 25% tổng giá trị đơn thuê xe (`PriceLockedTotal * 0.25m`).
+- **Phí hoa hồng sàn AZU Car:** 5% tổng giá trị hợp đồng (`PriceLockedTotal * 0.05m`).
+- **Doanh thu ròng của Chủ xe:** 95% tổng giá trị hợp đồng (`PriceLockedTotal * 0.95m`).
+- **Phạt vi phạm đơn phương hủy hợp đồng:** 8% tổng giá trị hợp đồng (`PriceLockedTotal * 0.08m`).
+- Mỗi đơn thuê xe đều sinh giao dịch ngân hàng giả lập tương ứng trong `mock_bank_transactions` (`Deposit`, `Transfer`, `Refund`, `Penalty`) đảm bảo tính cân đối kế toán tuyệt đối giữa các tài khoản người dùng và tài khoản sàn `ESCROW-0001`.
 
 ---
 
@@ -119,17 +135,19 @@ Hệ thống mô phỏng dòng tiền ký quỹ qua Ngân hàng mô phỏng:
 
 ## 6. Thống kê Doanh thu Chủ xe (`#doanh-thu-content`)
 
-Sau khi dữ liệu mẫu được nạp, dashboard doanh thu của các chủ xe sẽ hiển thị chính xác các số liệu sau:
-- **Chủ xe 1 (`owner1`):**
-  - Tổng doanh thu (Gross): **9.800.000 đ** (BK01: 3.000.000 đ + BK03: 4.000.000 đ + BK07: 2.800.000 đ)
-  - Phí dịch vụ sàn đã chi (Commission 10%): **980.000 đ**
-  - Thực nhận ròng (Net Earnings): **8.820.000 đ**
+Sau khi dữ liệu mẫu được nạp, dashboard doanh thu của các chủ xe sẽ hiển thị chính xác các số liệu thực tế từ cơ sở dữ liệu:
+- **Chủ xe 1 (`owner1` - Phạm Quốc Dũng):**
+  - Tổng doanh thu (Gross): **9.900.000 đ** (`BK-NOV-01`: 3.100.000 đ + `BK-NOV-03`: 4.000.000 đ + `BK-NOV-05`: 2.800.000 đ)
+  - Phí dịch vụ sàn đã chi (Commission 5%): **495.000 đ**
+  - Thực nhận ròng (Net Earnings 95%): **9.405.000 đ**
   - Số chuyến hoàn tất: **3 chuyến**
-- **Chủ xe 2 (`owner2`):**
-  - Tổng doanh thu (Gross): **10.450.000 đ** (BK02: 3.550.000 đ + BK04: 3.300.000 đ + BK15: 3.600.000 đ)
-  - Phí dịch vụ sàn đã chi (Commission 10%): **1.045.000 đ**
-  - Thực nhận ròng (Net Earnings): **9.405.000 đ**
+- **Chủ xe 2 (`owner2` - Hoàng Thị Em):**
+  - Tổng doanh thu (Gross): **11.500.000 đ** (`BK-NOV-06`: 3.600.000 đ + `BK-NOV-02`: 4.600.000 đ + `BK-NOV-04`: 3.300.000 đ)
+  - Phí dịch vụ sàn đã chi (Commission 5%): **575.000 đ**
+  - Thực nhận ròng (Net Earnings 95%): **10.925.000 đ**
   - Số chuyến hoàn tất: **3 chuyến**
+- **Chủ xe 3 (`owner3` - Võ Văn Phúc):**
+  - Đang có chuyến `Ongoing` (`BK-NOV-08`: Santa Fe 5.900.000 đ, cọc 1.475.000 đ đang giữ trong Escrow) và các chuyến sắp tới (`Accepted`/`Pending`) trong tháng 12/2026 và tháng 01/2027.
 - Mỗi dòng trong bảng chuyến đi đã hoàn tất đều có liên kết trực tiếp `href="/booking/{id}"` giúp chủ xe dễ dàng xem biên bản bàn giao và sao kê tài chính chi tiết.
 
 ---
@@ -142,15 +160,25 @@ Sau khi dữ liệu mẫu được nạp, dashboard doanh thu của các chủ x
 
 2. **Kiểm thử Quản lý Lịch xe & Mở khóa (Option 2):**
    - Đăng nhập `owner1` $\rightarrow$ truy cập `/owner` $\rightarrow$ chọn tab **"Lịch xe"**.
-   - Chọn xe **Toyota Vios (30A-123.45)** $\rightarrow$ thấy dải ngày bảo dưỡng từ ngày +14 đến +16 trong mục *"Khoảng ngày đã chủ động khóa"*. Bấm nút **"Mở khóa"** $\rightarrow$ gọi API xóa thành công và lịch cập nhật lại ngay.
+   - Chọn xe **Toyota Vios (30A-123.45)** $\rightarrow$ thấy dải ngày bảo dưỡng từ ngày 26/11 đến 28/11 trong mục *"Khoảng ngày đã chủ động khóa"*. Bấm nút **"Mở khóa"** $\rightarrow$ gọi API xóa thành công và lịch cập nhật lại ngay.
 
 3. **Kiểm thử Doanh thu Chủ xe:**
-   - Tại `/owner` của `owner1` $\rightarrow$ chọn tab **"Doanh thu"** $\rightarrow$ xác nhận tổng doanh thu hiển thị **9.800.000 đ**, thực nhận **8.820.000 đ**, 3 chuyến hoàn tất. Bấm vào mã đơn chuyến đi $\rightarrow$ chuyển hướng tới trang chi tiết `/booking/{id}`.
+   - Tại `/owner` của `owner1` $\rightarrow$ chọn tab **"Doanh thu"** $\rightarrow$ xác nhận tổng doanh thu hiển thị **9.900.000 đ**, hoa hồng sàn **495.000 đ**, thực nhận **9.405.000 đ**, 3 chuyến hoàn tất. Bấm vào mã đơn chuyến đi $\rightarrow$ chuyển hướng tới trang chi tiết `/booking/{id}`.
 
 4. **Kiểm thử Đánh giá Mù (Double-Blind Review):**
    - Đăng nhập `owner2` $\rightarrow$ truy cập `/owner` $\rightarrow$ tab **"Chuyến của tôi"** (mục Đã hoàn thành).
-   - Đơn **BK02** (Mazda CX-5 với `renter2`) có nút **"Đánh giá khách thuê"**. Bấm vào để gửi đánh giá $\rightarrow$ sau khi gửi, đánh giá của cả khách và chủ xe cùng được công khai (`IsPublic = true`).
+   - Đơn **BK-NOV-02** (Mazda CX-5 với `renter2`) có nút **"Đánh giá khách thuê"**. Bấm vào để gửi đánh giá $\rightarrow$ sau khi gửi, đánh giá của cả khách và chủ xe cùng được công khai (`IsPublic = true`).
 
 5. **Kiểm thử Giải quyết Khiếu nại Admin:**
-   - Đăng nhập `staff1` $\rightarrow$ truy cập `/admin/disputes.html` $\rightarrow$ xem khiếu nại đang mở của đơn **BK06** (hỏng điều hòa xe Santa Fe V11) kèm ảnh bằng chứng `/seed/dispute-evidence-1.jpg`.
-   - Xem khiếu nại đã giải quyết của **BK07** (`ForceComplete`) và **BK08** (`CancelOwnerFault` phạt chủ xe 195.000 đ).
+   - Đăng nhập `staff1` $\rightarrow$ truy cập `/admin/index.html#disputes` (hoặc `/admin/disputes.html`) $\rightarrow$ xem khiếu nại đang mở của đơn **BK-NOV-08** (hỏng điều hòa xe Santa Fe V11) kèm ảnh bằng chứng `/seed/dispute-evidence-1.jpg`.
+   - Xem khiếu nại đã giải quyết của **BK-NOV-05** (`ForceComplete` hoàn 100% cọc cho khách) và **BK-JAN-10** (`CancelOwnerFault` phạt chủ xe 8% tương ứng 432.000 đ).
+
+6. **Kiểm thử Cổng Quản Trị Toàn Nền Tảng (Admin Portal Real API):**
+   - Đăng nhập `admin1` / `Test@12345` $\rightarrow$ truy cập `/admin/index.html`:
+     - **Tổng quan (`#overview`):** Hiển thị đúng số liệu thực tế từ database: 12 người dùng chuẩn, 30 đơn thuê, 20 xe/tin đăng, số ca tranh chấp.
+     - **Người dùng (`#users`):** Danh sách 12 tài khoản chuẩn hệ thống, phân quyền, kiểm tra án phạt (`renter4` bị khóa 7 ngày), tính năng khóa/mở khóa tài khoản.
+     - **Chủ xe (`#owners`):** Danh sách 4 chủ xe (`owner1`-`owner4`), xem ảnh CCCD mặt trước/sau, duyệt chủ xe mới (`owner4`).
+     - **Tin đăng (`#listings`):** Danh sách 20 xe/tin đăng, duyệt tin đăng mới (`V18` Hyundai Tucson, `V19` Ford Everest đang ở trạng thái `PendingApproval`).
+     - **Tranh chấp (`#disputes`):** Xem ca khiếu nại đang mở (`BK-NOV-08`) và bấm phán quyết giải quyết.
+     - **Biểu phí (`#fees`):** Xem và cấu hình tỷ lệ hoa hồng sàn (mặc định 5%), tỷ lệ cọc (25%), phạt hủy đơn (8%).
+     - **Doanh thu (`#revenue`):** Thống kê tổng doanh thu thực tế toàn sàn, tiền cọc đang ký quỹ trong Escrow, tổng hoa hồng sàn thu được.
