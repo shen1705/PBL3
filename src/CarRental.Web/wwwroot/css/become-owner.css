@@ -1813,6 +1813,13 @@ a {
 }
 
 /* Quản lý chuyến đi của chủ xe */
+#danh-sach-xe-content .section-page-heading,
+#danh-sach-xe-content .management-card,
+#quan-ly-chuyen-content .section-page-heading,
+#quan-ly-chuyen-content .management-card {
+    max-width: 1000px;
+}
+
 .owner-trip-tab {
     cursor: pointer;
     transition: all 0.2s ease;
