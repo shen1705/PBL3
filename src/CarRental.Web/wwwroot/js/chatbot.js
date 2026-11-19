@@ -214,14 +214,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    function handleSend(textToSend) {
+    async function handleSend(textToSend) {
         const text = textToSend || chatInputText.value.trim();
         if (!text) return;
 
-        // remove chips
-        if (chatPromptChips && chatPromptChips.parentElement) {
-            chatPromptChips.remove();
-        }
+        // remove existing chips
+        const existingChips = chatMessagesStream.querySelectorAll('.chat-prompt-chips');
+        existingChips.forEach(c => c.remove());
 
         appendUserMessage(text);
         if (chatInputText) {
@@ -232,11 +231,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typingIndicator) typingIndicator.hidden = false;
         scrollChatToBottom();
 
-        setTimeout(() => {
-            if (typingIndicator) typingIndicator.hidden = true;
-            const answer = findBotAnswer(text);
-            appendBotMessage(answer.reply, answer.suggestions);
-        }, 500);
+        try {
+            const res = await fetch('/api/chatbot/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ message: text })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (typingIndicator) typingIndicator.hidden = true;
+                if (data && data.reply) {
+                    appendBotMessage(data.reply, data.suggestions || []);
+                    return;
+                }
+            }
+            throw new Error('Chatbot API unavailable');
+        } catch (err) {
+            console.warn('Chatbot API error, using local fallback:', err);
+            setTimeout(() => {
+                if (typingIndicator) typingIndicator.hidden = true;
+                const answer = findBotAnswer(text);
+                appendBotMessage(answer.reply, answer.suggestions);
+            }, 300);
+        }
     }
 
     // send message

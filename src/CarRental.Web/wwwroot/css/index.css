@@ -1785,3 +1785,70 @@ body {
     }
 }
 
+
+
+/* Floating AI Chat Bubble */
+.floating-chat-bubble {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #ffffff;
+    padding: 10px 18px 10px 14px;
+    border-radius: 9999px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    border: 1.5px solid rgba(223, 183, 108, 0.4);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.floating-chat-bubble:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.35), 0 4px 10px rgba(223, 183, 108, 0.3);
+    border-color: #dfb76c;
+    color: #fef08a;
+}
+.floating-chat-bubble .floating-chat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #dfb76c;
+    color: #0f172a;
+    border-radius: 50%;
+    font-size: 14px;
+}
+.floating-chat-bubble .floating-chat-pulse {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
+    animation: pulseChatDot 2s infinite;
+}
+@keyframes pulseChatDot {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+@media (max-width: 640px) {
+    .floating-chat-bubble {
+        bottom: 16px;
+        right: 16px;
+        padding: 10px;
+        border-radius: 50%;
+    }
+    .floating-chat-bubble .floating-chat-text {
+        display: none;
+    }
+    .floating-chat-bubble .floating-chat-pulse {
+        display: none;
+    }
+}

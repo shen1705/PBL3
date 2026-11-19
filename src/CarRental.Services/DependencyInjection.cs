@@ -3,6 +3,7 @@ using CarRental.Services.Admin;
 using CarRental.Services.Auth;
 using CarRental.Services.Availability;
 using CarRental.Services.Bookings;
+using CarRental.Services.Chatbot;
 using CarRental.Services.Infrastructure;
 using CarRental.Services.Vehicles;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,7 @@ public static class DependencyInjection
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
+        services.AddHttpClient();
 
         services.AddSingleton<IClock, SystemClock>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -21,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IVehicleService, VehicleService>();
         services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<IChatbotService, GeminiChatbotService>();
         services.AddScoped<IAdminUserService, AdminUserService>();
         services.AddScoped<IAdminOwnerService, AdminOwnerService>();
         services.AddScoped<IAdminListingService, AdminListingService>();
