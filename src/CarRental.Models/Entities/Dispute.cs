@@ -13,6 +13,9 @@ public class Dispute
     public string RaisedBy { get; set; } = string.Empty;
     [Required]
     public string Description { get; set; } = string.Empty;
+    [MaxLength(50)]
+    public string? Category { get; set; }
+    public decimal? ProposedAmount { get; set; }
     [MaxLength(255)]
     public string? EvidenceImage { get; set; }
     [Required, MaxLength(20)]

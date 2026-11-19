@@ -15,4 +15,7 @@ public interface IAdminUserService
     Task<ServiceResult<bool>> LiftSanctionAsync(string targetUserId, LiftSanctionRequest request, string currentUserId, CancellationToken ct = default);
     Task<ServiceResult<bool>> ResetUserPasswordAsync(string targetUserId, ResetPasswordByAdminRequest request, string currentUserId, CancellationToken ct = default);
     Task<ServiceResult<bool>> UpdateUserRolesAsync(string targetUserId, UpdateUserRolesRequest request, string currentUserId, CancellationToken ct = default);
+    Task<ServiceResult<bool>> VerifyDriverLicenseAsync(string targetUserId, VerifyDriverLicenseRequest request, string currentUserId, CancellationToken ct = default);
+    Task<ServiceResult<AdminVerifyLicenseResultDto>> AutoVerifyDriverLicenseAsync(string targetUserId, string currentUserId, CancellationToken ct = default);
+    Task<ServiceResult<AdminBatchVerifyResultDto>> BatchAutoVerifyLicensesAsync(string currentUserId, CancellationToken ct = default);
 }

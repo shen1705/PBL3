@@ -845,11 +845,16 @@ function escapeTripHtml(value) {
 
 function formatTripDate(value, includeTime = false) {
     if (!value) return '—';
-    const date = new Date(value);
+    let s = String(value);
+    if (s.includes('T') && !s.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(s)) {
+        s += 'Z';
+    }
+    const date = new Date(s);
     if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleString('vi-VN', includeTime
-        ? { dateStyle: 'medium', timeStyle: 'short' }
-        : { dateStyle: 'medium' });
+    return date.toLocaleString('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        ...(includeTime ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' })
+    });
 }
 
 function formatTripMoney(value) {
@@ -1016,18 +1021,40 @@ function renderTripDetail(booking, tab = 'overview') {
                 : (isOwner ? 'Chuẩn bị xe và mở biên bản bàn giao xe để ghi nhận tình trạng.' : 'Kiểm tra xe và mở biên bản nhận xe để xác nhận.');
             actions = `${userConfirmedPickup ? '' : `<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">${handoverText}</button>`}${canCancel ? '<button type="button" class="trip-detail-action is-danger" data-trip-detail-action="cancel">Hủy đơn</button>' : ''}`;
         } else if (status === 'Ongoing') {
-            const returnText = isOwner ? 'Mở biên bản nhận lại xe' : 'Mở biên bản trả xe';
-            title = userConfirmedReturn
-                ? (isOwner ? 'Chờ khách xác nhận trả xe' : 'Chờ chủ xe xác nhận nhận lại')
-                : 'Chuyến đang diễn ra';
-            description = userConfirmedReturn
-                ? 'Bạn đã xác nhận, chờ bên còn lại hoàn tất.'
-                : (isOwner ? 'Mở biên bản nhận lại xe để kiểm tra và kết thúc chuyến.' : 'Mở biên bản trả xe để ghi nhận tình trạng và xác nhận.');
-            actions = `${userConfirmedReturn ? '' : `<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">${returnText}</button>`}${booking.hasDispute ? `<span class="trip-detail-state">Khiếu nại: ${escapeTripHtml(booking.disputeStatus || 'Đang xử lý')}</span>` : '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="dispute">Báo sự cố</button>'}`;
-        } else if (status === 'Completed' && !booking.hasReviewed) {
+            const renterConfirmed = handovers.some(item =>
+                String(item.type).toLowerCase() === 'return' && item.confirmedBy === booking.renterId);
+            const ownerConfirmed = handovers.some(item =>
+                String(item.type).toLowerCase() === 'return' && item.confirmedBy === booking.ownerId);
+
+            if (isOwner) {
+                if (renterConfirmed && !ownerConfirmed) {
+                    title = 'Khách thuê đã gửi biên bản trả xe';
+                    description = 'Khách thuê đã bàn giao trả xe. Vui lòng kiểm tra xe thực tế (ODO, nhiên liệu, thân vỏ, phạt nguội). Nếu xe ổn thỏa, hãy Nghiệm thu xe để hoàn tất. Nếu có hư hỏng/vi phạm, hãy Báo sự cố để phong tỏa tiền cọc.';
+                    actions = `<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">Nghiệm thu nhận lại xe</button>${booking.hasDispute ? `<span class="trip-detail-state">Khiếu nại: ${escapeTripHtml(booking.disputeStatus || 'Đang xử lý')}</span>` : '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="dispute">Báo sự cố</button>'}`;
+                } else if (ownerConfirmed) {
+                    title = 'Đã hoàn tất nghiệm thu';
+                    description = 'Bạn đã xác nhận nhận lại xe.';
+                    actions = '';
+                } else {
+                    title = 'Chuyến đang diễn ra';
+                    description = 'Mở biên bản nhận lại xe khi khách trả xe để kiểm tra và kết thúc chuyến.';
+                    actions = `<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">Mở biên bản nhận lại xe</button>${booking.hasDispute ? `<span class="trip-detail-state">Khiếu nại: ${escapeTripHtml(booking.disputeStatus || 'Đang xử lý')}</span>` : '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="dispute">Báo sự cố</button>'}`;
+                }
+            } else {
+                if (renterConfirmed) {
+                    title = 'Đã gửi biên bản trả xe';
+                    description = 'Bạn đã gửi thông tin bàn giao trả xe. Đang chờ chủ xe kiểm tra thực tế xe và xác nhận nghiệm thu hoàn tất chuyến đi.';
+                    actions = `${booking.hasDispute ? `<span class="trip-detail-state">Khiếu nại: ${escapeTripHtml(booking.disputeStatus || 'Đang xử lý')}</span>` : '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="dispute">Báo sự cố</button>'}`;
+                } else {
+                    title = 'Chuyến đang diễn ra';
+                    description = 'Mở biên bản trả xe để ghi nhận tình trạng xe (ODO, mức xăng) và bàn giao cho chủ xe.';
+                    actions = `<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">Mở biên bản trả xe</button>${booking.hasDispute ? `<span class="trip-detail-state">Khiếu nại: ${escapeTripHtml(booking.disputeStatus || 'Đang xử lý')}</span>` : '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="dispute">Báo sự cố</button>'}`;
+                }
+            }
+        } else if (status === 'Completed') {
             title = 'Chuyến đã hoàn tất';
-            description = isOwner ? 'Chia sẻ đánh giá về khách thuê.' : 'Chia sẻ đánh giá về chuyến đi.';
-            actions = `<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="review">${isOwner ? 'Đánh giá khách thuê' : 'Đánh giá chuyến đi'}</button>`;
+            description = isOwner ? 'Chuyến đi đã hoàn tất quyết toán. Chia sẻ đánh giá về khách thuê.' : 'Chuyến đi đã hoàn tất quyết toán. Chia sẻ đánh giá về chuyến đi.';
+            actions = `${!booking.hasReviewed ? `<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="review">${isOwner ? 'Đánh giá khách thuê' : 'Đánh giá chuyến đi'}</button>` : '<span class="trip-detail-state is-done"><i class="fa-solid fa-check"></i> Đã đánh giá</span>'}${booking.hasDispute ? `<span class="trip-detail-state" style="margin-left: 8px;">Khiếu nại: ${escapeTripHtml(booking.disputeStatus || 'Đang xử lý')}</span>` : '<button type="button" class="trip-detail-action is-secondary" data-trip-detail-action="dispute" style="margin-left: 8px;">Khiếu nại sau chuyến</button>'}`;
         }
 
         return `<section class="trip-detail-task" aria-labelledby="trip-detail-task-title">
@@ -1223,14 +1250,28 @@ async function handleTripDetailAction(action, button) {
         url = `/api/bookings/${bookingId}/cancel`;
         body = { reason: reason.trim() || (isOwner ? 'Chủ xe chủ động hủy đơn' : 'Khách thuê chủ động hủy chuyến') };
     } else if (action === 'dispute') {
-        const description = prompt('Mô tả sự cố phát sinh (tối thiểu 10 ký tự):');
-        if (!description) return;
-        if (description.trim().length < 10) {
-            alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');
-            return;
+        if (window.AzuDisputeModal) {
+            window.AzuDisputeModal.open({
+                bookingId: currentTripDetail.bookingId,
+                vehicleName: currentTripDetail.vehicleName,
+                otherPartyName: isOwner ? currentTripDetail.renterName : currentTripDetail.ownerName,
+                isOwner,
+                depositAmount: currentTripDetail.depositAmount || 0,
+                onSuccess: async () => {
+                    try {
+                        const detailResponse = await fetch(`/api/bookings/${bookingId}`);
+                        const detailResult = await detailResponse.json();
+                        if (detailResult?.isSuccess && detailResult.data) {
+                            currentTripDetail = detailResult.data;
+                            renderCurrentTripDetail();
+                        }
+                    } catch (e) {
+                        console.error('Error reloading trip detail:', e);
+                    }
+                }
+            });
         }
-        url = `/api/bookings/${bookingId}/dispute`;
-        body = { description: description.trim() };
+        return;
     }
 
     if (!url) return;
@@ -1624,31 +1665,18 @@ async function renderTrips() {
                 disputeBtn.type = 'button';
                 disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
                 disputeBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sự cố';
-                disputeBtn.addEventListener('click', async () => {
-                    const desc = prompt('Nhập chi tiết sự cố phát sinh (tối thiểu 10 ký tự):');
-                    if (!desc) return;
-                    if (desc.trim().length < 10) {
-                        alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');
-                        return;
-                    }
-                    disputeBtn.disabled = true;
-                    try {
-                        const r = await fetch(`/api/bookings/${trip.bookingId}/dispute`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ description: desc.trim() })
+                disputeBtn.addEventListener('click', () => {
+                    if (window.AzuDisputeModal) {
+                        window.AzuDisputeModal.open({
+                            bookingId: trip.bookingId,
+                            vehicleName: trip.vehicleName,
+                            otherPartyName: trip.ownerName || 'Chủ xe',
+                            isOwner: false,
+                            depositAmount: trip.depositAmount || 0,
+                            onSuccess: () => renderTrips()
                         });
-                        const d = await r.json();
-                        if (r.ok && d.isSuccess) {
-                            alert(d.message || 'Khiếu nại đã được gửi thành công.');
-                            renderTrips();
-                        } else {
-                            alert('Lỗi: ' + (d?.message || 'Không thể gửi khiếu nại'));
-                        }
-                    } catch (e) {
-                        alert('Lỗi kết nối máy chủ.');
-                    } finally {
-                        disputeBtn.disabled = false;
+                    } else {
+                        alert('Đang tải mô-đun khiếu nại, vui lòng thử lại.');
                     }
                 });
                 actionsDiv.appendChild(disputeBtn);

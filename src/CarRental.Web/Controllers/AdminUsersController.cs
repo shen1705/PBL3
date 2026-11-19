@@ -158,4 +158,58 @@ public class AdminUsersController : ControllerBase
 
         return Ok(result);
     }
+
+    // Duyệt / Từ chối GPLX
+    [HttpPost("{id}/verify-license")]
+    public async Task<IActionResult> VerifyDriverLicense(string id, [FromBody] VerifyDriverLicenseRequest request, CancellationToken ct)
+    {
+        var currentUserId = _currentUser.UserId;
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập lại." });
+
+        var result = await _adminUserService.VerifyDriverLicenseAsync(id, request, currentUserId, ct);
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == ErrorCodes.Forbidden)
+                return StatusCode(StatusCodes.Status403Forbidden, result);
+            if (result.ErrorCode == ErrorCodes.NotFound)
+                return NotFound(result);
+
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    // Tự động kiểm tra & thẩm định GPLX
+    [HttpPost("{id}/auto-verify-license")]
+    public async Task<IActionResult> AutoVerifyDriverLicense(string id, CancellationToken ct)
+    {
+        var currentUserId = _currentUser.UserId;
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập lại." });
+
+        var result = await _adminUserService.AutoVerifyDriverLicenseAsync(id, currentUserId, ct);
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == ErrorCodes.NotFound)
+                return NotFound(result);
+
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
+    // Quét & Tự động duyệt hàng loạt các GPLX hợp lệ
+    [HttpPost("batch-auto-verify-licenses")]
+    public async Task<IActionResult> BatchAutoVerifyLicenses(CancellationToken ct)
+    {
+        var currentUserId = _currentUser.UserId;
+        if (string.IsNullOrEmpty(currentUserId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập lại." });
+
+        var result = await _adminUserService.BatchAutoVerifyLicensesAsync(currentUserId, ct);
+        return Ok(result);
+    }
 }

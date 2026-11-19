@@ -36,6 +36,8 @@ public class BookingSummaryDto
     // Handover & Review states
     public bool HasPickupConfirmed { get; set; }
     public bool HasReturnConfirmed { get; set; }
+    public bool HasRenterReturnConfirmed { get; set; }
+    public bool HasOwnerReturnConfirmed { get; set; }
     public bool HasReviewed { get; set; }
     public bool HasDispute { get; set; }
     public string? DisputeStatus { get; set; }

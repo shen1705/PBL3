@@ -105,6 +105,8 @@ public class AdminDisputeService : IAdminDisputeService
                 RaisedBy = d.RaisedBy,
                 RaiserName = d.Raiser?.FullName ?? d.Raiser?.UserName ?? string.Empty,
                 RaiserRole = raiserRole,
+                Category = d.Category,
+                ProposedAmount = d.ProposedAmount,
                 Description = d.Description,
                 EvidenceImage = d.EvidenceImage,
                 Status = d.Status,
@@ -167,6 +169,8 @@ public class AdminDisputeService : IAdminDisputeService
             RaisedBy = dispute.RaisedBy,
             RaiserName = dispute.Raiser?.FullName ?? dispute.Raiser?.UserName ?? string.Empty,
             RaiserRole = raiserRole,
+            Category = dispute.Category,
+            ProposedAmount = dispute.ProposedAmount,
             Description = dispute.Description,
             EvidenceImage = dispute.EvidenceImage,
             Status = dispute.Status,
@@ -220,6 +224,10 @@ public class AdminDisputeService : IAdminDisputeService
         // force complete action
         if (request.ResolutionAction == ResolutionActions.ForceComplete && booking != null)
         {
+            decimal penaltyAmount = request.ApprovedPenaltyAmount ?? dispute.ProposedAmount ?? 0m;
+            decimal commissionRate = BusinessRules.DefaultCommissionRate;
+            decimal commissionAmount = Math.Round(booking.PriceLockedTotal * commissionRate);
+
             if (booking.Status == BookingStatuses.Ongoing)
             {
                 booking.Status = BookingStatuses.Completed;
@@ -229,30 +237,32 @@ public class AdminDisputeService : IAdminDisputeService
                 {
                     booking.SourceHold.Status = DepositHoldStatuses.Converted;
                 }
+            }
 
-                var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == booking.BookingId, ct);
-                decimal commissionRate = BusinessRules.DefaultCommissionRate;
-                decimal commissionAmount = Math.Round(booking.PriceLockedTotal * commissionRate);
-
-                if (payment == null)
+            var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == booking.BookingId, ct);
+            if (payment == null)
+            {
+                payment = new Payment
                 {
-                    payment = new Payment
-                    {
-                        BookingId = booking.BookingId,
-                        DepositStatus = DepositStatuses.Refunded,
-                        CommissionRate = commissionRate,
-                        CommissionAmount = commissionAmount,
-                        RevenueRecordedAt = now
-                    };
-                    _db.Payments.Add(payment);
-                }
-                else
+                    BookingId = booking.BookingId,
+                    DepositStatus = DepositStatuses.Refunded,
+                    PenaltyAmount = penaltyAmount > 0 ? penaltyAmount : null,
+                    CommissionRate = commissionRate,
+                    CommissionAmount = commissionAmount,
+                    RevenueRecordedAt = now
+                };
+                _db.Payments.Add(payment);
+            }
+            else
+            {
+                payment.DepositStatus = DepositStatuses.Refunded;
+                if (penaltyAmount > 0)
                 {
-                    payment.DepositStatus = DepositStatuses.Refunded;
-                    payment.CommissionRate = commissionRate;
-                    payment.CommissionAmount = commissionAmount;
-                    payment.RevenueRecordedAt = now;
+                    payment.PenaltyAmount = penaltyAmount;
                 }
+                payment.CommissionRate = commissionRate;
+                payment.CommissionAmount = commissionAmount;
+                payment.RevenueRecordedAt = payment.RevenueRecordedAt ?? now;
             }
         }
         // cancel owner fault action
@@ -271,12 +281,15 @@ public class AdminDisputeService : IAdminDisputeService
                 }
 
                 var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == booking.BookingId, ct);
+                decimal penaltyAmount = Math.Round(booking.PriceLockedTotal * BusinessRules.OwnerCancelPenaltyRate);
+
                 if (payment == null)
                 {
                     payment = new Payment
                     {
                         BookingId = booking.BookingId,
                         DepositStatus = DepositStatuses.Refunded,
+                        PenaltyAmount = penaltyAmount,
                         CommissionRate = 0,
                         CommissionAmount = 0
                     };
@@ -285,6 +298,7 @@ public class AdminDisputeService : IAdminDisputeService
                 else
                 {
                     payment.DepositStatus = DepositStatuses.Refunded;
+                    payment.PenaltyAmount = penaltyAmount;
                 }
             }
         }

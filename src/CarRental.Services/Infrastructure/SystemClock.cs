@@ -1,42 +1,43 @@
+using System;
 using CarRental.Services.Abstractions;
 
 namespace CarRental.Services.Infrastructure;
 
 public class SystemClock : IClock
 {
-    public DateTime UtcNow => DateTime.UtcNow;
+    // Giờ Việt Nam (GMT+7)
+    public DateTime Now => VietnamTimeZone.Now;
 
-    public DateOnly UtcToday => DateOnly.FromDateTime(DateTime.UtcNow);
+    public DateOnly Today => VietnamTimeZone.Today;
+
+    // Giữ UtcNow trả về giờ hệ thống Việt Nam để toàn bộ DB và Service lưu đồng bộ giờ Việt Nam
+    public DateTime UtcNow => VietnamTimeZone.Now;
+
+    public DateOnly UtcToday => VietnamTimeZone.Today;
 
     public DateTime ToUtc(DateTime dateTime)
     {
-        return dateTime.Kind switch
-        {
-            DateTimeKind.Utc => dateTime,
-            DateTimeKind.Local => dateTime.ToUniversalTime(),
-            _ => DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)
-        };
+        return dateTime;
     }
 
     public int CompareUtc(DateTime first, DateTime second)
     {
-        return DateTime.Compare(ToUtc(first), ToUtc(second));
+        return DateTime.Compare(first, second);
     }
 
     public bool IsPastUtc(DateTime dateTime)
     {
-        return ToUtc(dateTime) < UtcNow;
+        return dateTime < Now;
     }
 
     public bool IsFutureUtc(DateTime dateTime)
     {
-        return ToUtc(dateTime) > UtcNow;
+        return dateTime > Now;
     }
 
     public bool IsInRangeUtc(DateTime target, DateTime start, DateTime end)
     {
-        var targetUtc = ToUtc(target);
-        return targetUtc >= ToUtc(start) && targetUtc <= ToUtc(end);
+        return target >= start && target <= end;
     }
 
     public int Compare(DateTime first, DateTime second) => CompareUtc(first, second);

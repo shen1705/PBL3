@@ -15,6 +15,7 @@ public static class AppClaimTypes
 {
     public const string CanManageSystemConfig = "CanManageSystemConfig";   
     public const string CanManageAdminAccounts = "CanManageAdminAccounts"; 
+    public const string DriverLicenseVerified = "DriverLicenseVerified";
     public const string GrantedValue = "true";
 }
 // owner approve

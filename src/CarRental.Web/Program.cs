@@ -2,12 +2,18 @@ using CarRental.Data;
 using CarRental.Models.Entities;
 using CarRental.Services;
 using CarRental.Services.Availability;
+using CarRental.Web.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter());
+        options.JsonSerializerOptions.Converters.Add(new UtcNullableDateTimeJsonConverter());
+    });
 
 builder.Services.AddData(builder.Configuration);
 

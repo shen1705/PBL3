@@ -1790,6 +1790,20 @@ async function loadOwnerTrips(status = currentOwnerTripStatus) {
     }
 }
 
+function formatVnTripDate(val, includeTime = false) {
+    if (!val) return '—';
+    let s = String(val);
+    if (s.includes('T') && !s.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(s)) {
+        s += 'Z';
+    }
+    const d = new Date(s);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleString('vi-VN', {
+        timeZone: 'Asia/Ho_Chi_Minh',
+        ...(includeTime ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' })
+    });
+}
+
 function renderOwnerTrips(items) {
     const listEl = document.getElementById('owner-trips-list');
     const emptyEl = document.getElementById('owner-trips-empty');
@@ -1861,13 +1875,28 @@ function renderOwnerTrips(items) {
         const details = document.createElement('div');
         details.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 13px; color: #475569;';
 
-        const startStr = new Date(req.startDate).toLocaleDateString('vi-VN');
-        const endStr = new Date(req.endDate).toLocaleDateString('vi-VN');
+        const startStr = formatVnTripDate(req.startDate);
+        const endStr = formatVnTripDate(req.endDate);
+
+        let renterReturnAlert = '';
+        if (req.status === 'Ongoing' && req.hasRenterReturnConfirmed) {
+            renterReturnAlert = `<div style="grid-column: 1 / -1; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px 12px; font-size: 12.5px; color: #1e40af; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-bell" style="color: #2563eb; font-size: 14px;"></i>
+                <span><strong>Khách thuê đã gửi bàn giao trả xe.</strong> Vui lòng kiểm tra xe thực tế (ODO, nhiên liệu, thân vỏ, phạt nguội). Nếu có sự cố, hãy bấm <strong>"Khiếu nại sự cố"</strong> để phong tỏa cọc. Nếu xe ổn thỏa, bấm <strong>"Nghiệm thu & Hoàn tất chuyến"</strong>.</span>
+            </div>`;
+        }
+
+        let completedTimeInfo = '';
+        if (req.status === 'Completed' && req.completedAt) {
+            completedTimeInfo = `<p style="margin: 4px 0 0; color: #15803d; font-size: 12px;"><i class="fa-solid fa-circle-check" style="width: 16px;"></i> Hoàn tất lúc: <strong>${formatVnTripDate(req.completedAt, true)}</strong></p>`;
+        }
 
         details.innerHTML = `
+            ${renterReturnAlert}
             <div>
                 <p style="margin: 0 0 4px;"><i class="fa-regular fa-user" style="color: #64748b; width: 16px;"></i> Khách thuê: <strong>${req.renterName}</strong> ${req.renterPhone ? `(${req.renterPhone})` : ''}</p>
                 <p style="margin: 0;"><i class="fa-solid fa-location-dot" style="color: #64748b; width: 16px;"></i> Khu vực: ${req.district ? req.district + ', ' : ''}${req.city || 'TP. Đà Nẵng'}</p>
+                ${completedTimeInfo}
             </div>
             <div>
                 <p style="margin: 0 0 4px;"><i class="fa-regular fa-calendar-days" style="color: #64748b; width: 16px;"></i> Thời gian: <strong>${startStr} - ${endStr}</strong> (${req.rentalDays} ngày)</p>
@@ -1974,10 +2003,10 @@ function renderOwnerTrips(items) {
             const completeBtn = document.createElement('button');
             completeBtn.type = 'button';
             completeBtn.style.cssText = 'background: #2563eb; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
-            completeBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Nhận lại xe & Hoàn tất chuyến';
+            completeBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Nghiệm thu xe & Quyết toán hoàn tất';
             completeBtn.addEventListener('click', async () => {
                 const remaining = Number(req.priceLockedTotal || 0) - Number(req.depositAmount || 0);
-                if (!confirm(`Xác nhận đã nhận lại xe và quyết toán số tiền thuê còn lại (${remaining.toLocaleString('vi-VN')} đ) từ khách ${req.renterName}? Hệ thống sẽ hoàn tất chuyến đi và ghi nhận doanh thu.`)) return;
+                if (!confirm(`Xác nhận bạn ĐÃ KIỂM TRA XE và đồng ý nhận lại xe ${req.vehicleName} từ khách ${req.renterName}?\n\nSố tiền thuê còn lại khách thanh toán cho bạn: ${remaining.toLocaleString('vi-VN')} đ.\nTiền cọc của khách sẽ được giải phóng hoàn trả. Doanh thu của bạn sẽ được ghi nhận vào hệ thống.`)) return;
                 completeBtn.disabled = true;
                 try {
                     const r = await fetch(`/api/bookings/${req.bookingId}/return`, {
@@ -1987,7 +2016,7 @@ function renderOwnerTrips(items) {
                     });
                     const d = await r.json();
                     if (r.ok && d.isSuccess) {
-                        alert('Đã hoàn tất chuyến đi thành công! Doanh thu đã được ghi nhận.');
+                        alert('Đã nghiệm thu xe và hoàn tất chuyến đi thành công! Doanh thu đã được ghi nhận.');
                         loadOwnerTrips();
                         loadOwnerRevenue();
                     } else {
@@ -2011,31 +2040,18 @@ function renderOwnerTrips(items) {
                 disputeBtn.type = 'button';
                 disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
                 disputeBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sự cố';
-                disputeBtn.addEventListener('click', async () => {
-                    const desc = prompt('Nhập thông tin sự cố/vi phạm và đề xuất khoản phí (Ví dụ: Trả trễ 2h và thiếu xăng, đề xuất phạt 350.000đ; hoặc Phạt nguội quá tốc độ ngày 15/10, đề xuất phạt 1.000.000đ):');
-                    if (!desc) return;
-                    if (desc.trim().length < 10) {
-                        alert('Mô tả khiếu nại phải có ít nhất 10 ký tự.');
-                        return;
-                    }
-                    disputeBtn.disabled = true;
-                    try {
-                        const r = await fetch(`/api/bookings/${req.bookingId}/dispute`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ description: desc.trim() })
+                disputeBtn.addEventListener('click', () => {
+                    if (window.AzuDisputeModal) {
+                        window.AzuDisputeModal.open({
+                            bookingId: req.bookingId,
+                            vehicleName: req.vehicleName,
+                            otherPartyName: req.renterName,
+                            isOwner: true,
+                            depositAmount: req.depositAmount || 0,
+                            onSuccess: () => loadOwnerTrips()
                         });
-                        const d = await r.json();
-                        if (r.ok && d.isSuccess) {
-                            alert(d.message || 'Khiếu nại đã được gửi thành công.');
-                            loadOwnerTrips();
-                        } else {
-                            alert('Lỗi: ' + (d?.message || 'Không thể gửi khiếu nại'));
-                        }
-                    } catch(e) {
-                        alert('Lỗi kết nối máy chủ.');
-                    } finally {
-                        disputeBtn.disabled = false;
+                    } else {
+                        alert('Đang tải mô-đun khiếu nại, vui lòng thử lại.');
                     }
                 });
                 actionsRow.appendChild(disputeBtn);
@@ -2055,6 +2071,28 @@ function renderOwnerTrips(items) {
                 reviewedBadge.style.cssText = 'font-size: 12.5px; color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
                 reviewedBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã gửi đánh giá';
                 actionsRow.appendChild(reviewedBadge);
+            }
+
+            if (!req.hasDispute) {
+                const disputeAfterBtn = document.createElement('button');
+                disputeAfterBtn.type = 'button';
+                disputeAfterBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 7px 14px; border-radius: 8px; font-weight: 600; font-size: 12.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+                disputeAfterBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sau chuyến (Phạt nguội/Sự cố)';
+                disputeAfterBtn.addEventListener('click', () => {
+                    if (window.AzuDisputeModal) {
+                        window.AzuDisputeModal.open({
+                            bookingId: req.bookingId,
+                            vehicleName: req.vehicleName,
+                            otherPartyName: req.renterName,
+                            isOwner: true,
+                            depositAmount: req.depositAmount || 0,
+                            onSuccess: () => loadOwnerTrips()
+                        });
+                    } else {
+                        alert('Đang tải mô-đun khiếu nại, vui lòng thử lại.');
+                    }
+                });
+                actionsRow.appendChild(disputeAfterBtn);
             }
         }
 

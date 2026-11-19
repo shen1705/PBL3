@@ -22,6 +22,8 @@ public class AdminDisputeListItemDto
     public string RaisedBy { get; set; } = string.Empty;
     public string RaiserName { get; set; } = string.Empty;
     public string RaiserRole { get; set; } = string.Empty;
+    public string? Category { get; set; }
+    public decimal? ProposedAmount { get; set; }
     public string Description { get; set; } = string.Empty;
     public string? EvidenceImage { get; set; }
     public string Status { get; set; } = string.Empty;
@@ -58,6 +60,8 @@ public class ResolveDisputeRequest
     [Required(ErrorMessage = "Vui lòng chọn hướng xử lý.")]
     [MaxLength(30)]
     public string ResolutionAction { get; set; } = string.Empty; // None / CancelOwnerFault / ForceComplete
+
+    public decimal? ApprovedPenaltyAmount { get; set; }
 
     [Required(ErrorMessage = "Vui lòng nhập ghi chú kết quả giải quyết.")]
     [MaxLength(255)]

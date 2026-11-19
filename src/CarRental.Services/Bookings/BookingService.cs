@@ -138,6 +138,15 @@ public class BookingService : IBookingService
                 ErrorCodes.Validation);
         }
 
+        var isLicenseVerified = await _db.UserClaims.AsNoTracking()
+            .AnyAsync(c => c.UserId == renterUserId && c.ClaimType == AppClaimTypes.DriverLicenseVerified && c.ClaimValue == AppClaimTypes.GrantedValue, ct);
+        if (!isLicenseVerified)
+        {
+            return ServiceResult<BookingDetailDto>.Fail(
+                "Giấy phép lái xe (GPLX) của bạn chưa được xác thực hoặc đang chờ kiểm duyệt. Vui lòng liên hệ Quản trị viên hoặc chờ hệ thống hoàn tất thẩm định.",
+                ErrorCodes.Validation);
+        }
+
         // find vehicle & listing
         var listing = await _db.VehicleListings
             .Include(l => l.Vehicle)
@@ -345,6 +354,8 @@ public class BookingService : IBookingService
                 CompletedAt = b.CompletedAt,
                 HasPickupConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Pickup),
                 HasReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return),
+                HasRenterReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return && h.ConfirmedBy == b.RenterId),
+                HasOwnerReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return && h.ConfirmedBy == b.Vehicle.OwnerId),
                 HasReviewed = b.Reviews.Any(r => r.ReviewerId == renterUserId),
                 HasDispute = b.Disputes.Any(d => d.Status == DisputeStatuses.Open),
                 DisputeStatus = b.Disputes.OrderByDescending(d => d.CreatedAt).FirstOrDefault()?.Status
@@ -447,6 +458,8 @@ public class BookingService : IBookingService
                 CompletedAt = b.CompletedAt,
                 HasPickupConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Pickup),
                 HasReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return),
+                HasRenterReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return && h.ConfirmedBy == b.RenterId),
+                HasOwnerReturnConfirmed = b.HandoverConfirmations.Any(h => h.Type == HandoverTypes.Return && h.ConfirmedBy == b.Vehicle.OwnerId),
                 HasReviewed = b.Reviews.Any(r => r.ReviewerId == ownerUserId),
                 HasDispute = b.Disputes.Any(d => d.Status == DisputeStatuses.Open),
                 DisputeStatus = b.Disputes.OrderByDescending(d => d.CreatedAt).FirstOrDefault()?.Status
@@ -733,6 +746,7 @@ public class BookingService : IBookingService
         if (now >= booking.StartDate && booking.Status == BookingStatuses.Accepted)
             return ServiceResult<BookingDetailDto>.Fail("Không thể hủy đơn thuê khi đã đến hoặc quá thời gian nhận xe.", ErrorCodes.InvalidState);
 
+        var previousStatus = booking.Status;
         booking.Status = BookingStatuses.Cancelled;
         booking.CancelledAt = now;
         booking.CancelledBy = currentUserId;
@@ -744,6 +758,40 @@ public class BookingService : IBookingService
         if (booking.SourceHold != null)
         {
             booking.SourceHold.Status = DepositHoldStatuses.Cancelled;
+        }
+
+        // Cập nhật trạng thái tiền cọc & phạt vi phạm theo SRS mục 4.3 & Quy định xử lý phạt:
+        var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == bookingId, ct);
+        if (payment == null)
+        {
+            payment = new Payment { BookingId = bookingId };
+            _db.Payments.Add(payment);
+        }
+
+        if (previousStatus == BookingStatuses.Pending)
+        {
+            // Renter hủy khi đơn chờ duyệt -> Hoàn trả toàn bộ 100% tiền cọc
+            payment.DepositStatus = DepositStatuses.Refunded;
+        }
+        else if (previousStatus == BookingStatuses.Accepted)
+        {
+            if (isRenter)
+            {
+                // Renter tự hủy sau khi đã duyệt nhưng trước giờ nhận xe -> Mất cọc (Forfeited), cọc chuyển cho Owner trừ hoa hồng 5%
+                decimal commissionRate = BusinessRules.DefaultCommissionRate;
+                decimal commissionAmount = Math.Round(booking.PriceLockedTotal * commissionRate);
+                payment.DepositStatus = DepositStatuses.Forfeited;
+                payment.CommissionRate = commissionRate;
+                payment.CommissionAmount = commissionAmount;
+                payment.RevenueRecordedAt = now;
+            }
+            else if (isOwner)
+            {
+                // Owner tự hủy đơn đã duyệt -> Hoàn cọc 100% cho khách + Phạt chủ xe 8% giá trị đơn thuê
+                decimal penaltyAmount = Math.Round(booking.PriceLockedTotal * BusinessRules.OwnerCancelPenaltyRate);
+                payment.DepositStatus = DepositStatuses.Refunded;
+                payment.PenaltyAmount = penaltyAmount;
+            }
         }
 
         _logger.LogInformation("Đơn #{BookingId} đã bị HỦY bởi {UserId} (isRenter: {IsRenter}). Lý do: {Reason}",
@@ -801,7 +849,6 @@ public class BookingService : IBookingService
                 RemainingPaymentMethod = request.RemainingPaymentMethod
             };
             _db.HandoverConfirmations.Add(conf);
-            booking.HandoverConfirmations.Add(conf);
         }
         else
         {
@@ -871,7 +918,6 @@ public class BookingService : IBookingService
                 RemainingPaymentMethod = request.RemainingPaymentMethod
             };
             _db.HandoverConfirmations.Add(conf);
-            booking.HandoverConfirmations.Add(conf);
         }
         else
         {
@@ -881,54 +927,61 @@ public class BookingService : IBookingService
             existingConf.RemainingPaymentMethod = request.RemainingPaymentMethod ?? existingConf.RemainingPaymentMethod;
         }
 
-        // check complete condition
-        // host or both confirmed
-        var returnCount = booking.HandoverConfirmations.Count(h => h.Type == HandoverTypes.Return);
-        bool shouldComplete = isOwner || returnCount >= 2;
+        // Quy trình nghiệm thu trả xe:
+        // - Khi Khách thuê (Renter) xác nhận: Ghi nhận biên bản trả xe của khách, đơn vẫn giữ Ongoing để Chủ xe kiểm tra thực tế xe.
+        // - Khi Chủ xe (Owner) xác nhận nghiệm thu: Kiểm tra tranh chấp, nếu xe ổn thỏa thì mới chuyển sang Completed & giải phóng cọc.
+        bool shouldComplete = isOwner;
 
         if (shouldComplete && booking.Status == BookingStatuses.Ongoing)
         {
             // check open dispute
             bool hasOpenDisputes = booking.Disputes.Any(d => d.Status == DisputeStatuses.Open);
-            if (!hasOpenDisputes)
+            if (hasOpenDisputes)
             {
-                booking.Status = BookingStatuses.Completed;
-                booking.CompletedAt = now;
-
-                // settle payment & refund deposit
-                if (booking.SourceHold != null)
-                {
-                    booking.SourceHold.Status = DepositHoldStatuses.Converted;
-                }
-
-                // record payment & revenue
-                var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == bookingId, ct);
-                decimal commissionRate = BusinessRules.DefaultCommissionRate;
-                decimal commissionAmount = Math.Round(booking.PriceLockedTotal * commissionRate);
-
-                if (payment == null)
-                {
-                    payment = new Payment
-                    {
-                        BookingId = bookingId,
-                        DepositStatus = DepositStatuses.Refunded,
-                        CommissionRate = commissionRate,
-                        CommissionAmount = commissionAmount,
-                        RevenueRecordedAt = now
-                    };
-                    _db.Payments.Add(payment);
-                }
-                else
-                {
-                    payment.DepositStatus = DepositStatuses.Refunded;
-                    payment.CommissionRate = commissionRate;
-                    payment.CommissionAmount = commissionAmount;
-                    payment.RevenueRecordedAt = now;
-                }
-
-                _logger.LogInformation("Đơn thuê #{BookingId} đã HOÀN TẤT (COMPLETED). Doanh thu: {Total}, Hoa hồng: {Commission}",
-                    bookingId, booking.PriceLockedTotal, commissionAmount);
+                return ServiceResult<BookingDetailDto>.Fail("Đơn thuê đang có khiếu nại/tranh chấp chưa được giải quyết. Không thể hoàn tất chuyến đi.", ErrorCodes.Conflict);
             }
+
+            booking.Status = BookingStatuses.Completed;
+            booking.CompletedAt = now;
+
+            // settle payment & refund deposit
+            if (booking.SourceHold != null)
+            {
+                booking.SourceHold.Status = DepositHoldStatuses.Converted;
+            }
+
+            // record payment & revenue
+            var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == bookingId, ct);
+            decimal commissionRate = BusinessRules.DefaultCommissionRate;
+            decimal commissionAmount = Math.Round(booking.PriceLockedTotal * commissionRate);
+
+            if (payment == null)
+            {
+                payment = new Payment
+                {
+                    BookingId = bookingId,
+                    DepositStatus = DepositStatuses.Refunded,
+                    CommissionRate = commissionRate,
+                    CommissionAmount = commissionAmount,
+                    RevenueRecordedAt = now
+                };
+                _db.Payments.Add(payment);
+            }
+            else
+            {
+                payment.DepositStatus = DepositStatuses.Refunded;
+                payment.CommissionRate = commissionRate;
+                payment.CommissionAmount = commissionAmount;
+                payment.RevenueRecordedAt = now;
+            }
+
+            _logger.LogInformation("Chủ xe {OwnerId} đã nghiệm thu và hoàn tất Đơn thuê #{BookingId}. Doanh thu: {Total}, Hoa hồng: {Commission}",
+                currentUserId, bookingId, booking.PriceLockedTotal, commissionAmount);
+        }
+        else if (isRenter)
+        {
+            _logger.LogInformation("Khách thuê {RenterId} đã gửi biên bản trả xe cho Đơn thuê #{BookingId}. Đang chờ Chủ xe nghiệm thu xe.",
+                currentUserId, bookingId);
         }
 
         await _db.SaveChangesAsync(ct);
@@ -1040,15 +1093,19 @@ public class BookingService : IBookingService
         if (!isRenter && !isOwner)
             return ServiceResult<bool>.Fail("Bạn không có quyền gửi khiếu nại cho đơn thuê này.", ErrorCodes.Forbidden);
 
-        // only ongoing
-        if (booking.Status != BookingStatuses.Ongoing)
-            return ServiceResult<bool>.Fail("Chỉ có thể gửi khiếu nại khi chuyến đi đang diễn ra hoặc đang trong quá trình bàn giao trả xe.", ErrorCodes.InvalidState);
+        var now = _clock.UtcNow;
+
+        // Cho phép gửi khiếu nại khi chuyến đang diễn ra, trong lúc bàn giao trả xe hoặc trong vòng 48 giờ sau khi hoàn tất chuyến
+        bool canDispute = booking.Status == BookingStatuses.Ongoing ||
+            (booking.Status == BookingStatuses.Completed && (!booking.CompletedAt.HasValue || now - booking.CompletedAt.Value <= TimeSpan.FromHours(48)));
+
+        if (!canDispute)
+            return ServiceResult<bool>.Fail("Chỉ có thể gửi khiếu nại khi chuyến đi đang diễn ra, trong lúc bàn giao trả xe hoặc trong vòng 48 giờ sau khi hoàn tất chuyến.", ErrorCodes.InvalidState);
 
         // check existing open dispute
         if (booking.Disputes.Any(d => d.Status == DisputeStatuses.Open))
             return ServiceResult<bool>.Fail("Đơn thuê này đang có khiếu nại đang chờ xử lý.", ErrorCodes.Conflict);
 
-        var now = _clock.UtcNow;
         var evidence = string.IsNullOrWhiteSpace(request.EvidenceImage)
             ? "https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&q=80&w=800"
             : request.EvidenceImage.Trim();
@@ -1057,6 +1114,8 @@ public class BookingService : IBookingService
         {
             BookingId = bookingId,
             RaisedBy = currentUserId,
+            Category = !string.IsNullOrWhiteSpace(request.Category) ? request.Category.Trim() : "Other",
+            ProposedAmount = request.ProposedAmount > 0 ? request.ProposedAmount : null,
             Description = request.Description.Trim(),
             EvidenceImage = evidence,
             Status = DisputeStatuses.Open,

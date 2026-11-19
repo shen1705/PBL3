@@ -2,6 +2,8 @@ namespace CarRental.Services.Abstractions;
 
 public interface IClock
 {
+    DateTime Now { get; }
+    DateOnly Today { get; }
     DateTime UtcNow { get; }
     DateOnly UtcToday { get; }
 

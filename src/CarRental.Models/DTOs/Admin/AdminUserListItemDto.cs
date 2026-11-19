@@ -18,6 +18,7 @@ public class AdminUserListItemDto
     public bool IsAdmin { get; set; }
     public bool HasDriverLicense { get; set; }
     public string? DriverLicenseClass { get; set; }
+    public bool IsDriverLicenseVerified { get; set; }
     public string? OwnerApprovalStatus { get; set; }
     public bool IsSanctioned { get; set; }
     public string? ActiveSanctionType { get; set; }

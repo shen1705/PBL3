@@ -120,6 +120,15 @@ public static class DbInitializer
                 });
             }
 
+            if (isRenterOrOwner && key != "renter3" && key != "renter4")
+            {
+                var userClaims = await um.GetClaimsAsync(user);
+                if (!userClaims.Any(c => c.Type == AppClaimTypes.DriverLicenseVerified))
+                {
+                    await um.AddClaimAsync(user, new Claim(AppClaimTypes.DriverLicenseVerified, AppClaimTypes.GrantedValue));
+                }
+            }
+
             if (key.StartsWith("owner") && !await db.OwnerProfiles.AnyAsync(x => x.UserId == user.Id))
             {
                 var isPending = key == "owner4";

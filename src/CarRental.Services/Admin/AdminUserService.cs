@@ -133,6 +133,11 @@ public class AdminUserService : IAdminUserService
             .Where(d => userIds.Contains(d.UserId))
             .ToDictionaryAsync(d => d.UserId, ct);
 
+        var verifiedLicenseUserIds = await _db.UserClaims.AsNoTracking()
+            .Where(c => userIds.Contains(c.UserId) && c.ClaimType == AppClaimTypes.DriverLicenseVerified && c.ClaimValue == AppClaimTypes.GrantedValue)
+            .Select(c => c.UserId)
+            .ToHashSetAsync(ct);
+
         var ownerProfiles = await _db.OwnerProfiles.AsNoTracking()
             .Where(o => userIds.Contains(o.UserId))
             .ToDictionaryAsync(o => o.UserId, ct);
@@ -214,6 +219,7 @@ public class AdminUserService : IAdminUserService
                 IsAdmin = isAdmin,
                 HasDriverLicense = hasDl,
                 DriverLicenseClass = dl?.LicenseClass,
+                IsDriverLicenseVerified = verifiedLicenseUserIds.Contains(u.Id),
                 OwnerApprovalStatus = op?.ApprovalStatus,
                 IsSanctioned = isSanctioned,
                 ActiveSanctionType = activeSanction?.SanctionType,
@@ -252,8 +258,12 @@ public class AdminUserService : IAdminUserService
                 items = items.Where(x => x.IsStaff).ToList();
             else if (r.Equals("Admin", StringComparison.OrdinalIgnoreCase))
                 items = items.Where(x => x.IsAdmin).ToList();
-            else if (r.Equals("Renter", StringComparison.OrdinalIgnoreCase))
+            else if (r.Equals("Renter", StringComparison.OrdinalIgnoreCase) || r.Equals("Customer", StringComparison.OrdinalIgnoreCase))
                 items = items.Where(x => !x.IsOwner && !x.IsStaff && !x.IsAdmin).ToList();
+            else if (r.Equals("Sanctioned", StringComparison.OrdinalIgnoreCase))
+                items = items.Where(x => x.IsSanctioned).ToList();
+            else if (r.Equals("PendingLicense", StringComparison.OrdinalIgnoreCase))
+                items = items.Where(x => x.HasDriverLicense && !x.IsDriverLicenseVerified).ToList();
         }
 
         var total = items.Count;
@@ -278,6 +288,8 @@ public class AdminUserService : IAdminUserService
 
         var roles = (await _userManager.GetRolesAsync(user)).ToList();
         var dl = await _db.DriverLicenses.AsNoTracking().FirstOrDefaultAsync(d => d.UserId == userId, ct);
+        var isDlVerified = await _db.UserClaims.AsNoTracking()
+            .AnyAsync(c => c.UserId == userId && c.ClaimType == AppClaimTypes.DriverLicenseVerified && c.ClaimValue == AppClaimTypes.GrantedValue, ct);
         var op = await _db.OwnerProfiles.AsNoTracking().FirstOrDefaultAsync(o => o.UserId == userId, ct);
         var bank = await _db.MockBankAccounts.AsNoTracking().FirstOrDefaultAsync(b => b.UserId == userId, ct);
 
@@ -379,6 +391,7 @@ public class AdminUserService : IAdminUserService
             IsAdmin = isAdmin,
             HasDriverLicense = dl != null,
             DriverLicenseClass = dl?.LicenseClass,
+            IsDriverLicenseVerified = isDlVerified,
             OwnerApprovalStatus = op?.ApprovalStatus,
             IsSanctioned = isSanctioned,
             ActiveSanctionType = activeSanction?.SanctionType,
@@ -398,7 +411,8 @@ public class AdminUserService : IAdminUserService
                 LicenseNumber = dl.LicenseNumber,
                 LicenseClass = dl.LicenseClass,
                 ExpiryDate = dl.ExpiryDate,
-                ImageFront = dl.ImageFront
+                ImageFront = dl.ImageFront,
+                IsVerified = isDlVerified
             } : null,
             OwnerProfile = op != null ? new OwnerProfileDetailDto
             {
@@ -599,5 +613,140 @@ public class AdminUserService : IAdminUserService
             targetUserId, currentUserId, string.Join(",", toAdd), string.Join(",", toRemove));
 
         return ServiceResult<bool>.Success(true);
+    }
+
+    public async Task<ServiceResult<bool>> VerifyDriverLicenseAsync(string targetUserId, VerifyDriverLicenseRequest request, string currentUserId, CancellationToken ct = default)
+    {
+        var targetUser = await _userManager.FindByIdAsync(targetUserId);
+        if (targetUser == null)
+            return ServiceResult<bool>.Fail("Không tìm thấy người dùng.", ErrorCodes.NotFound);
+
+        var dl = await _db.DriverLicenses.FirstOrDefaultAsync(d => d.UserId == targetUserId, ct);
+        if (dl == null)
+            return ServiceResult<bool>.Fail("Người dùng chưa cập nhật thông tin Giấy phép lái xe.", ErrorCodes.InvalidState);
+
+        var existingClaims = await _userManager.GetClaimsAsync(targetUser);
+        var verifiedClaim = existingClaims.FirstOrDefault(c => c.Type == AppClaimTypes.DriverLicenseVerified);
+
+        if (request.IsApproved)
+        {
+            if (verifiedClaim == null)
+            {
+                await _userManager.AddClaimAsync(targetUser, new Claim(AppClaimTypes.DriverLicenseVerified, AppClaimTypes.GrantedValue));
+            }
+            _logger.LogInformation("Driver license for user {TargetUserId} APPROVED by admin/staff {CurrentUserId}", targetUserId, currentUserId);
+        }
+        else
+        {
+            if (verifiedClaim != null)
+            {
+                await _userManager.RemoveClaimAsync(targetUser, verifiedClaim);
+            }
+            _logger.LogInformation("Driver license for user {TargetUserId} REJECTED by admin/staff {CurrentUserId}. Reason: {Reason}", targetUserId, currentUserId, request.Reason);
+        }
+
+        return ServiceResult<bool>.Success(true);
+    }
+
+    public async Task<ServiceResult<AdminVerifyLicenseResultDto>> AutoVerifyDriverLicenseAsync(string targetUserId, string currentUserId, CancellationToken ct = default)
+    {
+        var targetUser = await _userManager.FindByIdAsync(targetUserId);
+        if (targetUser == null)
+            return ServiceResult<AdminVerifyLicenseResultDto>.Fail("Không tìm thấy người dùng.", ErrorCodes.NotFound);
+
+        var dl = await _db.DriverLicenses.FirstOrDefaultAsync(d => d.UserId == targetUserId, ct);
+        if (dl == null)
+            return ServiceResult<AdminVerifyLicenseResultDto>.Fail("Người dùng chưa cập nhật thông tin Giấy phép lái xe.", ErrorCodes.InvalidState);
+
+        var now = DateOnly.FromDateTime(_clock.UtcNow);
+        var issues = new List<string>();
+
+        // 1. Kiểm tra định dạng số GPLX
+        var licenseNum = dl.LicenseNumber?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(licenseNum) || licenseNum.Length < 6)
+        {
+            issues.Add("Số Giấy phép lái xe không hợp lệ (tối thiểu 6 ký tự).");
+        }
+
+        // 2. Kiểm tra hạng bằng lái
+        var validClasses = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "B1", "B2", "C", "D", "E", "FB2", "FC", "FD", "FE" };
+        var licenseClass = dl.LicenseClass?.Trim().ToUpperInvariant() ?? string.Empty;
+        if (!validClasses.Contains(licenseClass))
+        {
+            issues.Add($"Hạng GPLX '{dl.LicenseClass}' không hợp lệ hoặc không được phép điều khiển ô tô.");
+        }
+
+        // 3. Kiểm tra hạn sử dụng
+        if (dl.ExpiryDate <= now)
+        {
+            issues.Add($"Giấy phép lái xe đã hết hạn sử dụng vào ngày {dl.ExpiryDate:dd/MM/yyyy}.");
+        }
+
+        // 4. Kiểm tra ảnh chụp
+        if (string.IsNullOrWhiteSpace(dl.ImageFront))
+        {
+            issues.Add("Chưa tải lên ảnh chụp mặt trước Giấy phép lái xe.");
+        }
+
+        var isAutoApproved = issues.Count == 0;
+        if (isAutoApproved)
+        {
+            var existingClaims = await _userManager.GetClaimsAsync(targetUser);
+            var verifiedClaim = existingClaims.FirstOrDefault(c => c.Type == AppClaimTypes.DriverLicenseVerified);
+            if (verifiedClaim == null)
+            {
+                await _userManager.AddClaimAsync(targetUser, new Claim(AppClaimTypes.DriverLicenseVerified, AppClaimTypes.GrantedValue));
+            }
+            _logger.LogInformation("Driver license for user {TargetUserId} AUTO-VERIFIED by {CurrentUserId}", targetUserId, currentUserId);
+        }
+
+        var resultDto = new AdminVerifyLicenseResultDto
+        {
+            UserId = targetUserId,
+            UserName = targetUser.UserName ?? string.Empty,
+            FullName = targetUser.FullName,
+            LicenseNumber = dl.LicenseNumber ?? string.Empty,
+            LicenseClass = dl.LicenseClass ?? string.Empty,
+            ExpiryDate = dl.ExpiryDate,
+            IsAutoApproved = isAutoApproved,
+            Issues = issues
+        };
+
+        return ServiceResult<AdminVerifyLicenseResultDto>.Success(resultDto);
+    }
+
+    public async Task<ServiceResult<AdminBatchVerifyResultDto>> BatchAutoVerifyLicensesAsync(string currentUserId, CancellationToken ct = default)
+    {
+        var usersWithDl = await _db.DriverLicenses.AsNoTracking().ToListAsync(ct);
+        var userIds = usersWithDl.Select(d => d.UserId).ToList();
+
+        var verifiedUserIds = await _db.UserClaims.AsNoTracking()
+            .Where(c => userIds.Contains(c.UserId) && c.ClaimType == AppClaimTypes.DriverLicenseVerified && c.ClaimValue == AppClaimTypes.GrantedValue)
+            .Select(c => c.UserId)
+            .ToHashSetAsync(ct);
+
+        var pendingDlList = usersWithDl.Where(d => !verifiedUserIds.Contains(d.UserId)).ToList();
+        var batchResult = new AdminBatchVerifyResultDto
+        {
+            TotalScanned = pendingDlList.Count
+        };
+
+        foreach (var dl in pendingDlList)
+        {
+            var res = await AutoVerifyDriverLicenseAsync(dl.UserId, currentUserId, ct);
+            if (res.IsSuccess && res.Data != null)
+            {
+                batchResult.Details.Add(res.Data);
+                if (res.Data.IsAutoApproved)
+                    batchResult.AutoApprovedCount++;
+                else
+                    batchResult.NeedsManualReviewCount++;
+            }
+        }
+
+        _logger.LogInformation("Batch auto-verification completed by {CurrentUserId}: Total {Total}, Approved {Approved}, NeedsReview {NeedsReview}",
+            currentUserId, batchResult.TotalScanned, batchResult.AutoApprovedCount, batchResult.NeedsManualReviewCount);
+
+        return ServiceResult<AdminBatchVerifyResultDto>.Success(batchResult);
     }
 }
