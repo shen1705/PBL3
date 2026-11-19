@@ -1069,6 +1069,34 @@ public class BookingService : IBookingService
         return ServiceResult<ReviewDto>.Success(dto, message);
     }
 
+    public async Task<ServiceResult<bool>> ReportReviewAsync(
+        int reviewId,
+        CarRental.Models.DTOs.Reviews.ReportReviewRequest request,
+        string currentUserId,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(currentUserId))
+            return ServiceResult<bool>.Fail("Yêu cầu đăng nhập.", ErrorCodes.Unauthorized);
+
+        var review = await _db.Reviews.FirstOrDefaultAsync(r => r.ReviewId == reviewId, ct);
+        if (review == null)
+            return ServiceResult<bool>.Fail("Không tìm thấy đánh giá.", ErrorCodes.NotFound);
+
+        if (review.IsReported)
+            return ServiceResult<bool>.Fail("Đánh giá này đã được báo cáo và đang chờ Quản trị viên xử lý.", ErrorCodes.Conflict);
+
+        var now = _clock.UtcNow;
+        review.IsReported = true;
+        review.ReportReason = request.Reason.Trim();
+        review.ReportedByUserId = currentUserId;
+        review.ReportedAt = now;
+
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Người dùng {UserId} báo cáo đánh giá #{ReviewId}: {Reason}", currentUserId, reviewId, request.Reason);
+
+        return ServiceResult<bool>.Success(true, "Báo cáo đánh giá đã được gửi thành công đến Quản trị viên để kiểm duyệt.");
+    }
+
     // create dispute
     public async Task<ServiceResult<bool>> CreateDisputeAsync(
         int bookingId,

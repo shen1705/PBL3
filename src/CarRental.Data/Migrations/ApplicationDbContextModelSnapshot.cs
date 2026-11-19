@@ -393,6 +393,11 @@ namespace CarRental.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("booking_id");
 
+                    b.Property<string>("Category")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("category");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("created_at");
@@ -406,6 +411,10 @@ namespace CarRental.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("evidence_image");
+
+                    b.Property<decimal?>("ProposedAmount")
+                        .HasColumnType("decimal(65,30)")
+                        .HasColumnName("proposed_amount");
 
                     b.Property<string>("RaisedBy")
                         .IsRequired()
@@ -835,9 +844,41 @@ namespace CarRental.Data.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("is_public");
 
+                    b.Property<bool>("IsReported")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_reported");
+
+                    b.Property<DateTime?>("ModeratedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("moderated_at");
+
+                    b.Property<string>("ModeratedByUserId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("moderated_by_user_id");
+
+                    b.Property<string>("ModerationNotes")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("moderation_notes");
+
                     b.Property<int>("Rating")
                         .HasColumnType("int")
                         .HasColumnName("rating");
+
+                    b.Property<string>("ReportReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("report_reason");
+
+                    b.Property<DateTime?>("ReportedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("reported_at");
+
+                    b.Property<string>("ReportedByUserId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("reported_by_user_id");
 
                     b.Property<string>("RevieweeId")
                         .IsRequired()

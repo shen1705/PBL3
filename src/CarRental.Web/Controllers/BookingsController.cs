@@ -296,6 +296,40 @@ public class BookingsController : ControllerBase
         return Ok(result);
     }
 
+    // Báo cáo đánh giá vi phạm (UC-S-04)
+    [Authorize]
+    [HttpPost("api/reviews/{id:int}/report")]
+    public async Task<IActionResult> ReportReview(int id, [FromBody] CarRental.Models.DTOs.Reviews.ReportReviewRequest request, CancellationToken ct)
+    {
+        var userId = _currentUser.UserId;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập.", errorCode = ErrorCodes.Unauthorized });
+
+        if (request == null)
+            return BadRequest(new { isSuccess = false, message = "Dữ liệu báo cáo không hợp lệ.", errorCode = ErrorCodes.Validation });
+
+        request.ReviewId = id;
+
+        if (!ModelState.IsValid)
+        {
+            var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            return BadRequest(new { isSuccess = false, message = errors, errorCode = ErrorCodes.Validation });
+        }
+
+        var result = await _bookingService.ReportReviewAsync(id, request, userId, ct);
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == ErrorCodes.NotFound)
+                return NotFound(result);
+            if (result.ErrorCode == ErrorCodes.Conflict)
+                return Conflict(result);
+
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
     // Khiếu nại sự cố
     [Authorize]
     [HttpPost("api/bookings/{id:int}/dispute")]

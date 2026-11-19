@@ -60,6 +60,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddServices();
+builder.Services.AddHostedService<CarRental.Services.Jobs.BookingExpiryBackgroundService>();
 
 var app = builder.Build();
 

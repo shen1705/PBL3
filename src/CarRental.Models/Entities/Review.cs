@@ -19,6 +19,18 @@ public class Review
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsPublic { get; set; }
 
+    public bool IsReported { get; set; }
+    [MaxLength(500)]
+    public string? ReportReason { get; set; }
+    [MaxLength(255)]
+    public string? ReportedByUserId { get; set; }
+    public DateTime? ReportedAt { get; set; }
+    [MaxLength(255)]
+    public string? ModeratedByUserId { get; set; }
+    public DateTime? ModeratedAt { get; set; }
+    [MaxLength(255)]
+    public string? ModerationNotes { get; set; }
+
     public Booking Booking { get; set; } = null!;
     public ApplicationUser Reviewer { get; set; } = null!;
     public ApplicationUser Reviewee { get; set; } = null!;

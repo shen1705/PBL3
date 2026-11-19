@@ -1810,9 +1810,52 @@ function openCarPopup(car) {
                                     dateSpan.className = 'review-date';
                                     dateSpan.textContent = dateStr;
 
+                                    // report review (UC-S-04)
+                                    const reportBtn = document.createElement('button');
+                                    reportBtn.type = 'button';
+                                    reportBtn.className = 'btn-report-review';
+                                    reportBtn.title = 'Báo cáo đánh giá sai sự thật / vi phạm';
+                                    reportBtn.style.cssText = 'background:transparent; border:none; color:#94a3b8; cursor:pointer; font-size:12px; margin-left:8px; padding:2px 4px; border-radius:4px; transition:all 0.15s;';
+                                    reportBtn.innerHTML = '<i class="fa-regular fa-flag"></i>';
+                                    reportBtn.addEventListener('mouseenter', () => { reportBtn.style.color = '#ef4444'; });
+                                    reportBtn.addEventListener('mouseleave', () => { reportBtn.style.color = '#94a3b8'; });
+                                    reportBtn.addEventListener('click', async (e) => {
+                                        e.stopPropagation();
+                                        if (!window.AzuStore.isLoggedIn()) {
+                                            alert('Vui lòng đăng nhập để gửi báo cáo đánh giá.');
+                                            return;
+                                        }
+                                        const reason = prompt('Nhập lý do báo cáo đánh giá này (sai sự thật, xúc phạm, thông tin sai lệch...):');
+                                        if (!reason || reason.trim().length < 5) {
+                                            if (reason !== null) alert('Vui lòng nhập lý do tối thiểu 5 ký tự.');
+                                            return;
+                                        }
+                                        reportBtn.disabled = true;
+                                        try {
+                                            const res = await fetch(`/api/reviews/${r.reviewId}/report`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ reviewId: r.reviewId, reason: reason.trim() })
+                                            });
+                                            const data = await res.json();
+                                            if (res.ok && data.isSuccess) {
+                                                alert(data.message || 'Báo cáo đánh giá đã được gửi thành công đến Quản trị viên!');
+                                                reportBtn.innerHTML = '<i class="fa-solid fa-flag" style="color:#ef4444"></i>';
+                                                reportBtn.title = 'Đã báo cáo';
+                                            } else {
+                                                alert('Lỗi: ' + (data?.message || 'Không thể gửi báo cáo.'));
+                                            }
+                                        } catch(err) {
+                                            alert('Lỗi kết nối máy chủ.');
+                                        } finally {
+                                            reportBtn.disabled = false;
+                                        }
+                                    });
+
                                     userDiv.appendChild(avatarDiv);
                                     userDiv.appendChild(userInfoDiv);
                                     userDiv.appendChild(dateSpan);
+                                    userDiv.appendChild(reportBtn);
 
                                     const p = document.createElement('p');
                                     p.className = 'review-text';

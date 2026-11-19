@@ -452,6 +452,15 @@ public class VehicleService : IVehicleService
     {
         try
         {
+            // UC-AS-11: Tạm dừng quyền chủ xe nếu có khoản phạt chưa thanh toán hoặc đang chịu án phạt
+            var isSanctioned = await _db.AccountSanctions.AsNoTracking()
+                .AnyAsync(s => s.UserId == ownerId && (s.ExpiresAt == null || s.ExpiresAt > DateTime.UtcNow), ct);
+            if (isSanctioned)
+            {
+                return ServiceResult<VehicleDetailDto>.Fail(
+                    "Tài khoản của bạn đang bị áp dụng chế tài kỷ luật hoặc nợ phạt chưa thanh toán (UC-AS-11). Vui lòng liên hệ Quản trị viên để được hỗ trợ.", ErrorCodes.Forbidden);
+            }
+
             // check license plate
             var cleanPlate = request.LicensePlate.Trim().ToUpperInvariant();
             var plateExists = await _db.Vehicles

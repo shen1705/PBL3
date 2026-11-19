@@ -94,7 +94,7 @@ const badge = (s) => {
 
 // State
 let currentUser = null;
-let page = ['overview', 'owners', 'listings', 'disputes', 'users', 'fees', 'revenue', 'logs', 'settings'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
+let page = ['overview', 'owners', 'listings', 'disputes', 'reviews', 'users', 'fees', 'revenue', 'logs', 'settings'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
 let filter = 'all';
 let query = '';
 let pageCache = {};
@@ -140,6 +140,7 @@ const pageNames = {
   owners: 'Hồ sơ chủ xe',
   listings: 'Quản lý tin đăng',
   disputes: 'Tranh chấp',
+  reviews: 'Báo cáo đánh giá',
   users: 'Người dùng',
   fees: 'Phí & hoa hồng',
   revenue: 'Doanh thu',
@@ -533,6 +534,66 @@ async function renderDisputes() {
     </section>`;
 }
 
+async function renderReviews() {
+  const res = await api('/api/admin/reviews/reported');
+  const items = res?.data || [];
+  pageCache.reviews = items;
+
+  return header('Kiểm duyệt Đánh giá', 'Xử lý báo cáo các đánh giá vi phạm tiêu chuẩn cộng đồng, sai sự thật (UC-AS-10)', exportBtn('reviews')) +
+    note('Các đánh giá bị người dùng báo cáo vi phạm sẽ được hiển thị tại đây để Quản trị viên thẩm định, duyệt giữ lại công khai hoặc gỡ bỏ / ẩn.') +
+    `<div class="stats-grid">
+      ${stat('Đánh giá bị báo cáo', items.length, 'Cần thẩm định & xử lý', 'flag')}
+      ${stat('Cơ chế kiểm duyệt', 'Độc lập', 'Staff & Admin có thẩm quyền', 'shield')}
+    </div>
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Danh sách đánh giá bị báo cáo</h2>
+        <small>${items.length} báo cáo</small>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mã ĐG</th>
+              <th>Đơn & Xe</th>
+              <th>Người đánh giá</th>
+              <th>Người nhận ĐG</th>
+              <th>Điểm & Nhận xét</th>
+              <th>Lý do báo cáo</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.length ? items.map(r => `
+              <tr>
+                <td><strong>#DG-${r.reviewId}</strong><span class="sub">${formatDate(r.createdAt)}</span></td>
+                <td><strong>Đơn #${r.bookingId}</strong><span class="sub">${escapeHtml(r.vehicleName)} (${escapeHtml(r.licensePlate)})</span></td>
+                <td><strong>${escapeHtml(r.reviewerName)}</strong></td>
+                <td><strong>${escapeHtml(r.revieweeName)}</strong></td>
+                <td style="max-width:280px;white-space:normal;line-height:1.4">
+                  <div style="color:#f59e0b;font-size:13px;font-weight:700">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+                  <div style="font-size:13px;color:#334155">${escapeHtml(r.comment || 'Không có nhận xét')}</div>
+                </td>
+                <td style="max-width:240px;white-space:normal;line-height:1.4">
+                  <strong style="color:var(--danger)">${escapeHtml(r.reportReason || 'Vi phạm tiêu chuẩn')}</strong>
+                  <span class="sub">Báo cáo bởi: ${escapeHtml(r.reportedByName || 'Thành viên')} (${formatDate(r.reportedAt)})</span>
+                </td>
+                <td>${r.isPublic ? '<span class="badge approved">Công khai</span>' : '<span class="badge suspended">Tạm ẩn</span>'}</td>
+                <td>
+                  <div class="row-actions">
+                    <button class="btn small approved" data-action="review-keep:${r.reviewId}" title="Duyệt giữ lại đánh giá công khai">Giữ lại</button>
+                    <button class="btn small danger" data-action="review-hide:${r.reviewId}" title="Ẩn và gỡ bỏ đánh giá vi phạm">Ẩn ĐG</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('') : `<tr><td colspan="8" class="empty">Hiện không có đánh giá nào bị báo cáo vi phạm 🎉</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
 async function renderUsers() {
   const [resMetrics, resList] = await Promise.all([
     api('/api/admin/users/metrics'),
@@ -861,6 +922,7 @@ async function render() {
       case 'owners': html = await renderOwners(); break;
       case 'listings': html = await renderListings(); break;
       case 'disputes': html = await renderDisputes(); break;
+      case 'reviews': html = await renderReviews(); break;
       case 'users': html = await renderUsers(); break;
       case 'fees': html = await renderFees(); break;
       case 'revenue': html = await renderRevenue(); break;
@@ -1205,6 +1267,40 @@ async function handleAction(raw) {
           });
         }
       }, 50);
+    }
+  } else if (target === 'review') {
+    if (verb === 'keep') {
+      showModal('Phê duyệt giữ lại đánh giá', `
+        <p>Xác nhận đánh giá ID <strong>#DG-${id}</strong> không vi phạm chính sách cộng đồng và giữ lại hiển thị công khai?</p>
+      `, async () => {
+        const res = await api(`/api/admin/reviews/${id}/moderate`, {
+          method: 'POST',
+          body: { isApproved: true, note: 'Đã kiểm tra và phê duyệt giữ lại bởi Quản trị viên' }
+        });
+        if (!res?.isSuccess) { toast(res?.message || 'Lỗi xử lý kiểm duyệt đánh giá'); return false; }
+        addLog('Kiểm duyệt đánh giá', `Giữ lại đánh giá #${id}`);
+        toast('Đã phê duyệt giữ lại đánh giá công khai!');
+        render();
+      }, 'Xác nhận giữ lại');
+    } else if (verb === 'hide') {
+      showModal('Ẩn và gỡ bỏ đánh giá vi phạm', `
+        <p>Ẩn đánh giá ID <strong>#DG-${id}</strong> do vi phạm tiêu chuẩn cộng đồng, ngôn từ xúc phạm hoặc thông tin sai lệch.</p>
+        <div class="field">
+          <label for="reviewModNote">Ghi chú kiểm duyệt / Lý do ẩn *</label>
+          <textarea id="reviewModNote" placeholder="Ví dụ: Đánh giá có ngôn từ thô tục, xúc phạm danh dự hoặc vu khống..." required></textarea>
+        </div>
+      `, async () => {
+        const note = document.getElementById('reviewModNote')?.value.trim();
+        if (!note || note.length < 5) { toast('Vui lòng nhập lý do tối thiểu 5 ký tự'); return false; }
+        const res = await api(`/api/admin/reviews/${id}/moderate`, {
+          method: 'POST',
+          body: { isApproved: false, note }
+        });
+        if (!res?.isSuccess) { toast(res?.message || 'Lỗi ẩn đánh giá'); return false; }
+        addLog('Kiểm duyệt đánh giá', `Ẩn đánh giá #${id}: ${note}`);
+        toast('Đã ẩn đánh giá vi phạm thành công!');
+        render();
+      }, 'Ẩn đánh giá');
     }
   } else if (target === 'user') {
     if (verb === 'sanction') {
