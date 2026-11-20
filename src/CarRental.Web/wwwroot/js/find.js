@@ -1402,7 +1402,7 @@ function updateCalendarTriggerSummary() {
 
     if (calSelectedStart && calSelectedEnd) {
         const days = Math.max(1, Math.round((calSelectedEnd.getTime() - calSelectedStart.getTime()) / 86400000) + 1);
-        summaryText.innerHTML = `<span style="color: #00a550; font-weight: 700;"><i class="fa-solid fa-calendar-check"></i> Đã chọn ${days} ngày thuê</span>`;
+        summaryText.innerHTML = `<span style="color: #b88a32; font-weight: 700;"><i class="fa-solid fa-calendar-check"></i> Đã chọn ${days} ngày thuê</span>`;
         datesText.textContent = `${formatVNShortDate(calSelectedStart)} - ${formatVNShortDate(calSelectedEnd)} (21:00)`;
     } else if (calSelectedStart) {
         summaryText.textContent = 'Đang chọn khoảng ngày thuê...';
@@ -1572,6 +1572,29 @@ document.getElementById('calResetSelectionBtn')?.addEventListener('click', () =>
     calSelectionStep = 0;
     renderAvailabilityCalendar();
     updateCalendarTriggerSummary();
+});
+
+// Lịch xe dạng thu gọn: chỉ render và hiển thị khi người dùng yêu cầu.
+const inlineCalendarToggle = document.getElementById('btnToggleInlineCalendar');
+const inlineCalendarPanel = document.getElementById('inlineCalendarPanel');
+const inlineCalendarToggleLabel = document.getElementById('calendarToggleLabel');
+
+inlineCalendarToggle?.addEventListener('click', () => {
+    if (!inlineCalendarPanel) return;
+
+    const willOpen = inlineCalendarPanel.hidden;
+    inlineCalendarPanel.hidden = !willOpen;
+    inlineCalendarToggle.setAttribute('aria-expanded', String(willOpen));
+
+    if (inlineCalendarToggleLabel) {
+        inlineCalendarToggleLabel.innerHTML = willOpen
+            ? '<i class="fa-solid fa-chevron-up"></i> Thu gọn lịch'
+            : '<i class="fa-solid fa-chevron-down"></i> Xem lịch xe';
+    }
+
+    if (willOpen) {
+        renderAvailabilityCalendar();
+    }
 });
 
 // Modal Lịch xe bận & trống
@@ -2871,7 +2894,7 @@ function openPaymentSimulationModal() {
         const sZero = new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate());
         const eZero = new Date(eDate.getFullYear(), eDate.getMonth(), eDate.getDate());
         const days = Math.max(1, Math.round((eZero.getTime() - sZero.getTime()) / 86400000) + 1);
-        paySimCarMeta.textContent = `Thuê xe ${pendingBookingData.display.carName} • ${days} ngày • Ký quỹ 25%`;
+        paySimCarMeta.textContent = `${pendingBookingData.display.carName} · Thuê ${days} ngày`;
     }
 
     const paySimTransferMemo = document.getElementById('paySimTransferMemo');
@@ -2921,6 +2944,9 @@ function closePaymentSimulationModal() {
 
 document.getElementById('closePaymentSimModal')?.addEventListener('click', closePaymentSimulationModal);
 document.getElementById('btnCancelPaymentSimulation')?.addEventListener('click', closePaymentSimulationModal);
+document.getElementById('paymentSimulationModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'paymentSimulationModal') closePaymentSimulationModal();
+});
 
 document.getElementById('btnConfirmPaymentSimulation')?.addEventListener('click', async () => {
     if (!pendingBookingData) return;
@@ -2995,7 +3021,7 @@ document.getElementById('btnConfirmPaymentSimulation')?.addEventListener('click'
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Xác nhận thanh toán thành công (Mô phỏng)';
+            btn.innerHTML = 'Xác nhận thanh toán mô phỏng';
         }
     }
 });

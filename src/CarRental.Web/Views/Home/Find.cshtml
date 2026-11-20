@@ -461,26 +461,61 @@
                     <!-- Lịch trạng thái bận & trống -->
                     <div class="car-popup-section" id="popupAvailabilityCalendarSection">
                         <div class="section-header-inline">
-                            <h2 class="section-subheading"><i class="fa-regular fa-calendar-days" style="color: #00a550;"></i> Lịch xe bận &amp; trống</h2>
+                            <h2 class="section-subheading"><i class="fa-regular fa-calendar-days" style="color: #d1a34b;"></i> Lịch xe bận &amp; trống</h2>
                             <span class="cal-status-pill"><i class="fa-solid fa-bolt"></i> Cập nhật theo thời gian thực</span>
                         </div>
                         <p class="section-plain-text" style="margin-bottom: 12px; font-size: 13.5px; color: #64748b;">
                             Xem lịch bận/trống thực tế của xe và chọn ngày nhận - trả xe phù hợp với lộ trình của bạn:
                         </p>
 
-                        <div class="calendar-trigger-card">
-                            <div class="cal-trigger-left">
-                                <div class="cal-trigger-icon">
-                                    <i class="fa-regular fa-calendar-days"></i>
-                                </div>
-                                <div>
-                                    <strong id="calQuickSummaryText" style="font-size: 14.5px; color: #1e293b; display: block;">Lịch xe bận &amp; trống</strong>
-                                    <small id="calQuickSelectedDatesText" style="display: block; color: #64748b; margin-top: 3px;">Nhấp để mở xem chi tiết các ngày đã có người đặt và chọn ngày thuê</small>
-                                </div>
+                        <button type="button" class="calendar-trigger-card" id="btnToggleInlineCalendar"
+                                aria-expanded="false" aria-controls="inlineCalendarPanel">
+                            <span class="cal-trigger-left">
+                                <span class="cal-trigger-icon"><i class="fa-regular fa-calendar-days"></i></span>
+                                <span>
+                                    <strong id="calQuickSummaryText">Lịch xe bận &amp; trống</strong>
+                                    <small id="calQuickSelectedDatesText">Bấm để xem chi tiết và chọn ngày thuê</small>
+                                </span>
+                            </span>
+                            <span class="btn-open-calendar-modal" id="calendarToggleLabel">
+                                <i class="fa-solid fa-chevron-down"></i> Xem lịch xe
+                            </span>
+                        </button>
+
+                        <div class="car-availability-calendar-box inline-calendar-panel" id="inlineCalendarPanel" hidden>
+                            <div class="cal-header-bar">
+                                <button type="button" class="cal-btn-nav" id="calPrevMonthBtn" title="Tháng trước">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <span class="cal-current-month" id="calMonthTitle">Tháng 11 / 2026</span>
+                                <button type="button" class="cal-btn-nav" id="calNextMonthBtn" title="Tháng sau">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
                             </div>
-                            <button type="button" class="btn-open-calendar-modal" id="btnOpenCarCalendarModal">
-                                <i class="fa-solid fa-calendar-week"></i> Xem lịch xe
-                            </button>
+
+                            <div class="cal-weekdays-row">
+                                <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span class="weekend">T7</span><span class="weekend">CN</span>
+                            </div>
+
+                            <div class="cal-days-grid" id="calDaysGrid">
+                                <!-- Rendered dynamically by find.js -->
+                            </div>
+
+                            <div class="cal-legend-bar">
+                                <div class="legend-badge"><span class="badge-dot dot-available"></span> Trống (Có thể thuê)</div>
+                                <div class="legend-badge"><span class="badge-dot dot-busy"></span> Đã bận / Có người đặt</div>
+                                <div class="legend-badge"><span class="badge-dot dot-selected"></span> Khoảng ngày bạn chọn</div>
+                            </div>
+
+                            <div class="cal-selection-bar" id="calSelectionBar">
+                                <div class="selection-info">
+                                    <i class="fa-solid fa-calendar-check" style="color: #d1a34b;"></i>
+                                    <span id="calSelectionText">Đang áp dụng lịch hiện tại</span>
+                                </div>
+                                <button type="button" class="cal-reset-btn" id="calResetSelectionBtn" style="display: none;">
+                                    <i class="fa-solid fa-rotate-left"></i> Chọn lại ngày
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1178,55 +1213,58 @@
             <button class="payment-sim-close" id="closePaymentSimModal" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
 
             <div class="pay-sim-header">
-                <div class="pay-sim-badge"><i class="fa-solid fa-shield-halved"></i> CỔNG KÝ QUỸ AZU ESCROW SECURE</div>
-                <h3 id="paySimTitle">Thanh toán cọc giữ xe (25%)</h3>
-                <p>Khoản thanh toán được bảo lưu an toàn tại tài khoản bảo chứng trung gian cho đến khi nhận bàn giao xe.</p>
+                <h3 id="paySimTitle">Thanh toán cọc giữ xe</h3>
+                <p class="pay-sim-car-meta" id="paySimCarMeta">Honda City 2022 · Thuê 2 ngày</p>
             </div>
 
             <div class="pay-sim-body">
                 <div class="pay-sim-amount-card">
-                    <span class="pay-sim-amount-label">SỐ TIỀN CỌC CẦN THANH TOÁN (25%)</span>
-                    <strong class="pay-sim-amount-val" id="paySimAmount">0 đ</strong>
-                    <div class="pay-sim-car-meta" id="paySimCarMeta">Thuê xe Vinfast VF3 • 2 ngày</div>
+                    <span class="pay-sim-amount-label">Tiền cọc <strong>(25%)</strong></span>
+                    <strong class="pay-sim-amount-val" id="paySimAmount">350.000 đ</strong>
                 </div>
 
-                <div class="pay-sim-qr-box">
-                    <div class="qr-frame">
-                        <img id="paySimQrImage" src="/seed/vietqr-escrow.png" alt="Mã VietQR Thanh toán mô phỏng" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=AZU_ESCROW_CAR_RENTAL'">
-                        <div class="qr-scan-line"></div>
-                    </div>
-                    <div class="qr-details">
-                        <div class="qr-detail-row">
-                            <span>Ngân hàng thụ hưởng:</span>
-                            <strong>MBBank (Ngoại thương &amp; Quân Đội)</strong>
+                <div class="pay-sim-transfer-section">
+                    <h4 class="pay-sim-transfer-title">Thông tin chuyển khoản</h4>
+                    <div class="pay-sim-qr-box">
+                        <div class="qr-col">
+                            <div class="qr-frame">
+                                <img id="paySimQrImage" src="/seed/vietqr-escrow.png" alt="Mã VietQR Thanh toán mô phỏng" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=AZU_ESCROW_CAR_RENTAL'">
+                            </div>
+                            <div class="qr-caption">QR minh họa</div>
                         </div>
-                        <div class="qr-detail-row">
-                            <span>Số tài khoản bảo chứng:</span>
-                            <strong style="color: #0284c7; font-size: 15px;">AZU-ESCROW-88899</strong>
-                        </div>
-                        <div class="qr-detail-row">
-                            <span>Chủ tài khoản:</span>
-                            <strong>AZU CAR RENTAL ESCROW</strong>
-                        </div>
-                        <div class="qr-detail-row">
-                            <span>Nội dung chuyển khoản:</span>
-                            <strong id="paySimTransferMemo" style="color: #b45309;">AZUPAY 20261111</strong>
-                        </div>
-                        <div class="qr-timer-pill">
-                            <i class="fa-solid fa-clock-rotate-left"></i> Giao dịch hết hạn trong: <strong id="paySimCountdown">14:59</strong>
+                        <div class="qr-details">
+                            <div class="qr-detail-row">
+                                <span class="qr-row-label">Ngân hàng</span>
+                                <strong class="qr-row-value">MBBank</strong>
+                            </div>
+                            <div class="qr-detail-row">
+                                <span class="qr-row-label">Số tài khoản bảo chứng</span>
+                                <strong class="qr-row-value">AZU-ESCROW-88899</strong>
+                            </div>
+                            <div class="qr-detail-row">
+                                <span class="qr-row-label">Chủ tài khoản</span>
+                                <strong class="qr-row-value">AZU CAR RENTAL ESCROW</strong>
+                            </div>
+                            <div class="qr-detail-row">
+                                <span class="qr-row-label">Nội dung chuyển khoản</span>
+                                <strong class="qr-row-value" id="paySimTransferMemo">AZUPAY019242</strong>
+                            </div>
+                            <div class="qr-detail-row qr-timer-row">
+                                <span class="qr-row-label">Thời gian còn lại</span>
+                                <strong class="qr-row-value qr-countdown" id="paySimCountdown">14:57</strong>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="pay-sim-instruction">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <span>Đây là môi trường thanh toán mô phỏng. Bấm nút bên dưới để giả lập hoàn tất giao dịch chuyển khoản cọc.</span>
+                    Tiền cọc được giữ tại tài khoản bảo chứng đến khi bạn nhận xe. Đây là giao dịch mô phỏng.
                 </div>
             </div>
 
             <div class="pay-sim-footer">
                 <button type="button" class="btn-confirm-sim-payment" id="btnConfirmPaymentSimulation">
-                    <i class="fa-solid fa-circle-check"></i> Xác nhận thanh toán thành công (Mô phỏng)
+                    Xác nhận thanh toán mô phỏng
                 </button>
                 <button type="button" class="btn-cancel-sim-payment" id="btnCancelPaymentSimulation">
                     Quay lại chỉnh sửa đơn
@@ -1255,65 +1293,6 @@
                 </a>
                 <button type="button" class="btn-close-gplx-modal" id="btnCancelGplxModal">
                     Để sau
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Lịch xe bận & trống (Popup) -->
-    <div class="car-calendar-overlay" id="carCalendarModal" hidden>
-        <div class="car-calendar-dialog" role="dialog" aria-modal="true" aria-labelledby="carCalendarTitle">
-            <button class="car-calendar-close" id="closeCarCalendarModal" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
-            <div class="car-calendar-header">
-                <div class="car-calendar-icon-wrap">
-                    <i class="fa-regular fa-calendar-days"></i>
-                </div>
-                <div>
-                    <h3 id="carCalendarTitle">Lịch xe bận &amp; trống</h3>
-                    <p class="car-calendar-subtitle">Kiểm tra các ngày xe bận hoặc chọn ngày nhận - trả xe trực tiếp</p>
-                </div>
-            </div>
-
-            <div class="car-availability-calendar-box in-modal">
-                <div class="cal-header-bar">
-                    <button type="button" class="cal-btn-nav" id="calPrevMonthBtn" title="Tháng trước">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </button>
-                    <span class="cal-current-month" id="calMonthTitle">Tháng 11 / 2026</span>
-                    <button type="button" class="cal-btn-nav" id="calNextMonthBtn" title="Tháng sau">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </button>
-                </div>
-
-                <div class="cal-weekdays-row">
-                    <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span class="weekend">T7</span><span class="weekend">CN</span>
-                </div>
-
-                <div class="cal-days-grid" id="calDaysGrid">
-                    <!-- Rendered dynamically by find.js -->
-                </div>
-
-                <div class="cal-legend-bar">
-                    <div class="legend-badge"><span class="badge-dot dot-available"></span> Trống (Có thể thuê)</div>
-                    <div class="legend-badge"><span class="badge-dot dot-busy"></span> Đã bận / Có người đặt</div>
-                    <div class="legend-badge"><span class="badge-dot dot-selected"></span> Khoảng ngày bạn chọn</div>
-                </div>
-
-                <div class="cal-selection-bar" id="calSelectionBar">
-                    <div class="selection-info">
-                        <i class="fa-solid fa-calendar-check" style="color: #00a550;"></i>
-                        <span id="calSelectionText">Đang áp dụng lịch hiện tại</span>
-                    </div>
-                    <button type="button" class="cal-reset-btn" id="calResetSelectionBtn" style="display: none;">
-                        <i class="fa-solid fa-rotate-left"></i> Chọn lại ngày
-                    </button>
-                </div>
-            </div>
-
-            <div class="car-calendar-footer">
-                <button type="button" class="btn-cancel-cal" id="btnCloseCarCalendarBottom">Đóng</button>
-                <button type="button" class="btn-apply-cal" id="btnApplyCalendarSelection">
-                    <i class="fa-solid fa-check"></i> Áp dụng ngày chọn
                 </button>
             </div>
         </div>

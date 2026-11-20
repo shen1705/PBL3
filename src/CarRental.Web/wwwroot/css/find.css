@@ -959,7 +959,7 @@ body {
 }
 
 .delivery-note {
-    color: #21a36b;
+    color: #2019eb;
     font-size: 14px;
     font-weight: 500;
     white-space: nowrap;
@@ -1069,7 +1069,7 @@ body {
 }
 
 /* ==========================================================================
-   POPUP CHI TIẾT XE AZU CAR (Khớp 100% Ảnh mẫu)
+    POPUP CHI TIẾT XE AZU CAR 
    ========================================================================== */
 
 .car-popup-overlay {
@@ -1320,8 +1320,8 @@ body {
     gap: 12px;
     padding: 12px;
     border-radius: 12px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: #fffaf0;
+    border: 1px solid #ead9b2;
 }
 
 .spec-icon {
@@ -1532,7 +1532,7 @@ body {
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 13px;
-    color: #15803d;
+    color: #1f51e9;
     line-height: 1.5;
 }
 
@@ -2000,7 +2000,7 @@ body {
 }
 
 /* ========================================================
-   MODAL ĐIỀN THÔNG TIN ĐẶT XE (BOOKING CHECKOUT MODAL)
+    MODAL ĐIỀN THÔNG TIN ĐẶT XE (BOOKING CHECKOUT MODAL)
    ======================================================== */
 .booking-overlay {
     position: fixed;
@@ -2494,7 +2494,7 @@ body {
 }
 
 /* =========================================================
-   LỊCH TRẠNG THÁI BẬN & TRỐNG (AVAILABILITY CALENDAR)
+    LỊCH TRẠNG THÁI BẬN & TRỐNG (AVAILABILITY CALENDAR)
    ========================================================= */
 .cal-status-pill {
     display: inline-flex;
@@ -2502,15 +2502,16 @@ body {
     gap: 5px;
     font-size: 11.5px;
     font-weight: 700;
-    color: #00a550;
-    background: #e8f7ee;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
     padding: 3px 10px;
     border-radius: 999px;
 }
 
 .car-availability-calendar-box {
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
+    background: #fdfcf9;
+    border: 1.5px solid #f3ebe0;
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
@@ -2545,8 +2546,8 @@ body {
 }
 
 .cal-btn-nav:hover:not(:disabled) {
-    background: #00a550;
-    border-color: #00a550;
+    background: #d1a34b;
+    border-color: #d1a34b;
     color: #ffffff;
 }
 
@@ -2605,9 +2606,9 @@ body {
 }
 
 .cal-day.available:hover {
-    border-color: #00a550;
-    background: #f0fdf4;
-    color: #00a550;
+    border-color: #d1a34b;
+    background: #fffbeb;
+    color: #b45309;
     transform: translateY(-1px);
 }
 
@@ -2629,18 +2630,18 @@ body {
 
 .cal-day.selected-start,
 .cal-day.selected-end {
-    background: #00a550 !important;
-    border-color: #00a550 !important;
+    background: #d1a34b !important;
+    border-color: #d1a34b !important;
     color: #ffffff !important;
     font-weight: 800;
     text-decoration: none;
-    box-shadow: 0 4px 10px rgba(0, 165, 80, 0.35);
+    box-shadow: 0 4px 12px rgba(209, 163, 75, 0.4);
 }
 
 .cal-day.in-selected-range {
-    background: #dcfce7 !important;
-    border-color: #86efac !important;
-    color: #166534 !important;
+    background: #fef3c7 !important;
+    border-color: #fde68a !important;
+    color: #92400e !important;
     font-weight: 700;
     text-decoration: none;
 }
@@ -2677,7 +2678,7 @@ body {
 }
 
 .badge-dot.dot-available {
-    background: #00a550;
+    background: #d1a34b;
 }
 
 .badge-dot.dot-busy {
@@ -2685,8 +2686,8 @@ body {
 }
 
 .badge-dot.dot-selected {
-    background: #10b981;
-    box-shadow: 0 0 0 2px #047857;
+    background: #d1a34b;
+    box-shadow: 0 0 0 2px #b48228;
 }
 
 .cal-selection-bar {
@@ -2695,8 +2696,8 @@ body {
     align-items: center;
     margin-top: 12px;
     padding: 10px 14px;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
+    background: #fffdf5;
+    border: 1px solid #fef08a;
     border-radius: 10px;
     font-size: 13px;
     color: #1e293b;
@@ -2728,11 +2729,9 @@ body {
 }
 
 /* =========================================================
-   HỢP ĐỒNG ĐIỆN TỬ TRONG FORM ĐẶT XE
+    HỢP ĐỒNG ĐIỆN TỬ TRONG FORM ĐẶT XE
    ========================================================= */
-.booking-contract-card {
-    border-left: 4px solid #00a550;
-}
+
 
 .contract-card-header {
     display: flex;
@@ -2742,9 +2741,9 @@ body {
 }
 
 .btn-sample-contract {
-    border: 1px solid #00a550;
+    border: 1px solid #061638;
     background: #ffffff;
-    color: #00a550;
+    color: #061638;
     font-size: 12.5px;
     font-weight: 700;
     padding: 5px 12px;
@@ -2792,7 +2791,7 @@ body {
 }
 
 .text-green {
-    color: #00a550;
+    color: #020d3b;
 }
 
 .signature-hint {
@@ -2805,7 +2804,7 @@ body {
 }
 
 /* =========================================================
-   POPUP HỢP ĐỒNG MẪU (SAMPLE CONTRACT MODAL)
+    POPUP HỢP ĐỒNG MẪU (SAMPLE CONTRACT MODAL)
    ========================================================= */
 .contract-popup-overlay {
     position: fixed;
@@ -2818,10 +2817,9 @@ body {
     align-items: flex-start;
     overflow-y: auto;
     padding: 32px 16px;
-}
-
+} 
 .contract-popup-overlay[hidden] {
-    display: none !important;
+    display: none ;
 }
 
 .contract-popup-dialog {
@@ -2969,7 +2967,7 @@ body {
 }
 
 .btn-contract-agree {
-    background: #00a550;
+    background: #1d2d6f;
     color: #ffffff;
     border: none;
     padding: 11px 22px;
@@ -2983,9 +2981,6 @@ body {
     transition: all 0.2s ease;
 }
 
-.btn-contract-agree:hover {
-    background: #008742;
-}
 
 .btn-contract-close {
     background: #f1f5f9;
@@ -3003,19 +2998,20 @@ body {
 }
 
 /* =========================================================
-   POPUP GIẢ LẬP THANH TOÁN (PAYMENT SIMULATION MODAL)
+    POPUP GIẢ LẬP THANH TOÁN (PAYMENT SIMULATION MODAL)
    ========================================================= */
 .payment-sim-overlay {
     position: fixed;
     inset: 0;
     z-index: 10070;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(6px);
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
     display: flex;
     justify-content: center;
     align-items: center;
     overflow-y: auto;
     padding: 24px 16px;
+    box-sizing: border-box;
 }
 
 .payment-sim-overlay[hidden] {
@@ -3025,25 +3021,26 @@ body {
 .payment-sim-dialog {
     background: #ffffff;
     width: 100%;
-    max-width: 580px;
+    max-width: 520px;
     border-radius: 24px;
-    padding: 28px;
+    padding: 32px 32px 28px;
     position: relative;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
     box-sizing: border-box;
+    font-family: inherit;
 }
 
 .payment-sim-close {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 24px;
+    right: 24px;
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: 10px;
     border: none;
-    background: #f1f5f9;
+    background: #f3f5f7;
     color: #475569;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
     display: grid;
     place-items: center;
@@ -3052,91 +3049,97 @@ body {
 
 .payment-sim-close:hover {
     background: #e2e8f0;
-    transform: rotate(90deg);
-}
-
-.pay-sim-header {
-    text-align: center;
-    margin-bottom: 18px;
-}
-
-.pay-sim-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 800;
-    color: #0284c7;
-    background: #e0f2fe;
-    padding: 4px 14px;
-    border-radius: 999px;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-}
-
-.pay-sim-header h3 {
-    margin: 0 0 6px;
-    font-size: 22px;
-    font-weight: 800;
     color: #0f172a;
 }
 
-.pay-sim-header p {
-    margin: 0;
-    font-size: 13.5px;
-    color: #64748b;
+.pay-sim-header {
+    text-align: left;
+    margin-bottom: 20px;
+    padding-right: 40px;
 }
 
-.pay-sim-amount-card {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    color: #ffffff;
-    padding: 18px 20px;
-    border-radius: 16px;
-    text-align: center;
-    margin-bottom: 18px;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
-}
-
-.pay-sim-amount-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: #94a3b8;
-}
-
-.pay-sim-amount-val {
-    display: block;
-    font-size: 28px;
-    font-weight: 900;
-    color: #38bdf8;
-    margin: 4px 0 6px;
+.pay-sim-header h3 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.3px;
 }
 
 .pay-sim-car-meta {
-    font-size: 13px;
-    color: #cbd5e1;
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.pay-sim-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.pay-sim-amount-card {
+    background: #f4f6f8;
+    padding: 16px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    box-sizing: border-box;
+}
+
+.pay-sim-amount-label {
+    font-size: 15px;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.pay-sim-amount-label strong {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.pay-sim-amount-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.3px;
+}
+
+.pay-sim-transfer-section {
+    margin-bottom: 16px;
+}
+
+.pay-sim-transfer-title {
+    margin: 0 0 14px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
 }
 
 .pay-sim-qr-box {
     display: flex;
-    gap: 18px;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.qr-col {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 16px;
+    flex-shrink: 0;
 }
 
 .qr-frame {
-    width: 140px;
-    height: 140px;
-    border-radius: 12px;
+    width: 128px;
+    height: 128px;
+    border-radius: 10px;
     background: #ffffff;
-    border: 1.5px solid #cbd5e1;
+    border: 1px solid #e2e8f0;
+    padding: 6px;
     overflow: hidden;
-    position: relative;
-    flex-shrink: 0;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3145,59 +3148,75 @@ body {
 .qr-frame img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    display: block;
+}
+
+.qr-caption {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+    text-align: center;
 }
 
 .qr-details {
     flex: 1;
-    font-size: 13px;
+    display: flex;
+    flex-direction: column;
 }
 
 .qr-detail-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 7px;
-    padding-bottom: 4px;
-    border-bottom: 1px dashed #e2e8f0;
-}
-
-.qr-detail-row span {
-    color: #64748b;
-}
-
-.qr-detail-row strong {
-    color: #0f172a;
-}
-
-.qr-timer-pill {
-    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: #fef3c7;
-    color: #92400e;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13.5px;
+}
+
+.qr-detail-row:first-child {
+    padding-top: 0;
+}
+
+.qr-detail-row:last-child {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.qr-row-label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+.qr-row-value {
+    color: #0f172a;
     font-weight: 700;
-    margin-top: 4px;
+    text-align: right;
+}
+
+.qr-countdown {
+    color: #0f172a;
+    font-weight: 800;
 }
 
 .pay-sim-instruction {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12.5px;
-    color: #0369a1;
-    background: #f0f9ff;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 18px;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.55;
+    margin-top: 6px;
+    margin-bottom: 22px;
 }
 
+.pay-sim-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* NÚT THANH TOÁN */
 .btn-confirm-sim-payment {
     width: 100%;
-    height: 48px;
-    background: #00a550;
+    height: 50px;
+    background: #0a2540; /* Màu xanh Navy */
     color: #ffffff;
     border: none;
     border-radius: 12px;
@@ -3209,33 +3228,69 @@ body {
     justify-content: center;
     gap: 8px;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 14px rgba(0, 165, 80, 0.3);
+    box-shadow: 0 4px 14px rgba(10, 37, 64, 0.25);
+    box-sizing: border-box;
 }
 
 .btn-confirm-sim-payment:hover {
-    background: #008742;
+    background: #061a2e; /* Navy đậm hơn khi hover */
     transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(10, 37, 64, 0.35);
+}
+
+.btn-confirm-sim-payment:active {
+    transform: translateY(0);
+}
+
+.btn-confirm-sim-payment:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .btn-cancel-sim-payment {
     width: 100%;
     height: 38px;
     background: transparent;
-    color: #64748b;
+    color: #1e293b;
     border: none;
-    font-size: 13.5px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
-    margin-top: 8px;
+    margin-top: 10px;
     transition: color 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-cancel-sim-payment:hover {
-    color: #0f172a;
+    color: #0a2540;
+}
+
+@media (max-width: 520px) {
+    .payment-sim-dialog {
+        padding: 24px 18px 20px;
+        border-radius: 20px;
+    }
+    .pay-sim-qr-box {
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+    }
+    .qr-details {
+        width: 100%;
+    }
+    .pay-sim-amount-card {
+        padding: 12px 16px;
+    }
+    .pay-sim-amount-val {
+        font-size: 22px;
+    }
 }
 
 /* =========================================================
-   POPUP CẢNH BÁO CHƯA CÓ GPLX (GPLX REQUIRED MODAL)
+    POPUP CẢNH BÁO CHƯA CÓ GPLX (GPLX REQUIRED MODAL)
    ========================================================= */
 .gplx-warning-overlay {
     position: fixed;
@@ -3250,7 +3305,7 @@ body {
 }
 
 .gplx-warning-overlay[hidden] {
-    display: none !important;
+    display: none ;
 }
 
 .gplx-warning-dialog {
@@ -3333,13 +3388,13 @@ body {
     gap: 10px;
 }
 
-.btn-goto-license {
+.gplx-modal-actions .btn-goto-license {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     height: 46px;
-    background: #00a550;
+    background: #598ad7;
     color: #ffffff;
     text-decoration: none;
     border-radius: 12px;
@@ -3350,11 +3405,11 @@ body {
 }
 
 .btn-goto-license:hover {
-    background: #008742;
+    background: #688ed3;
     transform: translateY(-1px);
 }
 
-.btn-close-gplx-modal {
+.gplx-modal-actions .btn-close-gplx-modal {
     height: 38px;
     background: #f1f5f9;
     color: #64748b;
@@ -3587,8 +3642,39 @@ body {
 }
 
 .calendar-trigger-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-color: #d1a34b;
+    box-shadow: 0 6px 16px rgba(184, 138, 50, 0.12);
+}
+
+button.calendar-trigger-card {
+    width: 100%;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.calendar-trigger-card #calQuickSummaryText,
+.calendar-trigger-card #calQuickSelectedDatesText {
+    display: block;
+}
+
+.calendar-trigger-card #calQuickSummaryText {
+    color: #1e293b;
+    font-size: 14.5px;
+}
+
+.calendar-trigger-card #calQuickSelectedDatesText {
+    margin-top: 3px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.inline-calendar-panel {
+    margin-top: 14px;
+}
+
+.inline-calendar-panel[hidden] {
+    display: none !important;
 }
 
 .cal-trigger-left {
@@ -3599,8 +3685,8 @@ body {
 
 .cal-trigger-icon {
     font-size: 24px;
-    color: #00a550;
-    background: #ecfdf5;
+    color: #b88a32;
+    background: #fff0cc;
     width: 48px;
     height: 48px;
     border-radius: 10px;
@@ -3611,7 +3697,7 @@ body {
 }
 
 .btn-open-calendar-modal {
-    background: #00a550;
+    background: #1c2635;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -3627,7 +3713,7 @@ body {
 }
 
 .btn-open-calendar-modal:hover {
-    background: #008842;
+    background: #b88a32;
 }
 
 /* Popup Lịch xe bận & trống */
