@@ -19,15 +19,86 @@ function resolveVehicleImage(car) {
     return window.AzuVehicleImages?.resolve(vehicleName, currentImage) || currentImage;
 }
 
+// Quản lý Yêu thích xe (Favorites) lưu LocalStorage
+function getFavoriteCars() {
+    try {
+        const stored = localStorage.getItem('azuCarFavorites');
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+function toggleFavoriteCar(carId, btnEl) {
+    let favorites = getFavoriteCars();
+    const idStr = String(carId);
+    const index = favorites.indexOf(idStr);
+    let isNowFav = false;
+
+    if (index > -1) {
+        favorites.splice(index, 1);
+        isNowFav = false;
+    } else {
+        favorites.push(idStr);
+        isNowFav = true;
+    }
+
+    try {
+        localStorage.setItem('azuCarFavorites', JSON.stringify(favorites));
+    } catch {}
+
+    if (btnEl) {
+        btnEl.classList.toggle('is-active', isNowFav);
+        btnEl.title = isNowFav ? 'Bỏ yêu thích' : 'Thêm vào yêu thích';
+        btnEl.setAttribute('aria-label', isNowFav ? 'Bỏ yêu thích' : 'Thêm vào yêu thích');
+        btnEl.innerHTML = isNowFav ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>';
+
+        btnEl.style.transform = 'scale(1.25)';
+        setTimeout(() => { btnEl.style.transform = ''; }, 200);
+    }
+
+    window.dispatchEvent(new CustomEvent('azuCarFavoritesChanged', { 
+        detail: { favorites, carId: idStr, isFavorite: isNowFav } 
+    }));
+}
+
+function createFavoriteButton(carId) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-card-favorite';
+    const idStr = String(carId);
+    const favorites = getFavoriteCars();
+    const isFav = favorites.includes(idStr);
+
+    if (isFav) {
+        btn.classList.add('is-active');
+        btn.title = 'Bỏ yêu thích';
+        btn.setAttribute('aria-label', 'Bỏ yêu thích');
+        btn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+    } else {
+        btn.title = 'Thêm vào yêu thích';
+        btn.setAttribute('aria-label', 'Thêm vào yêu thích');
+        btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+    }
+
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        toggleFavoriteCar(idStr, btn);
+    });
+
+    return btn;
+}
+
 const sampleCars = [
-    { name: 'TOYOTA VIOS G 2024', city: 'Hà Nội', district: 'Quận Cầu Giấy', price: '650K', rating: '4.9', trips: 18, year: 2024, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/2/25/Toyota_Vios_%28XP150%29_sedan_front_view.jpg' },
-    { name: 'HONDA CITY RS 2023', city: 'Hà Nội', district: 'Quận Đống Đa', price: '680K', rating: '5.0', trips: 12, year: 2023, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/d/dd/Honda_City_2020.jpg' },
-    { name: 'MAZDA CX-5 PREMIUM 2024', city: 'Hà Nội', district: 'Quận Nam Từ Liêm', price: '1.050K', rating: '4.8', trips: 21, year: 2024, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Mazda_CX-5_Newground_1X7A6786.jpg' },
-    { name: 'MITSUBISHI XPANDER 2023', city: 'Hà Nội', district: 'Quận Long Biên', price: '850K', rating: '4.9', trips: 15, year: 2023, seats: 7, image: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Mitsubishi_Xpander_Sport_%28depan%29%2C_Palangkaraya.jpg' },
-    { name: 'KIA SONET PREMIUM 2024', city: 'TP. Hồ Chí Minh', district: 'Quận 1', price: '720K', rating: '4.9', trips: 16, year: 2024, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/7/75/2021_Kia_Sonet_1.5_Premiere_%28Indonesia%29_front_view_02.jpg' },
-    { name: 'TOYOTA VIOS G 2023', city: 'TP. Hồ Chí Minh', district: 'Quận Bình Thạnh', price: '630K', rating: '4.8', trips: 20, year: 2023, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/2/25/Toyota_Vios_%28XP150%29_sedan_front_view.jpg' },
-    { name: 'HONDA CR-V L 2024', city: 'TP. Hồ Chí Minh', district: 'TP. Thủ Đức', price: '1.250K', rating: '5.0', trips: 11, year: 2024, seats: 7, image: 'https://upload.wikimedia.org/wikipedia/commons/0/01/Honda_CR-V%2C_Auto_2024%2C_Zurich_%28PANA0740%29.jpg' },
-    { name: 'FORD TERRITORY TITANIUM 2024', city: 'TP. Hồ Chí Minh', district: 'Quận 7', price: '1.100K', rating: '4.9', trips: 14, year: 2024, seats: 5, image: 'https://upload.wikimedia.org/wikipedia/commons/f/f8/Ford_Territory_003.jpg' }
+    { name: 'TOYOTA VIOS G 2024', city: 'Hà Nội', district: 'Quận Cầu Giấy', price: '650K', rating: '4.9', trips: 18, year: 2024, seats: 5, fuel: 'gas', image: 'https://upload.wikimedia.org/wikipedia/commons/2/25/Toyota_Vios_%28XP150%29_sedan_front_view.jpg' },
+    { name: 'HONDA CITY RS 2023', city: 'Hà Nội', district: 'Quận Đống Đa', price: '680K', rating: '5.0', trips: 12, year: 2023, seats: 5, fuel: 'gas', image: 'https://upload.wikimedia.org/wikipedia/commons/d/dd/Honda_City_2020.jpg' },
+    { name: 'VINFAST VF3 2025', city: 'Hà Nội', district: 'Quận Nam Từ Liêm', price: '500K', rating: '5.0', trips: 35, year: 2025, seats: 4, fuel: 'electric', image: 'https://upload.wikimedia.org/wikipedia/commons/0/05/VinFast_VF_3_at_VMS_2024_%28cropped%29.jpg' },
+    { name: 'MITSUBISHI XPANDER 2023', city: 'Hà Nội', district: 'Quận Long Biên', price: '850K', rating: '4.9', trips: 15, year: 2023, seats: 7, fuel: 'gas', image: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Mitsubishi_Xpander_Sport_%28depan%29%2C_Palangkaraya.jpg' },
+    { name: 'VINFAST VF5 PLUS 2024', city: 'TP. Hồ Chí Minh', district: 'Quận 1', price: '600K', rating: '4.9', trips: 28, year: 2024, seats: 5, fuel: 'electric', image: 'https://upload.wikimedia.org/wikipedia/commons/8/87/2023_VinFast_VF_5_Plus_front_view.jpg' },
+    { name: 'TOYOTA VIOS G 2023', city: 'TP. Hồ Chí Minh', district: 'Quận Bình Thạnh', price: '630K', rating: '4.8', trips: 20, year: 2023, seats: 5, fuel: 'gas', image: 'https://upload.wikimedia.org/wikipedia/commons/2/25/Toyota_Vios_%28XP150%29_sedan_front_view.jpg' },
+    { name: 'VINFAST VF9 PLUS 2024', city: 'TP. Hồ Chí Minh', district: 'TP. Thủ Đức', price: '1.750K', rating: '5.0', trips: 19, year: 2024, seats: 7, fuel: 'electric', image: 'https://upload.wikimedia.org/wikipedia/commons/6/62/VinFast_VF_9_Plus_IMG_1523.jpg' },
+    { name: 'FORD TERRITORY TITANIUM 2024', city: 'TP. Hồ Chí Minh', district: 'Quận 7', price: '1.100K', rating: '4.9', trips: 14, year: 2024, seats: 5, fuel: 'gas', image: 'https://upload.wikimedia.org/wikipedia/commons/f/f8/Ford_Territory_003.jpg' }
 ];
 
 function createSampleCarCard(car) {
@@ -35,16 +106,21 @@ function createSampleCarCard(car) {
     card.className = 'car-card';
     card.dataset.sampleListing = 'true';
     card.dataset.city = car.city;
+    card.dataset.district = car.district || '';
     card.dataset.seats = car.seats || 5;
     const priceKNum = parseInt((car.price || '650').replace(/[^\d]/g, ''), 10) || 650;
     card.dataset.priceK = priceKNum;
     card.dataset.rawPrice = priceKNum * 1000;
     card.dataset.trans = 'auto';
-    card.dataset.fuel = (car.name || '').toLowerCase().includes('vf') ? 'electric' : 'gas';
+
+    const isElectric = car.fuel === 'electric' || (car.name || '').toLowerCase().includes('vf');
+    const fuelKey = isElectric ? 'electric' : 'gas';
+    card.dataset.fuel = fuelKey;
     card.dataset.brand = getCarBrand(car.name);
     card.dataset.carType = getCarBodyType(car.name, car.seats);
     card.dataset.delivery = 'true';
     card.dataset.deposit = 'true';
+    card.dataset.location = car.district ? `${car.district}, ${car.city}` : car.city;
 
     const imageWrapper = document.createElement('div');
     imageWrapper.className = 'car-img-wrapper';
@@ -60,6 +136,10 @@ function createSampleCarCard(car) {
     image.alt = car.name;
     imageWrapper.appendChild(image);
 
+    // Nút Yêu thích (Hover & Click toggle)
+    const favBtn = createFavoriteButton(`sample_${car.name.replace(/\s+/g, '_')}`);
+    imageWrapper.appendChild(favBtn);
+
     const currentUserId = sessionStorage.getItem('azuCarUserId');
     if (currentUserId && car.ownerId && currentUserId === car.ownerId) {
         card.dataset.isMyCar = 'true';
@@ -73,22 +153,58 @@ function createSampleCarCard(car) {
     const info = document.createElement('div');
     info.className = 'car-info';
 
+    // Badges: Miễn thế chấp & Giao xe tận nơi
+    const badgesRow = document.createElement('div');
+    badgesRow.className = 'car-badges-row';
+    const bDeposit = document.createElement('span');
+    bDeposit.className = 'badge-tag badge-deposit';
+    bDeposit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Miễn thế chấp';
+    const bDelivery = document.createElement('span');
+    bDelivery.className = 'badge-tag badge-delivery';
+    bDelivery.innerHTML = '<i class="fa-solid fa-map-pin"></i> Giao xe tận nơi';
+    badgesRow.append(bDeposit, bDelivery);
+
     const name = document.createElement('h3');
     name.textContent = car.name;
-    const details = document.createElement('p');
-    details.className = 'car-rating-loc';
-    details.append(
-        document.createTextNode(`★ ${car.rating} • ${car.trips} chuyến`)
-    );
 
+    // Small text: Điện / Xăng
+    const specsRow = document.createElement('div');
+    specsRow.className = 'car-specs-row';
+    const fuelItem = document.createElement('span');
+    fuelItem.className = `car-spec-fuel ${fuelKey === 'electric' ? 'spec-electric' : 'spec-gas'}`;
+    fuelItem.innerHTML = fuelKey === 'electric' 
+        ? '<i class="fa-solid fa-charging-station"></i> Điện' 
+        : '<i class="fa-solid fa-gas-pump"></i> Xăng';
+    specsRow.appendChild(fuelItem);
+
+    // Small text: Vị trí
+    const locRow = document.createElement('div');
+    locRow.className = 'car-location-row';
+    const locIcon = document.createElement('i');
+    locIcon.className = 'fa-solid fa-location-dot';
+    const locSpan = document.createElement('span');
+    locSpan.textContent = car.district ? `${car.district}, ${car.city}` : car.city;
+    locRow.append(locIcon, locSpan);
+
+    // Footer: Đánh giá + Số chuyến như Mioto & Giá
     const footer = document.createElement('div');
     footer.className = 'car-footer';
+
+    const ratingTrips = document.createElement('div');
+    ratingTrips.className = 'car-rating-trips car-rating-loc';
+    ratingTrips.innerHTML = `
+        <span class="rating-val"><i class="fa-solid fa-star star-gold"></i> ${car.rating}</span>
+        <span class="dot-sep">·</span>
+        <span class="trips-val"><i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> ${car.trips} chuyến</span>
+    `;
+
     const price = document.createElement('span');
     price.className = 'car-price';
     price.append(document.createTextNode(car.price), document.createElement('span'));
     price.lastElementChild.textContent = '/ngày';
-    footer.appendChild(price);
-    info.append(name, details, footer);
+    footer.append(ratingTrips, price);
+
+    info.append(badgesRow, name, specsRow, locRow, footer);
     card.append(imageWrapper, info);
     return card;
 }
@@ -121,10 +237,16 @@ function createCarCardFromApi(car) {
     const rawFuel = (car.fuelType || '').toLowerCase();
     const rawName = (car.name || '').toLowerCase();
     let fuelKey = 'gas';
+    let fuelLabel = 'Xăng';
+    let fuelIcon = 'fa-solid fa-gas-pump';
     if (rawFuel.includes('elec') || rawFuel.includes('điện') || rawName.includes('điện') || rawName.includes('vf')) {
         fuelKey = 'electric';
+        fuelLabel = 'Điện';
+        fuelIcon = 'fa-solid fa-charging-station';
     } else if (rawFuel.includes('dies') || rawFuel.includes('dầu')) {
         fuelKey = 'diesel';
+        fuelLabel = 'Dầu';
+        fuelIcon = 'fa-solid fa-gas-pump';
     }
     card.dataset.fuel = fuelKey;
 
@@ -132,12 +254,10 @@ function createCarCardFromApi(car) {
     card.dataset.brand = brandKey;
     card.dataset.carType = getCarBodyType(car.name, car.seats);
 
-    if (car.vehicleId % 2 === 0 || car.vehicleId % 3 === 0) {
-        card.dataset.delivery = 'true';
-    }
-    if (car.vehicleId % 2 === 1 || Number(car.pricePerDay) <= 1000000) {
-        card.dataset.deposit = 'true';
-    }
+    const hasDelivery = car.vehicleId % 2 === 0 || car.vehicleId % 3 === 0;
+    const hasDeposit = car.vehicleId % 2 === 1 || Number(car.pricePerDay) <= 1000000;
+    if (hasDelivery) card.dataset.delivery = 'true';
+    if (hasDeposit) card.dataset.deposit = 'true';
 
     const imageWrapper = document.createElement('div');
     imageWrapper.className = 'car-img-wrapper';
@@ -154,6 +274,10 @@ function createCarCardFromApi(car) {
     image.alt = car.name;
     imageWrapper.appendChild(image);
 
+    // Nút Yêu thích (Hover & Click toggle)
+    const favBtn = createFavoriteButton(car.vehicleId || car.listingId || car.name);
+    imageWrapper.appendChild(favBtn);
+
     const currentUserId = sessionStorage.getItem('azuCarUserId');
     if (currentUserId && car.ownerId && currentUserId === car.ownerId) {
         card.dataset.isMyCar = 'true';
@@ -167,43 +291,79 @@ function createCarCardFromApi(car) {
     const info = document.createElement('div');
     info.className = 'car-info';
 
+    // Badges: Miễn thế chấp & Giao xe tận nơi
+    const badgesRow = document.createElement('div');
+    badgesRow.className = 'car-badges-row';
+    if (hasDeposit) {
+        const bDeposit = document.createElement('span');
+        bDeposit.className = 'badge-tag badge-deposit';
+        bDeposit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Miễn thế chấp';
+        badgesRow.appendChild(bDeposit);
+    }
+    if (hasDelivery) {
+        const bDelivery = document.createElement('span');
+        bDelivery.className = 'badge-tag badge-delivery';
+        bDelivery.innerHTML = '<i class="fa-solid fa-map-pin"></i> Giao xe tận nơi';
+        badgesRow.appendChild(bDelivery);
+    }
+
     const h3 = document.createElement('h3');
     h3.textContent = car.name;
 
-    const details = document.createElement('p');
-    details.className = 'car-rating-loc';
-    const starIcon = document.createElement('i');
-    starIcon.className = 'fa-solid fa-star text-warning';
+    // Small text: Điện / Xăng
+    const specsRow = document.createElement('div');
+    specsRow.className = 'car-specs-row';
+    const fuelItem = document.createElement('span');
+    fuelItem.className = `car-spec-fuel ${fuelKey === 'electric' ? 'spec-electric' : 'spec-gas'}`;
+    fuelItem.innerHTML = `<i class="${fuelIcon}"></i> ${fuelLabel}`;
+    specsRow.appendChild(fuelItem);
+
+    // Small text: Vị trí
+    const locRow = document.createElement('div');
+    locRow.className = 'car-location-row';
+    const locIcon = document.createElement('i');
+    locIcon.className = 'fa-solid fa-location-dot';
+    const locSpan = document.createElement('span');
+    const locString = car.location || (car.district ? `${car.district}, ${car.city}` : (car.city || 'TP. Đà Nẵng'));
+    locSpan.textContent = locString;
+    locRow.append(locIcon, locSpan);
+
+    // Footer: Đánh giá + Số chuyến như Mioto & Giá
+    const footer = document.createElement('div');
+    footer.className = 'car-footer';
+
+    const ratingTrips = document.createElement('div');
+    ratingTrips.className = 'car-rating-trips car-rating-loc';
     
     const hasRating = typeof car.rating === 'number' && car.rating > 0;
     const ratingVal = hasRating ? car.rating.toFixed(1) : '';
     const tripsVal = car.totalTrips || 0;
 
     if (hasRating) {
-        details.append(
-            starIcon,
-            document.createTextNode(` ${ratingVal} • ${tripsVal} chuyến`)
-        );
+        ratingTrips.innerHTML = `
+            <span class="rating-val"><i class="fa-solid fa-star star-gold"></i> ${ratingVal}</span>
+            <span class="dot-sep">·</span>
+            <span class="trips-val"><i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> ${tripsVal} chuyến</span>
+        `;
     } else {
-        const noRatingSpan = document.createElement('span');
-        noRatingSpan.style.color = '#64748b';
-        noRatingSpan.textContent = 'Chưa có đánh giá';
-        details.append(
-            noRatingSpan,
-            document.createTextNode(` • ${tripsVal} chuyến`)
-        );
+        ratingTrips.innerHTML = `
+            <span class="rating-val text-muted">Chưa có đánh giá</span>
+            <span class="dot-sep">·</span>
+            <span class="trips-val"><i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> ${tripsVal} chuyến</span>
+        `;
     }
 
-    const footer = document.createElement('div');
-    footer.className = 'car-footer';
     const priceSpan = document.createElement('span');
     priceSpan.className = 'car-price';
     const priceK = Math.round(car.pricePerDay / 1000).toLocaleString('vi-VN') + 'K';
     priceSpan.append(document.createTextNode(priceK), document.createElement('span'));
     priceSpan.lastElementChild.textContent = '/ngày';
-    footer.appendChild(priceSpan);
+    footer.append(ratingTrips, priceSpan);
 
-    info.append(h3, details, footer);
+    if (badgesRow.childNodes.length > 0) {
+        info.append(badgesRow);
+    }
+    info.append(h3, specsRow, locRow, footer);
     card.append(imageWrapper, info);
     return card;
 }
@@ -1204,18 +1364,19 @@ function carFromCard(card) {
         pricePerDay: card.dataset.rawPrice ? Number(card.dataset.rawPrice) : null,
         city: card.dataset.city || '',
         district: card.dataset.district || '',
-        location: card.dataset.location || location,
+        location: card.dataset.location || card.querySelector('.car-location-row span')?.textContent.trim() || location,
+        fuel: card.dataset.fuel || 'gas',
         description: card.dataset.description || '',
         licensePlate: card.dataset.plate || '',
         name: card.querySelector('h3')?.textContent.trim() || 'Xe AZU Car',
         image: card.querySelector('img')?.src || '',
         location,
         price: priceText,
-        rating: ratingMatch ? ratingMatch[1] : '5.0',
+        rating: ratingMatch ? ratingMatch[1] : (card.querySelector('.rating-val')?.textContent.trim() || '5.0'),
         trips: tripsMatch ? `${tripsMatch[1]} chuyến` : '0 chuyến',
-        year: yearMatch ? yearMatch[1] : '2023',
-        transmission: card.querySelector('.tag-trans')?.textContent.trim() || 'Số tự động',
-        seats: card.querySelector('.tag-seats')?.textContent.trim() || '5 chỗ'
+        year: yearMatch ? yearMatch[1] : '2024',
+        transmission: card.dataset.trans === 'manual' ? 'Số sàn' : 'Số tự động',
+        seats: `${card.dataset.seats || 5} chỗ`
     };
 }
 
@@ -3008,6 +3169,9 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
 });
 
 carsGrid?.addEventListener('click', event => {
+    if (event.target.closest('.btn-card-favorite')) {
+        return;
+    }
     const card = event.target.closest('.car-card');
     if (!card) return;
     const car = carFromCard(card);

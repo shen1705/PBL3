@@ -902,86 +902,219 @@ body {
 
 
 .car-info {
-    padding: 9px 10px 8px;
+    padding: 10px 12px 10px;
 }
 
-.car-tags-top {
-    gap: 4px;
+/* Nút Yêu thích trên ảnh xe (Hover & Click toggle phong cách Mioto) */
+.btn-card-favorite {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    padding: 0;
+}
+
+.btn-card-favorite:hover {
+    background: #ffffff;
+    color: #ef4444;
+    border-color: #fee2e2;
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
+
+.btn-card-favorite.is-active {
+    background: #ffffff;
+    color: #ef4444;
+    border-color: #fee2e2;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.btn-card-favorite.is-active i {
+    color: #ef4444;
+}
+
+/* Badges dưới ảnh: Miễn thế chấp & Giao xe tận nơi */
+.car-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     margin-bottom: 6px;
 }
 
-.tag-trans,
-.tag-seats {
-    padding: 3px 5px;
-    border-radius: 3px;
-    font-size: 14px;
-    line-height: 1;
+.badge-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    line-height: 1.35;
 }
 
-.tag-trans {
-    background: #fff8dc;
-    color: #2e302a;
+.badge-tag.badge-deposit {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
 }
 
-.tag-seats {
-    background: #eef4ff;
-    color: #4280dd;
+.badge-tag.badge-deposit i {
+    color: #059669;
+    font-size: 10px;
+}
+
+.badge-tag.badge-delivery {
+    background: #fff7ed;
+    color: #ea580c;
+    border: 1px solid #fed7aa;
+}
+
+.badge-tag.badge-delivery i {
+    color: #ea580c;
+    font-size: 10px;
 }
 
 .car-info h3 {
-    overflow: hidden;
-    margin-bottom: 4px;
-    font-size: 14px;
+    margin: 0 0 5px 0;
+    font-size: 14.5px;
     font-weight: 800;
+    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.car-rating-loc {
-    height: 34px;
-    margin-bottom: 4px;
-    overflow: hidden;
-    color: #8a918d;
-    font-size: 14px;
-    line-height: 1.75;
-    white-space: nowrap;
-}
-
-.car-rating-loc b {
-    color: #8a918d;
-    font-weight: 500;
-}
-
-.car-footer {
-    min-height: 24px;
-    padding-top: 5px;
-    border-top: 1px solid #e9eeeb;
-}
-
-.delivery-note {
-    color: #2019eb;
-    font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.price-group {
+/* Dòng small text về Điện / Xăng phong cách Mioto */
+.car-specs-row {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+    font-size: 12.5px;
+    color: #64748b;
 }
 
-.price-group del {
-    height: 8px;
-    color: #a1a7a3;
-    font-size: 14px;
-    line-height: 1;
+.car-spec-fuel {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+}
+
+.car-spec-fuel.spec-electric {
+    color: #059669;
+}
+
+.car-spec-fuel.spec-electric i {
+    color: #08a85e;
+    font-size: 12px;
+}
+
+.car-spec-fuel.spec-gas {
+    color: #64748b;
+}
+
+.car-spec-fuel.spec-gas i {
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* Dòng small text về vị trí */
+.car-location-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 8px;
+    font-size: 12.5px;
+    color: #64748b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.car-location-row i {
+    color: #64748b;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.car-location-row span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Footer: Đánh giá + Số chuyến như Mioto & Giá */
+.car-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 28px;
+    padding-top: 8px;
+    margin-top: 4px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.car-rating-trips {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.car-rating-trips .star-gold {
+    color: #f59e0b;
+    font-size: 12px;
+}
+
+.car-rating-trips .rating-val {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.car-rating-trips .rating-val.text-muted {
+    font-weight: 500;
+    color: #64748b;
+}
+
+.car-rating-trips .dot-sep {
+    color: #94a3b8;
+    font-weight: 700;
+}
+
+.car-rating-trips .trip-bag-icon {
+    color: #10b981;
+    font-size: 12px;
+    margin-right: 2px;
+}
+
+.car-rating-trips .trips-val {
+    font-weight: 500;
+    color: #475569;
 }
 
 .car-price {
     color: #08a85e;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 800;
     line-height: 1.1;
     white-space: nowrap;
@@ -989,7 +1122,7 @@ body {
 
 .car-price span {
     color: #08a85e;
-    font-size: 14px;
+    font-size: 12.5px;
     font-weight: 600;
 }
 
