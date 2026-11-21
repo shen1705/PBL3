@@ -94,7 +94,7 @@ const badge = (s) => {
 
 // State
 let currentUser = null;
-let page = ['overview', 'owners', 'listings', 'disputes', 'reviews', 'users', 'fees', 'revenue', 'logs', 'settings'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
+let page = ['overview', 'owners', 'listings', 'disputes', 'reviews', 'users', 'fees', 'revenue', 'logs'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'overview';
 let filter = 'all';
 let query = '';
 let pageCache = {};
@@ -144,8 +144,7 @@ const pageNames = {
   users: 'Người dùng',
   fees: 'Phí & hoa hồng',
   revenue: 'Doanh thu',
-  logs: 'Nhật ký',
-  settings: 'Cài đặt'
+  logs: 'Nhật ký'
 };
 
 const note = () => '';
@@ -204,20 +203,71 @@ document.getElementById('dialogForm').addEventListener('submit', async (e) => {
   document.getElementById('modal').close();
 });
 
-// Update sidebar badge counts
+// Update sidebar badge counts & notifications
+let lastPendingMetrics = null;
 async function updateSidebarMetrics() {
   const res = await api('/api/admin/users/metrics');
   if (res?.isSuccess && res.data) {
     const d = res.data;
+    lastPendingMetrics = d;
     const ownersEl = document.querySelector('[data-count="owners"]');
     const listingsEl = document.querySelector('[data-count="listings"]');
     const disputesEl = document.querySelector('[data-count="disputes"]');
     if (ownersEl) ownersEl.textContent = d.pendingOwnerCount || '';
     if (listingsEl) listingsEl.textContent = d.pendingListingCount || '';
     if (disputesEl) disputesEl.textContent = d.openDisputeCount || '';
+
+    const totalPending = (d.pendingOwnerCount || 0) + (d.pendingListingCount || 0) + (d.openDisputeCount || 0);
     const dot = document.getElementById('notifyDot');
-    if (dot) dot.hidden = !(d.pendingOwnerCount > 0 || d.pendingListingCount > 0 || d.openDisputeCount > 0);
+    if (dot) dot.style.display = totalPending > 0 ? 'block' : 'none';
+    const badgeEl = document.getElementById('notifyCountBadge');
+    if (badgeEl) badgeEl.textContent = totalPending;
+    renderNotifyList(d);
   }
+}
+
+function renderNotifyList(d) {
+  const listEl = document.getElementById('notifyList');
+  if (!listEl) return;
+  if (!d) {
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);font-size:13px">Không có tác vụ nào đang chờ.</div>';
+    return;
+  }
+  let itemsHtml = '';
+  if (d.pendingOwnerCount > 0) {
+    itemsHtml += `
+      <div class="notify-item" data-go="owners" data-filter="Pending">
+        <div class="notify-icon" style="color:var(--gold)">${icon('car-front')}</div>
+        <div class="notify-content">
+          <strong>${d.pendingOwnerCount} hồ sơ chủ xe</strong>
+          <small>Đang chờ xét duyệt CCCD</small>
+        </div>
+      </div>`;
+  }
+  if (d.pendingListingCount > 0) {
+    itemsHtml += `
+      <div class="notify-item" data-go="listings" data-filter="PendingApproval">
+        <div class="notify-icon" style="color:var(--gold)">${icon('clipboard-list')}</div>
+        <div class="notify-content">
+          <strong>${d.pendingListingCount} tin đăng xe</strong>
+          <small>Đang chờ duyệt kiểm định</small>
+        </div>
+      </div>`;
+  }
+  if (d.openDisputeCount > 0) {
+    itemsHtml += `
+      <div class="notify-item warn" data-go="disputes" data-filter="Open">
+        <div class="notify-icon" style="color:#ef4444">${icon('alert-triangle')}</div>
+        <div class="notify-content">
+          <strong>${d.openDisputeCount} khiếu nại tranh chấp</strong>
+          <small>Cần phán quyết Escrow</small>
+        </div>
+      </div>`;
+  }
+  if (!itemsHtml) {
+    itemsHtml = '<div style="padding:20px 16px;text-align:center;color:var(--muted);font-size:13px"><p style="margin:0 0 4px;font-size:16px">🎉</p>Hiện không có tác vụ nào tồn đọng!</div>';
+  }
+  listEl.innerHTML = itemsHtml;
 }
 
 // Render Pages
@@ -233,7 +283,7 @@ async function renderOverview() {
   const totalPending = (m.pendingOwnerCount || 0) + (m.pendingListingCount || 0) + (m.openDisputeCount || 0);
 
   return `
-    <div class="overview-top">${header('Tổng quan', 'Tình hình hoạt động thực tế trên sàn AZU Car từ cơ sở dữ liệu', exportBtn('summary'))}</div>
+    <div class="overview-top">${header('Tổng quan', 'Tình hình hoạt động thực tế trên sàn AZU Car từ cơ sở dữ liệu')}</div>
     <div class="stats-grid">
       ${stat('Tổng giao dịch (GMV)', shortMoney(m.totalGmv), 'Từ tất cả đơn hoàn tất', 'arrow-left-right')}
       ${stat('Hoa hồng tích lũy', money(m.platformRevenue), 'Phí dịch vụ 5% ghi nhận', 'coins')}
@@ -243,7 +293,6 @@ async function renderOverview() {
     <section class="panel pending-panel">
       <div class="panel-heading">
         <h2>Cần xử lý <span class="badge pending">${totalPending}</span></h2>
-        <small>${icon('history')} Cập nhật trực tiếp từ hệ thống</small>
       </div>
       <div class="pending-grid">
         <button class="pending-tile" data-go="owners">
@@ -269,47 +318,36 @@ async function renderOverview() {
 
     <details class="overview-more" open>
       <summary>${icon('clipboard-list')} Đối soát các chuyến đi hoàn tất gần đây <span class="summary-chevron" aria-hidden="true">${icon('chevron-down')}</span></summary>
-      <div class="two-col overview-detail">
-        <section class="panel">
-          <div class="panel-heading">
-            <h2>Giao dịch hoàn tất gần đây</h2>
-            <small><button class="inline-link" data-go="revenue">Xem doanh thu chi tiết <span class="inline-chevron">${icon('chevron-right')}</span></button></small>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
+      <section class="panel" style="margin-top:14px">
+        <div class="panel-heading">
+          <h2>Giao dịch hoàn tất gần đây</h2>
+          <small><button class="inline-link" data-go="revenue">Xem doanh thu chi tiết <span class="inline-chevron">${icon('chevron-right')}</span></button></small>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Chủ xe & Xe</th>
+                <th>Tổng tiền</th>
+                <th>Hoa hồng (5%)</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${settlements.length ? settlements.map(s => `
                 <tr>
-                  <th>Mã đơn</th>
-                  <th>Chủ xe & Xe</th>
-                  <th>Tổng tiền</th>
-                  <th>Hoa hồng (5%)</th>
-                  <th>Trạng thái</th>
+                  <td><strong>#${s.bookingId}</strong></td>
+                  <td><strong>${escapeHtml(s.ownerName)}</strong><span class="sub">${escapeHtml(s.vehicleName)}</span></td>
+                  <td>${money(s.totalAmount)}</td>
+                  <td><span class="gold">${money(s.commissionAmount)}</span></td>
+                  <td>${badge('Completed')}</td>
                 </tr>
-              </thead>
-              <tbody>
-                ${settlements.length ? settlements.map(s => `
-                  <tr>
-                    <td><strong>#${s.bookingId}</strong></td>
-                    <td><strong>${escapeHtml(s.ownerName)}</strong><span class="sub">${escapeHtml(s.vehicleName)}</span></td>
-                    <td>${money(s.totalAmount)}</td>
-                    <td><span class="gold">${money(s.commissionAmount)}</span></td>
-                    <td>${badge('Completed')}</td>
-                  </tr>
-                `).join('') : `<tr><td colspan="5" class="empty">Chưa có giao dịch hoàn tất</td></tr>`}
-              </tbody>
-            </table>
-          </div>
-        </section>
-        <section class="panel">
-          <div class="panel-heading"><h2>Quy tắc vận hành & đối soát</h2></div>
-          <ul class="intro-list">
-            <li>Chỉ tính doanh thu cho các đơn ở trạng thái <strong>Completed</strong>.</li>
-            <li>Đơn hoàn tất khi có đủ xác nhận bàn giao nhận xe và trả xe hai chiều.</li>
-            <li>Đơn tranh chấp (Dispute) bị giữ cọc bảo chứng Escrow, không ghi nhận doanh thu cho tới khi có phán quyết Admin.</li>
-            <li>Tỷ lệ hoa hồng sàn AZU Car được trích tự động 5% theo hợp đồng.</li>
-          </ul>
-        </section>
-      </div>
+              `).join('') : `<tr><td colspan="5" class="empty">Chưa có giao dịch hoàn tất</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </details>
   `;
 }
@@ -687,7 +725,7 @@ async function renderFees() {
   const depPct = Math.round(d.depositRate * 100);
   const penPct = Math.round(d.ownerCancelPenaltyRate * 100);
 
-  return header('Phí & Hoa hồng sàn', 'Thiết lập tỷ lệ hoa hồng, tiền cọc bảo chứng và chính sách phạt vi phạm hủy chuyến', exportBtn('fees')) +
+  return header('Phí & Hoa hồng sàn', 'Thiết lập tỷ lệ hoa hồng, tiền cọc bảo chứng và chính sách phạt vi phạm hủy chuyến') +
     note('Cấu hình phí được lưu trữ trong bảng SystemSettings trên MySQL và tự động áp dụng khi tạo hợp đồng thuê xe mới.') +
     `<div class="two-col">
       <section class="panel">
@@ -811,12 +849,15 @@ async function renderRevenue() {
 }
 
 function renderLogs() {
-  return header('Nhật ký Hoạt động Quản trị', 'Lưu vết lịch sử các hành động duyệt xe, xét duyệt chủ xe, phán quyết tranh chấp và cập nhật hệ thống', exportBtn('logs')) +
-    note('Nhật ký giúp kiểm toán viên và ban quản trị truy vết mọi thao tác vận hành trên cổng quản trị.') +
+  return header('Nhật ký Hoạt động Quản trị', 'Lưu vết lịch sử các hành động duyệt xe, xét duyệt chủ xe, phán quyết tranh chấp và cập nhật hệ thống') +
+    note() +
     `<section class="panel">
-      <div class="panel-heading">
-        <h2>Hoạt động gần đây</h2>
-        <small>${logs.length} sự kiện</small>
+      <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h2>Hoạt động gần đây</h2>
+          <small>${logs.length} sự kiện</small>
+        </div>
+        <button class="btn small danger" id="clearLogsBtn">${icon('refresh')} Xóa nhật ký</button>
       </div>
       <div class="table-wrap">
         <table>
@@ -841,25 +882,6 @@ function renderLogs() {
         </table>
       </div>
     </section>`;
-}
-
-function renderSettings() {
-  return header('Cài đặt & Trạng thái Hệ thống', 'Kiểm tra tình trạng vận hành, kết nối cơ sở dữ liệu và phiên làm việc quản trị viên') +
-    note() +
-    `<div class="two-col">
-      <section class="panel">
-        <div class="panel-heading"><h2>Trạng thái kết nối dịch vụ</h2></div>
-        <ul class="list-simple">
-          <li>Máy chủ Web ASP.NET Core: <span class="badge approved">Đang hoạt động</span></li>
-          <li>Cơ sở dữ liệu MySQL 8.0: <span class="badge approved">Đã kết nối (localhost:3306)</span></li>
-          <li>Tài khoản quản trị hiện tại: <strong>${escapeHtml(currentUser?.fullName || currentUser?.userName || 'Chưa đăng nhập')}</strong></li>
-          <li>Vai trò hệ thống: <span class="badge approved">${(currentUser?.roles || []).join(', ') || 'Chưa xác thực'}</span></li>
-          <li>Bảo chứng ký quỹ Escrow: <span class="badge approved">Tài khoản ESCROW-0001</span></li>
-        </ul>
-        <div class="divider"></div>
-        <button class="btn danger" id="clearLogsBtn">${icon('refresh')} Xóa nhật ký trình duyệt</button>
-      </section>
-    </div>`;
 }
 
 function renderLoginPrompt() {
@@ -915,7 +937,6 @@ async function render() {
       case 'fees': html = await renderFees(); break;
       case 'revenue': html = await renderRevenue(); break;
       case 'logs': html = renderLogs(); break;
-      case 'settings': html = renderSettings(); break;
       default: html = await renderOverview(); break;
     }
     contentEl.innerHTML = html;
@@ -1634,7 +1655,63 @@ document.body.addEventListener('click', e => {
   const exp = e.target.closest('[data-export]');
   if (exp) return exportCSV(exp.dataset.export);
 
-  if (e.target.closest('#notificationBtn')) return go('overview');
+  // Profile dropdown toggle
+  const profileTrigger = e.target.closest('#profileBtn');
+  if (profileTrigger && !e.target.closest('#profileDropdown')) {
+    const pd = document.getElementById('profileDropdown');
+    const nd = document.getElementById('notifyDropdown');
+    if (nd) nd.style.display = 'none';
+    if (pd) pd.style.display = pd.style.display === 'none' ? 'block' : 'none';
+    return;
+  }
+
+  // Notification dropdown toggle
+  const notifTrigger = e.target.closest('#notificationBtn');
+  if (notifTrigger) {
+    const nd = document.getElementById('notifyDropdown');
+    const pd = document.getElementById('profileDropdown');
+    if (pd) pd.style.display = 'none';
+    if (nd) nd.style.display = nd.style.display === 'none' ? 'block' : 'none';
+    return;
+  }
+
+  // Close dropdowns when clicking outside
+  if (!e.target.closest('#profileBtn')) {
+    const pd = document.getElementById('profileDropdown');
+    if (pd) pd.style.display = 'none';
+  }
+  if (!e.target.closest('.notify-wrap')) {
+    const nd = document.getElementById('notifyDropdown');
+    if (nd) nd.style.display = 'none';
+  }
+
+  // Profile Change Password
+  if (e.target.closest('#btnAdminChangePwd')) {
+    const pd = document.getElementById('profileDropdown');
+    if (pd) pd.style.display = 'none';
+    handleAction('user-pwd:' + (currentUser?.id || 'admin1'));
+    return;
+  }
+
+  // Profile Logout or Sidebar Logout
+  if (e.target.closest('#btnAdminLogout') || e.target.closest('#logout')) {
+    const pd = document.getElementById('profileDropdown');
+    if (pd) pd.style.display = 'none';
+    showModal('Xác nhận đăng xuất', '<p>Bạn có chắc chắn muốn đăng xuất khỏi Cổng Quản trị AZU Car?</p>', () => {
+      location.assign('/logout');
+    }, 'Đăng xuất');
+    return;
+  }
+
+  // Click on Notification Item
+  const notifyItem = e.target.closest('.notify-item');
+  if (notifyItem) {
+    const nd = document.getElementById('notifyDropdown');
+    if (nd) nd.style.display = 'none';
+    if (notifyItem.dataset.filter) filter = notifyItem.dataset.filter;
+    return go(notifyItem.dataset.go);
+  }
+
   if (e.target.closest('#menuToggle')) return document.getElementById('sidebar')?.classList.toggle('open');
 
   if (e.target.closest('#clearLogsBtn')) {
@@ -1701,12 +1778,6 @@ document.body.addEventListener('click', e => {
     }, 'Tiến hành quét & duyệt tự động');
     return;
   }
-
-  if (e.target.closest('#logout')) {
-    showModal('Xác nhận đăng xuất', '<p>Bạn có chắc chắn muốn đăng xuất khỏi Cổng Quản trị AZU Car?</p>', () => {
-      location.assign('/logout');
-    }, 'Đăng xuất');
-  }
 });
 
 // Search input debounced
@@ -1753,13 +1824,18 @@ async function checkAuth() {
   if (res?.isSuccess && res.data) {
     currentUser = res.data;
     const name = currentUser.fullName || currentUser.userName || 'Quản trị viên';
+    const role = (currentUser.roles || []).includes('Admin') ? 'Quản trị viên (Admin)' : 'Nhân viên (Staff)';
     const initials = Array.from(name.trim()).slice(0, 2).join('').toLocaleUpperCase('vi');
     const nameEl = document.querySelector('.profile-text strong');
     const roleEl = document.querySelector('.profile-text small');
     const avatar = document.querySelector('.profile .avatar');
+    const dropNameEl = document.getElementById('dropdownAdminName');
+    const dropRoleEl = document.getElementById('dropdownAdminRole');
     if (nameEl) nameEl.textContent = name;
-    if (roleEl) roleEl.textContent = (currentUser.roles || []).includes('Admin') ? 'Quản trị viên (Admin)' : 'Nhân viên (Staff)';
+    if (roleEl) roleEl.textContent = role;
     if (avatar) avatar.textContent = initials;
+    if (dropNameEl) dropNameEl.textContent = name;
+    if (dropRoleEl) dropRoleEl.textContent = role;
   } else {
     currentUser = null;
   }
