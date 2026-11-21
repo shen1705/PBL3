@@ -304,9 +304,9 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 
 ### Phân tích sự cố kỹ thuật (Post-Mortem):
 - **Nguyên nhân làm crash server backend:** Trong quá trình bổ sung `PaymentCard`, hàm `SeedPaymentCardsAsync` được gọi trước khi chạy lệnh tạo bảng MySQL (`dotnet ef database update`). MySQL trả lỗi `Table 'carrental.payment_cards' doesn't exist`, làm server web sập cổng 5051.
-- **Hệ quả trên `/find`:** API `/api/vehicles` không phản hồi; kèm biến `vehicleImagePlaceholder` chưa khai báo ném lỗi `ReferenceError` làm spinner tìm xe không tắt được.
+- **Nguyên nhân trang `/find` bị treo vĩnh viễn (Phát hiện chính xác):** Trong [find.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/find.js) (dòng 2583) tồn tại một khối mã trùng lặp khai báo lại `const dOvertime = document.getElementById('extraFeeOvertimeDesc')` cùng phạm vi với dòng 2571. Điều này gây ra lỗi cú pháp chết người `SyntaxError: Identifier 'dOvertime' has already been declared`, khiến trình duyệt từ chối thực thi toàn bộ file `find.js`. Do đó hàm nạp xe `loadVehiclesFromApi()` không thể chạy và khối HTML ban đầu `.loading-cars` (*"Đang kết nối cơ sở dữ liệu và tải danh sách xe..."*) không bao giờ bị xóa.
 - **Hiện tượng bảng Admin rỗng:** Tài khoản đang đăng nhập là khách thuê thường (`renter1`), gọi API admin bị trả 403 Forbidden. Khối `.catch()` phía client tự gán số cứng ảo trên thẻ metric trong khi bảng nhận `[]`.
-- **Khắc phục:** Đã chạy migration cập nhật bảng `payment_cards`, sửa biến JS, sửa cơ chế hiển thị lỗi khi thiếu quyền trên Admin và khôi phục hoạt động ổn định 100%.
+- **Khắc phục:** Đã xóa bỏ đoạn mã trùng lặp trong `find.js`, xác minh cú pháp `VALID SYNTAX` qua Edge CDP, kiểm tra thực tế trên trình duyệt thấy `carCardsCount: 17`, `loadingExists: false`. Đã chạy migration cập nhật bảng `payment_cards`, sửa cơ chế hiển thị lỗi khi thiếu quyền trên Admin và khôi phục hoạt động ổn định 100%.
 
 ### Các thay đổi kỹ thuật chi tiết:
 1. **Hạ tầng Dữ liệu & Dịch vụ Thẻ thanh toán:**
