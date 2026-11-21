@@ -94,7 +94,9 @@ node_modules/
 /docs/report/exports/
 
 
-# Session notes (local notes)
+# Session notes (chỉ lưu trữ trong Obsidian Vault cá nhân, không lưu trong project repo)
 session_notes/
 *.session.md
+SESSION_NOTE.md
+[Ss][Ee][Ss][Ss][Ii][Oo][Nn]_[Nn][Oo][Tt][Ee]*.md
 docs/architecture/code-specification.md
