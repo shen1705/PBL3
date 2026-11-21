@@ -45,10 +45,80 @@
                     <button type="button" class="btn-register-outline">Đăng ký</button>
                     <button type="button" class="btn-slate">Đăng nhập</button>
                 </div>
-                <a id="account-display" class="account-display" href="/account" aria-label="Thông tin tài khoản" hidden>
-                    <span class="account-avatar" id="account-avatar"></span>
-                    <span id="account-name"></span>
-                </a>
+
+                <!-- User Authenticated Action Center -->
+                <div id="user-auth-actions" class="user-auth-actions" style="display:none;">
+                    <!-- Notification Center -->
+                    <div class="user-notif-wrapper" id="userNotifWrapper">
+                        <button type="button" class="user-notif-btn" id="userNotificationBtn" aria-label="Thông báo" aria-expanded="false" title="Thông báo hệ thống">
+                            <i class="fa-regular fa-bell"></i>
+                            <span class="user-notif-badge" id="userNotifyBadge" style="display:none;">0</span>
+                        </button>
+
+                        <div class="user-notif-dropdown" id="userNotifyDropdown" style="display:none;" role="region" aria-label="Trung tâm thông báo">
+                            <div class="user-notif-header">
+                                <div class="notif-title-wrap">
+                                    <span class="notif-title">Thông báo</span>
+                                    <span class="notif-unread-pill" id="notifUnreadPill" style="display:none;">0 mới</span>
+                                </div>
+                                <button type="button" class="notif-action-btn" id="btnMarkAllRead" title="Đánh dấu tất cả đã đọc">
+                                    <i class="fa-solid fa-check-double"></i> Đã đọc tất cả
+                                </button>
+                            </div>
+
+                            <div class="user-notif-list" id="userNotifyList">
+                                <div class="notif-loading">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> Đang tải thông báo...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="user-profile-wrapper" id="userProfileWrapper">
+                        <button type="button" class="user-profile-trigger" id="userProfileTrigger" aria-label="Menu tài khoản" aria-expanded="false">
+                            <span class="account-avatar" id="account-avatar">U</span>
+                            <span class="user-profile-name" id="account-name">Người dùng</span>
+                            <i class="fa-solid fa-chevron-down user-chevron"></i>
+                        </button>
+
+                        <div class="user-profile-dropdown" id="userProfileDropdown" style="display:none;" role="menu">
+                            <div class="user-dropdown-header">
+                                <div class="user-header-avatar" id="dropdownAvatar">U</div>
+                                <div class="user-header-info">
+                                    <strong class="user-header-name" id="dropdownUserName">Người dùng</strong>
+                                    <span class="user-header-role" id="dropdownUserRole">Khách thuê</span>
+                                </div>
+                            </div>
+                            <div class="user-dropdown-divider"></div>
+                            <a href="/account" class="user-dropdown-item" role="menuitem">
+                                <i class="fa-regular fa-user"></i>
+                                <span>Hồ sơ của tôi</span>
+                            </a>
+                            <a href="/account#trips" class="user-dropdown-item" role="menuitem">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                <span>Lịch sử chuyến</span>
+                            </a>
+                            <a href="/account#favorites" class="user-dropdown-item" role="menuitem">
+                                <i class="fa-regular fa-heart"></i>
+                                <span>Xe đã lưu</span>
+                            </a>
+                            <div class="user-dropdown-divider"></div>
+                            <button type="button" class="user-dropdown-item" id="btnOpenUserChangePwd" role="menuitem">
+                                <i class="fa-solid fa-key"></i>
+                                <span>Đổi mật khẩu</span>
+                            </button>
+                            <div class="user-dropdown-divider"></div>
+                            <button type="button" class="user-dropdown-item is-danger" id="btnUserHeaderLogout" role="menuitem">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                                <span>Đăng xuất</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden fallback anchor to preserve legacy references -->
+                <a id="account-display" class="account-display" href="/account" aria-label="Thông tin tài khoản" style="display:none !important;" hidden></a>
             </div>
         </div>
     </header>
@@ -122,6 +192,7 @@
     <script src="~/js/dispute-modal.js" asp-append-version="true"></script>
     <script src="~/js/trip-handover-modal.js" asp-append-version="true"></script>
     <script src="~/js/index.js" asp-append-version="true"></script>
+    <script src="~/js/user-nav.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

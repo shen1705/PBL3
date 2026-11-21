@@ -31,6 +31,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
     public DbSet<Dispute> Disputes => Set<Dispute>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -243,6 +244,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             b.ToTable("system_settings");
             b.HasKey(x => x.SettingKey);
             b.HasOne(x => x.Updater).WithMany().HasForeignKey(x => x.UpdatedBy).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<Notification>(b =>
+        {
+            b.ToTable("notifications");
+            b.HasKey(x => x.NotificationId);
+            b.Property(x => x.Title).HasMaxLength(200);
+            b.Property(x => x.Message).HasMaxLength(1000);
+            b.Property(x => x.Type).HasMaxLength(50);
+            b.Property(x => x.ActionUrl).HasMaxLength(255);
+            b.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            b.HasIndex(x => new { x.UserId, x.IsRead });
         });
 
         foreach (var entity in builder.Model.GetEntityTypes())

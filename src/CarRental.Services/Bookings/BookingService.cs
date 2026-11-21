@@ -11,6 +11,7 @@ using CarRental.Models.DTOs.Vehicles;
 using CarRental.Models.Entities;
 using CarRental.Services.Abstractions;
 using CarRental.Services.Availability;
+using CarRental.Services.Notifications;
 using CarRental.Services.Vehicles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -21,17 +22,20 @@ public class BookingService : IBookingService
 {
     private readonly ApplicationDbContext _db;
     private readonly IVehicleAvailabilityService _availabilityService;
+    private readonly INotificationService _notificationService;
     private readonly IClock _clock;
     private readonly ILogger<BookingService> _logger;
 
     public BookingService(
         ApplicationDbContext db,
         IVehicleAvailabilityService availabilityService,
+        INotificationService notificationService,
         IClock clock,
         ILogger<BookingService> logger)
     {
         _db = db;
         _availabilityService = availabilityService;
+        _notificationService = notificationService;
         _clock = clock;
         _logger = logger;
     }
@@ -255,6 +259,28 @@ public class BookingService : IBookingService
         }
 
         await _db.SaveChangesAsync(ct);
+
+        // Gửi thông báo cho Khách thuê & Chủ xe
+        var carTitle = $"{listing.Vehicle.Brand} {listing.Vehicle.Model}";
+        await _notificationService.CreateNotificationAsync(
+            renterUserId,
+            "Đặt xe & Ký quỹ thành công",
+            $"Đơn #{booking.BookingId} cho xe {carTitle} ({listing.Vehicle.LicensePlate}) đã được gửi đến chủ xe. Tiền ký quỹ 100% ({depositAmount:N0} đ) đang được bảo lưu an toàn tại Sàn AZU Car.",
+            "trip",
+            booking.BookingId,
+            "/account#trips",
+            ct);
+
+        var renterUser = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == renterUserId, ct);
+        var renterDisplayName = renterUser?.FullName ?? renterUser?.UserName ?? "Khách thuê";
+        await _notificationService.CreateNotificationAsync(
+            listing.Vehicle.OwnerId,
+            "Yêu cầu thuê xe mới",
+            $"Khách {renterDisplayName} vừa gửi yêu cầu thuê xe {carTitle} ({listing.Vehicle.LicensePlate}) từ {booking.StartDate:HH:mm dd/MM} đến {booking.EndDate:HH:mm dd/MM}. Hạn phản hồi: {responseDeadline:HH:mm dd/MM}.",
+            "trip",
+            booking.BookingId,
+            "/owner",
+            ct);
 
         _logger.LogInformation("Đã tạo đơn đặt xe mới #{BookingId} cho xe {VehicleId} từ người dùng {RenterId}",
             booking.BookingId, listing.VehicleId, renterUserId);
@@ -778,6 +804,29 @@ public class BookingService : IBookingService
             _logger.LogInformation("Chủ xe {OwnerId} đã TỪ CHỐI đơn #{BookingId}. Lý do: {Reason}", ownerUserId, bookingId, booking.RejectReason);
         }
 
+        if (request.Accept)
+        {
+            await _notificationService.CreateNotificationAsync(
+                booking.RenterId,
+                "Chủ xe đã duyệt yêu cầu!",
+                $"Chủ xe {booking.Vehicle.Owner?.FullName ?? booking.Vehicle.Owner?.UserName ?? "Chủ xe"} đã phê duyệt đơn #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}). Thời gian nhận xe: {booking.StartDate:HH:mm dd/MM}.",
+                "trip",
+                booking.BookingId,
+                "/account#trips",
+                ct);
+        }
+        else
+        {
+            await _notificationService.CreateNotificationAsync(
+                booking.RenterId,
+                "Chủ xe từ chối đơn thuê",
+                $"Chủ xe đã từ chối đơn #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}). Lý do: {booking.RejectReason}. Toàn bộ tiền ký quỹ 100% ({booking.PriceLockedTotal:N0} đ) đã được hoàn trả lại cho bạn.",
+                "trip",
+                booking.BookingId,
+                "/account#trips",
+                ct);
+        }
+
         await _db.SaveChangesAsync(ct);
 
         return await GetBookingDetailAsync(bookingId, ownerUserId, ct);
@@ -917,6 +966,29 @@ public class BookingService : IBookingService
         _logger.LogInformation("Đơn #{BookingId} đã bị HỦY bởi {UserId} (isRenter: {IsRenter}). Lý do: {Reason}",
             bookingId, currentUserId, isRenter, booking.CancelReason);
 
+        if (isRenter)
+        {
+            await _notificationService.CreateNotificationAsync(
+                booking.Vehicle.OwnerId,
+                "Khách thuê đã hủy đơn",
+                $"Khách thuê đã hủy đơn #{booking.BookingId} cho xe {booking.Vehicle.Brand} {booking.Vehicle.Model}. Lý do: {booking.CancelReason}.",
+                "trip",
+                booking.BookingId,
+                "/owner",
+                ct);
+        }
+        else if (isOwner)
+        {
+            await _notificationService.CreateNotificationAsync(
+                booking.RenterId,
+                "Chủ xe đã hủy đơn thuê",
+                $"Chủ xe đã hủy đơn #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}). Lý do: {booking.CancelReason}. Toàn bộ tiền ký quỹ đã được hoàn lại cho bạn.",
+                "trip",
+                booking.BookingId,
+                "/account#trips",
+                ct);
+        }
+
         await _db.SaveChangesAsync(ct);
 
         return await GetBookingDetailAsync(bookingId, currentUserId, ct);
@@ -983,6 +1055,29 @@ public class BookingService : IBookingService
         {
             booking.Status = BookingStatuses.Ongoing;
             _logger.LogInformation("Đơn thuê #{BookingId} đã chuyển sang trạng thái ONGOING bởi {UserId}", bookingId, currentUserId);
+        }
+
+        if (isOwner)
+        {
+            await _notificationService.CreateNotificationAsync(
+                booking.RenterId,
+                "Chủ xe đã bàn giao xe",
+                $"Chủ xe đã ký xác nhận bàn giao xe {booking.Vehicle.Brand} {booking.Vehicle.Model} (#{booking.BookingId}). Chúc bạn có một hành trình an toàn và thuận lợi!",
+                "trip",
+                booking.BookingId,
+                "/account#trips",
+                ct);
+        }
+        else if (isRenter)
+        {
+            await _notificationService.CreateNotificationAsync(
+                booking.Vehicle.OwnerId,
+                "Khách xác nhận nhận xe",
+                $"Khách thuê đã ký nhận bàn giao xe #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}). Chuyến đi chính thức bắt đầu.",
+                "trip",
+                booking.BookingId,
+                "/owner",
+                ct);
         }
 
         await _db.SaveChangesAsync(ct);
@@ -1117,9 +1212,37 @@ public class BookingService : IBookingService
 
             _logger.LogInformation("Chủ xe {OwnerId} đã nghiệm thu và hoàn tất Đơn thuê #{BookingId}. Doanh thu: {Total}, Hoa hồng: {Commission}",
                 currentUserId, bookingId, booking.PriceLockedTotal, commissionAmount);
+
+            // Thông báo cho Chủ xe & Khách thuê khi chuyến hoàn tất
+            await _notificationService.CreateNotificationAsync(
+                booking.Vehicle.OwnerId,
+                "Chuyến đi hoàn tất & Quyết toán",
+                $"Đơn thuê #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}) đã hoàn tất. Doanh thu {netOwnerPayout:N0} đ (sau khi trừ 5% hoa hồng sàn) đã được chuyển về tài khoản của bạn.",
+                "trip",
+                booking.BookingId,
+                "/owner",
+                ct);
+
+            await _notificationService.CreateNotificationAsync(
+                booking.RenterId,
+                "Hoàn tất chuyến đi",
+                $"Chuyến đi #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}) đã hoàn tất tốt đẹp. Cảm ơn bạn đã lựa chọn AZU Car! Hãy dành chút thời gian đánh giá trải nghiệm nhé.",
+                "trip",
+                booking.BookingId,
+                "/account#trips",
+                ct);
         }
         else if (isRenter)
         {
+            await _notificationService.CreateNotificationAsync(
+                booking.Vehicle.OwnerId,
+                "Khách gửi biên bản trả xe",
+                $"Khách thuê đã gửi biên bản trả xe cho đơn #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}). Vui lòng kiểm tra xe thực tế và xác nhận hoàn tất.",
+                "trip",
+                booking.BookingId,
+                "/owner",
+                ct);
+
             _logger.LogInformation("Khách thuê {RenterId} đã gửi biên bản trả xe cho Đơn thuê #{BookingId}. Đang chờ Chủ xe nghiệm thu xe.",
                 currentUserId, bookingId);
         }
@@ -1405,6 +1528,15 @@ public class BookingService : IBookingService
                     CreatedAt = now
                 });
             }
+
+            await _notificationService.CreateNotificationAsync(
+                b.RenterId,
+                "Đơn đặt xe đã hết hạn",
+                $"Chủ xe không phản hồi trong thời hạn quy định cho đơn #{b.BookingId}. Hệ thống đã tự động hủy đơn và hoàn trả 100% ({b.PriceLockedTotal:N0} đ) tiền ký quỹ về tài khoản của bạn.",
+                "trip",
+                b.BookingId,
+                "/account#trips",
+                ct);
         }
 
         await _db.SaveChangesAsync(ct);

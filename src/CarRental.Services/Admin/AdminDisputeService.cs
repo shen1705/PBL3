@@ -10,6 +10,7 @@ using CarRental.Models.DTOs.Admin;
 using CarRental.Models.DTOs.Bookings;
 using CarRental.Models.Entities;
 using CarRental.Services.Abstractions;
+using CarRental.Services.Notifications;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -18,15 +19,18 @@ namespace CarRental.Services.Admin;
 public class AdminDisputeService : IAdminDisputeService
 {
     private readonly ApplicationDbContext _db;
+    private readonly INotificationService _notificationService;
     private readonly IClock _clock;
     private readonly ILogger<AdminDisputeService> _logger;
 
     public AdminDisputeService(
         ApplicationDbContext db,
+        INotificationService notificationService,
         IClock clock,
         ILogger<AdminDisputeService> logger)
     {
         _db = db;
+        _notificationService = notificationService;
         _clock = clock;
         _logger = logger;
     }
@@ -301,6 +305,28 @@ public class AdminDisputeService : IAdminDisputeService
                     payment.PenaltyAmount = penaltyAmount;
                 }
             }
+        }
+
+        if (booking != null)
+        {
+            var note = string.IsNullOrWhiteSpace(request.ResolutionNotes) ? "Đã được Quản trị viên xử lý theo quy định." : request.ResolutionNotes.Trim();
+            await _notificationService.CreateNotificationAsync(
+                booking.RenterId,
+                "Phán quyết khiếu nại đơn thuê",
+                $"Khiếu nại cho đơn #{booking.BookingId} đã có kết luận từ Quản trị viên: {note}",
+                "dispute",
+                booking.BookingId,
+                "/account#trips",
+                ct);
+
+            await _notificationService.CreateNotificationAsync(
+                booking.Vehicle.OwnerId,
+                "Phán quyết khiếu nại đơn thuê",
+                $"Khiếu nại cho đơn #{booking.BookingId} đã có kết luận từ Quản trị viên: {note}",
+                "dispute",
+                booking.BookingId,
+                "/owner",
+                ct);
         }
 
         await _db.SaveChangesAsync(ct);

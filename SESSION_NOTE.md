@@ -181,7 +181,53 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 
 ---
 
-## 5. Lộ Trình Triển Khai Kế Tiếp (Roadmap & Next Steps)
+## 5. Nhật Ký Phiên Làm Việc #12 (2026-11-21) - Cải Tiến Đổi Mật Khẩu Admin, Dropdown Người Dùng & Hệ Thống Thông Báo Chuyến Đi (Renter & Owner)
+
+### 5.1. Bối cảnh & Yêu cầu của Người dùng
+1. **Đổi mật khẩu Admin**: Yêu cầu nhập đủ 3 trường: Mật khẩu cũ, Mật khẩu mới và Xác nhận mật khẩu mới.
+2. **Dropdown Header cho Người dùng**: Xây dựng menu dropdown cho user tương tự Admin, bao gồm:
+   - Hồ sơ cá nhân (`/account`)
+   - Lịch sử chuyến đi (`/account#trips`)
+   - Xe đã lưu (`/account#favorites`)
+   - Đổi mật khẩu (Modal nhập mật khẩu cũ + mới + xác nhận)
+   - Đăng xuất (Modal xác nhận đăng xuất)
+   - **Loại bỏ nút Đăng xuất ở thanh điều hướng bên trái (side panel)** của trang tài khoản (`Account.cshtml`, `BecomeOwner.cshtml`, `MyTrips.cshtml`).
+3. **Hệ thống Thông báo (Notification Center) cho Người dùng**:
+   - Bổ sung service & database lưu trữ thông báo thực tế.
+   - Phân biệt rõ ràng ngữ cảnh thông báo giữa **Khách thuê (Renter)** và **Chủ xe (Owner)** trong suốt vòng đời chuyến đi.
+   - Giao diện thiết kế theo **pattern hiện đại, chuyên nghiệp, phi-AI (non-AI pattern)**: màu sắc chức năng tinh tế, icon trực quan, huy hiệu đếm chưa đọc, dấu chấm unread, relative time tiếng Việt ("Vừa xong", "15 phút trước",...).
+
+### 5.2. Các hạng mục kỹ thuật đã triển khai
+
+1. **Đổi mật khẩu Admin (`admin/app.js`)**:
+   - Khi click "Đổi mật khẩu" tại profile dropdown của Admin: hiển thị modal gồm 3 ô mật khẩu: *Mật khẩu hiện tại*, *Mật khẩu mới* (tối thiểu 6 ký tự), *Xác nhận mật khẩu mới*.
+   - Kiểm tra ràng buộc hợp lệ và gọi API `POST /api/auth/change-password`.
+   - Ghi nhận Audit Log hệ thống và hiển thị toast thông báo.
+
+2. **Dữ liệu & Backend Services cho Thông báo**:
+   - **Entity**: [Notification.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Models/Entities/Notification.cs) (Id, UserId, Title, Message, Type, ReferenceId, ActionUrl, IsRead, CreatedAt).
+   - **DbContext & Migration**: Bổ sung `DbSet<Notification> Notifications` vào [ApplicationDbContext.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Data/ApplicationDbContext.cs); tạo migration `20261121095825_AddNotificationsTable` và áp dụng thành công vào MySQL.
+   - **Service**: [INotificationService.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/Notifications/INotificationService.cs) & [NotificationService.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/Notifications/NotificationService.cs) hỗ trợ lấy danh sách, đếm chưa đọc, đánh dấu đã đọc từng tin hoặc tất cả, format thời gian relative tiếng Việt.
+   - **API Controller**: [NotificationController.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Controllers/NotificationController.cs) với các endpoint `/api/notifications`, `/unread-count`, `/{id}/read`, `/read-all`.
+   - **Tích hợp vào Vòng đời Chuyến xe (`BookingService.cs` & `AdminDisputeService.cs`)**:
+     - *Đặt xe mới*: Renter nhận thông báo ký quỹ thành công; Owner nhận thông báo yêu cầu thuê kèm hạn phản hồi.
+     - *Duyệt/Từ chối*: Renter nhận thông báo chủ xe phê duyệt (hoặc từ chối kèm lý do + thông báo hoàn cọc).
+     - *Hủy chuyến*: Phía còn lại nhận lý do hủy đơn và chế tài tài chính tương ứng.
+     - *Bàn giao nhận xe (Pickup)*: Bên xác nhận kích hoạt thông báo cho bên đối tác tiếp tục hành trình.
+     - *Hoàn tất chuyến & Quyết toán (Return)*: Owner nhận thông báo quyết toán doanh thu (sau trừ 5% hoa hồng); Renter nhận thông báo cảm ơn và nhắc đánh giá trải nghiệm.
+     - *Hết hạn duyệt*: Renter nhận thông báo đơn tự động hết hạn và hoàn tiền 100%.
+     - *Tranh chấp*: Cả 2 bên nhận phán quyết chính thức từ Admin.
+
+3. **Giao diện Header, Dropdown & Panel người dùng**:
+   - **`_Layout.cshtml`**: Tích hợp Action Center gồm Nút chuông thông báo (`#userNotificationBtn`), Khay thông báo (`#userNotifyDropdown`), Nút kích hoạt Profile (`#userProfileTrigger`) kèm avatar chữ cái đầu, tên người dùng, chevron và Menu xổ xuống (`#userProfileDropdown`).
+   - **`_Modals.cshtml`**: Bổ sung Modal đổi mật khẩu người dùng (`#userChangePwdModal`) có nút ẩn/hiện mật khẩu và Modal xác nhận đăng xuất (`#userLogoutConfirmModal`).
+   - **Side Panels**: Gỡ bỏ nút đăng xuất (`#trip-logout`) tại thanh điều hướng bên trái của `Account.cshtml`, `BecomeOwner.cshtml` và `MyTrips.cshtml`.
+   - **CSS (`index.css`)**: Tùy biến kiểu dáng thanh lịch, shadow mềm mại, huy hiệu đỏ tinh gọn, các màu biểu tượng sự kiện phân loại rõ ràng (xanh lá: duyệt/bàn giao/hoàn tất; xanh dương: đơn mới; vàng cam: cảnh báo/hạn chót; đỏ: hủy/từ chối).
+   - **JS (`user-nav.js`)**: Điều khiển mở/đóng dropdown mượt mà, tự động đóng khi click ra ngoài hoặc bấm `Escape`, tự động cập nhật số lượng thông báo chưa đọc định kỳ 30 giây, đánh dấu đã đọc khi click chuyển hướng và xử lý form đổi mật khẩu.
+
+---
+
+## 6. Lộ Trình Triển Khai Kế Tiếp (Roadmap & Next Steps)
 
 ```
 [1. Auth Services] (Hoàn tất 100%)
@@ -208,8 +254,11 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 [8. Redundant UI Cleanups & CSV Export Audit] (Hoàn tất 100% - Session 10)
        │
        ▼
-[9. 7 Operational Flaws Fix & 100% Online Escrow Transition] (Hoàn tất 100% - Session 11) ◄─── (VỪA HOÀN THÀNH)
+[9. 7 Operational Flaws Fix & 100% Online Escrow Transition] (Hoàn tất 100% - Session 11)
        │
        ▼
-[10. Inspect Deferred Find.cshtml Links (Task 2 - Mục 4) / Favorite Vehicles]
+[10. User Dropdown, Notification Center & Admin Password Flow] (Hoàn tất 100% - Session 12) ◄─── (VỪA HOÀN THÀNH)
+       │
+       ▼
+[11. Inspect Deferred Find.cshtml Links (Task 2 - Mục 4) / Favorite Vehicles]
 ```

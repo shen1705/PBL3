@@ -1685,11 +1685,47 @@ document.body.addEventListener('click', e => {
     if (nd) nd.style.display = 'none';
   }
 
-  // Profile Change Password
+  // Profile Change Password (Admin đổi mật khẩu tài khoản: mật khẩu cũ, mật khẩu mới, xác nhận)
   if (e.target.closest('#btnAdminChangePwd')) {
     const pd = document.getElementById('profileDropdown');
     if (pd) pd.style.display = 'none';
-    handleAction('user-pwd:' + (currentUser?.id || 'admin1'));
+    showModal('Đổi mật khẩu Quản trị viên', `
+      <p style="margin-bottom:12px;font-size:13.5px;color:var(--muted)">Nhập mật khẩu hiện tại và thiết lập mật khẩu mới cho tài khoản quản trị.</p>
+      <div class="field" style="margin-bottom:12px;">
+        <label for="adminCurrentPwd">Mật khẩu hiện tại *</label>
+        <input id="adminCurrentPwd" type="password" placeholder="Nhập mật khẩu cũ..." required style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--line)">
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label for="adminNewPwd">Mật khẩu mới (tối thiểu 6 ký tự) *</label>
+        <input id="adminNewPwd" type="password" placeholder="Nhập mật khẩu mới..." required style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--line)">
+      </div>
+      <div class="field" style="margin-bottom:6px;">
+        <label for="adminConfirmPwd">Xác nhận mật khẩu mới *</label>
+        <input id="adminConfirmPwd" type="password" placeholder="Nhập lại mật khẩu mới..." required style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--line)">
+      </div>
+    `, async () => {
+      const curPwd = document.getElementById('adminCurrentPwd')?.value;
+      const newPwd = document.getElementById('adminNewPwd')?.value;
+      const confirmPwd = document.getElementById('adminConfirmPwd')?.value;
+
+      if (!curPwd) { toast('Vui lòng nhập mật khẩu hiện tại'); return false; }
+      if (!newPwd || newPwd.length < 6) { toast('Mật khẩu mới tối thiểu 6 ký tự'); return false; }
+      if (newPwd === curPwd) { toast('Mật khẩu mới không được trùng mật khẩu cũ'); return false; }
+      if (newPwd !== confirmPwd) { toast('Xác nhận mật khẩu mới không khớp'); return false; }
+
+      const res = await api('/api/auth/change-password', {
+        method: 'POST',
+        body: { currentPassword: curPwd, newPassword: newPwd, confirmPassword: confirmPwd }
+      });
+
+      if (!res?.isSuccess) {
+        toast(res?.message || 'Không thể đổi mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.');
+        return false;
+      }
+
+      addLog('Đổi mật khẩu', 'Quản trị viên đã đổi mật khẩu tài khoản thành công');
+      toast('Đã đổi mật khẩu tài khoản Quản trị viên thành công!');
+    }, 'Đổi mật khẩu');
     return;
   }
 
