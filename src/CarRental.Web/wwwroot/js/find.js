@@ -1705,6 +1705,9 @@ let currentPopupCar = null;
 
 function openCarPopup(car) {
     currentPopupCar = car;
+    if (bookingModal) {
+        bookingModal.hidden = true;
+    }
     if (typeof toggleOwnerListingEditMode === 'function') {
         toggleOwnerListingEditMode(false);
     }
@@ -2339,6 +2342,13 @@ document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
 document.getElementById('btnRentCarSubmit')?.addEventListener('click', () => {
     if (!currentPopupCar) return;
 
+    // check owner of car
+    const myUserId = sessionStorage.getItem('azuCarUserId');
+    if (myUserId && currentPopupCar.ownerId && String(myUserId) === String(currentPopupCar.ownerId)) {
+        alert('Đây là xe do bạn sở hữu. Bạn không thể tự thuê xe của chính mình.');
+        return;
+    }
+
     // check login
     if (!window.AzuStore || !window.AzuStore.isLoggedIn()) {
         sessionStorage.setItem('azuCarPromptLogin', '1');
@@ -2372,8 +2382,11 @@ document.getElementById('btnRentCarSubmit')?.addEventListener('click', () => {
         return;
     }
 
-    // open booking modal
-    openBookingModal();
+    // Tắt popup bài đăng, hiện popup thông tin thuê thủ tục
+    if (carDetailModal) {
+        carDetailModal.hidden = true;
+    }
+    openBookingModal(currentPopupCar);
 });
 
 // sync popup state on login
@@ -2395,7 +2408,19 @@ window.addEventListener('azu:auth-changed', (e) => {
 
 // close booking modal
 closeBookingModalBtn?.addEventListener('click', closeBookingModal);
-btnBackToCar?.addEventListener('click', closeBookingModal);
+
+// Nút Quay lại trong popup thuê xe -> tắt popup thuê xe và mở lại popup bài đăng xe
+btnBackToCar?.addEventListener('click', () => {
+    if (bookingModal) {
+        bookingModal.hidden = true;
+    }
+    if (carDetailModal && currentPopupCar) {
+        carDetailModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+    } else {
+        document.body.style.overflow = '';
+    }
+});
 
 bookingModal?.addEventListener('click', (e) => {
     if (e.target === bookingModal) {
@@ -2468,12 +2493,37 @@ function closeSampleContractModal() {
     if (modal) modal.hidden = true;
 }
 
-document.getElementById('linkOpenSampleContract')?.addEventListener('click', openSampleContractModal);
+const agreeCheck = document.getElementById('checkAgreeContract');
+const agreeWrapper = document.getElementById('checkAgreeContractWrapper');
+const linkOpenContract = document.getElementById('linkOpenSampleContract');
+
+// Khi bấm xác nhận checkbox đọc hợp đồng thì hiện popup hợp đồng ra để đọc và nút xác nhận (như cũ)
+agreeCheck?.addEventListener('click', (e) => {
+    if (!agreeCheck.checked) {
+        // Cho phép bỏ chọn nếu đang được tích
+        return;
+    }
+    // Ngăn chặn tích chay: mở popup hợp đồng ra để đọc và bấm xác nhận bên trong
+    e.preventDefault();
+    openSampleContractModal();
+});
+
+agreeWrapper?.addEventListener('click', (e) => {
+    if (e.target === agreeCheck || e.target.closest('#linkOpenSampleContract')) {
+        return;
+    }
+    openSampleContractModal();
+});
+
+linkOpenContract?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openSampleContractModal();
+});
+
 document.getElementById('closeSampleContractModal')?.addEventListener('click', closeSampleContractModal);
 document.getElementById('btnCloseSampleContractBottom')?.addEventListener('click', closeSampleContractModal);
 
 document.getElementById('btnAcceptSampleContract')?.addEventListener('click', () => {
-    const agreeCheck = document.getElementById('checkAgreeContract');
     if (agreeCheck) {
         agreeCheck.checked = true;
     }
@@ -3238,46 +3288,6 @@ carsGrid?.addEventListener('click', event => {
     const car = carFromCard(card);
     window.AzuStore.setSelectedCar(car);
 
-    // Không mở popup bài đăng cũ, đảm bảo không có popup chồng lên nhau
-    if (carDetailModal) {
-        carDetailModal.hidden = true;
-    }
-
-    // Kiểm tra xe của chính mình
-    const currentUserId = sessionStorage.getItem('azuCarUserId');
-    if (currentUserId && car.ownerId && currentUserId === car.ownerId) {
-        alert('Đây là xe do bạn sở hữu. Bạn không thể tự thuê xe của chính mình.');
-        return;
-    }
-
-    // Kiểm tra đăng nhập
-    if (!window.AzuStore || !window.AzuStore.isLoggedIn()) {
-        sessionStorage.setItem('azuCarPromptLogin', '1');
-        const loginModal = document.getElementById('loginModal');
-        if (loginModal) {
-            loginModal.classList.add('active');
-        } else {
-            window.location.href = '/';
-        }
-        return;
-    }
-
-    // Kiểm tra điều kiện xác minh GPLX
-    const user = window.AzuStore.getUser ? window.AzuStore.getUser() : null;
-    const isDlVerified = Boolean(
-        user && (
-            user.isDriverLicenseVerified === true ||
-            sessionStorage.getItem('azuCarLicenseVerified') === 'true' ||
-            (Array.isArray(user.claims) && user.claims.includes('DriverLicenseVerified')) ||
-            user.hasDriverLicense === true
-        )
-    );
-    if (!isDlVerified) {
-        alert('Tài khoản của bạn chưa xác thực Giấy phép lái xe (GPLX). Vui lòng cập nhật GPLX trong phần tài khoản trước khi thuê xe.');
-        window.location.href = '/account#license';
-        return;
-    }
-
-    // Mở trực tiếp popup điền thông tin thuê xe (bỏ qua popup bài đăng)
-    openBookingModal(car);
+    // Ở find bấm vào xe -> mở popup bài đăng
+    openCarPopup(car);
 });
