@@ -70,38 +70,16 @@ function createSampleCarCard(car) {
         imageWrapper.appendChild(myBadge);
     }
 
-    if (['VIOS', 'CITY', 'XPANDER', 'SONET', 'CR-V'].some(m => car.name.toUpperCase().includes(m))) {
-        card.dataset.instant = 'true';
-        const badge = document.createElement('span');
-        badge.className = 'badge-fast';
-        badge.innerHTML = '<i class="fa-solid fa-bolt"></i> ĐẶT NHANH';
-        imageWrapper.appendChild(badge);
-    }
-
     const info = document.createElement('div');
     info.className = 'car-info';
-    const tags = document.createElement('div');
-    tags.className = 'car-tags-top';
-
-    const transmission = document.createElement('span');
-    transmission.className = 'tag-trans';
-    transmission.textContent = 'SỐ TỰ ĐỘNG';
-    const seats = document.createElement('span');
-    seats.className = 'tag-seats';
-    seats.textContent = `${car.seats} CHỖ`;
-    tags.append(transmission, seats);
 
     const name = document.createElement('h3');
     name.textContent = car.name;
     const details = document.createElement('p');
     details.className = 'car-rating-loc';
     details.append(
-        document.createTextNode(`★ ${car.rating} • ${car.trips} chuyến • Đời ${car.year}`),
-        document.createElement('br')
+        document.createTextNode(`★ ${car.rating} • ${car.trips} chuyến`)
     );
-    const locationIcon = document.createElement('i');
-    locationIcon.className = 'fa-solid fa-location-dot';
-    details.append(locationIcon, document.createTextNode(` ${car.city}`));
 
     const footer = document.createElement('div');
     footer.className = 'car-footer';
@@ -110,7 +88,7 @@ function createSampleCarCard(car) {
     price.append(document.createTextNode(car.price), document.createElement('span'));
     price.lastElementChild.textContent = '/ngày';
     footer.appendChild(price);
-    info.append(tags, name, details, footer);
+    info.append(name, details, footer);
     card.append(imageWrapper, info);
     return card;
 }
@@ -164,15 +142,6 @@ function createCarCardFromApi(car) {
     const imageWrapper = document.createElement('div');
     imageWrapper.className = 'car-img-wrapper';
 
-    const carUpper = (car.name || '').toUpperCase();
-    if (['VIOS', 'CITY', 'XPANDER', 'VF', 'CR-V', 'CROSS', 'ACCENT', 'SANTA', 'CARNIVAL'].some(m => carUpper.includes(m))) {
-        card.dataset.instant = 'true';
-        const badge = document.createElement('span');
-        badge.className = 'badge-fast';
-        badge.innerHTML = '<i class="fa-solid fa-bolt"></i> ĐẶT NHANH';
-        imageWrapper.appendChild(badge);
-    }
-
     const image = document.createElement('img');
     image.src = resolveVehicleImage(car);
     image.addEventListener('error', () => {
@@ -198,17 +167,6 @@ function createCarCardFromApi(car) {
     const info = document.createElement('div');
     info.className = 'car-info';
 
-    const tags = document.createElement('div');
-    tags.className = 'car-tags-top';
-    const transSpan = document.createElement('span');
-    transSpan.className = 'tag-trans';
-    transSpan.textContent = (car.transmission === 'Manual' || car.transmission === 'Số sàn') ? 'SỐ SÀN' : 'SỐ TỰ ĐỘNG';
-
-    const seatsSpan = document.createElement('span');
-    seatsSpan.className = 'tag-seats';
-    seatsSpan.textContent = `${car.seats} CHỖ`;
-    tags.append(transSpan, seatsSpan);
-
     const h3 = document.createElement('h3');
     h3.textContent = car.name;
 
@@ -220,12 +178,11 @@ function createCarCardFromApi(car) {
     const hasRating = typeof car.rating === 'number' && car.rating > 0;
     const ratingVal = hasRating ? car.rating.toFixed(1) : '';
     const tripsVal = car.totalTrips || 0;
-    const yearVal = car.year || 2023;
 
     if (hasRating) {
         details.append(
             starIcon,
-            document.createTextNode(` ${ratingVal} • ${tripsVal} chuyến • `)
+            document.createTextNode(` ${ratingVal} • ${tripsVal} chuyến`)
         );
     } else {
         const noRatingSpan = document.createElement('span');
@@ -233,17 +190,9 @@ function createCarCardFromApi(car) {
         noRatingSpan.textContent = 'Chưa có đánh giá';
         details.append(
             noRatingSpan,
-            document.createTextNode(` • ${tripsVal} chuyến • `)
+            document.createTextNode(` • ${tripsVal} chuyến`)
         );
     }
-    const bYear = document.createElement('b');
-    bYear.textContent = `Đời ${yearVal}`;
-    details.appendChild(bYear);
-    details.appendChild(document.createElement('br'));
-
-    const locIcon = document.createElement('i');
-    locIcon.className = 'fa-solid fa-location-dot';
-    details.append(locIcon, document.createTextNode(` ${car.city}`));
 
     const footer = document.createElement('div');
     footer.className = 'car-footer';
@@ -254,7 +203,7 @@ function createCarCardFromApi(car) {
     priceSpan.lastElementChild.textContent = '/ngày';
     footer.appendChild(priceSpan);
 
-    info.append(tags, h3, details, footer);
+    info.append(h3, details, footer);
     card.append(imageWrapper, info);
     return card;
 }
@@ -866,8 +815,6 @@ if (openFilterModalBtn && filterModal) {
             i.classList.toggle('active', i.dataset.brand === 'all');
         });
 
-        pillBtnInstant?.classList.remove('active');
-
         applyAllFilters();
         updateFilterBadge();
         filterModal.classList.remove('active');
@@ -875,14 +822,10 @@ if (openFilterModalBtn && filterModal) {
 
     btnApplyFilter?.addEventListener('click', () => {
         currentFilters.price = filterModal.querySelector('.filter-chip.active[data-filter="price"]')?.dataset.value || 'all';
-        currentFilters.seats = filterModal.querySelector('.filter-chip.active[data-filter="seats"]')?.dataset.value || 'all';
         currentFilters.trans = filterModal.querySelector('.filter-chip.active[data-filter="trans"]')?.dataset.value || 'all';
         currentFilters.fuel = filterModal.querySelector('.filter-chip.active[data-filter="fuel"]')?.dataset.value || 'all';
-        currentFilters.instant = !!document.getElementById('filterFeatureInstant')?.checked;
         currentFilters.delivery = !!document.getElementById('filterFeatureDelivery')?.checked;
         currentFilters.deposit = !!document.getElementById('filterFeatureDeposit')?.checked;
-
-        if (pillBtnInstant) pillBtnInstant.classList.toggle('active', currentFilters.instant);
 
         applyAllFilters();
         updateFilterBadge();
@@ -893,10 +836,8 @@ if (openFilterModalBtn && filterModal) {
 function updateFilterBadge() {
     let count = 0;
     if (currentFilters.price !== 'all') count++;
-    if (currentFilters.seats !== 'all') count++;
     if (currentFilters.trans !== 'all') count++;
     if (currentFilters.fuel !== 'all') count++;
-    if (currentFilters.instant) count++;
     if (currentFilters.delivery) count++;
     if (currentFilters.deposit) count++;
     if (currentFilters.brand !== 'all') count++;
@@ -969,18 +910,7 @@ function isInstantBookingCar(card) {
 }
 
 function initCarBadges() {
-    document.querySelectorAll('.car-card').forEach(card => {
-        if (isInstantBookingCar(card)) {
-            card.dataset.instant = 'true';
-            const imgWrapper = card.querySelector('.car-img-wrapper');
-            if (imgWrapper && !imgWrapper.querySelector('.badge-fast')) {
-                const badge = document.createElement('span');
-                badge.className = 'badge-fast';
-                badge.innerHTML = '<i class="fa-solid fa-bolt"></i> ĐẶT NHANH';
-                imgWrapper.prepend(badge);
-            }
-        }
-    });
+    // badges initialized per card
 }
 
 function applyAllFilters() {
@@ -1027,11 +957,6 @@ function applyAllFilters() {
             } else if (carBrand !== currentFilters.brand.toLowerCase()) {
                 match = false;
             }
-        }
-
-        // check instant
-        if (match && currentFilters.instant && !isInstantBookingCar(card)) {
-            match = false;
         }
 
         // check price
@@ -1110,10 +1035,6 @@ function currentSearchQuery() {
     });
     return params.toString();
 }
-
-document.querySelector('.btn-back')?.addEventListener('click', () => {
-    window.location.href = `index.html?${currentSearchQuery()}`;
-});
 
 const searchBtn = document.querySelector('.btn-search-action');
 if (searchBtn) {
@@ -1264,19 +1185,6 @@ pillCarBrandMenu?.querySelectorAll('.pill-dropdown-item').forEach(item => {
         applyAllFilters();
         updateFilterBadge();
     });
-});
-
-// toggle instant
-pillBtnInstant?.addEventListener('click', () => {
-    const isNowActive = !currentFilters.instant;
-    currentFilters.instant = isNowActive;
-    pillBtnInstant.classList.toggle('active', isNowActive);
-
-    const cb = document.getElementById('filterFeatureInstant');
-    if (cb) cb.checked = isNowActive;
-
-    applyAllFilters();
-    updateFilterBadge();
 });
 
 function carFromCard(card) {

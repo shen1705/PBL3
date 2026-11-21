@@ -10,8 +10,6 @@
     <!-- Sub-header Search & Filter Bar -->
     <section class="search-filter-bar">
         <div class="container bar-content">
-            <button class="btn-back" type="button" aria-label="Quay lại" title="Quay lại"><i class="fa-solid fa-arrow-left"></i></button>
-            
             <div class="filter-location-box" id="openLocationModal" role="button" tabindex="0">
                 <i class="fa-solid fa-location-dot"></i>
                 <span class="filter-label">Địa điểm</span>
@@ -73,12 +71,6 @@
                     <button type="button" class="pill-dropdown-item" data-brand="other">Khác (Suzuki, Nissan...)</button>
                 </div>
             </div>
-
-            <!-- Nút Toggle Đặt xe nhanh -->
-            <button class="pill-btn" id="pillBtnInstant" type="button">
-                <i class="fa-solid fa-bolt"></i>
-                <span>Đặt xe nhanh</span>
-            </button>
         </div>
     </section>
 
@@ -247,16 +239,6 @@
                     </div>
                 </div>
 
-                <!-- Số chỗ ngồi -->
-                <div class="filter-group">
-                    <label class="filter-group-title">Số chỗ ngồi</label>
-                    <div class="filter-chips-grid" id="seatsFilterGroup">
-                        <button type="button" class="filter-chip active" data-filter="seats" data-value="all">Tất cả</button>
-                        <button type="button" class="filter-chip" data-filter="seats" data-value="4">4 - 5 chỗ</button>
-                        <button type="button" class="filter-chip" data-filter="seats" data-value="7">7 chỗ</button>
-                    </div>
-                </div>
-
                 <!-- Truyền động -->
                 <div class="filter-group">
                     <label class="filter-group-title">Truyền động</label>
@@ -282,14 +264,6 @@
                 <div class="filter-group">
                     <label class="filter-group-title">Tính năng & Tiện ích</label>
                     <div class="filter-checkbox-list">
-                        <label class="filter-checkbox-item">
-                            <input type="checkbox" id="filterFeatureInstant" value="instant">
-                            <span class="custom-check"><i class="fa-solid fa-check"></i></span>
-                            <div class="check-info">
-                                <strong>Đặt xe nhanh</strong>
-                                <small>Xác nhận ngay không cần chờ chủ xe duyệt</small>
-                            </div>
-                        </label>
                         <label class="filter-checkbox-item">
                             <input type="checkbox" id="filterFeatureDelivery" value="delivery">
                             <span class="custom-check"><i class="fa-solid fa-check"></i></span>
@@ -356,7 +330,7 @@
                     <div class="car-popup-header">
                         <h1 class="car-popup-title" id="popupCarTitle">VINFAST VF3 2026</h1>
                         <p class="car-popup-meta" id="popupCarMeta">
-                            <i class="fa-solid fa-star star-gold"></i> <span id="popupCarRating">5.0</span> • <span id="popupCarTrips">24 chuyến</span> • <span id="popupCarLoc">Phường Hòa Thuận Tây, Quận Hải Châu</span>
+                            <i class="fa-solid fa-star star-gold"></i> <span id="popupCarRating">5.0</span> • <span id="popupCarTrips">24 chuyến</span>
                         </p>
                         <div class="car-badges-row">
                             <span class="badge-pill badge-safe"><i class="fa-solid fa-shield-halved"></i> Miễn thế chấp</span>
@@ -382,20 +356,6 @@
                     <div class="car-popup-section">
                         <h2 class="section-subheading">Đặc điểm</h2>
                         <div class="car-specs-grid">
-                            <div class="spec-card">
-                                <i class="fa-solid fa-code-branch spec-icon"></i>
-                                <div class="spec-info">
-                                    <span class="spec-label">Truyền động</span>
-                                    <strong class="spec-value" id="popupCarTrans">Số tự động</strong>
-                                </div>
-                            </div>
-                            <div class="spec-card">
-                                <i class="fa-solid fa-couch spec-icon"></i>
-                                <div class="spec-info">
-                                    <span class="spec-label">Số ghế</span>
-                                    <strong class="spec-value" id="popupCarSeats">4 chỗ</strong>
-                                </div>
-                            </div>
                             <div class="spec-card">
                                 <i class="fa-solid fa-bolt-lightning spec-icon" id="popupFuelIcon"></i>
                                 <div class="spec-info">
