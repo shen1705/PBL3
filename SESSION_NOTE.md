@@ -102,7 +102,43 @@ Phiên làm việc này tập trung tối ưu hóa trải nghiệm người dùn
 
 ---
 
-## 3. Lộ Trình Triển Khai Kế Tiếp (Roadmap & Next Steps)
+## 3. Chi Tiết Phiên Làm Việc (Session 10: Dọn Dẹp UI Thừa Admin, Kích Hoạt Dropdown & Chuẩn Hóa Xuất CSV)
+
+Phiên làm việc này tập trung dọn dẹp các thành phần giao diện không có chức năng (Dead UI / Mock UI) trên cổng Quản trị Admin và chuẩn hóa vị trí các nút xuất báo cáo CSV:
+
+### 3.1. Kích hoạt & Chuẩn hóa Topbar Quản trị (Task 2 - Mục 1)
+1. **Dropdown Tài khoản Quản trị (`.profile` & `.profile-chevron`):**
+   - Bổ sung menu thả xuống tương tác khi click vào avatar/chevron.
+   - Cung cấp 2 chức năng nghiệp vụ thật: **Đổi mật khẩu** (mở modal đổi mật khẩu) và **Đăng xuất** (mở modal xác nhận đăng xuất an toàn).
+   - Tự động đóng dropdown khi click ra ngoài.
+2. **Khay Thông báo Tác vụ Cần xử lý (`#notificationBtn` & `#notifyDot`):**
+   - Thay thế cơ chế cũ (click chuông nhảy về Overview) bằng **Khay thông báo dropdown thông minh**.
+   - Phân loại và hiển thị số lượng tác vụ tồn đọng: Số hồ sơ chủ xe chờ duyệt CCCD, Số tin đăng xe chờ duyệt kiểm định, Số khiếu nại tranh chấp cần phán quyết Escrow.
+   - Click vào từng mục tác vụ sẽ tự động điều hướng sang tab tương ứng với bộ lọc chính xác (`Pending`, `Open`).
+   - Chấm đỏ `#notifyDot` hiển thị/ẩn động theo số lượng tác vụ thực tế từ cơ sở dữ liệu.
+3. **Thanh Breadcrumb Điều hướng Bấm được (Clickable Breadcrumb):**
+   - Biến thành phần "Quản trị" thành liên kết điều hướng bấm được (`data-go="overview"`), cho phép người dùng click để quay trở về màn hình Tổng quan từ bất kỳ tab nào.
+
+### 3.2. Loại bỏ Tab "Cài đặt" rỗng (Task 2 - Mục 2)
+1. Gỡ bỏ nút `Cài đặt` khỏi Sidebar điều hướng vì bên trong không có cấu hình nào cần thiết lập (các cấu hình phí, cọc đã nằm ở tab *Phí & hoa hồng*).
+2. Di dời nút **"Xóa nhật ký"** (`#clearLogsBtn`) sang panel tiêu đề của tab **Nhật ký** (`renderLogs`), đúng ngữ cảnh sử dụng.
+3. Chuyển hướng `settings.html` tự động về `index.html#overview`.
+
+### 3.3. Tinh gọn Dashboard Tổng quan (Task 2 - Mục 3)
+1. Xóa bỏ panel text lý thuyết "Quy tắc vận hành & đối soát" đang chiếm 50% diện tích màn hình.
+2. Mở rộng bảng "Giao dịch hoàn tất gần đây" ra 100% chiều ngang, giúp bảng đối soát hiển thị thoáng đãng, dễ theo dõi.
+3. Loại bỏ dòng text thừa `<small>Cập nhật trực tiếp từ hệ thống</small>`.
+
+### 3.4. Chuẩn hóa Nút Xuất CSV (Task 3)
+1. Gỡ bỏ nút **"Xuất CSV"** ở các trang không có bảng dữ liệu danh mục:
+   - Trang **Tổng quan** (`overview`)
+   - Trang **Phí & hoa hồng** (`fees`)
+   - Trang **Nhật ký** (`logs`)
+2. Giữ lại nút Xuất CSV ở đúng 5 tab danh sách thực thể có bảng đối soát phục vụ kế toán & kiểm toán: **Chủ xe**, **Tin đăng xe**, **Tranh chấp & khiếu nại**, **Người dùng**, **Doanh thu**.
+
+---
+
+## 4. Lộ Trình Triển Khai Kế Tiếp (Roadmap & Next Steps)
 
 ```
 [1. Auth Services] (Hoàn tất 100%)
