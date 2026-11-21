@@ -15,6 +15,7 @@
             <nav class="trips-side-nav">
                 <a class="trips-side-link active" href="#account" id="nav-account" aria-current="page"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
                 <a class="trips-side-link" href="@(User.IsInRole("Owner") ? "/owner" : "/become-owner")" id="nav-become-owner"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span></a>
+                <a class="trips-side-link" href="#cards" id="nav-cards"><i class="fa-regular fa-credit-card"></i><span>Thẻ thanh toán</span></a>
                 <a class="trips-side-link" href="#trips" id="nav-trips"><i class="fa-regular fa-calendar-days"></i><span>Lịch sử thuê</span></a>
                 <a class="trips-side-link" href="#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
                 <a class="trips-side-link" href="#password" id="nav-password"><i class="fa-solid fa-lock"></i><span>Đổi mật khẩu</span></a>
@@ -108,6 +109,50 @@
                             <button class="primary-button license-save-button" id="license-save-button" type="submit" hidden>Lưu thông tin</button>
                         </div>
                     </form>
+                </article>
+
+                <article class="panel payment-card-panel" id="payment-card-panel">
+                    <div class="panel-heading payment-card-heading">
+                        <div class="heading-title">
+                            <h2>Thẻ thanh toán</h2>
+                        </div>
+                        <button class="btn-add-card" id="btn-open-add-card" type="button">
+                            <span>Thêm thẻ</span>
+                            <i class="fa-regular fa-circle-plus"></i>
+                        </button>
+                    </div>
+
+                    <!-- Trạng thái chưa có thẻ (khớp mockup) -->
+                    <div class="payment-card-empty" id="payment-card-empty">
+                        <div class="payment-empty-illustration" aria-hidden="true">
+                            <svg width="240" height="200" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="35" y="20" width="170" height="160" rx="36" fill="#eaf7ee"/>
+                                <g transform="translate(162, 38)">
+                                    <circle cx="15" cy="15" r="22" fill="#34c759"/>
+                                    <path d="M10 19L14 15M17.5 11.5L21.5 7.5M11.5 12.5L8.5 15.5C6.8 17.2 6.8 19.8 8.5 21.5C10.2 23.2 12.8 23.2 14.5 21.5L17.5 18.5M14.5 11.5L17.5 8.5C19.2 6.8 21.8 6.8 23.5 8.5C25.2 10.2 25.2 12.8 23.5 14.5L20.5 17.5" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                </g>
+                                <g transform="translate(90, 36) rotate(-10)">
+                                    <rect x="0" y="0" width="82" height="142" rx="15" fill="#ffffff" stroke="#1c2635" stroke-width="3"/>
+                                    <rect x="3" y="3" width="76" height="136" rx="12" fill="#f4f7fb"/>
+                                    <rect x="10" y="22" width="62" height="38" rx="6" fill="#9ca3af"/>
+                                    <rect x="15" y="44" width="34" height="4" rx="2" fill="#e5e7eb"/>
+                                    <rect x="15" y="51" width="20" height="3" rx="1.5" fill="#e5e7eb"/>
+                                    <rect x="8" y="104" width="66" height="22" rx="4" fill="#3b82f6"/>
+                                </g>
+                                <path d="M42 165L68 112C71 106 79 105 84 111L122 135C125 137 126 142 123 145L78 192C65 183 50 173 42 165Z" fill="#f6b894"/>
+                                <path d="M30 160L65 195L48 206L15 175Z" fill="#f95721"/>
+                                <path d="M88 116C103 114 113 124 106 134C98 141 84 133 88 116Z" fill="#f6b894"/>
+                                <ellipse cx="102" cy="122" rx="4" ry="3" fill="#ffffff" opacity="0.6"/>
+                                <path d="M152 92C159 92 163 96 163 102C163 108 159 111 152 111" stroke="#f6b894" stroke-width="9" stroke-linecap="round"/>
+                                <path d="M148 108C155 108 159 112 159 118C159 124 155 127 148 127" stroke="#f6b894" stroke-width="9" stroke-linecap="round"/>
+                                <path d="M143 124C150 124 154 128 154 134C154 140 150 143 143 143" stroke="#f6b894" stroke-width="9" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <p class="payment-empty-text">Bạn chưa có thẻ nào</p>
+                    </div>
+
+                    <!-- Danh sách thẻ liên kết -->
+                    <div class="payment-card-list" id="payment-card-list" hidden></div>
                 </article>
             </div>
         </section>
@@ -216,10 +261,6 @@
                     <div class="password-card-text">
                         <h2>Thiết lập mật khẩu mới</h2>
                         <p>Để bảo mật tài khoản, vui lòng sử dụng mật khẩu mạnh và không chia sẻ cho bất kỳ ai.</p>
-                    </div>
-                    <div class="password-security-badge">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <span>Bảo mật tài khoản</span>
                     </div>
                 </div>
 

@@ -12,6 +12,7 @@ const sampleDataNote = document.getElementById('sampleDataNote');
 
 // default city
 let selectedLocation = savedLocation || urlLocation || document.getElementById('filterLocationText')?.textContent.trim() || 'TP. Đà Nẵng';
+const vehicleImagePlaceholder = window.AzuVehicleImages?.placeholder || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80';
 
 function resolveVehicleImage(car) {
     const currentImage = car.coverImageUrl || '';
@@ -390,22 +391,22 @@ async function loadVehiclesFromApi() {
         if (!response.ok) throw new Error('API error: ' + response.status);
         const resData = await response.json();
         const items = resData?.data?.items || [];
+        carsGrid.replaceChildren();
         if (items.length > 0) {
-            carsGrid.replaceChildren();
             items.forEach(v => {
                 carsGrid.appendChild(createCarCardFromApi(v));
             });
         } else {
-            carsGrid.replaceChildren();
             sampleCars.forEach(car => carsGrid.appendChild(createSampleCarCard(car)));
         }
     } catch (err) {
         console.warn('Lỗi khi tải dữ liệu xe từ backend API, sử dụng dữ liệu dự phòng:', err);
-        if (carsGrid && carsGrid.querySelectorAll('.car-card').length === 0) {
+        if (carsGrid) {
             carsGrid.replaceChildren();
             sampleCars.forEach(car => carsGrid.appendChild(createSampleCarCard(car)));
         }
     } finally {
+        carsGrid?.querySelector('.loading-cars')?.remove();
         refreshCarCards();
         initCarBadges();
         buildLocationOptions();

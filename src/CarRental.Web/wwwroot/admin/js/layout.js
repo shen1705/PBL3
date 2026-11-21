@@ -43,7 +43,6 @@ function renderSidebar() {
 
   el.innerHTML = `
     ${groups}
-    <a class="sidebar__logout" href="#">Đăng xuất</a>
   `;
 }
 
@@ -172,9 +171,6 @@ async function syncAdminLayoutData() {
         }
         if (roleEl) {
           roleEl.textContent = isAdmin ? 'Quản trị viên' : 'Nhân viên';
-        }
-        if (logoutLink) {
-          logoutLink.href = '/logout';
         }
       } else {
         window.location.href = '/?auth=login&returnUrl=' + encodeURIComponent(window.location.pathname);

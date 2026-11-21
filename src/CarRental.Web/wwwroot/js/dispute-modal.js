@@ -348,7 +348,7 @@
 
                 <div class="azu-disp-notice">
                     <div class="azu-disp-notice-row">
-                        <span><i class="fa-solid fa-shield-halved"></i> Tiền thanh toán ký quỹ (AZU Escrow):</span>
+                        <span><i class="fa-solid fa-shield-halved"></i> Tiền thanh toán cọc bảo chứng trực tuyến:</span>
                         <span style="font-size:15px; color:#b45309">${Number(depositAmount || 0).toLocaleString('vi-VN')} đ</span>
                     </div>
                     <p class="azu-disp-notice-desc">

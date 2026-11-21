@@ -260,7 +260,7 @@ function renderNotifyList(d) {
         <div class="notify-icon" style="color:#ef4444">${icon('alert-triangle')}</div>
         <div class="notify-content">
           <strong>${d.openDisputeCount} khiếu nại tranh chấp</strong>
-          <small>Cần phán quyết Escrow</small>
+          <small>Cần xử lý tiền cọc</small>
         </div>
       </div>`;
   }
@@ -283,7 +283,7 @@ async function renderOverview() {
   const totalPending = (m.pendingOwnerCount || 0) + (m.pendingListingCount || 0) + (m.openDisputeCount || 0);
 
   return `
-    <div class="overview-top">${header('Tổng quan', 'Tình hình hoạt động thực tế trên sàn AZU Car từ cơ sở dữ liệu')}</div>
+    <div class="overview-top">${header('Tổng quan', 'Tình hình hoạt động trên sàn AZU Car')}</div>
     <div class="stats-grid">
       ${stat('Tổng giao dịch (GMV)', shortMoney(m.totalGmv), 'Từ tất cả đơn hoàn tất', 'arrow-left-right')}
       ${stat('Hoa hồng tích lũy', money(m.platformRevenue), 'Phí dịch vụ 5% ghi nhận', 'coins')}
@@ -358,7 +358,7 @@ async function renderOwners() {
     api(`/api/admin/owners?page=1&pageSize=50${filter !== 'all' ? `&approvalStatus=${encodeURIComponent(filter)}` : ''}${query ? `&searchTerm=${encodeURIComponent(query)}` : ''}`)
   ]);
 
-  const m = resMetrics?.data || { totalProfiles: 4, pendingCount: 0, approvedCount: 4, rejectedCount: 0, suspendedCount: 0 };
+  const m = resMetrics?.data || { totalProfiles: 0, pendingCount: 0, approvedCount: 0, rejectedCount: 0, suspendedCount: 0 };
   const items = resList?.data?.items || [];
   pageCache.owners = items;
 
@@ -431,7 +431,7 @@ async function renderListings() {
     api(`/api/admin/listings?page=1&pageSize=50${filter !== 'all' ? `&moderationStatus=${encodeURIComponent(filter)}` : ''}${query ? `&searchTerm=${encodeURIComponent(query)}` : ''}`)
   ]);
 
-  const m = resMetrics?.data || { totalListings: 20, pendingCount: 2, publicCount: 17, hiddenCount: 1 };
+  const m = resMetrics?.data || { totalListings: 0, pendingCount: 0, publicCount: 0, hiddenCount: 0, rejectedCount: 0 };
   const items = resList?.data?.items || [];
   pageCache.listings = items;
 
@@ -507,7 +507,7 @@ async function renderDisputes() {
     api(`/api/admin/disputes?page=1&pageSize=50${filter !== 'all' ? `&status=${encodeURIComponent(filter)}` : ''}${query ? `&searchTerm=${encodeURIComponent(query)}` : ''}`)
   ]);
 
-  const m = resMetrics?.data || { totalDisputes: 3, openCount: 1, resolvedCount: 2, highPriorityCount: 0 };
+  const m = resMetrics?.data || { totalDisputes: 0, openCount: 0, resolvedCount: 0, highPriorityCount: 0 };
   const items = resList?.data?.items || [];
   pageCache.disputes = items;
 
@@ -517,10 +517,10 @@ async function renderDisputes() {
     ['Resolved', 'Đã giải quyết']
   ];
 
-  return header('Tranh chấp & Khiếu nại', 'Phán quyết các vụ việc mâu thuẫn giữa khách thuê và chủ xe, đảm bảo dòng tiền Escrow minh bạch', exportBtn('disputes')) +
-    note('Phán quyết tranh chấp sẽ trực tiếp điều phối tiền ký quỹ cọc Escrow, hoàn tiền hoặc phạt vi phạm theo đúng hợp đồng.') +
+  return header('Tranh chấp & Khiếu nại', 'Phán quyết các vụ việc mâu thuẫn giữa khách thuê và chủ xe, đảm bảo giải quyết tiền cọc minh bạch', exportBtn('disputes')) +
+    note('Phán quyết tranh chấp sẽ trực tiếp điều phối tiền ký quỹ cọc, hoàn tiền hoặc phạt vi phạm theo đúng hợp đồng.') +
     `<div class="stats-grid">
-      ${stat('Tổng vụ việc', m.totalDisputes, 'Đã ghi nhận trong CSDL', 'scale')}
+      ${stat('Tổng vụ việc', m.totalDisputes, 'Tất cả vụ khiếu nại', 'scale')}
       ${stat('Đang chờ xử lý', m.openCount, 'Cần ban hành phán quyết', 'alert-triangle')}
       ${stat('Đã giải quyết', m.resolvedCount, 'Đã ban hành quyết định', 'check-circle')}
       ${stat('Ưu tiên cao', m.highPriorityCount || 0, 'Quá hạn phản hồi 24h', 'history')}
@@ -663,7 +663,6 @@ async function renderUsers() {
           <h2>Danh sách tài khoản hệ thống</h2>
           <small>${items.length} người dùng</small>
         </div>
-        <button class="btn small primary" id="batchAutoVerifyBtn">⚡ Quét & Duyệt tự động GPLX</button>
       </div>
       ${listToolbar('Tên đăng nhập, họ tên, email, số điện thoại...', filters)}
       <div class="table-wrap">
@@ -699,7 +698,6 @@ async function renderUsers() {
                     <button class="btn small" data-detail="user:${u.id}">Chi tiết</button>
                     ${u.hasDriverLicense && !u.isDriverLicenseVerified ? `
                       <button class="btn small primary" data-action="user-approveLicense:${u.id}" title="Phê duyệt Giấy phép lái xe thủ công">Duyệt GPLX</button>
-                      <button class="btn small" data-action="user-autoVerifyLicense:${u.id}" title="Thẩm định tự động theo chuẩn" style="background:#e0e7ff;color:#3730a3">⚡ Tự động</button>
                     ` : ''}
                     ${!u.isAdmin ? (
                       u.isSanctioned ? `<button class="btn small gold-btn" data-action="user-lift:${u.id}">Mở khóa</button>` :
@@ -736,9 +734,9 @@ async function renderFees() {
           <div class="help">Mặc định 5%. Trích từ tổng giá trị hợp đồng khi đối soát chuyến hoàn tất.</div>
         </div>
         <div class="field">
-          <label for="depositRateInput">Tỷ lệ thanh toán ký quỹ trực tuyến Escrow (%)</label>
+          <label for="depositRateInput">Tỷ lệ thanh toán cọc trực tuyến (%)</label>
           <input id="depositRateInput" type="number" min="10" max="100" step="5" value="${depPct}">
-          <div class="help">Mặc định 100%. Tiền thuê được giữ an toàn trong tài khoản ký quỹ trung gian Escrow trước khi đối soát bàn giao xe.</div>
+          <div class="help">Mặc định 100%. Tiền thuê được giữ an toàn trong tài khoản bảo chứng trước khi đối soát bàn giao xe.</div>
         </div>
         <div class="field">
           <label for="penaltyRateInput">Tỷ lệ phạt hủy đơn phía Chủ xe (%)</label>
@@ -884,13 +882,15 @@ function renderLogs() {
     </section>`;
 }
 
-function renderLoginPrompt() {
+function renderLoginPrompt(user = null) {
+  const notPermitted = user && !(user.roles || []).some(r => r === 'Admin' || r === 'Staff');
   return `
     <div style="max-width:480px;margin:60px auto;padding:32px;background:var(--surface,#fff);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.06);border:1px solid var(--line,#e4e9ef)">
       <div style="text-align:center;margin-bottom:24px">
-        <img src="azu-mark.svg" width="56" height="56" alt="AZU Car">
-        <h2 style="margin:16px 0 8px 0;font-size:22px">Cổng Quản Trị AZU Car</h2>
-        <p style="color:var(--muted);font-size:14px">Vui lòng đăng nhập với tài khoản Quản trị viên (Admin) hoặc Nhân viên (Staff)</p>
+        <h2 style="margin:8px 0 8px 0;font-size:22px;color:var(--ink)">Cổng Quản Trị AZU Car</h2>
+        ${notPermitted 
+          ? `<p style="color:#ef4444;font-size:14px;line-height:1.5">Tài khoản hiện tại <strong>@${escapeHtml(user.userName)}</strong> (${(user.roles||[]).join(', ')}) không có quyền Quản trị.<br>Vui lòng đăng nhập với tài khoản Quản trị viên (Admin) hoặc Nhân viên (Staff).</p>` 
+          : `<p style="color:var(--muted);font-size:14px">Vui lòng đăng nhập với tài khoản Quản trị viên (Admin) hoặc Nhân viên (Staff)</p>`}
       </div>
       <form id="adminLoginForm">
         <div class="field" style="margin-bottom:16px">
@@ -910,6 +910,38 @@ function renderLoginPrompt() {
   `;
 }
 
+function bindAdminLoginForm() {
+  const form = document.getElementById('adminLoginForm');
+  if (!form || form.dataset.bound) return;
+  form.dataset.bound = 'true';
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Đang đăng nhập...';
+    }
+    const identifier = document.getElementById('loginIdentifier')?.value || '';
+    const password = document.getElementById('loginPassword')?.value || '';
+    const res = await api('/api/auth/login', {
+      method: 'POST',
+      body: { identifier, password }
+    });
+    if (res?.isSuccess && res.data) {
+      currentUser = res.data;
+      toast('Đăng nhập Quản trị thành công!');
+      await checkAuth();
+      render();
+    } else {
+      toast(res?.message || 'Đăng nhập không thành công.');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Đăng nhập vào Hệ thống';
+      }
+    }
+  });
+}
+
 // Master Render
 async function render() {
   document.getElementById('crumb').textContent = pageNames[page] || 'Tổng quan';
@@ -918,8 +950,10 @@ async function render() {
   const contentEl = document.getElementById('content');
   if (!contentEl) return;
 
-  if (!currentUser) {
-    contentEl.innerHTML = renderLoginPrompt();
+  const isAdminOrStaff = currentUser && (currentUser.roles || []).some(r => r === 'Admin' || r === 'Staff');
+  if (!currentUser || !isAdminOrStaff) {
+    contentEl.innerHTML = renderLoginPrompt(currentUser);
+    bindAdminLoginForm();
     return;
   }
 
@@ -1196,7 +1230,7 @@ async function showDetail(kind, id) {
         <div><span class="label">Xe thuê</span><strong>${escapeHtml(d.vehicleName)} (${escapeHtml(d.licensePlate)})</strong></div>
         <div><span class="label">Khách thuê</span><strong>${escapeHtml(d.renterName)} (${escapeHtml(d.renterPhone)})</strong></div>
         <div><span class="label">Chủ xe</span><strong>${escapeHtml(d.ownerName)} (${escapeHtml(d.ownerPhone)})</strong></div>
-        <div><span class="label">Tiền cọc giữ trong Escrow</span><strong class="gold">${money(d.depositAmount)}</strong></div>
+        <div><span class="label">Tiền cọc ký quỹ</span><strong class="gold">${money(d.depositAmount)}</strong></div>
         <div><span class="label">Phân loại vi phạm / Sự cố</span><span class="badge approved">${DISPUTE_CAT_LABELS[d.category] || escapeHtml(d.category || 'Chung')}</span></div>
         <div><span class="label">Mức phạt / phụ phí đề xuất</span><strong style="color:var(--danger)">${d.proposedAmount > 0 ? money(d.proposedAmount) : 'Không yêu cầu bồi thường'}</strong></div>
         <div><span class="label">Người khiếu nại</span><strong>${escapeHtml(d.raiserName)} (${escapeHtml(d.raiserRole)})</strong></div>
@@ -1246,7 +1280,6 @@ async function showDetail(kind, id) {
         <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
           ${!u.driverLicense.isVerified ? `
             <button class="btn small primary" data-action="user-approveLicense:${u.id}">✓ Phê duyệt thủ công</button>
-            <button class="btn small" data-action="user-autoVerifyLicense:${u.id}" style="background:#e0e7ff;color:#3730a3">⚡ Thẩm định tự động</button>
             <button class="btn small danger" data-action="user-rejectLicense:${u.id}">✕ Từ chối</button>
           ` : `
             <button class="btn small danger" data-action="user-revokeLicense:${u.id}">Thu hồi xác thực GPLX</button>
@@ -1357,7 +1390,7 @@ async function handleAction(raw) {
           <div>Phân loại: <strong>${catLabel}</strong></div>
           <div>Người khiếu nại: <strong>${escapeHtml(d.raiserName)} (${escapeHtml(d.raiserRole)})</strong></div>
           <div>Mức phạt / phụ phí đề xuất: <strong style="color:var(--danger)">${proposedAmt > 0 ? money(proposedAmt) : '0 đ'}</strong></div>
-          <div>Tiền cọc giữ trong Escrow: <strong class="gold">${money(d.depositAmount)}</strong></div>
+          <div>Tiền cọc ký quỹ: <strong class="gold">${money(d.depositAmount)}</strong></div>
         </div>
 
         <div class="field">
@@ -1551,28 +1584,6 @@ async function handleAction(raw) {
         toast('Đã thu hồi xác thực GPLX!');
         render();
       }, 'Thu hồi');
-    } else if (verb === 'autoVerifyLicense') {
-      showModal('Thẩm định tự động Giấy phép lái xe', `
-        <p>Hệ thống AZU Car sẽ tự động đối soát hồ sơ GPLX của người dùng theo 4 tiêu chuẩn:</p>
-        <ul class="list-simple">
-          <li>1. Định dạng số hiệu bằng lái hợp chuẩn</li>
-          <li>2. Hạng giấy phép lái xe ô tô (B1, B2, C, D, E)</li>
-          <li>3. Thời hạn sử dụng còn hiệu lực</li>
-          <li>4. Đầy đủ ảnh chụp mặt trước chứng từ</li>
-        </ul>
-        <p class="hint">Nếu đạt chuẩn, hệ thống sẽ tự động kích hoạt xác thực ngay mà không cần duyệt thủ công.</p>
-      `, async () => {
-        const res = await api(`/api/admin/users/${id}/auto-verify-license`, { method: 'POST' });
-        if (!res?.isSuccess || !res.data) { toast(res?.message || 'Lỗi kiểm tra tự động'); return false; }
-        const r = res.data;
-        if (r.isAutoApproved) {
-          addLog('Tự động duyệt GPLX', `Auto-verified GPLX cho ${r.fullName} (@${r.userName})`);
-          toast(`Đã thẩm định & duyệt tự động thành công cho ${r.fullName}!`);
-        } else {
-          toast(`Không đạt điều kiện tự động: ${r.issues.join(', ')}`);
-        }
-        render();
-      }, 'Tiến hành thẩm định tự động');
     }
   }
 }
@@ -1791,27 +1802,6 @@ document.body.addEventListener('click', e => {
       toast('Đã cập nhật cấu hình hệ thống thành công!');
       render();
     }, 'Cập nhật cấu hình');
-    return;
-  }
-
-  if (e.target.closest('#batchAutoVerifyBtn')) {
-    showModal('Quét & Duyệt tự động GPLX hàng loạt', `
-      <p>Hệ thống sẽ rà soát tất cả người dùng đang có hồ sơ Giấy phép lái xe nhưng chưa được xác thực.</p>
-      <ul class="list-simple">
-        <li>Kiểm tra số hiệu bằng lái hợp chuẩn</li>
-        <li>Kiểm tra hạng giấy phép lái xe ô tô (B1, B2, C, D, E)</li>
-        <li>Kiểm tra thời hạn hiệu lực còn sử dụng</li>
-        <li>Kiểm tra ảnh chụp chứng từ mặt trước</li>
-      </ul>
-      <p class="hint">Các hồ sơ đạt chuẩn sẽ được tự động kích hoạt ngay lập tức mà không cần thẩm định thủ công.</p>
-    `, async () => {
-      const res = await api('/api/admin/users/batch-auto-verify-licenses', { method: 'POST' });
-      if (!res?.isSuccess || !res.data) { toast(res?.message || 'Lỗi quét tự động'); return false; }
-      const b = res.data;
-      addLog('Quét tự động GPLX', `Quét ${b.totalScanned}: Duyệt tự động ${b.autoApprovedCount}, Cần duyệt thủ công ${b.needsManualReviewCount}`);
-      toast(`Đã quét ${b.totalScanned} hồ sơ: Tự động duyệt thành công ${b.autoApprovedCount} hồ sơ!`);
-      render();
-    }, 'Tiến hành quét & duyệt tự động');
     return;
   }
 });

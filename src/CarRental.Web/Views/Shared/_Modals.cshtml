@@ -390,6 +390,71 @@
     </div>
 </div>
 
+<!-- Modal Thêm thẻ thanh toán -->
+<div id="addPaymentCardModal" class="auth-modal-overlay" style="display:none;">
+    <div class="auth-modal-card payment-modal-card">
+        <button type="button" class="modal-close-btn" id="closeAddPaymentCardBtn" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+        <div class="modal-header">
+            <h2>Liên kết thẻ thanh toán</h2>
+            <p>Thẻ dùng để thanh toán và giữ cọc trực tuyến bảo chứng an toàn</p>
+        </div>
+        <form class="auth-form" id="add-payment-card-form" autocomplete="off">
+            <div class="auth-error-banner" id="add-card-error-banner" style="display:none; color: #b91c1c; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; font-size: 13.5px; margin-bottom: 14px; line-height: 1.4;"></div>
+            
+            <div class="form-group">
+                <label for="card-number-input">Số thẻ <span style="color:#ef4444">*</span></label>
+                <div class="input-wrapper card-number-wrapper">
+                    <input id="card-number-input" name="cardNumber" type="text" maxlength="23" placeholder="4111 2222 3333 4444" required>
+                    <span class="card-brand-badge" id="cardBrandBadge"><i class="fa-regular fa-credit-card"></i></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="card-holder-input">Tên in trên thẻ <span style="color:#ef4444">*</span></label>
+                <div class="input-wrapper">
+                    <input id="card-holder-input" name="cardHolderName" type="text" placeholder="NGUYEN VAN A" style="text-transform: uppercase;" required>
+                </div>
+            </div>
+
+            <div class="form-row-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group">
+                    <label for="card-expiry-input">Hạn sử dụng <span style="color:#ef4444">*</span></label>
+                    <div class="input-wrapper">
+                        <input id="card-expiry-input" name="expiry" type="text" maxlength="5" placeholder="MM/YY" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="card-cvv-input">Mã bảo mật CVV <span style="color:#ef4444">*</span></label>
+                    <div class="input-wrapper">
+                        <input id="card-cvv-input" name="cvv" type="password" maxlength="4" placeholder="123" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="card-bank-input">Ngân hàng phát hành (tùy chọn)</label>
+                <div class="input-wrapper">
+                    <input id="card-bank-input" name="bankName" type="text" placeholder="Vietcombank, MB Bank, Techcombank...">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 4px;">
+                <label class="custom-checkbox-label" style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; cursor: pointer; color: #374151;">
+                    <input type="checkbox" id="card-default-checkbox" checked style="width: 16px; height: 16px; accent-color: #1c2635; cursor: pointer;">
+                    <span>Đặt làm thẻ thanh toán mặc định</span>
+                </label>
+            </div>
+
+            <div class="card-security-note" style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #64748b; background: #f8fafc; padding: 10px 12px; border-radius: 8px; margin: 12px 0 16px;">
+                <i class="fa-solid fa-shield-halved" style="color: #10b981; font-size: 14px;"></i>
+                <span>Thông tin thẻ được mã hóa bảo mật theo chuẩn PCI DSS</span>
+            </div>
+
+            <button type="submit" class="btn-submit-auth" id="btnSubmitAddCard">Liên kết thẻ</button>
+        </form>
+    </div>
+</div>
+
 <!-- Modal Đăng xuất (Misue pattern) -->
 <div class="dialog-backdrop" id="logout-modal" hidden>
     <div class="register-dialog">

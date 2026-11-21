@@ -32,6 +32,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Dispute> Disputes => Set<Dispute>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<PaymentCard> PaymentCards => Set<PaymentCard>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -256,6 +257,19 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             b.Property(x => x.ActionUrl).HasMaxLength(255);
             b.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
             b.HasIndex(x => new { x.UserId, x.IsRead });
+        });
+
+        builder.Entity<PaymentCard>(b =>
+        {
+            b.ToTable("payment_cards");
+            b.HasKey(x => x.CardId);
+            b.Property(x => x.UserId).HasMaxLength(255);
+            b.Property(x => x.CardHolderName).HasMaxLength(100);
+            b.Property(x => x.CardNumberMasked).HasMaxLength(30);
+            b.Property(x => x.Last4Digits).HasMaxLength(4);
+            b.Property(x => x.CardBrand).HasMaxLength(20);
+            b.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+            b.HasIndex(x => x.UserId);
         });
 
         foreach (var entity in builder.Model.GetEntityTypes())

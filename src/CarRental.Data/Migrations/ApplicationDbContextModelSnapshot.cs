@@ -874,6 +874,68 @@ namespace CarRental.Data.Migrations
                     b.ToTable("payments", (string)null);
                 });
 
+            modelBuilder.Entity("CarRental.Models.Entities.PaymentCard", b =>
+                {
+                    b.Property<int>("CardId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("card_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("CardId"));
+
+                    b.Property<string>("CardBrand")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("card_brand");
+
+                    b.Property<string>("CardHolderName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("card_holder_name");
+
+                    b.Property<string>("CardNumberMasked")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("card_number_masked");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("ExpiryMonth")
+                        .HasColumnType("int")
+                        .HasColumnName("expiry_month");
+
+                    b.Property<int>("ExpiryYear")
+                        .HasColumnType("int")
+                        .HasColumnName("expiry_year");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_default");
+
+                    b.Property<string>("Last4Digits")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("varchar(4)")
+                        .HasColumnName("last4_digits");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("CardId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("payment_cards", (string)null);
+                });
+
             modelBuilder.Entity("CarRental.Models.Entities.Review", b =>
                 {
                     b.Property<int>("ReviewId")
@@ -1613,6 +1675,17 @@ namespace CarRental.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Booking");
+                });
+
+            modelBuilder.Entity("CarRental.Models.Entities.PaymentCard", b =>
+                {
+                    b.HasOne("CarRental.Models.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CarRental.Models.Entities.Review", b =>

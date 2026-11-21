@@ -32,6 +32,7 @@ const addressSection = document.getElementById('address-section');
 const privacySection = document.getElementById('privacy-section');
 const passwordSection = document.getElementById('password-section');
 const navAccount = document.getElementById('nav-account');
+const navCards = document.getElementById('nav-cards');
 const navTrips = document.getElementById('nav-trips');
 const navOrders = document.getElementById('nav-orders');
 const navAddress = document.getElementById('nav-address');
@@ -72,7 +73,8 @@ const emptyTripsDescription = document.getElementById('empty-trips-description')
 
 // switch views
 function showView(viewName) {
-    const isAccount = viewName === 'account';
+    const isCards = viewName === 'cards';
+    const isAccount = viewName === 'account' || isCards;
     const isAddress = viewName === 'address';
     const isPrivacy = viewName === 'privacy';
     const isPassword = viewName === 'password';
@@ -90,7 +92,10 @@ function showView(viewName) {
     });
 
     if (isAccount) {
-        if (navAccount) {
+        if (isCards && navCards) {
+            navCards.classList.add('active');
+            navCards.setAttribute('aria-current', 'page');
+        } else if (navAccount) {
             navAccount.classList.add('active');
             navAccount.setAttribute('aria-current', 'page');
         }
@@ -132,6 +137,11 @@ function handleHashNavigation() {
         showView('privacy');
     } else if (hash === '#password') {
         showView('password');
+    } else if (hash === '#cards') {
+        showView('cards');
+        setTimeout(() => {
+            document.getElementById('payment-card-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 80);
     } else {
         showView('account');
     }
@@ -146,6 +156,15 @@ navAccount?.addEventListener('click', (e) => {
     history.pushState(null, '', '#account');
     showView('account');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+navCards?.addEventListener('click', (e) => {
+    e.preventDefault();
+    history.pushState(null, '', '#cards');
+    showView('cards');
+    setTimeout(() => {
+        document.getElementById('payment-card-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
 });
 
 navTrips?.addEventListener('click', (e) => {
@@ -448,6 +467,7 @@ function renderAccountData() {
 
     renderLicenseData();
     syncUserProfile();
+    loadPaymentCards();
 }
 
 // Profile Form & Dialog
@@ -1335,6 +1355,261 @@ newAddressForm?.addEventListener('submit', (e) => {
 
 initLocationDropdowns();
 renderSavedAddresses();
+
+// ==========================================
+// THẺ THANH TOÁN (PAYMENT CARDS)
+// ==========================================
+const paymentCardPanel = document.getElementById('payment-card-panel');
+const paymentCardEmpty = document.getElementById('payment-card-empty');
+const paymentCardList = document.getElementById('payment-card-list');
+const btnOpenAddCard = document.getElementById('btn-open-add-card');
+const addPaymentCardModal = document.getElementById('addPaymentCardModal');
+const closeAddPaymentCardBtn = document.getElementById('closeAddPaymentCardBtn');
+const addPaymentCardForm = document.getElementById('add-payment-card-form');
+const addCardErrorBanner = document.getElementById('add-card-error-banner');
+const cardNumberInput = document.getElementById('card-number-input');
+const cardExpiryInput = document.getElementById('card-expiry-input');
+const cardCvvInput = document.getElementById('card-cvv-input');
+const cardHolderInput = document.getElementById('card-holder-input');
+const cardBankInput = document.getElementById('card-bank-input');
+const cardDefaultCheckbox = document.getElementById('card-default-checkbox');
+const cardBrandBadge = document.getElementById('cardBrandBadge');
+
+function detectCardBrand(num) {
+    const clean = (num || '').replace(/\s+/g, '');
+    if (/^4/.test(clean)) return { brand: 'Visa', icon: 'fa-brands fa-cc-visa' };
+    if (/^(5[1-5]|2[2-7])/.test(clean)) return { brand: 'Mastercard', icon: 'fa-brands fa-cc-mastercard' };
+    if (/^(352[89]|35[3-8][0-9])/.test(clean)) return { brand: 'JCB', icon: 'fa-brands fa-cc-jcb' };
+    if (/^(9704)/.test(clean)) return { brand: 'Napas', icon: 'fa-solid fa-credit-card' };
+    return { brand: 'Thẻ quốc tế', icon: 'fa-regular fa-credit-card' };
+}
+
+cardNumberInput?.addEventListener('input', (e) => {
+    let val = e.target.value.replace(/\D/g, '').slice(0, 19);
+    e.target.value = val.replace(/(.{4})/g, '$1 ').trim();
+    if (cardBrandBadge) {
+        const info = detectCardBrand(val);
+        cardBrandBadge.innerHTML = `<i class="${info.icon}"></i>`;
+    }
+});
+
+cardExpiryInput?.addEventListener('input', (e) => {
+    let val = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (val.length >= 3) {
+        val = val.slice(0, 2) + '/' + val.slice(2);
+    }
+    e.target.value = val;
+});
+
+cardCvvInput?.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+});
+
+cardHolderInput?.addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase();
+});
+
+btnOpenAddCard?.addEventListener('click', () => {
+    if (addPaymentCardForm) addPaymentCardForm.reset();
+    if (addCardErrorBanner) addCardErrorBanner.style.display = 'none';
+    if (cardBrandBadge) cardBrandBadge.innerHTML = '<i class="fa-regular fa-credit-card"></i>';
+    if (addPaymentCardModal) addPaymentCardModal.style.display = 'flex';
+    cardNumberInput?.focus();
+});
+
+closeAddPaymentCardBtn?.addEventListener('click', () => {
+    if (addPaymentCardModal) addPaymentCardModal.style.display = 'none';
+});
+
+addPaymentCardModal?.addEventListener('click', (e) => {
+    if (e.target === addPaymentCardModal) {
+        addPaymentCardModal.style.display = 'none';
+    }
+});
+
+function showCardError(msg) {
+    if (addCardErrorBanner) {
+        addCardErrorBanner.textContent = msg;
+        addCardErrorBanner.style.display = 'block';
+    } else {
+        alert(msg);
+    }
+}
+
+addPaymentCardForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (addCardErrorBanner) addCardErrorBanner.style.display = 'none';
+
+    const rawNum = (cardNumberInput?.value || '').replace(/\s+/g, '');
+    const holder = (cardHolderInput?.value || '').trim();
+    const expiry = (cardExpiryInput?.value || '').trim();
+    const cvv = (cardCvvInput?.value || '').trim();
+    const bankName = (cardBankInput?.value || '').trim();
+    const isDefault = Boolean(cardDefaultCheckbox?.checked);
+
+    if (rawNum.length < 12 || rawNum.length > 19) {
+        showCardError('Số thẻ không hợp lệ (12 - 19 chữ số).');
+        return;
+    }
+    const expiryParts = expiry.split('/');
+    if (expiryParts.length !== 2) {
+        showCardError('Hạn sử dụng phải đúng định dạng MM/YY (ví dụ: 12/28).');
+        return;
+    }
+    const month = parseInt(expiryParts[0], 10);
+    let year = parseInt(expiryParts[1], 10);
+    if (isNaN(month) || month < 1 || month > 12) {
+        showCardError('Tháng hết hạn không hợp lệ (01 - 12).');
+        return;
+    }
+    if (year < 100) year += 2000;
+    if (cvv.length < 3 || cvv.length > 4) {
+        showCardError('Mã CVV phải gồm 3 hoặc 4 chữ số.');
+        return;
+    }
+
+    const payload = {
+        cardNumber: rawNum,
+        cardHolderName: holder,
+        expiryMonth: month,
+        expiryYear: year,
+        cvv: cvv,
+        bankName: bankName || null,
+        isDefault: isDefault
+    };
+
+    const submitBtn = document.getElementById('btnSubmitAddCard');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang liên kết...';
+    }
+
+    try {
+        const resp = await fetch('/api/payment-cards', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        const result = await resp.json();
+        if (resp.ok && result && result.isSuccess) {
+            if (addPaymentCardModal) addPaymentCardModal.style.display = 'none';
+            await loadPaymentCards();
+        } else {
+            showCardError(result?.message || 'Không thể liên kết thẻ. Vui lòng kiểm tra lại thông tin.');
+        }
+    } catch {
+        showCardError('Lỗi kết nối khi liên kết thẻ thanh toán.');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Liên kết thẻ';
+        }
+    }
+});
+
+async function loadPaymentCards() {
+    if (!paymentCardList || !paymentCardEmpty) return;
+    try {
+        const resp = await fetch('/api/payment-cards', {
+            headers: { 'Accept': 'application/json' }
+        });
+        if (!resp.ok) {
+            paymentCardEmpty.hidden = false;
+            paymentCardList.hidden = true;
+            return;
+        }
+        const result = await resp.json();
+        const cards = result && result.isSuccess && Array.isArray(result.data) ? result.data : [];
+        if (cards.length === 0) {
+            paymentCardEmpty.hidden = false;
+            paymentCardList.hidden = true;
+            return;
+        }
+
+        paymentCardEmpty.hidden = true;
+        paymentCardList.hidden = false;
+        paymentCardList.innerHTML = cards.map(c => {
+            const brandName = c.cardBrand || c.cardType || 'Thẻ quốc tế';
+            const typeStr = brandName.toLowerCase();
+            const isVisa = typeStr.includes('visa');
+            const isMastercard = typeStr.includes('mastercard');
+            const isJcb = typeStr.includes('jcb');
+            const brandIcon = isVisa ? 'fa-brands fa-cc-visa' : (isMastercard ? 'fa-brands fa-cc-mastercard' : (isJcb ? 'fa-brands fa-cc-jcb' : 'fa-regular fa-credit-card'));
+            const expiryStr = c.expiryFormatted || ((c.expiryMonth && c.expiryYear) ? `${String(c.expiryMonth).padStart(2, '0')}/${String(c.expiryYear).slice(-2)}` : '');
+            const maskedNum = c.cardNumberMasked || c.maskedCardNumber || '•••• •••• •••• ••••';
+            return `
+                <div class="payment-card-item ${c.isDefault ? 'is-default' : ''}" data-card-id="${c.cardId}">
+                    <div class="payment-card-top">
+                        <div class="payment-card-brand-wrap">
+                            <i class="${brandIcon} payment-card-brand-icon"></i>
+                            <span class="payment-card-bank-name">${c.bankName || brandName}</span>
+                        </div>
+                        ${c.isDefault ? '<span class="badge-default-card"><i class="fa-solid fa-circle-check"></i> Mặc định</span>' : ''}
+                    </div>
+                    <div class="payment-card-number">${maskedNum}</div>
+                    <div class="payment-card-bottom">
+                        <div>
+                            <div class="payment-card-holder-name">${c.cardHolderName || 'Chủ thẻ'}</div>
+                            ${expiryStr ? `<div class="payment-card-expiry">Hạn: ${expiryStr}</div>` : ''}
+                        </div>
+                        <div class="payment-card-actions">
+                            ${!c.isDefault ? `<button type="button" class="btn-set-default-card" data-card-id="${c.cardId}">Đặt mặc định</button>` : ''}
+                            <button type="button" class="btn-delete-card" data-card-id="${c.cardId}" title="Xóa thẻ" aria-label="Xóa thẻ"><i class="fa-regular fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        paymentCardList.querySelectorAll('.btn-set-default-card').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const cardId = e.currentTarget.getAttribute('data-card-id');
+                if (!cardId) return;
+                try {
+                    const r = await fetch(`/api/payment-cards/${cardId}/default`, {
+                        method: 'PUT',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const d = await r.json();
+                    if (d && d.isSuccess) {
+                        await loadPaymentCards();
+                    } else {
+                        alert(d?.message || 'Không thể đặt thẻ mặc định');
+                    }
+                } catch {
+                    alert('Lỗi kết nối khi đặt thẻ mặc định');
+                }
+            });
+        });
+
+        paymentCardList.querySelectorAll('.btn-delete-card').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const cardId = e.currentTarget.getAttribute('data-card-id');
+                if (!cardId) return;
+                if (!confirm('Bạn có chắc chắn muốn xóa thẻ liên kết này không?')) return;
+                try {
+                    const r = await fetch(`/api/payment-cards/${cardId}`, {
+                        method: 'DELETE',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const d = await r.json();
+                    if (d && d.isSuccess) {
+                        await loadPaymentCards();
+                    } else {
+                        alert(d?.message || 'Không thể xóa thẻ');
+                    }
+                } catch {
+                    alert('Lỗi kết nối khi xóa thẻ');
+                }
+            });
+        });
+    } catch (err) {
+        console.error('Error loading payment cards:', err);
+    }
+}
 
 // Khởi chạy
 handleHashNavigation();

@@ -3256,4 +3256,228 @@ body {
     }
 }
 
+/* ==========================================================================
+   Phần Thẻ thanh toán (Payment Cards)
+   ========================================================================== */
+.payment-card-panel {
+    padding: 24px;
+    margin-top: 24px;
+}
+
+.payment-card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.payment-card-heading h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1c2635;
+    margin: 0;
+}
+
+.btn-add-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #ffffff;
+    border: 1px solid #1c2635;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #1c2635;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-add-card:hover {
+    background: #f8fafc;
+    border-color: #0f172a;
+}
+
+.btn-add-card i {
+    font-size: 15px;
+}
+
+/* Empty State khớp mockup */
+.payment-card-empty {
+    text-align: center;
+    padding: 24px 16px 36px;
+}
+
+.payment-empty-illustration {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.payment-empty-text {
+    font-size: 15px;
+    color: #4b5563;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Card List */
+.payment-card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.payment-card-item {
+    position: relative;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 150px;
+}
+
+.payment-card-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.payment-card-item.is-default {
+    border-color: #1c2635;
+    background: #fbfcfe;
+    box-shadow: 0 4px 12px rgba(28, 38, 53, 0.06);
+}
+
+.payment-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.payment-card-brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.payment-card-brand-icon {
+    font-size: 24px;
+    color: #1c2635;
+}
+
+.payment-card-brand-icon.fa-cc-visa {
+    color: #1a1f71;
+}
+
+.payment-card-brand-icon.fa-cc-mastercard {
+    color: #eb001b;
+}
+
+.payment-card-bank-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.badge-default-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: #ecfdf5;
+    color: #059669;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.payment-card-number {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #1e293b;
+    margin: 14px 0 10px;
+}
+
+.payment-card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 12px;
+}
+
+.payment-card-holder-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.payment-card-expiry {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.payment-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-set-default-card {
+    background: none;
+    border: none;
+    color: #d97706;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.btn-set-default-card:hover {
+    background: #fef3c7;
+}
+
+.btn-delete-card {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.15s;
+}
+
+.btn-delete-card:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.card-number-wrapper {
+    position: relative;
+}
+
+.card-brand-badge {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+
 

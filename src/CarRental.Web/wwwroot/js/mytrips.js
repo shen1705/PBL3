@@ -1090,7 +1090,7 @@ function renderTripDetail(booking, tab = 'overview') {
             <div class="trip-detail-clauses">
                 <h4>Điều khoản áp dụng</h4>
                 <ul>
-                    <li>Thanh toán ký quỹ 100% tổng giá thuê trực tuyến qua sàn AZU Car Escrow; không trả tiền thuê bằng tiền mặt khi nhận xe.</li>
+                    <li>Thanh toán ký quỹ 100% tổng giá thuê trực tuyến qua sàn AZU Car (tài khoản bảo chứng); không trả tiền thuê bằng tiền mặt khi nhận xe.</li>
                     <li>Chỉ có thể hủy khi đơn đang chờ duyệt hoặc đã được duyệt; đơn đã duyệt không thể hủy từ thời điểm nhận xe.</li>
                     <li>Nếu chủ xe không bàn giao xe, gửi báo sự cố kèm thông tin/bằng chứng để Staff xác minh. Nếu xác định lỗi chủ xe, đơn được xử lý theo quy trình khiếu nại và tiền cọc được hoàn theo kết quả xử lý.</li>
                 </ul>

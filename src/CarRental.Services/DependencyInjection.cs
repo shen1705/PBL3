@@ -6,6 +6,7 @@ using CarRental.Services.Bookings;
 using CarRental.Services.Chatbot;
 using CarRental.Services.Infrastructure;
 using CarRental.Services.Notifications;
+using CarRental.Services.PaymentCards;
 using CarRental.Services.Vehicles;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IAdminFeeService, AdminFeeService>();
         services.AddScoped<IAdminRevenueService, AdminRevenueService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IPaymentCardService, PaymentCardService>();
 
         return services;
     }

@@ -30,6 +30,7 @@ public static class DbInitializer
         await SeedSettingsAndBankAsync(db, users);
         await SeedVehiclesAndBookingsAsync(db, users);
         await SeedNotificationsAsync(db, users);
+        await SeedPaymentCardsAsync(db, users);
 
         // seed staff role
         var staff1User = await userManager.FindByNameAsync("staff1");
@@ -1070,5 +1071,43 @@ public static class DbInitializer
         }
 
         await db.SaveChangesAsync();
+    }
+
+    private static async Task SeedPaymentCardsAsync(
+        ApplicationDbContext db, Dictionary<string, ApplicationUser> u)
+    {
+        if (await db.PaymentCards.AnyAsync()) return;
+
+        if (u.TryGetValue("renter1", out var r1))
+        {
+            var now = DateTime.UtcNow;
+            db.PaymentCards.AddRange(
+                new PaymentCard
+                {
+                    UserId = r1.Id,
+                    CardHolderName = "NGUYEN VAN THUE",
+                    CardNumberMasked = "•••• •••• •••• 8899",
+                    Last4Digits = "8899",
+                    CardBrand = "Visa",
+                    ExpiryMonth = 8,
+                    ExpiryYear = 2028,
+                    IsDefault = true,
+                    CreatedAt = now.AddDays(-15)
+                },
+                new PaymentCard
+                {
+                    UserId = r1.Id,
+                    CardHolderName = "NGUYEN VAN THUE",
+                    CardNumberMasked = "•••• •••• •••• 4321",
+                    Last4Digits = "4321",
+                    CardBrand = "Mastercard",
+                    ExpiryMonth = 12,
+                    ExpiryYear = 2027,
+                    IsDefault = false,
+                    CreatedAt = now.AddDays(-5)
+                }
+            );
+            await db.SaveChangesAsync();
+        }
     }
 }
