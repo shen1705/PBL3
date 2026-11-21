@@ -43,8 +43,9 @@ Phiên làm việc này tập trung tối ưu hóa trải nghiệm người dùn
    - **Dòng Small Text về Năng lượng:** Hiển thị rõ `<i class="fa-solid fa-charging-station"></i> Điện` (xanh lá đặc trưng) cho xe điện (VinFast VF3, VF5, VF9...) và `<i class="fa-solid fa-gas-pump"></i> Xăng / Dầu` cho xe động cơ đốt trong.
    - **Dòng Small Text về Vị trí:** Hiển thị `<i class="fa-solid fa-location-dot"></i> Quận/Huyện, Tỉnh/TP` tinh gọn, màu sắc hài hòa.
    - **Khu vực Đánh giá & Số chuyến chuẩn Mioto:** 
-     - Trái: `<i class="fa-solid fa-star star-gold"></i> 5.0` · `<i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> 52 chuyến` (icon vali xanh lá `#10b981`).
-     - Phải: Giá thuê nổi bật màu xanh lá `#08a85e` (`650K/ngày`).
+     - Trái: `<i class="fa-solid fa-star star-gold"></i> 5.0` · `<i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> 52 chuyến` (icon vali xanh lá `#10b981`). Xe chưa có đánh giá hiển thị tinh gọn `Chưa có đánh giá` (hoặc số chuyến nếu đã có chuyến), ngăn chặn tràn dòng đẩy giá xe.
+     - Phải: Giá thuê nổi bật màu xanh lá `#08a85e` (`650K/ngày`), cố định `flex-shrink: 0`.
+   - **Tối giản Badge tiện ích:** Bỏ các icon rườm rà ở nhãn `Miễn thế chấp` và `Giao xe tận nơi` (cả trên thẻ xe lẫn modal chi tiết) giúp giao diện thoáng gọn chuẩn phong cách hiện đại.
    - **Đồng bộ Modal chi tiết xe:** Khôi phục hiển thị địa điểm `#popupCarLoc` trên dòng metadata của modal xem xe.
 
 ---
@@ -55,6 +56,7 @@ Phiên làm việc này tập trung tối ưu hóa trải nghiệm người dùn
 - **Git Commit & Push:**
   - Commit `570a168`: *refactor(ui-hci): streamline find filters, simplify car card metadata, convert car registration to in-page wizard, and rename trips to rental history*
   - Commit `29d4cf3`: *feat(ui-hci): add mioto-style small specs for fuel and location, mioto rating-trips layout, and car favorite toggle*
+  - Commit `8f1e2f0`: *fix(ui): prevent price overflow on unrated car cards and remove badge icons for deposit/delivery*
   - Đã đẩy lên nhánh `develop` trên GitHub repository (`origin/develop`).
 
 ---
