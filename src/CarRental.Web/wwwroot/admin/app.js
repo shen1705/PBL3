@@ -148,8 +148,7 @@ const pageNames = {
   settings: 'Cài đặt'
 };
 
-const note = (txt = 'Dữ liệu được cập nhật trực tiếp từ cơ sở dữ liệu MySQL và hệ thống xác thực ASP.NET Core.') =>
-  `<div class="data-note">${icon('info')}<span>${txt}</span></div>`;
+const note = () => '';
 
 const header = (name, desc, buttons = '') =>
   `<section class="hero"><div><h1>${name}</h1><p>${desc}</p></div><div class="hero-actions">${buttons}</div></section>`;
@@ -309,7 +308,6 @@ async function renderOverview() {
             <li>Đơn tranh chấp (Dispute) bị giữ cọc bảo chứng Escrow, không ghi nhận doanh thu cho tới khi có phán quyết Admin.</li>
             <li>Tỷ lệ hoa hồng sàn AZU Car được trích tự động 5% theo hợp đồng.</li>
           </ul>
-          <div class="source-note">${icon('info')} Cơ sở dữ liệu: MySQL 8.0 · Bảng dữ liệu chuẩn 30 đơn kiểm thử.</div>
         </section>
       </div>
     </details>
@@ -861,16 +859,6 @@ function renderSettings() {
         <div class="divider"></div>
         <button class="btn danger" id="clearLogsBtn">${icon('refresh')} Xóa nhật ký trình duyệt</button>
       </section>
-
-      <section class="panel">
-        <div class="panel-heading"><h2>Kiểm thử & Nghiệp vụ hệ thống</h2></div>
-        <ul class="intro-list">
-          <li><strong>30 đơn thuê mẫu:</strong> Đã seed chuẩn xác 10 đơn tháng 11/2026, 10 đơn tháng 12/2026 và 10 đơn tháng 01/2027.</li>
-          <li><strong>Kiểm thử khiếu nại:</strong> Xem vụ việc đang mở (#TC-2 / BK-NOV-08) tại tab Tranh chấp để kiểm thử tính năng phán quyết hoàn cọc/phạt chủ xe.</li>
-          <li><strong>Kiểm thử duyệt tin:</strong> Xem 2 xe V18 & V19 đang ở trạng thái Chờ duyệt tại tab Tin đăng.</li>
-          <li><strong>Kiểm thử doanh thu:</strong> Xem chi tiết đối soát dòng tiền tại tab Doanh thu và Doanh thu trên tài khoản Chủ xe (/owner).</li>
-        </ul>
-      </section>
     </div>`;
 }
 
@@ -1010,28 +998,93 @@ async function showDetail(kind, id) {
     const l = res.data;
     const images = l.images || [];
 
+    const regImg = l.registrationCertImage ? (l.registrationCertImage.startsWith('/') ? l.registrationCertImage : '/' + l.registrationCertImage) : '';
+    const insImg = l.insuranceImage ? (l.insuranceImage.startsWith('/') ? l.insuranceImage : '/' + l.insuranceImage) : '';
+    const inspImg = l.inspectionCertImage ? (l.inspectionCertImage.startsWith('/') ? l.inspectionCertImage : '/' + l.inspectionCertImage) : '';
+
     const content = `
       <div class="detail-list">
         <div><span class="label">Mã tin đăng</span><strong>#${l.listingId}</strong></div>
         <div><span class="label">Phương tiện</span><strong>${escapeHtml(l.brand)} ${escapeHtml(l.model)} (${l.year})</strong></div>
-        <div><span class="label">Biển số xe</span><code>${escapeHtml(l.licensePlate)}</code></div>
+        <div><span class="label">Biển số xe</span><code style="font-weight:700;font-size:13px;color:var(--ink);background:#f1f5f9;padding:2px 8px;border-radius:4px">${escapeHtml(l.licensePlate)}</code></div>
         <div><span class="label">Chủ sở hữu</span><strong>${escapeHtml(l.ownerName)} (${escapeHtml(l.ownerPhone)})</strong></div>
-        <div><span class="label">Vị trí xe</span><strong>${escapeHtml(l.location)}, ${escapeHtml(l.district)}, ${escapeHtml(l.city)}</strong></div>
-        <div><span class="label">Giá thuê / ngày</span><strong class="gold">${money(l.pricePerDay)}</strong></div>
+        <div><span class="label">Khu vực bàn giao</span><strong>${escapeHtml(l.location)}, ${escapeHtml(l.district)}, ${escapeHtml(l.city)}</strong></div>
+        <div><span class="label">Giá thuê đề xuất</span><strong class="gold">${money(l.pricePerDay)} / ngày</strong></div>
         <div><span class="label">Hộp số · Nhiên liệu</span><strong>${escapeHtml(l.transmission)} · ${escapeHtml(l.fuelType)}</strong></div>
         <div><span class="label">Số chỗ ngồi</span><strong>${l.seats} chỗ</strong></div>
-        <div><span class="label">Trạng thái kiểm duyệt</span>${badge(l.moderationStatus)}</div>
+        <div><span class="label">Ngày nộp hồ sơ</span><strong>${formatDate(l.createdAt)}</strong></div>
+        <div><span class="label">Trạng thái duyệt</span>${badge(l.moderationStatus)}</div>
+        ${l.moderatorName ? `<div><span class="label">Người kiểm duyệt</span><strong>${escapeHtml(l.moderatorName)}</strong></div>` : ''}
+        ${l.moderatedAt ? `<div><span class="label">Thời gian duyệt</span><strong>${formatDate(l.moderatedAt)}</strong></div>` : ''}
+        ${l.moderationNote ? `<div><span class="label">Ghi chú kiểm duyệt</span><strong style="color:var(--danger)">${escapeHtml(l.moderationNote)}</strong></div>` : ''}
       </div>
-      <h4 style="margin:16px 0 8px 0">Mô tả xe</h4>
+
+      <h4 style="margin:16px 0 8px 0">Mô tả bài đăng</h4>
       <p style="background:var(--bg);padding:12px;border-radius:8px;font-size:14px;line-height:1.5">${escapeHtml(l.description || 'Không có mô tả')}</p>
+
+      <h4 style="margin:16px 0 8px 0">Hồ sơ pháp lý & Giấy tờ xe</h4>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:16px">
+        <div style="background:var(--surface,#fff);border:1px solid var(--line,#e2e8f0);border-radius:8px;padding:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <strong style="font-size:13px">1. Cà vẹt / Đăng ký xe</strong>
+            <span class="badge approved" style="font-size:10px">Bắt buộc</span>
+          </div>
+          ${regImg ? `
+            <a href="${regImg}" target="_blank" title="Xem ảnh gốc">
+              <img src="${regImg}" alt="Cà vẹt xe" style="width:100%;height:130px;object-fit:cover;border-radius:6px;border:1px solid var(--line)" onerror="this.outerHTML='<div class=\\'empty\\'>Không tải được ảnh cà vẹt</div>'">
+            </a>
+          ` : '<div class="empty" style="padding:28px 8px;font-size:12px;color:var(--muted)">Chưa tải ảnh cà vẹt</div>'}
+        </div>
+
+        <div style="background:var(--surface,#fff);border:1px solid var(--line,#e2e8f0);border-radius:8px;padding:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <strong style="font-size:13px">2. Sổ Đăng kiểm</strong>
+            <small style="color:var(--muted)">Hạn: ${l.inspectionExpiryDate ? formatDate(l.inspectionExpiryDate) : 'Chưa cập nhật'}</small>
+          </div>
+          ${inspImg ? `
+            <a href="${inspImg}" target="_blank" title="Xem ảnh gốc">
+              <img src="${inspImg}" alt="Đăng kiểm xe" style="width:100%;height:130px;object-fit:cover;border-radius:6px;border:1px solid var(--line)" onerror="this.outerHTML='<div class=\\'empty\\'>Không tải được ảnh đăng kiểm</div>'">
+            </a>
+          ` : '<div class="empty" style="padding:28px 8px;font-size:12px;color:var(--muted)">Chưa tải ảnh đăng kiểm</div>'}
+        </div>
+
+        <div style="background:var(--surface,#fff);border:1px solid var(--line,#e2e8f0);border-radius:8px;padding:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <strong style="font-size:13px">3. Bảo hiểm xe</strong>
+            <small style="color:var(--muted)">Hạn: ${l.insuranceExpiryDate ? formatDate(l.insuranceExpiryDate) : 'Chưa cập nhật'}</small>
+          </div>
+          ${insImg ? `
+            <a href="${insImg}" target="_blank" title="Xem ảnh gốc">
+              <img src="${insImg}" alt="Bảo hiểm xe" style="width:100%;height:130px;object-fit:cover;border-radius:6px;border:1px solid var(--line)" onerror="this.outerHTML='<div class=\\'empty\\'>Không tải được ảnh bảo hiểm</div>'">
+            </a>
+          ` : '<div class="empty" style="padding:28px 8px;font-size:12px;color:var(--muted)">Chưa tải ảnh bảo hiểm</div>'}
+        </div>
+      </div>
+
       ${images.length ? `
-        <h4 style="margin:16px 0 8px 0">Hình ảnh phương tiện (${images.length})</h4>
-        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px">
-          ${images.map(img => `<img src="${img.imagePath}" alt="Xe" style="width:140px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--line)" onerror="this.style.display='none'">`).join('')}
+        <h4 style="margin:16px 0 8px 0">Hình ảnh phương tiện ngoại thất & nội thất (${images.length})</h4>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:8px;margin-bottom:16px">
+          ${images.map((img, idx) => `
+            <div style="position:relative">
+              <img src="${img.imagePath}" alt="Ảnh xe ${idx + 1}" style="width:100%;height:95px;object-fit:cover;border-radius:8px;border:1px solid var(--line)" onerror="this.style.display='none'">
+              ${img.isCover ? '<span style="position:absolute;top:4px;left:4px;background:#059669;color:#fff;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700">Ảnh bìa</span>' : ''}
+            </div>
+          `).join('')}
         </div>
       ` : ''}
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+        ${l.moderationStatus === 'PendingApproval' ? `
+          <button type="button" class="btn primary" onclick="document.getElementById('modal').close(); handleAction('listing-approve:${l.listingId}')">✓ Phê duyệt tin đăng</button>
+          <button type="button" class="btn danger" onclick="document.getElementById('modal').close(); handleAction('listing-reject:${l.listingId}')">✕ Từ chối tin</button>
+        ` : l.moderationStatus === 'Public' ? `
+          <button type="button" class="btn" onclick="document.getElementById('modal').close(); handleAction('listing-hide:${l.listingId}')">Tạm ẩn bài đăng</button>
+        ` : `
+          <button type="button" class="btn primary" onclick="document.getElementById('modal').close(); handleAction('listing-approve:${l.listingId}')">Duyệt lại</button>
+        `}
+      </div>
     `;
-    showModal(`Chi tiết tin đăng xe: ${escapeHtml(l.brand)} ${escapeHtml(l.model)}`, content, () => {}, 'Đóng');
+    showModal(`Chi tiết kiểm duyệt tin đăng xe: ${escapeHtml(l.brand)} ${escapeHtml(l.model)} (${escapeHtml(l.licensePlate)})`, content, () => {}, 'Đóng');
   } else if (kind === 'dispute') {
     const res = await api(`/api/admin/disputes/${id}`);
     if (!res?.isSuccess || !res.data) return toast(res?.message || 'Không thể lấy chi tiết tranh chấp');
