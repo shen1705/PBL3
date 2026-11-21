@@ -57,6 +57,7 @@ Phiên làm việc này tập trung tối ưu hóa trải nghiệm người dùn
   - Commit `570a168`: *refactor(ui-hci): streamline find filters, simplify car card metadata, convert car registration to in-page wizard, and rename trips to rental history*
   - Commit `29d4cf3`: *feat(ui-hci): add mioto-style small specs for fuel and location, mioto rating-trips layout, and car favorite toggle*
   - Commit `8f1e2f0`: *fix(ui): prevent price overflow on unrated car cards and remove badge icons for deposit/delivery*
+  - Commit `9a7deb4`: *feat(ui-admin): hover heart with white-green style, remove redundant admin notes, and enrich listing approval with legal documents*
   - Đã đẩy lên nhánh `develop` trên GitHub repository (`origin/develop`).
 
 ---
