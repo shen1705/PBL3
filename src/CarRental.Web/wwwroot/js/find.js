@@ -2578,19 +2578,6 @@ function loadCustomListingAttributes(vehicleId) {
 
     const cDeodor = document.getElementById('extraFeeDeodorCost');
     if (cDeodor) cDeodor.textContent = `${Number(deodorFee).toLocaleString('vi-VN')}đ`;
-        if (cLimit) cLimit.textContent = '3.000đ/km';
-
-        const dOvertime = document.getElementById('extraFeeOvertimeDesc');
-        const cOvertime = document.getElementById('extraFeeOvertimeCost');
-        if (dOvertime) dOvertime.textContent = 'Phụ phí phát sinh khi hoàn trả xe trễ giờ. Thuê thêm 1 ngày nếu trễ quá 5 giờ.';
-        if (cOvertime) cOvertime.textContent = '70.000đ/giờ';
-
-        const cClean = document.getElementById('extraFeeCleanCost');
-        if (cClean) cClean.textContent = '80.000đ';
-
-        const cDeodor = document.getElementById('extraFeeDeodorCost');
-        if (cDeodor) cDeodor.textContent = '500.000đ';
-    }
 }
 
 function toggleSectionEditor(sectionName, showEditor) {
