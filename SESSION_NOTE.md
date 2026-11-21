@@ -426,4 +426,8 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 
 ### Kết quả kiểm thử tự động (Verification):
 - `dotnet build --no-incremental`: Succeeded (0 Warning, 0 Error).
-- Đã giải phóng hoàn toàn tiến trình server nền (không chạy ngầm) theo đúng mong muốn của người dùng để người dùng tự do chạy lệnh run của mình.
+- Giao diện nút yêu thích trên bài đăng xe được tinh chỉnh đúng chuẩn:
+  - Mặc định ẩn (`opacity: 0; pointer-events: none;`), chỉ khi rê chuột vào bài đăng xe mới hiện lên mượt mà.
+  - Khi chưa tim: Giữ nguyên 100% bản cũ (nền tối mờ kính `rgba(15, 23, 42, 0.42)`, viền trắng mỏng, icon tim outline trắng).
+  - Khi đã tim (`.is-active`): Nền nút và ruột tim là màu **xanh nhạt tươi sáng** (`#10b981`), nét viền trái tim màu **trắng tinh** (`color: #ffffff;` với `<i class="fa-regular fa-heart"></i>`).
+- Web Application đang phục vụ tại `http://localhost:5051`.
