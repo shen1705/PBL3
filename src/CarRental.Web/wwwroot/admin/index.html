@@ -1,1 +1,117 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AZU Car — Trung tâm Quản trị Hệ thống</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="theme-v3.css"><link rel="stylesheet" href="theme-v4.css"></head><body><div id="app"><aside class="sidebar" id="sidebar"><div class="brand"><img class="brand-logo" src="azu-mark.svg" width="42" height="42" alt="Biểu tượng AZU Car"><span class="brand-name"><strong>AZU</strong><span class="gold">Car</span></span></div><div class="nav-groups"><div class="nav-group"><p>VẬN HÀNH</p><button data-page="overview" class="nav-link active"><span data-icon="layout-dashboard"></span>Tổng quan</button><button data-page="owners" class="nav-link"><span data-icon="car-front"></span>Chủ xe <b class="nav-count" data-count="owners"></b></button><button data-page="listings" class="nav-link"><span data-icon="clipboard-list"></span>Tin đăng <b class="nav-count" data-count="listings"></b></button><button data-page="disputes" class="nav-link"><span data-icon="scale"></span>Tranh chấp <b class="nav-count" data-count="disputes"></b></button><button data-page="reviews" class="nav-link"><span data-icon="star"></span>Đánh giá <b class="nav-count" data-count="reviews"></b></button></div><div class="nav-group"><p>NỀN TẢNG</p><button data-page="users" class="nav-link"><span data-icon="users"></span>Người dùng</button><button data-page="fees" class="nav-link"><span data-icon="wallet"></span>Phí & hoa hồng</button><button data-page="revenue" class="nav-link"><span data-icon="chart-no-axes-column"></span>Doanh thu</button></div><div class="nav-group"><p>HỆ THỐNG</p><button data-page="logs" class="nav-link"><span data-icon="history"></span>Nhật ký</button><button data-page="settings" class="nav-link"><span data-icon="settings"></span>Cài đặt</button><div class="nav-logout"><button id="logout" class="nav-link logout"><span data-icon="log-out"></span>Đăng xuất</button></div></div></div><div class="sidebar-foot"><small>AZU Car Admin · v4.3</small></div></aside><div class="workspace"><header class="topbar"><div class="topbar-start"><button class="icon-btn mobile-menu" id="menuToggle" aria-label="Mở menu">☰</button><span class="breadcrumb"><span class="crumb-home" data-icon="layout-dashboard"></span> Quản trị <span class="slash">/</span> <strong id="crumb">Tổng quan</strong></span></div><div class="topbar-actions"><span class="demo-chip live-chip" style="background:rgba(34,197,94,0.12);color:#15803d;border:1px solid rgba(34,197,94,0.3)" title="Hệ thống đang kết nối trực tiếp cơ sở dữ liệu MySQL và ASP.NET Core API"><span class="pulse" style="background:#22c55e"></span> HỆ THỐNG TRỰC TUYẾN</span><button id="notificationBtn" class="icon-btn" title="Tác vụ đang chờ"><span data-icon="bell"></span><i id="notifyDot"></i></button><div class="profile"><div class="avatar">QU</div><div class="profile-text"><strong>Quản trị Một</strong><small>Quản trị viên</small></div><span class="profile-chevron" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></div></div></header><main id="content"></main><footer>AZU Car · Hệ Thống Quản Trị Vận Hành</footer></div></div><div class="toast" id="toast" role="status"></div><dialog id="modal"><form method="dialog" id="dialogForm"><div id="modalContent"></div><div class="modal-actions"><button class="btn ghost" value="cancel">Hủy</button><button class="btn primary" id="confirmBtn" value="confirm">Xác nhận</button></div></form></dialog><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AZU Car — Trung tâm Quản trị Hệ thống</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="theme-v3.css">
+  <link rel="stylesheet" href="theme-v4.css">
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="azu-mark.svg" width="42" height="42" alt="Biểu tượng AZU Car">
+        <span class="brand-name"><strong>AZU</strong><span class="gold">Car</span></span>
+      </div>
+      <div class="nav-groups">
+        <div class="nav-group">
+          <p>VẬN HÀNH</p>
+          <button data-page="overview" class="nav-link active"><span data-icon="layout-dashboard"></span>Tổng quan</button>
+          <button data-page="owners" class="nav-link"><span data-icon="car-front"></span>Chủ xe <b class="nav-count" data-count="owners"></b></button>
+          <button data-page="listings" class="nav-link"><span data-icon="clipboard-list"></span>Tin đăng <b class="nav-count" data-count="listings"></b></button>
+          <button data-page="disputes" class="nav-link"><span data-icon="scale"></span>Tranh chấp <b class="nav-count" data-count="disputes"></b></button>
+          <button data-page="reviews" class="nav-link"><span data-icon="star"></span>Đánh giá <b class="nav-count" data-count="reviews"></b></button>
+        </div>
+        <div class="nav-group">
+          <p>NỀN TẢNG</p>
+          <button data-page="users" class="nav-link"><span data-icon="users"></span>Người dùng</button>
+          <button data-page="fees" class="nav-link"><span data-icon="wallet"></span>Phí & hoa hồng</button>
+          <button data-page="revenue" class="nav-link"><span data-icon="chart-no-axes-column"></span>Doanh thu</button>
+        </div>
+        <div class="nav-group">
+          <p>HỆ THỐNG</p>
+          <button data-page="logs" class="nav-link"><span data-icon="history"></span>Nhật ký</button>
+          <div class="nav-logout">
+            <button id="logout" class="nav-link logout"><span data-icon="log-out"></span>Đăng xuất</button>
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-foot">
+        <small>AZU Car Admin · v4.4</small>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-start">
+          <button class="icon-btn mobile-menu" id="menuToggle" aria-label="Mở menu">☰</button>
+          <span class="breadcrumb">
+            <a href="#overview" data-go="overview" class="crumb-home" style="color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px" title="Về trang Tổng quan">
+              <span data-icon="layout-dashboard"></span> Quản trị
+            </a>
+            <span class="slash">/</span>
+            <strong id="crumb">Tổng quan</strong>
+          </span>
+        </div>
+        <div class="topbar-actions">
+          <span class="demo-chip live-chip" style="background:rgba(34,197,94,0.12);color:#15803d;border:1px solid rgba(34,197,94,0.3)" title="Hệ thống kết nối trực tiếp MySQL và ASP.NET Core API">
+            <span class="pulse" style="background:#22c55e"></span> HỆ THỐNG TRỰC TUYẾN
+          </span>
+          <div class="notify-wrap">
+            <button id="notificationBtn" class="icon-btn" title="Tác vụ đang chờ"><span data-icon="bell"></span><i id="notifyDot" style="display:none"></i></button>
+            <div class="notify-dropdown" id="notifyDropdown" style="display:none">
+              <div class="notify-header">
+                <strong>Tác vụ cần xử lý</strong>
+                <span class="badge pending" id="notifyCountBadge" style="font-size:11px">0</span>
+              </div>
+              <div class="notify-list" id="notifyList"></div>
+              <div class="notify-footer">
+                <button data-go="overview">Xem chi tiết trên Tổng quan →</button>
+              </div>
+            </div>
+          </div>
+          <div class="profile" id="profileBtn" title="Menu tài khoản">
+            <div class="avatar">QU</div>
+            <div class="profile-text">
+              <strong id="topbarAdminName">Quản trị Một</strong>
+              <small id="topbarAdminRole">Quản trị viên</small>
+            </div>
+            <span class="profile-chevron" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </span>
+            <div class="profile-dropdown" id="profileDropdown" style="display:none">
+              <div class="dropdown-header">
+                <strong id="dropdownAdminName">Quản trị Một</strong>
+                <small id="dropdownAdminRole">Quản trị viên</small>
+              </div>
+              <button class="dropdown-item" id="btnAdminChangePwd">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Đổi mật khẩu
+              </button>
+              <button class="dropdown-item danger" id="btnAdminLogout">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main id="content"></main>
+      <footer>AZU Car · Hệ Thống Quản Trị Vận Hành</footer>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <dialog id="modal">
+    <form method="dialog" id="dialogForm">
+      <div id="modalContent"></div>
+      <div class="modal-actions">
+        <button class="btn ghost" value="cancel">Hủy</button>
+        <button class="btn primary" id="confirmBtn" value="confirm">Xác nhận</button>
+      </div>
+    </form>
+  </dialog>
+  <script src="app.js"></script>
+</body>
+</html>
