@@ -138,7 +138,50 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 
 ---
 
-## 4. Lộ Trình Triển Khai Kế Tiếp (Roadmap & Next Steps)
+## 4. Nhật Ký Phiên Làm Việc #11 (2026-11-21) - Khắc Phục 7 Lỗ Hổng Vận Hành & Chuyển Đổi Ký Quỹ Trực Tuyến 100% Escrow
+
+### 4.1. Bối cảnh & Mục tiêu
+- **Chuyển đổi 100% Online Escrow**: Thay vì cơ chế cũ (đặt cọc 25% trực tuyến + 75% tiền mặt trả khi nhận xe), hệ thống chuyển đổi sang mô hình **100% Ký quỹ trực tuyến qua Sàn AZU Car**.
+  - Giải quyết triệt để vấn đề "giao dịch chui" né phí hoa hồng sàn.
+  - Loại bỏ rủi ro khách mang số tiền mặt lớn (15 - 20 triệu VNĐ) khi đi nhận xe.
+  - Đảm bảo thực thi bảo chứng tài chính khi xảy ra tranh chấp, phụ phí phát sinh, phạt vi phạm hoặc hủy chuyến sát giờ.
+  - Tiền cọc xe máy/hiện vật (hoặc 15 triệu thế chấp tài sản) vẫn được bàn giao trực tiếp tại thời điểm nhận xe.
+- **Xử lý toàn diện 7 lỗ hổng hệ thống (Flaws 1 - 7)** được phát hiện trong quy trình thuê xe, phê duyệt và thanh toán.
+
+### 4.2. Chi tiết các hạng mục đã hoàn thành
+
+1. **Khắc phục Flaw 1 (Điều kiện duyệt Chủ xe trước khi đăng xe)**:
+   - Trong `VehicleService.CreateVehicleAsync`: Bổ sung kiểm tra bắt buộc `OwnerProfile` phải tồn tại và có `ApprovalStatus == OwnerApprovalStatuses.Approved`. Người dùng chưa xác minh CCCD sẽ bị chặn đăng tải xe lên sàn.
+2. **Khắc phục Flaw 2 (Lead Time & Deadline phản hồi động)**:
+   - Bổ sung `BusinessRules.MinLeadTimeHours = 2`: Chặn đặt xe sát giờ (phải đặt trước tối thiểu 2 giờ để chủ xe kịp chuẩn bị).
+   - Thiết lập hạn phản hồi động cho Chủ xe: `ResponseDeadline = Min(now + 24h, StartDate - 1h)`. Nếu đơn đặt cận ngày, chủ xe phải phản hồi chậm nhất 1 tiếng trước giờ nhận xe (hoặc tối thiểu 30 phút).
+3. **Khắc phục Flaw 3 (Buffer Time giữa các chuyến liên tiếp)**:
+   - Bổ sung `BusinessRules.TurnaroundBufferHours = 2`: Trong `VehicleAvailabilityService.CheckAsync`, áp dụng khoảng đệm 2 giờ trước và sau mỗi đơn thuê đã khóa lịch để chủ xe có thời gian nhận xe, kiểm tra, vệ sinh và bàn giao cho khách kế tiếp.
+4. **Khắc phục Flaw 4 (Chuẩn hóa trạng thái Ký quỹ & Tự động quyết toán)**:
+   - Khi hoàn tất chuyến đi (`ConfirmReturnAsync`) hoặc Admin cưỡng chế hoàn tất (`ForceComplete`), trạng thái tiền cọc được cập nhật chính xác thành `DepositStatuses.Transferred`.
+   - Hệ thống tự động trích 5% hoa hồng sàn và chuyển 95% giá trị hợp đồng từ tài khoản ký quỹ `ESCROW-0001` sang tài khoản ngân hàng ảo của Chủ xe via `MockBankTransaction`.
+5. **Khắc phục Flaw 5 (Tự động hoàn cọc 100% khi từ chối hoặc hết hạn)**:
+   - Khi chủ xe từ chối (`RejectBookingAsync`) hoặc đơn hết hạn (`AutoExpireBookingsAsync`), hệ thống cập nhật `Payment.DepositStatus = DepositStatuses.Refunded` và tự động tạo giao dịch hoàn tiền 100% từ `ESCROW-0001` về tài khoản Renter.
+6. **Khắc phục Flaw 6 (Khóa lịch xe linh hoạt theo giờ)**:
+   - Trong `VehicleService.AddUnavailabilityAsync`, hỗ trợ khóa lịch chi tiết theo giờ thay vì ép buộc cả ngày (00:00:00 - 23:59:59) nếu người dùng chọn khung giờ cụ thể.
+7. **Khắc phục Flaw 7 (Bảo vệ phí giao xe cho Chủ xe khi khách hủy sát giờ)**:
+   - Trong `BookingService.CancelBookingAsync`, khi khách thuê hủy chuyến đã duyệt sát giờ nhận xe, toàn bộ phí giao xe (Delivery Fee) được bảo lưu và giải ngân cho Chủ xe để bù đắp chi phí di chuyển thực tế.
+
+### 4.3. Đồng bộ giao diện người dùng (UI/UX)
+- **`Find.cshtml` & `find.js`**:
+  - Tóm tắt chi phí hiển thị rõ ràng: `Thanh toán Ký quỹ Trực tuyến (100%)` và `Tiền thuê phải trả khi nhận xe: 0đ (Đã thanh toán đủ)`.
+  - Cập nhật Điều 2 Hợp đồng điện tử và Modal thanh toán mô phỏng VietQR theo tỷ lệ 100%.
+- **`trip-handover-modal.js`**:
+  - Gỡ bỏ dropdown chọn trả tiền mặt 75% khi nhận xe; thay thế bằng badge xác nhận "Đã thanh toán 100% trực tuyến qua Ký quỹ Sàn AZU Car".
+  - Cập nhật modal hủy chuyến và chế tài tài chính rõ ràng.
+- **`admin/app.js` & `AdminFeeDtos.cs`**:
+  - Mở rộng khoảng cho phép thiết lập tỷ lệ ký quỹ lên tối đa 100% (`[Range(0.05, 1.00)]`).
+- **`account.js` & `mytrips.js` & `dispute-modal.js`**:
+  - Đồng bộ text hiển thị thông tin tiền ký quỹ 100% trên lịch sử chuyến đi của khách thuê và chủ xe.
+
+---
+
+## 5. Lộ Trình Triển Khai Kế Tiếp (Roadmap & Next Steps)
 
 ```
 [1. Auth Services] (Hoàn tất 100%)
@@ -162,11 +205,11 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 [7. HCI Refactoring & Mioto-Style UI/UX Enhancements] (Hoàn tất 100% - Session 8)
        │
        ▼
-[8. Favorites Management Page & Vehicle Like System] ◄─── (TIẾP THEO)
+[8. Redundant UI Cleanups & CSV Export Audit] (Hoàn tất 100% - Session 10)
        │
        ▼
-[9. Admin Approvals: Owner Profiles & Vehicle Listings]
+[9. 7 Operational Flaws Fix & 100% Online Escrow Transition] (Hoàn tất 100% - Session 11) ◄─── (VỪA HOÀN THÀNH)
        │
        ▼
-[10. Admin Financial Settlement, Fees & Disputes]
+[10. Inspect Deferred Find.cshtml Links (Task 2 - Mục 4) / Favorite Vehicles]
 ```

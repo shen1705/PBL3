@@ -179,10 +179,12 @@ public static class SettingKeys
 
 public static class BusinessRules
 {
-    public const decimal DepositRate = 0.25m;             // deposit = 25% price_locked_total
-    public const decimal OwnerCancelPenaltyRate = 0.08m;  // Owner penalty 8% price_locked_total (dieu chinh ve 8%)
-    public const decimal DefaultCommissionRate = 0.05m;   // commission 
-    public const int ResponseDeadlineHours = 24;          // owner response time 
+    public const decimal DepositRate = 1.00m;             // 100% online rental payment held in Escrow
+    public const decimal OwnerCancelPenaltyRate = 0.08m;  // Owner penalty 8% price_locked_total
+    public const decimal DefaultCommissionRate = 0.05m;   // platform commission 5%
+    public const int ResponseDeadlineHours = 24;          // max owner response time in hours
+    public const int MinLeadTimeHours = 2;                // Dat xe truoc toi thieu 2 gio
+    public const int TurnaroundBufferHours = 2;           // Dem ban giao, kiem tra va ve sinh 2 gio
 }
 
 // error 

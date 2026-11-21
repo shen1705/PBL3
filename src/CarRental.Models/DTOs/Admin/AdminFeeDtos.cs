@@ -25,7 +25,7 @@ public class UpdateFeeSettingsRequest
     [Range(0.01, 0.50, ErrorMessage = "Tỷ lệ hoa hồng phải từ 1% đến 50%.")]
     public decimal CommissionRate { get; set; }
 
-    [Range(0.05, 0.90, ErrorMessage = "Tỷ lệ cọc phải từ 5% đến 90%.")]
+    [Range(0.05, 1.00, ErrorMessage = "Tỷ lệ cọc phải từ 5% đến 100%.")]
     public decimal? DepositRate { get; set; }
 
     [Range(0.05, 0.90, ErrorMessage = "Tỷ lệ phạt hủy phải từ 5% đến 90%.")]

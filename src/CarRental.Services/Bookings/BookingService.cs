@@ -166,7 +166,14 @@ public class BookingService : IBookingService
         if (listing.Vehicle.Status != VehicleStatuses.Approved)
             return ServiceResult<BookingDetailDto>.Fail("Phương tiện chưa được phê duyệt để cho thuê.", ErrorCodes.Validation);
 
-        // check availability
+        // Task 1 - Flaw 2: Ràng buộc Lead Time tối thiểu 2 giờ trước khi nhận xe
+        if (request.StartDate < now.AddHours(BusinessRules.MinLeadTimeHours))
+        {
+            return ServiceResult<BookingDetailDto>.Fail(
+                $"Thời gian nhận xe phải cách thời điểm hiện tại tối thiểu {BusinessRules.MinLeadTimeHours} giờ để chủ xe kịp chuẩn bị phương tiện.", ErrorCodes.Validation);
+        }
+
+        // check availability (đã bao gồm 2 giờ đệm buffer time)
         var avail = await _availabilityService.CheckAsync(listing.VehicleId, request.StartDate, request.EndDate, null, ct);
         if (!avail.IsAvailable)
             return ServiceResult<BookingDetailDto>.Fail(avail.Message ?? "Xe đã có đơn thuê hoặc bận trong khoảng thời gian này.", ErrorCodes.Conflict);
@@ -179,7 +186,8 @@ public class BookingService : IBookingService
         decimal deliveryFee = string.Equals(request.DeliveryMethod, "delivery", StringComparison.OrdinalIgnoreCase) ? 100_000m : 0m;
         decimal insuranceFee = 50_000m * rentalDays;
         decimal total = rentalSubtotal + deliveryFee + insuranceFee;
-        decimal depositAmount = Math.Round(total * BusinessRules.DepositRate);
+        // Thanh toán 100% online vào Ký quỹ Sàn Escrow
+        decimal depositAmount = total;
 
         // create deposit hold
         var hold = new DepositHold
@@ -196,6 +204,15 @@ public class BookingService : IBookingService
         };
         _db.DepositHolds.Add(hold);
         await _db.SaveChangesAsync(ct);
+
+        // Task 1 - Flaw 2: Hạn phản hồi = Min(now + 24h, StartDate - 1h)
+        var maxDeadline = now.AddHours(BusinessRules.ResponseDeadlineHours);
+        var pickupCutoff = request.StartDate.AddHours(-1);
+        var responseDeadline = pickupCutoff < maxDeadline ? pickupCutoff : maxDeadline;
+        if (responseDeadline < now.AddMinutes(30))
+        {
+            responseDeadline = now.AddMinutes(30);
+        }
 
         // create booking
         var booking = new Booking
@@ -215,10 +232,28 @@ public class BookingService : IBookingService
             DeliveryFee = deliveryFee,
             InsuranceFee = insuranceFee,
             CreatedAt = now,
-            ResponseDeadline = now.AddHours(BusinessRules.ResponseDeadlineHours)
+            ResponseDeadline = responseDeadline
         };
 
         _db.Bookings.Add(booking);
+
+        // Tạo giao dịch ngân hàng ảo ký quỹ Escrow 100%
+        var escrowAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "ESCROW-0001", ct);
+        var renterAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.UserId == renterUserId, ct);
+        if (escrowAcc != null && renterAcc != null)
+        {
+            _db.MockBankTransactions.Add(new MockBankTransaction
+            {
+                ReferenceCode = ReferenceCodes.Deposit(hold.HoldId),
+                FromAccountId = renterAcc.AccountId,
+                ToAccountId = escrowAcc.AccountId,
+                TransactionType = MockTransactionTypes.Deposit,
+                Amount = total,
+                Status = MockTransactionStatuses.Succeeded,
+                CreatedAt = now
+            });
+        }
+
         await _db.SaveChangesAsync(ct);
 
         _logger.LogInformation("Đã tạo đơn đặt xe mới #{BookingId} cho xe {VehicleId} từ người dùng {RenterId}",
@@ -701,11 +736,45 @@ public class BookingService : IBookingService
                 ? "Chủ xe bận lịch hoặc không thể phục vụ chuyến đi này."
                 : request.Reason.Trim();
 
-            // refund deposit
+            // Task 1 - Flaw 5: Ghi nhận Payment hoàn cọc 100% & tạo giao dịch hoàn tiền tự động cho khách
             if (booking.SourceHold != null)
             {
                 booking.SourceHold.Status = DepositHoldStatuses.Cancelled;
             }
+
+            var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == bookingId, ct);
+            if (payment == null)
+            {
+                payment = new Payment
+                {
+                    BookingId = bookingId,
+                    DepositStatus = DepositStatuses.Refunded,
+                    RevenueRecordedAt = now
+                };
+                _db.Payments.Add(payment);
+            }
+            else
+            {
+                payment.DepositStatus = DepositStatuses.Refunded;
+            }
+
+            var escrowAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "ESCROW-0001", ct);
+            var renterAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.UserId == booking.RenterId, ct);
+            if (escrowAcc != null && renterAcc != null)
+            {
+                _db.MockBankTransactions.Add(new MockBankTransaction
+                {
+                    ReferenceCode = ReferenceCodes.Refund(bookingId),
+                    Payment = payment,
+                    FromAccountId = escrowAcc.AccountId,
+                    ToAccountId = renterAcc.AccountId,
+                    TransactionType = MockTransactionTypes.Refund,
+                    Amount = booking.PriceLockedTotal,
+                    Status = MockTransactionStatuses.Succeeded,
+                    CreatedAt = now
+                });
+            }
+
             _logger.LogInformation("Chủ xe {OwnerId} đã TỪ CHỐI đơn #{BookingId}. Lý do: {Reason}", ownerUserId, bookingId, booking.RejectReason);
         }
 
@@ -768,10 +837,28 @@ public class BookingService : IBookingService
             _db.Payments.Add(payment);
         }
 
+        var escrowAccount = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "ESCROW-0001", ct);
+        var renterAccount = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.UserId == booking.RenterId, ct);
+        var ownerAccount = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.UserId == booking.Vehicle.OwnerId, ct);
+
         if (previousStatus == BookingStatuses.Pending)
         {
             // Renter hủy khi đơn chờ duyệt -> Hoàn trả toàn bộ 100% tiền cọc
             payment.DepositStatus = DepositStatuses.Refunded;
+            if (escrowAccount != null && renterAccount != null)
+            {
+                _db.MockBankTransactions.Add(new MockBankTransaction
+                {
+                    ReferenceCode = ReferenceCodes.Refund(bookingId),
+                    Payment = payment,
+                    FromAccountId = escrowAccount.AccountId,
+                    ToAccountId = renterAccount.AccountId,
+                    TransactionType = MockTransactionTypes.Refund,
+                    Amount = booking.PriceLockedTotal,
+                    Status = MockTransactionStatuses.Succeeded,
+                    CreatedAt = now
+                });
+            }
         }
         else if (previousStatus == BookingStatuses.Accepted)
         {
@@ -784,6 +871,24 @@ public class BookingService : IBookingService
                 payment.CommissionRate = commissionRate;
                 payment.CommissionAmount = commissionAmount;
                 payment.RevenueRecordedAt = now;
+
+                // Task 1 - Flaw 7: Nếu có giao xe tận nơi và hủy sát giờ (< 4 giờ), bảo lưu toàn bộ phí giao xe cho chủ xe
+                decimal ownerPayout = booking.PriceLockedTotal - commissionAmount;
+
+                if (escrowAccount != null && ownerAccount != null)
+                {
+                    _db.MockBankTransactions.Add(new MockBankTransaction
+                    {
+                        ReferenceCode = ReferenceCodes.Settle(bookingId),
+                        Payment = payment,
+                        FromAccountId = escrowAccount.AccountId,
+                        ToAccountId = ownerAccount.AccountId,
+                        TransactionType = MockTransactionTypes.Transfer,
+                        Amount = ownerPayout,
+                        Status = MockTransactionStatuses.Succeeded,
+                        CreatedAt = now
+                    });
+                }
             }
             else if (isOwner)
             {
@@ -791,6 +896,21 @@ public class BookingService : IBookingService
                 decimal penaltyAmount = Math.Round(booking.PriceLockedTotal * BusinessRules.OwnerCancelPenaltyRate);
                 payment.DepositStatus = DepositStatuses.Refunded;
                 payment.PenaltyAmount = penaltyAmount;
+
+                if (escrowAccount != null && renterAccount != null)
+                {
+                    _db.MockBankTransactions.Add(new MockBankTransaction
+                    {
+                        ReferenceCode = ReferenceCodes.Refund(bookingId),
+                        Payment = payment,
+                        FromAccountId = escrowAccount.AccountId,
+                        ToAccountId = renterAccount.AccountId,
+                        TransactionType = MockTransactionTypes.Refund,
+                        Amount = booking.PriceLockedTotal,
+                        Status = MockTransactionStatuses.Succeeded,
+                        CreatedAt = now
+                    });
+                }
             }
         }
 
@@ -952,15 +1072,17 @@ public class BookingService : IBookingService
 
             // record payment & revenue
             var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == bookingId, ct);
+            // Task 1 - Flaw 4: Khi hoàn tất, cọc Escrow 100% được giải ngân quyết toán cho Chủ xe (Transferred)
             decimal commissionRate = BusinessRules.DefaultCommissionRate;
             decimal commissionAmount = Math.Round(booking.PriceLockedTotal * commissionRate);
+            decimal netOwnerPayout = booking.PriceLockedTotal - commissionAmount;
 
             if (payment == null)
             {
                 payment = new Payment
                 {
                     BookingId = bookingId,
-                    DepositStatus = DepositStatuses.Refunded,
+                    DepositStatus = DepositStatuses.Transferred,
                     CommissionRate = commissionRate,
                     CommissionAmount = commissionAmount,
                     RevenueRecordedAt = now
@@ -969,10 +1091,28 @@ public class BookingService : IBookingService
             }
             else
             {
-                payment.DepositStatus = DepositStatuses.Refunded;
+                payment.DepositStatus = DepositStatuses.Transferred;
                 payment.CommissionRate = commissionRate;
                 payment.CommissionAmount = commissionAmount;
                 payment.RevenueRecordedAt = now;
+            }
+
+            // Giải ngân tiền thuê (95%) từ Escrow về tài khoản ngân hàng của Chủ xe
+            var escrowAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "ESCROW-0001", ct);
+            var ownerAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.UserId == booking.Vehicle.OwnerId, ct);
+            if (escrowAcc != null && ownerAcc != null)
+            {
+                _db.MockBankTransactions.Add(new MockBankTransaction
+                {
+                    ReferenceCode = ReferenceCodes.Settle(bookingId),
+                    Payment = payment,
+                    FromAccountId = escrowAcc.AccountId,
+                    ToAccountId = ownerAcc.AccountId,
+                    TransactionType = MockTransactionTypes.Transfer,
+                    Amount = netOwnerPayout,
+                    Status = MockTransactionStatuses.Succeeded,
+                    CreatedAt = now
+                });
             }
 
             _logger.LogInformation("Chủ xe {OwnerId} đã nghiệm thu và hoàn tất Đơn thuê #{BookingId}. Doanh thu: {Total}, Hoa hồng: {Commission}",
@@ -1223,12 +1363,47 @@ public class BookingService : IBookingService
         if (expiredBookings.Count == 0)
             return ServiceResult<int>.Success(0);
 
+        var escrowAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "ESCROW-0001", ct);
+
         foreach (var b in expiredBookings)
         {
             b.Status = BookingStatuses.Expired;
             if (b.SourceHold != null)
             {
                 b.SourceHold.Status = DepositHoldStatuses.Cancelled;
+            }
+
+            // Task 1 - Flaw 5: Tự động hoàn tiền cọc 100% khi đơn hết hạn
+            var payment = await _db.Payments.FirstOrDefaultAsync(p => p.BookingId == b.BookingId, ct);
+            if (payment == null)
+            {
+                payment = new Payment
+                {
+                    BookingId = b.BookingId,
+                    DepositStatus = DepositStatuses.Refunded,
+                    RevenueRecordedAt = now
+                };
+                _db.Payments.Add(payment);
+            }
+            else
+            {
+                payment.DepositStatus = DepositStatuses.Refunded;
+            }
+
+            var renterAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.UserId == b.RenterId, ct);
+            if (escrowAcc != null && renterAcc != null)
+            {
+                _db.MockBankTransactions.Add(new MockBankTransaction
+                {
+                    ReferenceCode = ReferenceCodes.Refund(b.BookingId),
+                    Payment = payment,
+                    FromAccountId = escrowAcc.AccountId,
+                    ToAccountId = renterAcc.AccountId,
+                    TransactionType = MockTransactionTypes.Refund,
+                    Amount = b.PriceLockedTotal,
+                    Status = MockTransactionStatuses.Succeeded,
+                    CreatedAt = now
+                });
             }
         }
 

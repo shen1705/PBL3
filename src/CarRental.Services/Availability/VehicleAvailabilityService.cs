@@ -53,15 +53,17 @@ public class VehicleAvailabilityService : IVehicleAvailabilityService
             // booked dates
             var lockingStatuses = BookingStatuses.Locking.ToArray();
             var excludeId = excludeBookingId ?? -1;
+            // Task 1 - Flaw 3: Khoảng đệm xe (Buffer time = 2 giờ) giữa các chuyến liên tiếp
+            var buffer = TimeSpan.FromHours(BusinessRules.TurnaroundBufferHours);
             var alreadyBooked = await _db.Bookings.AsNoTracking()
                 .AnyAsync(b => b.VehicleId == vehicleId
                             && b.BookingId != excludeId
                             && lockingStatuses.Contains(b.Status)
-                            && b.StartDate < end
-                            && b.EndDate > start, ct);
+                            && b.StartDate < end.Add(buffer)
+                            && b.EndDate.Add(buffer) > start, ct);
             if (alreadyBooked)
                 return AvailabilityResult.Unavailable(UnavailableReason.AlreadyBooked,
-                    "Xe đã có đơn thuê trong khoảng thời gian này.");
+                    "Xe đã có đơn thuê trong khoảng thời gian này (đã tính 2 giờ đệm vệ sinh, kiểm tra và bảo dưỡng xe).");
 
             return AvailabilityResult.Available();
         }
