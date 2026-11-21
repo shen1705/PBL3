@@ -372,3 +372,26 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 ### Kết quả kiểm thử tự động (Verification):
 - `dotnet build`: Succeeded (0 Warning, 0 Error) trong 15.45 giây.
 - Web Application khởi động thành công và phục vụ tại `http://localhost:5051`.
+
+---
+
+## 10. Chi Tiết Session 16: Tinh Gọn Hợp Đồng, Xóa Bỏ Hoàn Toàn Mục Thanh Toán Khi Nhận Xe & Tẩy Sạch Icon/Emoji AI Rườm Rà
+
+### Bối cảnh & Yêu cầu:
+1. **Gỡ bỏ text ép buộc & Nút hợp đồng thừa:**
+   - Xóa bỏ dòng chữ nhắc nhở máy móc: *"↳ Nhấp để mở hợp đồng & bấm Xác nhận bên trong (Không thể tích chọn trực tiếp)"*.
+   - Cho phép người dùng tích chọn trực tiếp vào checkbox Hợp đồng thuê xe điện tử một cách tự nhiên.
+   - Gỡ bỏ nút bấm thừa `[Xem hợp đồng thuê xe]` ở góc phải thẻ Hợp đồng, chỉ giữ lại liên kết chữ *"Hợp đồng thuê xe điện tử"* để người dùng bấm xem chi tiết khi có nhu cầu.
+2. **Loại bỏ triệt để mục "Thanh toán khi nhận xe":**
+   - Xóa bỏ tùy chọn phương thức thanh toán tiền mặt khi nhận xe trong Modal đặt xe (`Find.cshtml`).
+   - Xóa bỏ dòng `Tiền thuê phải trả khi nhận xe: 0 đ (Đã thanh toán đủ)` trong bảng tóm tắt chi phí đặt xe (`find.js` / `Find.cshtml`) và trong chi tiết chuyến đi (`mytrips.js`), khẳng định trọn vẹn mô hình 100% Ký quỹ Sàn Trực tuyến.
+   - Cập nhật kịch bản Chatbot (`GeminiChatbotService.cs`, `chatbot.js`, `support.js`) xóa bỏ hoàn toàn tàn dư cọc 25% - trả sau 75%.
+3. **Thanh lọc toàn bộ Icon / Emoji rườm rà (AI text/emoji purge):**
+   - Gỡ bỏ các biểu tượng không cần thiết: icon khiên tại tiêu đề thế chấp (`<i class="fa-solid fa-shield-halved"></i>`), icon bắt tay / bàn tay (`<i class="fa-solid fa-hand-holding-hand"></i>`), icon thông tin/check trong badge thế chấp, icon sấm sét (`<i class="fa-solid fa-bolt"></i>`), icon gậy phép ma thuật (`<i class="fa-solid fa-wand-magic-sparkles"></i>`).
+   - Xóa bỏ loạt icon đặt đầu mỗi câu trong phần mô tả xe (`popupCarDescription`) vốn mang phong cách AI listicle.
+   - Xóa bỏ các emoji trang trí thừa (`🎉`, `💰`, `❌`) trong các thông báo alert và giao diện.
+
+### Kết quả kiểm thử tự động (Verification):
+- `dotnet build`: Succeeded (0 Warning, 0 Error).
+- Giao diện Modal đặt xe tinh gọn, chuẩn mực, chuyên nghiệp, không còn các chi tiết gượng ép.
+- Web Application đang phục vụ ổn định tại `http://localhost:5051`.

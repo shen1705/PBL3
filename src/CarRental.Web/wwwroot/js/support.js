@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             keywords: ['cọc', 'đặt cọc', 'thế chấp', 'tiền mặt', 'xe máy', 'miễn thế chấp', 'cà vẹt'],
             reply: `
-                <p><strong>💰 Quy định về đặt cọc & thế chấp tài sản:</strong></p>
+                <p><strong>Quy định về thanh toán ký quỹ &amp; thế chấp tài sản:</strong></p>
                 <ul>
                     <li><strong>Xe Miễn thế chấp:</strong> Bạn chỉ cần thanh toán tiền thuê, không cần giữ lại xe máy hay cọc tiền mặt.</li>
                     <li><strong>Xe có thế chấp:</strong> Bạn có thể chọn 1 trong 2 hình thức:

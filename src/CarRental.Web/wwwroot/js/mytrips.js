@@ -1169,10 +1169,6 @@ function renderTripDetail(booking, tab = 'overview') {
                         <strong>${formatTripMoney(booking.depositAmount)}</strong>
                     </div>
                 </div>
-                <div class="trip-payment-line trip-payment-remaining" style="color: #16a34a;">
-                    <div><span>${isOwner ? 'Tiền thuê thanh toán khi nhận xe' : 'Tiền thuê phải trả khi nhận xe'}</span></div>
-                    <strong>0 đ (Đã thanh toán đủ)</strong>
-                </div>
             </aside>
         </div>
         ${isCancelled ? `<div class="trip-detail-notice is-warning">${escapeTripHtml(booking.cancelReason || booking.rejectReason || badge.text)}</div>` : ''}`;

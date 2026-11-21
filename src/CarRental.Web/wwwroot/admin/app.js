@@ -83,7 +83,7 @@ const DISPUTE_CAT_LABELS = {
   'TechnicalIssue': '🔧 Sự cố kỹ thuật',
   'LateDelivery': '⏰ Giao xe trễ',
   'DifferentVehicle': '🚙 Sai mô tả xe',
-  'Overcharge': '💰 Phụ thu sai',
+  'Overcharge': 'Phụ thu sai',
   'Other': '⚠️ Vi phạm khác'
 };
 
@@ -265,7 +265,7 @@ function renderNotifyList(d) {
       </div>`;
   }
   if (!itemsHtml) {
-    itemsHtml = '<div style="padding:20px 16px;text-align:center;color:var(--muted);font-size:13px"><p style="margin:0 0 4px;font-size:16px">🎉</p>Hiện không có tác vụ nào tồn đọng!</div>';
+    itemsHtml = '<div style="padding:20px 16px;text-align:center;color:var(--muted);font-size:13px">Hiện không có tác vụ nào tồn đọng!</div>';
   }
   listEl.innerHTML = itemsHtml;
 }
@@ -623,7 +623,7 @@ async function renderReviews() {
                   </div>
                 </td>
               </tr>
-            `).join('') : `<tr><td colspan="8" class="empty">Hiện không có đánh giá nào bị báo cáo vi phạm 🎉</td></tr>`}
+            `).join('') : `<tr><td colspan="8" class="empty">Hiện không có đánh giá nào bị báo cáo vi phạm</td></tr>`}
           </tbody>
         </table>
       </div>

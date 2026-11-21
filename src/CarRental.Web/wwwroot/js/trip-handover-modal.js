@@ -383,8 +383,8 @@
                 const data = await res.json();
                 if (res.ok && data.isSuccess) {
                     alert(isPickup
-                        ? '🎉 Xác nhận nhận xe thành công! Chúc bạn có một hành trình an toàn.'
-                        : '🎉 Nghiệm thu và trả xe thành công! Cảm ơn bạn đã sử dụng dịch vụ của AZU Car.');
+                        ? 'Xác nhận nhận xe thành công! Chúc bạn có một hành trình an toàn.'
+                        : 'Nghiệm thu và trả xe thành công! Cảm ơn bạn đã sử dụng dịch vụ của AZU Car.');
                     closeFn();
                     if (typeof onSuccess === 'function') onSuccess(data.data);
                 } else {

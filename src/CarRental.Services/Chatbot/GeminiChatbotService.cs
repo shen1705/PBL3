@@ -327,14 +327,13 @@ Nhiệm vụ của bạn là giải đáp chính xác, lịch sự, thân thiệ
         {
             return (
                 """
-                <p><strong>💰 Quy định về đặt cọc giữ chỗ & thế chấp tài sản:</strong></p>
+                <p><strong>Quy định về thanh toán ký quỹ &amp; thế chấp tài sản:</strong></p>
                 <ul>
-                    <li><strong>Ký quỹ giữ chỗ (25%):</strong> Khách hàng ký quỹ 25% giá trị chuyến đi qua tài khoản bảo chứng <strong>AZU Escrow</strong> để giữ lịch xe.</li>
-                    <li><strong>Thanh toán còn lại (75%):</strong> Thanh toán khi nhận xe hoặc lúc kết thúc chuyến đi.</li>
-                    <li><strong>Tài sản thế chấp:</strong> Với xe có yêu cầu thế chấp, bạn gửi lại xe máy chính chủ (trên 15 triệu) hoặc tiền mặt 5 - 15 triệu cho chủ xe khi nhận chìa khóa.</li>
+                    <li><strong>Ký quỹ sàn (100%):</strong> Khách hàng thanh toán trực tuyến 100% tiền thuê qua tài khoản bảo chứng AZU Car ngay khi đặt xe, an tâm không phát sinh tiền thuê khi nhận xe.</li>
+                    <li><strong>Tài sản thế chấp:</strong> Với xe có yêu cầu thế chấp, bạn gửi lại xe máy chính chủ (trên 15 triệu) hoặc tiền mặt thế chấp cho chủ xe khi nhận chìa khóa.</li>
                 </ul>
                 <div class="msg-highlight-box">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Tiền cọc hoặc xe máy sẽ được hoàn trả đầy đủ ngay khi bạn trả xe không phát sinh sự cố.
+                    Tiền cọc thế chấp hoặc xe máy sẽ được hoàn trả đầy đủ ngay khi bạn trả xe không phát sinh sự cố.
                 </div>
                 """,
                 new List<string> { "Chính sách hủy chuyến & hoàn cọc?", "Phụ phí nếu hút thuốc hoặc trả trễ?", "Thủ tục nhận xe gồm những gì?" }

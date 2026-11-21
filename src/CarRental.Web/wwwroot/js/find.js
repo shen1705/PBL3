@@ -2183,7 +2183,6 @@ async function refreshBookingPrice() {
                     document.getElementById('bookDeliveryFee') && (document.getElementById('bookDeliveryFee').textContent = d.deliveryFee > 0 ? `${d.deliveryFee.toLocaleString('vi-VN')} đ` : 'Miễn phí');
                     document.getElementById('bookTotalPrice') && (document.getElementById('bookTotalPrice').textContent = `${d.priceLockedTotal.toLocaleString('vi-VN')} đ`);
                     document.getElementById('bookDepositPrice') && (document.getElementById('bookDepositPrice').textContent = `${d.depositAmount.toLocaleString('vi-VN')} đ`);
-                    document.getElementById('bookRemainingPrice') && (document.getElementById('bookRemainingPrice').textContent = `${d.remainingAmount.toLocaleString('vi-VN')} đ`);
                     return;
                 }
             }
@@ -2208,7 +2207,6 @@ async function refreshBookingPrice() {
     document.getElementById('bookDeliveryFee') && (document.getElementById('bookDeliveryFee').textContent = delivery > 0 ? `${delivery.toLocaleString('vi-VN')} đ` : 'Miễn phí');
     document.getElementById('bookTotalPrice') && (document.getElementById('bookTotalPrice').textContent = `${total.toLocaleString('vi-VN')} đ`);
     document.getElementById('bookDepositPrice') && (document.getElementById('bookDepositPrice').textContent = `${deposit.toLocaleString('vi-VN')} đ`);
-    document.getElementById('bookRemainingPrice') && (document.getElementById('bookRemainingPrice').textContent = `0 đ (Đã thanh toán đủ)`);
 }
 
 function openBookingModal() {
@@ -2235,17 +2233,6 @@ function openBookingModal() {
     const agreeCheck = document.getElementById('checkAgreeContract');
     if (agreeCheck) {
         agreeCheck.checked = false;
-        agreeCheck.dataset.acceptedByModal = '';
-    }
-    const noticeEl = document.getElementById('contractAgreePromptNotice');
-    if (noticeEl) {
-        noticeEl.innerHTML = '<i class="fa-solid fa-hand-pointer"></i> Nhấp để mở hợp đồng &amp; bấm Xác nhận bên trong (Không thể tích chọn trực tiếp)';
-        noticeEl.style.color = '#b45309';
-    }
-    const wrap = document.getElementById('checkAgreeContractWrapper');
-    if (wrap) {
-        wrap.style.borderColor = '#cbd5e1';
-        wrap.style.background = '#f8fafc';
     }
 
     const sigInput = document.getElementById('bookElectronicSignature');
@@ -2264,13 +2251,13 @@ function openBookingModal() {
         if (bookColTitle) bookColTitle.textContent = 'Miễn thế chấp';
         if (bookColTag) {
             bookColTag.style.background = '#059669';
-            bookColTag.innerHTML = '<i class="fa-solid fa-circle-check"></i> Miễn thế chấp';
+            bookColTag.textContent = 'Miễn thế chấp';
         }
     } else {
         if (bookColTitle) bookColTitle.textContent = 'Yêu cầu thế chấp tài sản';
         if (bookColTag) {
             bookColTag.style.background = '#d97706';
-            bookColTag.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Có yêu cầu thế chấp';
+            bookColTag.textContent = 'Có yêu cầu thế chấp';
         }
     }
 
@@ -2470,36 +2457,14 @@ function closeSampleContractModal() {
     if (modal) modal.hidden = true;
 }
 
-document.getElementById('btnOpenContractModal')?.addEventListener('click', openSampleContractModal);
 document.getElementById('linkOpenSampleContract')?.addEventListener('click', openSampleContractModal);
 document.getElementById('closeSampleContractModal')?.addEventListener('click', closeSampleContractModal);
 document.getElementById('btnCloseSampleContractBottom')?.addEventListener('click', closeSampleContractModal);
-
-// Flaw 4: Do not allow direct checking of contract checkbox; clicking it or its box opens the contract modal
-document.getElementById('checkAgreeContractWrapper')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    openSampleContractModal();
-});
-document.getElementById('checkAgreeContract')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    openSampleContractModal();
-});
 
 document.getElementById('btnAcceptSampleContract')?.addEventListener('click', () => {
     const agreeCheck = document.getElementById('checkAgreeContract');
     if (agreeCheck) {
         agreeCheck.checked = true;
-        agreeCheck.dataset.acceptedByModal = 'true';
-    }
-    const noticeEl = document.getElementById('contractAgreePromptNotice');
-    if (noticeEl) {
-        noticeEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã đồng ý và ký kết hợp đồng thuê xe điện tử';
-        noticeEl.style.color = '#16a34a';
-    }
-    const wrap = document.getElementById('checkAgreeContractWrapper');
-    if (wrap) {
-        wrap.style.borderColor = '#16a34a';
-        wrap.style.background = '#f0fdf4';
     }
     closeSampleContractModal();
 });
@@ -3125,7 +3090,7 @@ document.getElementById('btnConfirmPaymentSimulation')?.addEventListener('click'
                 ? Number(resData.data.depositAmount).toLocaleString('vi-VN') + ' đ'
                 : pendingBookingData.display.deposit;
 
-            alert(`🎉 Thanh toán trực tuyến & Đặt xe thành công!\n\n• Mã đơn: #${bookingId}\n• Ký quỹ Sàn 100%: ${depositFormatted}\n• Đã ký Hợp đồng thuê xe điện tử AZU Car\n\nQuý khách không cần thanh toán tiền thuê tại điểm nhận xe. Hệ thống sẽ chuyển bạn đến trang Quản lý đơn thuê chi tiết!`);
+            alert(`Thanh toán trực tuyến & Đặt xe thành công!\n\n• Mã đơn: #${bookingId}\n• Ký quỹ Sàn 100%: ${depositFormatted}\n• Đã ký Hợp đồng thuê xe điện tử AZU Car\n\nQuý khách không cần thanh toán tiền thuê tại điểm nhận xe. Hệ thống sẽ chuyển bạn đến trang Quản lý đơn thuê chi tiết!`);
 
             window.location.href = `/booking/${bookingId}`;
         } else {
@@ -3161,14 +3126,14 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
         errorBanner.textContent = '';
     }
 
-    // 1. Verify contract agreement checkbox (Must be confirmed inside sample contract modal)
+    // 1. Verify contract agreement checkbox
     const agreeCheck = document.getElementById('checkAgreeContract');
-    if (agreeCheck && (!agreeCheck.checked || !agreeCheck.dataset.acceptedByModal)) {
+    if (agreeCheck && !agreeCheck.checked) {
         if (errorBanner) {
-            errorBanner.textContent = 'Vui lòng mở Hợp đồng thuê xe điện tử và nhấn "Tôi đồng ý & Ký kết" bên trong hợp đồng.';
+            errorBanner.textContent = 'Vui lòng tích chọn đồng ý với Điều khoản và Hợp đồng thuê xe điện tử.';
             errorBanner.style.display = 'block';
         }
-        openSampleContractModal();
+        agreeCheck.focus();
         return;
     }
 

@@ -335,7 +335,7 @@
                     const json = await res.json();
                     if (res.ok && json.isSuccess) {
                         closeUserModal(changePwdModal);
-                        alert('🎉 Đổi mật khẩu tài khoản thành công!');
+                        alert('Đổi mật khẩu tài khoản thành công!');
                     } else {
                         showError(changePwdError, json.message || 'Không thể đổi mật khẩu. Vui lòng kiểm tra lại mật khẩu cũ.');
                     }
