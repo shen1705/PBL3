@@ -30,6 +30,11 @@
                     profileTrigger.setAttribute('aria-expanded', 'true');
                 }
             });
+
+            // Close dropdown immediately when any navigation link inside is clicked
+            profileDropdown.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => closeAllDropdowns());
+            });
         }
 
         if (notifBtn && notifDropdown) {

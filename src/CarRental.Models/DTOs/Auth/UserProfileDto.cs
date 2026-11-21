@@ -13,6 +13,7 @@ public class UserProfileDto
 
     // Driver License
     public bool HasDriverLicense { get; set; }
+    public bool IsDriverLicenseVerified => Claims != null && Claims.Contains(CarRental.Models.Constants.AppClaimTypes.DriverLicenseVerified);
     public string? LicenseNumber { get; set; }
     public string? LicenseClass { get; set; }
     public DateOnly? LicenseExpiryDate { get; set; }

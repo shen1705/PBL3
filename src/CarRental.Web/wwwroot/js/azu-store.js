@@ -12,6 +12,8 @@
         returnTo: 'azuCarReturnTo',
         selectedCar: 'azuCarSelectedCar',
         hasDriverLicense: 'azuCarHasDriverLicense',
+        isDriverLicenseVerified: 'azuCarLicenseVerified',
+        claims: 'azuCarClaims',
         licenseNumber: 'azuCarLicenseNumber',
         licenseClass: 'azuCarLicenseClass',
         licenseExpiryDate: 'azuCarLicenseExpiryDate',
@@ -135,6 +137,36 @@
         syncRoleUi();
     }
 
+    function saveUserData(u) {
+        if (!u) return;
+        const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
+        sessionStorage.setItem(KEYS.name, displayName);
+        sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
+        sessionStorage.setItem(KEYS.username, u.userName || '');
+        sessionStorage.setItem(KEYS.userId, u.userId || '');
+        writeJson(KEYS.roles, u.roles || []);
+        if (u.claims) writeJson(KEYS.claims, u.claims);
+        if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
+        if (u.email) sessionStorage.setItem(KEYS.email, u.email);
+        if (u.hasDriverLicense !== undefined) sessionStorage.setItem(KEYS.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
+        
+        const isVerified = Boolean(
+            u.isDriverLicenseVerified === true ||
+            (Array.isArray(u.claims) && u.claims.includes('DriverLicenseVerified')) ||
+            (u.hasDriverLicense && (u.licenseNumber || sessionStorage.getItem(KEYS.licenseNumber)))
+        );
+        sessionStorage.setItem(KEYS.isDriverLicenseVerified, isVerified ? 'true' : 'false');
+
+        if (u.licenseNumber) sessionStorage.setItem(KEYS.licenseNumber, u.licenseNumber);
+        if (u.licenseClass) sessionStorage.setItem(KEYS.licenseClass, u.licenseClass);
+        if (u.licenseExpiryDate) sessionStorage.setItem(KEYS.licenseExpiryDate, u.licenseExpiryDate);
+        if (u.licenseImageFront) {
+            sessionStorage.setItem(KEYS.licenseImageFront, u.licenseImageFront);
+        } else if (u.hasDriverLicense && u.userName) {
+            sessionStorage.setItem(KEYS.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
+        }
+    }
+
     async function checkAuth() {
         try {
             const res = await fetch('/api/auth/me', {
@@ -145,23 +177,7 @@
                 const data = await res.json();
                 if (data.isSuccess && data.data) {
                     const u = data.data;
-                    const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
-                    sessionStorage.setItem(KEYS.name, displayName);
-                    sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
-                    sessionStorage.setItem(KEYS.username, u.userName || '');
-                    sessionStorage.setItem(KEYS.userId, u.userId);
-                    writeJson(KEYS.roles, u.roles || []);
-                    if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
-                    if (u.email) sessionStorage.setItem(KEYS.email, u.email);
-                    if (u.hasDriverLicense !== undefined) sessionStorage.setItem(KEYS.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
-                    if (u.licenseNumber) sessionStorage.setItem(KEYS.licenseNumber, u.licenseNumber);
-                    if (u.licenseClass) sessionStorage.setItem(KEYS.licenseClass, u.licenseClass);
-                    if (u.licenseExpiryDate) sessionStorage.setItem(KEYS.licenseExpiryDate, u.licenseExpiryDate);
-                    if (u.licenseImageFront) {
-                        sessionStorage.setItem(KEYS.licenseImageFront, u.licenseImageFront);
-                    } else if (u.hasDriverLicense && u.userName) {
-                        sessionStorage.setItem(KEYS.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
-                    }
+                    saveUserData(u);
                     syncHeaderAuth();
                     window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
                     syncRoleUi();
@@ -182,9 +198,11 @@
                 sessionStorage.removeItem(KEYS.username);
                 sessionStorage.removeItem(KEYS.userId);
                 sessionStorage.removeItem(KEYS.roles);
+                sessionStorage.removeItem(KEYS.claims);
                 sessionStorage.removeItem(KEYS.phone);
                 sessionStorage.removeItem(KEYS.email);
                 sessionStorage.removeItem(KEYS.hasDriverLicense);
+                sessionStorage.removeItem(KEYS.isDriverLicenseVerified);
                 sessionStorage.removeItem(KEYS.licenseNumber);
                 sessionStorage.removeItem(KEYS.licenseClass);
                 sessionStorage.removeItem(KEYS.licenseExpiryDate);
@@ -210,23 +228,7 @@
         const data = await res.json();
         if (res.ok && data.isSuccess) {
             const u = data.data;
-            const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
-            sessionStorage.setItem(KEYS.name, displayName);
-            sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
-            sessionStorage.setItem(KEYS.username, u.userName || '');
-            sessionStorage.setItem(KEYS.userId, u.userId);
-            writeJson(KEYS.roles, u.roles || []);
-            if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
-            if (u.email) sessionStorage.setItem(KEYS.email, u.email);
-            if (u.hasDriverLicense !== undefined) sessionStorage.setItem(KEYS.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
-            if (u.licenseNumber) sessionStorage.setItem(KEYS.licenseNumber, u.licenseNumber);
-            if (u.licenseClass) sessionStorage.setItem(KEYS.licenseClass, u.licenseClass);
-            if (u.licenseExpiryDate) sessionStorage.setItem(KEYS.licenseExpiryDate, u.licenseExpiryDate);
-            if (u.licenseImageFront) {
-                sessionStorage.setItem(KEYS.licenseImageFront, u.licenseImageFront);
-            } else if (u.hasDriverLicense && u.userName) {
-                sessionStorage.setItem(KEYS.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
-            }
+            saveUserData(u);
             syncHeaderAuth();
             window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
             syncRoleUi();
@@ -251,23 +253,7 @@
         const data = await res.json();
         if (res.ok && data.isSuccess) {
             const u = data.data;
-            const displayName = (u.fullName && u.fullName.trim()) || u.userName || '';
-            sessionStorage.setItem(KEYS.name, displayName);
-            sessionStorage.setItem(KEYS.fullName, (u.fullName && u.fullName.trim()) || '');
-            sessionStorage.setItem(KEYS.username, u.userName || '');
-            sessionStorage.setItem(KEYS.userId, u.userId);
-            writeJson(KEYS.roles, u.roles || []);
-            if (u.phoneNumber) sessionStorage.setItem(KEYS.phone, u.phoneNumber);
-            if (u.email) sessionStorage.setItem(KEYS.email, u.email);
-            if (u.hasDriverLicense !== undefined) sessionStorage.setItem(KEYS.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
-            if (u.licenseNumber) sessionStorage.setItem(KEYS.licenseNumber, u.licenseNumber);
-            if (u.licenseClass) sessionStorage.setItem(KEYS.licenseClass, u.licenseClass);
-            if (u.licenseExpiryDate) sessionStorage.setItem(KEYS.licenseExpiryDate, u.licenseExpiryDate);
-            if (u.licenseImageFront) {
-                sessionStorage.setItem(KEYS.licenseImageFront, u.licenseImageFront);
-            } else if (u.hasDriverLicense && u.userName) {
-                sessionStorage.setItem(KEYS.licenseImageFront, `/seed/license-${u.userName.toLowerCase()}.jpg`);
-            }
+            saveUserData(u);
             syncHeaderAuth();
             window.dispatchEvent(new CustomEvent('azu:auth-changed', { detail: u }));
             syncRoleUi();
@@ -286,9 +272,11 @@
         sessionStorage.removeItem(KEYS.username);
         sessionStorage.removeItem(KEYS.userId);
         sessionStorage.removeItem(KEYS.roles);
+        sessionStorage.removeItem(KEYS.claims);
         sessionStorage.removeItem(KEYS.phone);
         sessionStorage.removeItem(KEYS.email);
         sessionStorage.removeItem(KEYS.hasDriverLicense);
+        sessionStorage.removeItem(KEYS.isDriverLicenseVerified);
         sessionStorage.removeItem(KEYS.licenseNumber);
         sessionStorage.removeItem(KEYS.licenseClass);
         sessionStorage.removeItem(KEYS.licenseExpiryDate);
@@ -340,6 +328,7 @@
 
     function getUser() {
         const rawRoles = readJson(KEYS.roles, []);
+        const rawClaims = readJson(KEYS.claims, []);
         return {
             userId: sessionStorage.getItem(KEYS.userId) || '',
             name: sessionStorage.getItem(KEYS.fullName) || sessionStorage.getItem(KEYS.name) || '',
@@ -348,11 +337,13 @@
             email: sessionStorage.getItem(KEYS.email) || '',
             phone: sessionStorage.getItem(KEYS.phone) || '',
             hasDriverLicense: sessionStorage.getItem(KEYS.hasDriverLicense) === 'true',
+            isDriverLicenseVerified: sessionStorage.getItem(KEYS.isDriverLicenseVerified) === 'true' || sessionStorage.getItem(KEYS.hasDriverLicense) === 'true',
             licenseNumber: sessionStorage.getItem(KEYS.licenseNumber) || '',
             licenseClass: sessionStorage.getItem(KEYS.licenseClass) || '',
             licenseExpiryDate: sessionStorage.getItem(KEYS.licenseExpiryDate) || '',
             licenseImageFront: sessionStorage.getItem(KEYS.licenseImageFront) || '',
-            roles: Array.isArray(rawRoles) ? rawRoles : []
+            roles: Array.isArray(rawRoles) ? rawRoles : [],
+            claims: Array.isArray(rawClaims) ? rawClaims : []
         };
     }
 

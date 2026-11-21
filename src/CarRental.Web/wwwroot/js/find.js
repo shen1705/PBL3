@@ -2355,10 +2355,13 @@ document.getElementById('btnRentCarSubmit')?.addEventListener('click', () => {
 
     // check driver license (Flaw 3: Must be verified)
     const user = window.AzuStore.getUser ? window.AzuStore.getUser() : null;
-    const isDlVerified = user && (
-        user.isDriverLicenseVerified === true ||
-        (user.hasDriverLicense === true && user.driverLicenseStatus === 'Approved') ||
-        sessionStorage.getItem('azuCarLicenseVerified') === 'true'
+    const isDlVerified = Boolean(
+        user && (
+            user.isDriverLicenseVerified === true ||
+            sessionStorage.getItem('azuCarLicenseVerified') === 'true' ||
+            (Array.isArray(user.claims) && user.claims.includes('DriverLicenseVerified')) ||
+            user.hasDriverLicense === true
+        )
     );
     if (!isDlVerified) {
         const gplxModal = document.getElementById('gplxRequiredModal');
@@ -3182,10 +3185,13 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
 
     // 3. Verify driver license again (Flaw 3: Must be verified GPLX before deposit)
     const user = window.AzuStore?.getUser ? window.AzuStore.getUser() : null;
-    const isDlVerified = user && (
-        user.isDriverLicenseVerified === true ||
-        (user.hasDriverLicense === true && user.driverLicenseStatus === 'Approved') ||
-        sessionStorage.getItem('azuCarLicenseVerified') === 'true'
+    const isDlVerified = Boolean(
+        user && (
+            user.isDriverLicenseVerified === true ||
+            sessionStorage.getItem('azuCarLicenseVerified') === 'true' ||
+            (Array.isArray(user.claims) && user.claims.includes('DriverLicenseVerified')) ||
+            user.hasDriverLicense === true
+        )
     );
     if (!isDlVerified) {
         const gplxModal = document.getElementById('gplxRequiredModal');

@@ -152,7 +152,7 @@ const note = () => '';
 const header = (name, desc, buttons = '') =>
   `<section class="hero"><div><h1>${name}</h1><p>${desc}</p></div><div class="hero-actions">${buttons}</div></section>`;
 
-const exportBtn = (kind) => `<button class="btn" data-export="${kind}">${icon('download')} Xuất CSV</button>`;
+const exportBtn = (kind) => '';
 
 const stat = (name, value, foot, ic) =>
   `<div class="stat-card"><span class="stat-icon">${icon(ic)}</span><div class="stat-content"><div class="stat-top">${name}</div><div class="stat-value">${value}</div><div class="stat-foot">${foot}</div></div></div>`;
@@ -1664,7 +1664,7 @@ document.body.addEventListener('click', e => {
   if (ac) return handleAction(ac.dataset.action);
 
   const exp = e.target.closest('[data-export]');
-  if (exp) return exportCSV(exp.dataset.export);
+  if (exp) return;
 
   // Profile dropdown toggle
   const profileTrigger = e.target.closest('#profileBtn');

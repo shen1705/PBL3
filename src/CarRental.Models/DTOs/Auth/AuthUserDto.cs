@@ -10,6 +10,7 @@ public class AuthUserDto
     public IList<string> Roles { get; set; } = new List<string>();
     public IList<string> Claims { get; set; } = new List<string>();
     public bool HasDriverLicense { get; set; }
+    public bool IsDriverLicenseVerified => Claims != null && Claims.Contains(CarRental.Models.Constants.AppClaimTypes.DriverLicenseVerified);
     public bool IsOwner { get; set; }
     public string? OwnerApprovalStatus { get; set; }
 }

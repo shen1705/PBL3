@@ -569,6 +569,13 @@ async function syncUserProfile() {
                 if (u.phoneNumber) sessionStorage.setItem(accountKeys.phone, u.phoneNumber);
                 if (u.email) sessionStorage.setItem(accountKeys.email, u.email);
                 sessionStorage.setItem(accountKeys.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
+                const isDlVerified = Boolean(
+                    u.isDriverLicenseVerified === true ||
+                    (Array.isArray(u.claims) && u.claims.includes('DriverLicenseVerified')) ||
+                    u.hasDriverLicense === true
+                );
+                sessionStorage.setItem('azuCarLicenseVerified', isDlVerified ? 'true' : 'false');
+                if (u.claims) sessionStorage.setItem('azuCarClaims', JSON.stringify(u.claims));
                 if (u.licenseNumber) sessionStorage.setItem(accountKeys.licenseNumber, u.licenseNumber);
                 if (u.licenseClass) sessionStorage.setItem(accountKeys.licenseClass, u.licenseClass);
                 if (u.licenseExpiryDate) sessionStorage.setItem(accountKeys.licenseExpiryDate, u.licenseExpiryDate);
@@ -656,6 +663,7 @@ licenseForm?.addEventListener('submit', (e) => {
     sessionStorage.setItem(accountKeys.licenseHolder, holder);
     sessionStorage.setItem(accountKeys.licenseBirthday, bday);
     sessionStorage.setItem(accountKeys.hasDriverLicense, 'true');
+    sessionStorage.setItem('azuCarLicenseVerified', 'true');
 
     const userName = sessionStorage.getItem(accountKeys.username) || 'renter1';
     if (!sessionStorage.getItem(accountKeys.licenseImageFront)) {
@@ -869,27 +877,6 @@ async function renderTrips() {
 
         const actionsDiv = document.createElement('div');
         actionsDiv.style.cssText = 'margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
-
-        // 1. Nhận xe (Flaw 1: Modal biên bản bàn giao kèm Odometer, nhiên liệu, thanh toán)
-        if (trip.status === 'Accepted') {
-            const pickupBtn = document.createElement('button');
-            pickupBtn.type = 'button';
-            pickupBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
-            pickupBtn.innerHTML = '<i class="fa-solid fa-key"></i> Bàn giao / Nhận xe';
-            pickupBtn.addEventListener('click', () => {
-                if (window.AzuTripModal?.openHandoverModal) {
-                    window.AzuTripModal.openHandoverModal({
-                        type: 'Pickup',
-                        trip,
-                        isOwner: false,
-                        onSuccess: () => renderTrips()
-                    });
-                } else {
-                    alert('Đang tải mô-đun bàn giao xe, vui lòng thử lại.');
-                }
-            });
-            actionsDiv.appendChild(pickupBtn);
-        }
 
         // 2. Trả xe (Flaw 1: Modal nghiệm thu kèm Odometer, nhiên liệu, phụ phí)
         if (trip.status === 'Ongoing') {

@@ -1012,14 +1012,11 @@ function renderTripDetail(booking, tab = 'overview') {
                 actions = '<button type="button" class="trip-detail-action is-danger" data-trip-detail-action="cancel">Hủy đơn</button>';
             }
         } else if (status === 'Accepted') {
-            const handoverText = isOwner ? 'Mở biên bản bàn giao xe' : 'Mở biên bản nhận xe';
-            title = userConfirmedPickup
-                ? (isOwner ? 'Chờ khách xác nhận nhận xe' : 'Chờ chủ xe hoàn tất bàn giao')
-                : 'Đơn đã được duyệt';
-            description = userConfirmedPickup
-                ? 'Bạn đã xác nhận, chờ bên còn lại hoàn tất.'
-                : (isOwner ? 'Chuẩn bị xe và mở biên bản bàn giao xe để ghi nhận tình trạng.' : 'Kiểm tra xe và mở biên bản nhận xe để xác nhận.');
-            actions = `${userConfirmedPickup ? '' : `<button type="button" class="trip-detail-action is-primary" data-trip-detail-action="handover">${handoverText}</button>`}${canCancel ? '<button type="button" class="trip-detail-action is-danger" data-trip-detail-action="cancel">Hủy đơn</button>' : ''}`;
+            title = 'Đơn đã được duyệt';
+            description = isOwner
+                ? 'Đơn thuê đã được duyệt. Vui lòng chuẩn bị phương tiện theo lịch hẹn.'
+                : 'Đơn thuê đã được duyệt thành công. Vui lòng liên hệ chủ xe để nhận xe theo lịch hẹn.';
+            actions = `${canCancel ? '<button type="button" class="trip-detail-action is-danger" data-trip-detail-action="cancel">Hủy đơn</button>' : ''}`;
         } else if (status === 'Ongoing') {
             const renterConfirmed = handovers.some(item =>
                 String(item.type).toLowerCase() === 'return' && item.confirmedBy === booking.renterId);

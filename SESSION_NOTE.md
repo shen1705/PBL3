@@ -263,10 +263,13 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 [11. Misue Logout Modal Integration & Header Dropdown Hookup] (Hoàn tất 100% - Session 13)
        │
        ▼
-[12. Payment Cards, Full Human License Moderation & AI Text Purge] (Hoàn tất 100% - Session 14) ◄─── (VỪA HOÀN THÀNH)
+[12. Payment Cards, Full Human License Moderation & AI Text Purge] (Hoàn tất 100% - Session 14)
        │
        ▼
-[13. Inspect Deferred Find.cshtml Links (Task 2 - Mục 4) / Favorite Vehicles]
+[13. GPLX Gate Fix, Password Redirect, Payment Card Assets & CSV/Handover Purge] (Hoàn tất 100% - Session 15) ◄─── (VỪA HOÀN THÀNH)
+       │
+       ▼
+[14. Inspect Deferred Find.cshtml Links (Task 2 - Mục 4) / Favorite Vehicles]
 ```
 
 ---
@@ -335,3 +338,37 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 - API `GET /api/vehicles?pageSize=100`: Trả về 17 xe hợp lệ, thời gian phản hồi tức thì.
 - API `GET /api/payment-cards`: Trả về 2 thẻ đã seed của `renter1`, kiểm thử thêm thẻ mới, đặt mặc định và xóa thẻ đều thành công 100%.
 - Git Commits: `0e8178f` (Code), `504e1be` (Docs). Đã push lên nhánh `develop`.
+
+---
+
+## 9. Chi Tiết Session 15: Sửa Mâu Thuẫn GPLX Thuê Xe, Điều Hướng Đổi Mật Khẩu, Khắc Phục Icon/Ảnh Thẻ & Lược Bỏ CSV/Bàn Giao Xe
+
+### Bối cảnh & Yêu cầu:
+1. **Khắc phục mâu thuẫn xác minh GPLX khi thuê xe:** Khách thuê đã được cấp quyền / xác minh GPLX trong CSDL (ví dụ `renter1`) khi bấm "CHỌN THUÊ" trên `/find` lại bị chặn với thông báo chưa xác thực GPLX.
+2. **Menu Header Dropdown "Đổi mật khẩu":** Thay vì mở popup modal, phải chuyển hướng trực tiếp người dùng đến trang đổi mật khẩu: `/account#password`.
+3. **Cập nhật hình ảnh thẻ thanh toán rỗng:** Thay thế khối SVG tự vẽ tại `#payment-card-empty` bằng ảnh PNG chuẩn do người dùng cung cấp (`/images/payment-card-empty.png`).
+4. **Sửa icon nút "Thêm thẻ":** Khắc phục icon bị lỗi ký tự ô vuông có dấu X (`[X]`) do sử dụng class Pro `fa-regular fa-circle-plus` sang `fa-solid fa-plus` chuẩn FontAwesome Free.
+5. **Loại bỏ nút "Biên bản bàn giao xe":** Gỡ bỏ nút "Mở biên bản bàn giao xe" (chủ xe) / "Mở biên bản nhận xe" (khách thuê) khi đơn ở trạng thái Accepted trên trang `MyTrips` và `Account`.
+6. **Loại bỏ toàn bộ tính năng & dịch vụ Xuất CSV:** Gỡ bỏ toàn bộ nút "Xuất CSV" và các hàm xử lý CSV khỏi giao diện Admin (`admin/app.js` và `AZU-Car-Admin-v4.7/app.js`).
+
+### Các thay đổi kỹ thuật chi tiết:
+1. **Đồng bộ trạng thái Giấy phép lái xe (GPLX):**
+   - **Backend DTOs**: Thêm thuộc tính tính toán `public bool IsDriverLicenseVerified => Claims != null && Claims.Contains(AppClaimTypes.DriverLicenseVerified);` vào [UserProfileDto.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Models/DTOs/Auth/UserProfileDto.cs) và [AuthUserDto.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Models/DTOs/Auth/AuthUserDto.cs).
+   - **Store Session**: Cập nhật [azu-store.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/azu-store.js) hàm `checkAuth()`, `login()`, `register()` và `saveUserData()` để tự động lưu cờ `azuCarLicenseVerified` và mảng `azuCarClaims` vào `sessionStorage`. Cập nhật `getUser()` trả về `isDriverLicenseVerified` và `claims`.
+   - **GPLX Gate tại Tìm xe**: Trong [find.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/find.js) (dòng 2358 và 3185), kiểm tra toàn diện `user.isDriverLicenseVerified || sessionStorage.getItem('azuCarLicenseVerified') === 'true' || user.claims.includes('DriverLicenseVerified') || user.hasDriverLicense === true`, đảm bảo tài khoản đã xác thực có thể chuyển sang bước đặt xe ngay lập tức.
+   - **Đồng bộ trang Account**: Cập nhật [account.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/account.js) khi lưu GPLX hoặc gọi `syncUserProfile()` thì tự động cập nhật `azuCarLicenseVerified`.
+2. **Điều hướng Đổi mật khẩu từ Header Dropdown:**
+   - Trong [_Layout.cshtml](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Shared/_Layout.cshtml), đổi thẻ `<button id="btnOpenUserChangePwd">` thành `<a href="/account#password" class="user-dropdown-item" role="menuitem">`.
+   - Trong [user-nav.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/user-nav.js), thêm sự kiện tự động đóng dropdown khi click vào bất kỳ thẻ link `<a>` nào bên trong `#userProfileDropdown`.
+3. **Thay thế hình ảnh Thẻ thanh toán rỗng & Sửa icon Thêm thẻ:**
+   - Trong [Account.cshtml](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Home/Account.cshtml), thay khối SVG 25 dòng bằng thẻ `<img src="~/images/payment-card-empty.png" alt="Chưa có thẻ nào" class="payment-empty-img" style="max-width: 190px; height: auto;" asp-append-version="true">`.
+   - Đổi icon nút `#btn-open-add-card` từ `fa-regular fa-circle-plus` sang `fa-solid fa-plus`, hiển thị dấu cộng sắc nét và đồng bộ với toàn hệ thống.
+4. **Loại bỏ nút Biên bản bàn giao xe khi đơn đã duyệt:**
+   - Trong [mytrips.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/mytrips.js) tại trạng thái `Accepted`, gỡ bỏ nút `data-trip-detail-action="handover"`, cập nhật mô tả rõ ràng: *"Đơn thuê đã được duyệt thành công. Vui lòng liên hệ chủ xe để nhận xe theo lịch hẹn."*, chỉ giữ lại nút "Hủy đơn" khi đủ điều kiện.
+   - Trong [account.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/account.js), gỡ bỏ nút `pickupBtn` ("Bàn giao / Nhận xe") tại `trip.status === 'Accepted'`.
+5. **Loại bỏ toàn bộ Xuất CSV:**
+   - Trong [admin/app.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/admin/app.js) và [AZU-Car-Admin-v4.7/app.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/AZU-Car-Admin-v4.7/app.js): Chuyển `const exportBtn = (kind) => '';`, gỡ bỏ bộ bắt sự kiện `data-export` tải file CSV.
+
+### Kết quả kiểm thử tự động (Verification):
+- `dotnet build`: Succeeded (0 Warning, 0 Error) trong 15.45 giây.
+- Web Application khởi động thành công và phục vụ tại `http://localhost:5051`.
