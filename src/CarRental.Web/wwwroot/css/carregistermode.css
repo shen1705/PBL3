@@ -504,6 +504,28 @@ input {
     overflow-y: auto;
 }
 
+.registration-overlay.wizard-inpage-mode {
+    position: static;
+    inset: auto;
+    z-index: auto;
+    background: transparent;
+    backdrop-filter: none;
+    padding: 32px 16px 64px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 980px;
+    display: flex !important;
+    justify-content: center;
+    overflow-y: visible;
+}
+
+.registration-overlay.wizard-inpage-mode .registration-modal-card {
+    width: 100%;
+    max-height: none;
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
 .registration-modal-card {
     position: relative;
     width: min(940px, 96vw);

@@ -1182,7 +1182,7 @@ function renderTripDetail(booking, tab = 'overview') {
     }
 
     return `<div class="trip-detail-heading">
-        <button class="trip-detail-back" type="button" data-trip-detail-back><i class="fa-solid fa-arrow-left"></i> Quay lại chuyến của tôi</button>
+        <button class="trip-detail-back" type="button" data-trip-detail-back><i class="fa-solid fa-arrow-left"></i> Quay lại lịch sử thuê</button>
         <div class="trip-detail-title-row"><h2>Chi tiết chuyến #${escapeTripHtml(booking.bookingId)}</h2><span class="trip-status" style="background:${badge.bg};color:${badge.color}">${escapeTripHtml(badge.text)}</span></div>
     </div>
     <div class="trip-progress" aria-label="Tiến trình chuyến thuê">${stepMarkup}</div>
