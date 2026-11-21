@@ -253,7 +253,7 @@
                 <div class="azu-tm-trip-info">
                     <div><strong>Phương tiện:</strong> ${carName} ${plate}</div>
                     <div><strong>Đối tác cùng kiểm tra:</strong> ${partnerName}</div>
-                    ${!isPickup && remainingAmount > 0 ? `<div><strong>Tiền thuê còn lại thanh toán tại chỗ:</strong> <span style="color:#059669;font-weight:700;">${remainingAmount.toLocaleString('vi-VN')} đ</span></div>` : ''}
+                    <div><strong>Thanh toán:</strong> <span style="color:#059669;font-weight:700;">Đã ký quỹ 100% qua sàn AZU Car</span></div>
                 </div>
 
                 <form id="azuHandoverForm">
@@ -349,7 +349,7 @@
             const odo = modal.querySelector('#tmOdometer')?.value;
             const fuel = modal.querySelector('#tmFuelLevel')?.value || '100%';
             const notes = modal.querySelector('#tmNotes')?.value.trim() || '';
-            const payMethod = modal.querySelector('#tmPaymentMethod')?.value || 'cash';
+            const payMethod = 'online_escrow_100pct';
 
             // If return, append surcharges to notes if any
             let finalNotes = notes;

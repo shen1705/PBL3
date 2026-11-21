@@ -248,9 +248,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const colType = regCollateralType ? regCollateralType.value : 'none';
                 let colText = 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.';
                 if (colType === 'bike_or_cash') {
-                    colText = 'Yêu cầu thế chấp: Xe máy chính chủ (kèm cà vẹt gốc) HOẶC 15.000.000 đ tiền mặt khi nhận xe.';
+                    colText = 'Yêu cầu ký quỹ bảo chứng trực tuyến qua sàn AZU Car (không giao tiền mặt tại chỗ).';
                 } else if (colType === 'cash_only') {
-                    colText = 'Yêu cầu thế chấp Tiền mặt ký quỹ 15.000.000 đ khi nhận xe.';
+                    colText = 'Yêu cầu ký quỹ điện tử 15.000.000 đ qua sàn AZU Car.';
                 } else if (colType === 'custom') {
                     const customInput = document.getElementById('reg-collateral-custom-text')?.value.trim();
                     colText = customInput || 'Quy định thế chấp riêng theo thỏa thuận với chủ xe.';

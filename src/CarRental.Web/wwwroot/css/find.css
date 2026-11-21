@@ -141,14 +141,17 @@
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease;
+    will-change: transform, box-shadow;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .car-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 30px -6px rgba(0, 0, 0, 0.12), 0 6px 12px -2px rgba(0, 0, 0, 0.04);
 }
 
 .car-img-wrapper {
@@ -880,12 +883,16 @@ body {
     min-width: 0;
     border: 0;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(24, 40, 31, 0.09);
+    box-shadow: 0 4px 12px rgba(24, 40, 31, 0.08);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: transform, box-shadow;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .car-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(24, 40, 31, 0.12);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px -4px rgba(24, 40, 31, 0.14), 0 6px 12px -2px rgba(24, 40, 31, 0.05);
 }
 
 .car-img-wrapper {
@@ -897,15 +904,18 @@ body {
 .car-img-wrapper img {
     display: block;
     object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-
+.car-card:hover .car-img-wrapper img {
+    transform: scale(1.035);
+}
 
 .car-info {
     padding: 10px 12px 10px;
 }
 
-/* Nút Yêu thích trên ảnh xe (Hover & Click toggle phong cách Mioto) */
+/* Nút Yêu thích trên ảnh xe: Nền xanh viền tim trắng (phía trong vẫn xanh) */
 .btn-card-favorite {
     position: absolute;
     top: 10px;
@@ -913,51 +923,57 @@ body {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(15, 23, 42, 0.42);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: #00a550; /* Nền xanh */
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
     color: #ffffff;
-    font-size: 15px;
+    font-size: 14.5px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 5;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0, 165, 80, 0.35);
     padding: 0;
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.9);
-}
-
-/* Chỉ hiện lên khi rê chuột vào bài viết/thẻ xe, hoặc khi xe đã được tim */
-.car-card:hover .btn-card-favorite,
-.btn-card-favorite.is-active {
-    opacity: 1;
-    pointer-events: auto;
+    opacity: 0.92;
     transform: scale(1);
 }
 
+.btn-card-favorite i {
+    color: #ffffff; /* Viền tim trắng, ruột rỗng nhìn thấy màu xanh nền */
+    font-size: 14.5px;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+/* Khi rê chuột vào thẻ xe hoặc nút tim: hiện rõ và scale mượt mà */
+.car-card:hover .btn-card-favorite {
+    opacity: 1;
+    transform: scale(1.06);
+}
+
 .btn-card-favorite:hover {
-    background: #ffffff;
-    color: #00a550;
-    border-color: #d1fae5;
-    transform: scale(1.15);
-    box-shadow: 0 4px 12px rgba(0, 165, 80, 0.3);
+    background: #008f45; /* Vẫn giữ nền xanh */
+    border-color: #ffffff;
+    transform: scale(1.18) !important;
+    box-shadow: 0 4px 14px rgba(0, 165, 80, 0.5);
 }
 
 .btn-card-favorite:hover i {
-    color: #00a550;
+    color: #ffffff;
+    transform: scale(1.1);
 }
 
-/* Khi tim: Nền trắng tim xanh AZU Car */
+/* Khi đã yêu thích (active): Nền xanh viền tim trắng sáng tinh tế */
 .btn-card-favorite.is-active {
-    background: #ffffff;
-    color: #00a550;
-    border-color: #86efac;
-    box-shadow: 0 2px 8px rgba(0, 165, 80, 0.25);
+    opacity: 1;
+    background: #00a550;
+    border-color: #ffffff;
+    box-shadow: 0 3px 12px rgba(0, 165, 80, 0.45);
+}
+
+.btn-card-favorite.is-active i {
+    color: #ffffff;
 }
 
 .btn-card-favorite.is-active i {

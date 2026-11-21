@@ -395,3 +395,35 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 - `dotnet build`: Succeeded (0 Warning, 0 Error).
 - Giao diện Modal đặt xe tinh gọn, chuẩn mực, chuyên nghiệp, không còn các chi tiết gượng ép.
 - Web Application đang phục vụ ổn định tại `http://localhost:5051`.
+
+---
+
+## 11. Chi Tiết Session 17: Xóa Bỏ Triệt Để Thanh Toán Trực Tiếp, Tối Ưu Hover Bài Đăng Mượt Mà & Thiết Kế Lại Nút Tim Nền Xanh Viền Trắng
+
+### Bối cảnh & Yêu cầu:
+1. **Xóa bỏ hoàn toàn thanh toán trực tiếp / tiền mặt khi nhận xe:**
+   - Loại bỏ triệt để toàn bộ tàn dư mã nguồn, giao diện, và DTO liên quan đến "thanh toán tại chỗ", "tiền mặt khi nhận xe", hoặc "thanh toán phần còn lại".
+   - Trong Modal bàn giao xe (`trip-handover-modal.js`), xóa bỏ dòng `Tiền thuê còn lại thanh toán tại chỗ: ...`, thay bằng thông báo xác nhận: *"Đã ký quỹ 100% qua sàn AZU Car"*; gán cứng phương thức thanh toán là `online_escrow_100pct`.
+   - Trong giao diện chi tiết chuyến đi (`mytrips.js`), xóa bỏ hoàn toàn dropdown `<select name="remainingPaymentMethod">` (Tiền mặt / Chuyển khoản) và text hiển thị phương thức tiền mặt trong lịch sử bàn giao; tự động gửi `remainingPaymentMethod: 'online_escrow_100pct'`.
+   - Trong [ConfirmHandoverRequest.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Models/DTOs/Bookings/ConfirmHandoverRequest.cs), đổi giá trị mặc định của `RemainingPaymentMethod` từ `"cash"` thành `"online_escrow"`.
+   - Trong trang Đăng ký xe của chủ xe (`carregistermode.js`), thay thế các văn bản về thế chấp tiền mặt bằng quy định ký quỹ trực tuyến 100% qua sàn AZU Car.
+   - Trong [Find.cshtml](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Home/Find.cshtml), chỉnh sửa thẻ "Quy định tài sản thế chấp" thành "Quy định ký quỹ trực tuyến", xóa bỏ dòng hướng dẫn *"Bạn sẽ giao tài sản thế chấp (nếu có) trực tiếp cho chủ xe..."*, khẳng định rõ: *"Toàn bộ tiền thuê và tiền ký quỹ được bảo chứng trực tuyến 100% qua sàn AZU Car; không giao nhận tiền mặt tại chỗ."*.
+2. **Khắc phục triệt để lỗi ô vuông [X] ở nút "Thêm thẻ" (Payment Cards):**
+   - Trong [Account.cshtml](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Home/Account.cshtml), thay thế icon FontAwesome sang SVG inline `+` (`viewBox="0 0 24 24"`), đảm bảo sắc nét tuyệt đối và không bao giờ bị lỗi missing font glyph `🗙` trên bất kỳ trình duyệt nào.
+3. **Tối ưu hiệu ứng hover bài đăng xe (.car-card) cực kỳ mượt mà:**
+   - Trong [find.css](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/css/find.css), thay thế hiệu ứng chuyển động nhanh 0.2s bị giật bằng bộ thông số mượt mà phong cách ứng dụng cao cấp:
+     - `transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)`
+     - `will-change: transform, box-shadow`
+     - `transform: translateY(-6px)` kết hợp độ sâu bóng đổ mềm mại đa tầng: `box-shadow: 0 16px 32px -4px rgba(24, 40, 31, 0.14), 0 6px 12px -2px rgba(24, 40, 31, 0.05)`
+     - Thêm hiệu ứng phóng to nhẹ nhàng cho hình ảnh xe: `.car-card:hover .car-img-wrapper img { transform: scale(1.035); }` với `transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)`.
+4. **Đổi lại nút icon tim yêu thích: Nền xanh viền tim trắng (phía trong vẫn xanh):**
+   - Trong [find.css](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/css/find.css) tại `.btn-card-favorite`:
+     - Nền nút: Màu xanh lá thương hiệu chuẩn sàn (`background: #00a550`).
+     - Viền tim: Màu trắng (`color: #ffffff;` với icon outline `fa-regular fa-heart`).
+     - Phía trong lòng trái tim: Vẫn hiển thị màu xanh đồng nhất với nền nút (ruột rỗng nhìn xuyên qua nền xanh).
+     - Rê chuột vào bài đăng: Nút tim hiện rõ với độ mờ 1 và scale 1.06 mượt mà.
+     - Rê chuột trực tiếp vào nút tim: Đổi nhẹ sang `#008f45`, scale 1.18 êm ái, bóng đổ tỏa sáng xanh tinh tế.
+
+### Kết quả kiểm thử tự động (Verification):
+- `dotnet build --no-incremental`: Succeeded (0 Warning, 0 Error).
+- Đã giải phóng hoàn toàn tiến trình server nền (không chạy ngầm) theo đúng mong muốn của người dùng để người dùng tự do chạy lệnh run của mình.

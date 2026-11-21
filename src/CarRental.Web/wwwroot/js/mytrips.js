@@ -986,13 +986,12 @@ function renderTripDetail(booking, tab = 'overview') {
         const formMarkup = allowed && !userConfirmation ? `<form class="trip-handover-form" data-handover-form="${action}">
             <label>Số công-tơ-mét (km)<input name="odometer" type="number" min="0" inputmode="numeric" placeholder="Không bắt buộc"></label>
             <label>Mức nhiên liệu<select name="fuelLevel"><option value="">Chọn mức</option><option>1/4 bình</option><option>1/2 bình</option><option>3/4 bình</option><option>Đầy bình</option></select></label>
-            <label>Thanh toán phần còn lại<select name="remainingPaymentMethod"><option value="cash">Tiền mặt</option><option value="transfer">Chuyển khoản</option></select></label>
             <label class="trip-handover-notes">Ghi chú tình trạng<textarea name="notes" maxlength="1000" rows="2" placeholder="Không bắt buộc"></textarea></label>
             <button type="button" class="trip-detail-action is-primary" data-trip-detail-action="${action}">Xác nhận ${actionButtonText}</button>
         </form>` : '';
         return `<article class="trip-handover-card">
             <div class="trip-detail-title-row"><h3>${title}</h3><span class="trip-detail-state ${userConfirmation ? 'is-done' : ''}">${statusText}</span></div>
-            ${confirmations.length ? confirmations.map(item => `<p>${escapeTripHtml(item.confirmerName || 'Thành viên')} · ${escapeTripHtml(formatTripDate(item.confirmedAt, true))}${item.odometer != null ? ` · ${escapeTripHtml(item.odometer)} km` : ''}${item.fuelLevel ? ` · ${escapeTripHtml(item.fuelLevel)}` : ''}${item.remainingPaymentMethod ? ` · ${item.remainingPaymentMethod === 'transfer' ? 'Chuyển khoản' : 'Tiền mặt'}` : ''}</p>${item.notes ? `<p>${escapeTripHtml(item.notes)}</p>` : ''}`).join('') : '<p>Chưa có xác nhận.</p>'}
+            ${confirmations.length ? confirmations.map(item => `<p>${escapeTripHtml(item.confirmerName || 'Thành viên')} · ${escapeTripHtml(formatTripDate(item.confirmedAt, true))}${item.odometer != null ? ` · ${escapeTripHtml(item.odometer)} km` : ''}${item.fuelLevel ? ` · ${escapeTripHtml(item.fuelLevel)}` : ''} · Ký quỹ sàn 100%</p>${item.notes ? `<p>${escapeTripHtml(item.notes)}</p>` : ''}`).join('') : '<p>Chưa có xác nhận.</p>'}
             ${formMarkup}
         </article>`;
     };
@@ -1241,7 +1240,7 @@ async function handleTripDetailAction(action, button) {
             odometer: odometerValue ? Number(odometerValue) : null,
             fuelLevel: form?.elements.namedItem('fuelLevel')?.value || null,
             notes: form?.elements.namedItem('notes')?.value.trim() || null,
-            remainingPaymentMethod: form?.elements.namedItem('remainingPaymentMethod')?.value || 'cash'
+            remainingPaymentMethod: 'online_escrow_100pct'
         };
     } else if (action === 'cancel') {
         if (window.AzuTripModal?.openCancelBookingModal) {

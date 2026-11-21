@@ -16,6 +16,6 @@ public class ConfirmHandoverRequest
     [MaxLength(1000)]
     public string? Notes { get; set; }
 
-    [MaxLength(20)]
-    public string? RemainingPaymentMethod { get; set; } = "cash"; // "cash" / "transfer"
+    [MaxLength(30)]
+    public string? RemainingPaymentMethod { get; set; } = "online_escrow"; // 100% online escrow via AZU Car
 }
