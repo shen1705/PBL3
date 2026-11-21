@@ -52,7 +52,7 @@ function toggleFavoriteCar(carId, btnEl) {
         btnEl.classList.toggle('is-active', isNowFav);
         btnEl.title = isNowFav ? 'Bỏ yêu thích' : 'Thêm vào yêu thích';
         btnEl.setAttribute('aria-label', isNowFav ? 'Bỏ yêu thích' : 'Thêm vào yêu thích');
-        btnEl.innerHTML = isNowFav ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>';
+        btnEl.innerHTML = '<i class="fa-regular fa-heart"></i>';
 
         btnEl.style.transform = 'scale(1.25)';
         setTimeout(() => { btnEl.style.transform = ''; }, 200);
@@ -75,7 +75,7 @@ function createFavoriteButton(carId) {
         btn.classList.add('is-active');
         btn.title = 'Bỏ yêu thích';
         btn.setAttribute('aria-label', 'Bỏ yêu thích');
-        btn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+        btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
     } else {
         btn.title = 'Thêm vào yêu thích';
         btn.setAttribute('aria-label', 'Thêm vào yêu thích');
