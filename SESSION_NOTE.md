@@ -16,10 +16,50 @@
 - **Session 5 (End-to-End Car Rental Lifecycle):** Hoàn tất vòng đời thuê xe: `Accepted` -> `Ongoing` (Nhận xe / Pickup Handover) -> `Completed` (Trả xe / Return Handover, thanh toán 75% còn lại, trích 5% hoa hồng sàn AZU Car và ghi nhận 95% thu nhập ròng cho chủ xe, chuyển cọc `DepositHold`). Đánh giá 2 chiều (1 - 5 sao), báo cáo doanh thu chủ xe. Nhánh `feature/car-rental-lifecycle`.
 - **Session 6 (Admin & Staff Account Management):** Quản lý tài khoản người dùng (`/admin/users.html`), chế tài vi phạm (`Suspend7d`, `Suspend30d`, `Ban`), mở khóa, phân quyền vai trò. Đồng bộ số liệu thực tế từ Database vào Dashboard Quản trị và điều hướng trực tiếp Admin/Staff khi đăng nhập. Nhánh `feature/admin-account-management`.
 - **Session 7 (Owner Vehicle Synchronization & Ownership Display):** Sửa lỗi danh sách xe của chủ xe (`/api/vehicles/my-cars`), gắn huy hiệu `Xe của bạn` và phân quyền quản lý xe khi xem bài đăng của chính mình, hoàn thiện quy trình đăng ký xe mới gửi `POST /api/vehicles`.
+- **Session 8 (HCI Refactoring & Mioto-Style UI/UX Enhancements):** Tinh giản bộ lọc `/find`, chuyển đổi đăng ký xe thành In-Page Wizard, đồng bộ vai trò "Lịch sử thuê", tái thiết kế thẻ xe Mioto-style, hover tim trắng-xanh, làm sạch giao diện Admin và bổ sung hồ sơ pháp lý (cà vẹt, đăng kiểm, bảo hiểm) trong modal duyệt xe. Commit `9a7deb4`.
 
 ---
 
-## 2. Chi Tiết Phiên Làm Việc (Session 8: Tái Cấu Trúc Giao Diện Theo Chuẩn HCI & Thiết Kế Thẻ Xe Mioto-Style)
+## 2. Chi Tiết Phiên Làm Việc (Session 9: Đồng Bộ 100% Dữ Liệu Bài Đăng & Xử Lý Triệt Để 4 Flaws Quy Trình)
+
+Phiên làm việc này giải quyết các khiếm khuyết hệ thống về việc thiếu đồng bộ thông tin và bất đối xứng quy trình trong toàn bộ vòng đời thuê xe (Đăng ký $\rightarrow$ Duyệt $\rightarrow$ Đặt cọc $\rightarrow$ Bàn giao $\rightarrow$ Trả xe & Hủy chuyến):
+
+### 2.1. Đồng bộ 100% Thông tin Đăng ký xe $\rightarrow$ Admin $\rightarrow$ Chi tiết bài đăng (`/find`)
+1. **Mở rộng Wizard đăng ký xe (`CarRegisterMode.cshtml`, `carregistermode.js`, `carregistermode.css`):**
+   - Bổ sung **Bước 3: Thiết lập Chính sách, Phụ phí & Tiện nghi** trước khi gửi hồ sơ:
+     - **Tài sản thế chấp:** Miễn thế chấp / Xe máy kèm cà vẹt gốc hoặc Tiền mặt 15 triệu / Tiền mặt ký quỹ / Tùy chỉnh quy định riêng.
+     - **Biểu phụ phí phát sinh:** Giới hạn quãng đường (km/ngày), Phí vượt giới hạn (đ/km), Phí quá giờ (đ/h), Phí vệ sinh xe bẩn (đ), Phí khử mùi hôi (đ).
+     - **Tiện nghi xe:** Checkbox Bản đồ, Bluetooth, Camera lùi, Cam hành trình, Cảm biến va chạm, GPS, Ghế trẻ em, Khe cắm USB, Túi khí an toàn, Cửa sổ trời...
+     - **Điều khoản riêng:** Textarea các quy định bắt buộc (Không hút thuốc, giữ vệ sinh, không chở hàng cấm...).
+   - Đóng gói dữ liệu cấu hình vào metadata mô tả xe (`VehicleListing.Description`) và lưu trữ đồng bộ client-side.
+2. **Nâng cấp Modal kiểm duyệt tin đăng Admin (`admin/app.js`):**
+   - Modal `showDetail('listing', id)` giải mã đầy đủ khối metadata chính sách để Quản trị viên duyệt: Hiển thị rõ ràng Chính sách thế chấp, Bảng phụ phí đã thiết lập, Tiện nghi xe trang bị và Điều khoản riêng của chủ xe.
+3. **Đồng bộ hóa Modal xem chi tiết xe (`find.js`):**
+   - Hàm `loadCustomListingAttributes(vehicleId)` phân tích metadata từ bài đăng xe thực tế để hiển thị đúng biểu phí, điều khoản, thế chấp và danh mục tiện nghi của chiếc xe đó thay vì hiển thị dữ liệu mẫu mặc định.
+
+### 2.2. Giải quyết triệt để 4 Systemic Flaws theo yêu cầu người dùng
+1. **Flaw 1 (Bàn giao xe - Handover Confirmation):**
+   - Xây dựng mô-đun độc lập `trip-handover-modal.js` và nhúng toàn cục qua `_Layout.cshtml`.
+   - Thay thế hoàn toàn các hộp thoại `confirm()` sơ sài bằng Modal ký biên bản bàn giao điện tử chuyên nghiệp:
+     - **Nhận xe (Pickup):** Nhập số Odometer khởi điểm, Mức nhiên liệu/Pin (100%, 7/8, 3/4...), Phương thức thanh toán 75% còn lại (tiền mặt / chuyển khoản), Ghi chú trầy xước/hiện trạng và Checkbox cam kết đồng kiểm.
+     - **Trả xe (Return):** Nhập số Odometer kết thúc, Mức nhiên liệu/Pin lúc trả, Nhập bảng phụ phí phát sinh (quá km, trễ giờ, rửa xe, khử mùi), Ghi chú nghiệm thu và Checkbox cam kết hoàn tất.
+   - Tích hợp đồng bộ trên `account.js`, `mytrips.js` và `become-owner.js`.
+2. **Flaw 2 (Booking Wizard - Collateral Acknowledgment):**
+   - Thêm thẻ cảnh báo nổi bật **Quy định tài sản thế chấp khi nhận xe** (`.booking-collateral-alert-card`) ngay trong form đặt xe trên `Find.cshtml` / `find.js`.
+   - Hiển thị rõ ràng hình thức thế chấp của chiếc xe (Miễn thế chấp hoặc Xe máy/15 triệu tiền mặt) cùng hướng dẫn nhận lại tài sản khi trả xe, giải quyết triệt để bất ngờ/tranh chấp khi nhận xe.
+3. **Flaw 3 (Driver License Guard Before Deposit):**
+   - Thắt chặt kiểm tra tính hợp lệ và trạng thái duyệt của GPLX (`isDriverLicenseVerified` / `Approved`): Nếu chưa tải lên hoặc chưa được xác thực, hệ thống chặn mở mô phỏng thanh toán cọc 25% và hiển thị modal cảnh báo `gplxRequiredModal` dẫn đường trực tiếp về trang cập nhật GPLX.
+4. **Flaw 4 (Cảnh báo phạt hủy chuyến 8% & Cơ chế chấp thuận Hợp đồng):**
+   - **Cơ chế Checkbox Hợp đồng:** Checkbox `#checkAgreeContract` không cho phép tích chọn trực tiếp (`pointer-events: none`). Nhấp vào ô hoặc nhãn sẽ tự động mở Modal Hợp đồng thuê xe điện tử (`sampleContractModal`). Nút xác nhận "Tôi đồng ý & Ký kết" nằm bên trong modal; khi người dùng xác nhận trong modal thì checkbox mới được đánh dấu hợp lệ.
+   - **Modal Cảnh báo Hủy chuyến (`openCancelBookingModal`):**
+     - Đơn chờ duyệt: Thông báo hoàn cọc 100%.
+     - Khách hủy đơn đã duyệt: Cảnh báo mất toàn bộ 25% tiền cọc bồi thường chi phí giữ lịch.
+     - Chủ xe hủy đơn đã duyệt: Cảnh báo hoàn cọc 100% cho khách và **bị phạt 8% giá trị đơn thuê** theo quy chế sàn.
+     - Lựa chọn lý do hủy có cấu trúc và nút xác nhận có màu cảnh báo nguy cơ tài chính.
+
+---
+
+## 3. Tổng Quan Lại Các Phiên Cũ (Session 8)
 
 Phiên làm việc này tập trung tối ưu hóa trải nghiệm người dùng (UX) và giao diện người - máy (HCI) dựa trên tài liệu môn học (`DinhHuongGiaoDien.pdf` và cuốn *Designing Interfaces* của Jenifer Tidwell), đồng thời hoàn thiện thiết kế thẻ bài đăng xe tham chiếu chuẩn từ nền tảng Mioto.
 

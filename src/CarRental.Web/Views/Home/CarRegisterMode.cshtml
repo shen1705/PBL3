@@ -74,7 +74,7 @@
                             <div class="reg-step-badge">
                                 <i class="fa-regular fa-rectangle-list"></i>
                             </div>
-                            <span class="reg-step-label">Điền thông tin xe</span>
+                            <span class="reg-step-label">Thông tin cơ bản xe</span>
                         </div>
 
                         <!-- Bước 2 -->
@@ -82,23 +82,23 @@
                             <div class="reg-step-badge">
                                 <i class="fa-regular fa-image"></i>
                             </div>
-                            <span class="reg-step-label">Đăng tải hình ảnh xe</span>
+                            <span class="reg-step-label">Hình ảnh &amp; Giấy tờ</span>
                         </div>
 
                         <!-- Bước 3 -->
                         <div class="reg-step-item" data-step="3" role="button" tabindex="0">
                             <div class="reg-step-badge">
-                                <i class="fa-regular fa-comment-dots"></i>
+                                <i class="fa-solid fa-file-contract"></i>
                             </div>
-                            <span class="reg-step-label">AZU Car tư vấn chủ xe và duyệt xe</span>
+                            <span class="reg-step-label">Chính sách &amp; Phụ phí</span>
                         </div>
 
                         <!-- Bước 4 -->
                         <div class="reg-step-item" data-step="4" role="button" tabindex="0">
                             <div class="reg-step-badge">
-                                <i class="fa-solid fa-car-side"></i>
+                                <i class="fa-solid fa-clipboard-check"></i>
                             </div>
-                            <span class="reg-step-label">Bắt đầu cho thuê</span>
+                            <span class="reg-step-label">Hoàn tất &amp; Gửi duyệt</span>
                         </div>
                     </nav>
 
@@ -267,20 +267,166 @@
                             <button class="btn-step-prev" type="button" data-prev="1">
                                 <i class="fa-solid fa-arrow-left"></i> Quay lại
                             </button>
-                            <button class="btn-step-next" type="button" id="btn-submit-registration">
-                                Gửi hồ sơ đăng ký xe <i class="fa-solid fa-check"></i>
+                            <button class="btn-step-next" type="button" id="btn-to-step-3">
+                                Tiếp tục: Chính sách &amp; Phụ phí <i class="fa-solid fa-arrow-right"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Bước 3 -->
+                    <!-- BƯỚC 3: Thiết lập Chính sách, Phụ phí & Tiện nghi xe -->
                     <div class="reg-step-pane" id="pane-step-3" hidden>
+                        <div class="pane-header">
+                            <h4>Bước 3: Thiết lập Chính sách, Phụ phí &amp; Tiện nghi</h4>
+                            <p>Tùy chỉnh minh bạch quy định thế chấp, phụ phí và trang bị trên xe để hiển thị chính xác trong bài đăng.</p>
+                        </div>
+
+                        <form id="form-step-3">
+                            <!-- 1. Chính sách thế chấp -->
+                            <div class="reg-policy-card">
+                                <div class="reg-policy-card-title">
+                                    <i class="fa-solid fa-shield-halved" style="color: #00a550;"></i>
+                                    <h5>1. Yêu cầu Tài sản thế chấp khi nhận xe</h5>
+                                </div>
+                                <p class="reg-policy-card-desc">Khách thuê sẽ chuẩn bị tài sản này để giao cho bạn tại thời điểm nhận xe và nhận lại khi hoàn tất chuyến.</p>
+                                
+                                <div class="form-group" style="margin-bottom: 12px;">
+                                    <label for="reg-collateral-type">Hình thức yêu cầu thế chấp <span class="required">*</span></label>
+                                    <select id="reg-collateral-type" required>
+                                        <option value="none" selected>Miễn thế chấp (Khách không cần đặt cọc tiền mặt hoặc xe máy)</option>
+                                        <option value="bike_or_cash">Xe máy chính chủ (kèm cà vẹt gốc) HOẶC 15.000.000 đ tiền mặt</option>
+                                        <option value="cash_only">Tiền mặt ký quỹ (15.000.000 đ)</option>
+                                        <option value="custom">Quy định thế chấp riêng...</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group" id="reg-collateral-custom-wrap" style="display: none;">
+                                    <label for="reg-collateral-custom-text">Nội dung quy định thế chấp riêng <span class="required">*</span></label>
+                                    <input id="reg-collateral-custom-text" type="text" placeholder="Ví dụ: Xe máy trị giá > 20 triệu hoặc 20.000.000 đ">
+                                </div>
+                            </div>
+
+                            <!-- 2. Giới hạn quãng đường & Phụ phí -->
+                            <div class="reg-policy-card" style="margin-top: 18px;">
+                                <div class="reg-policy-card-title">
+                                    <i class="fa-solid fa-receipt" style="color: #00a550;"></i>
+                                    <h5>2. Giới hạn quãng đường &amp; Bảng phụ phí phát sinh</h5>
+                                </div>
+                                <p class="reg-policy-card-desc">Thiết lập biểu phí phát sinh khi khách trả xe quá giờ, vượt quãng đường hoặc làm bẩn xe.</p>
+
+                                <div class="form-row-2">
+                                    <div class="form-group">
+                                        <label for="reg-fee-limit-km">Giới hạn quãng đường (km / ngày)</label>
+                                        <input id="reg-fee-limit-km" type="number" min="100" max="1000" step="50" value="300" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-fee-limit-cost">Phí vượt giới hạn (VNĐ / km)</label>
+                                        <input id="reg-fee-limit-cost" type="number" min="1000" max="20000" step="500" value="3000" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-row-3">
+                                    <div class="form-group">
+                                        <label for="reg-fee-overtime">Phí quá giờ (VNĐ / giờ)</label>
+                                        <input id="reg-fee-overtime" type="number" min="20000" max="300000" step="10000" value="70000" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-fee-clean">Phí vệ sinh xe bẩn (VNĐ)</label>
+                                        <input id="reg-fee-clean" type="number" min="30000" max="300000" step="10000" value="80000" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="reg-fee-deodor">Phí khử mùi hôi/hút thuốc (VNĐ)</label>
+                                        <input id="reg-fee-deodor" type="number" min="100000" max="1000000" step="50000" value="500000" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Tiện nghi trang bị trên xe -->
+                            <div class="reg-policy-card" style="margin-top: 18px;">
+                                <div class="reg-policy-card-title">
+                                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #00a550;"></i>
+                                    <h5>3. Tiện nghi &amp; Trang bị trên xe</h5>
+                                </div>
+                                <p class="reg-policy-card-desc">Tích chọn các trang thiết bị thực tế đang có sẵn trên chiếc xe của bạn:</p>
+
+                                <div class="amenities-checkbox-grid">
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Bản đồ" checked>
+                                        <span><i class="fa-solid fa-map-location-dot"></i> Bản đồ dẫn đường</span>
+                                    </label>
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Bluetooth" checked>
+                                        <span><i class="fa-brands fa-bluetooth-b"></i> Bluetooth</span>
+                                    </label>
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Camera lùi" checked>
+                                        <span><i class="fa-solid fa-camera"></i> Camera lùi</span>
+                                    </label>
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Camera hành trình" checked>
+                                        <span><i class="fa-solid fa-video"></i> Camera hành trình</span>
+                                    </label>
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Cảm biến va chạm" checked>
+                                        <span><i class="fa-solid fa-satellite-dish"></i> Cảm biến va chạm</span>
+                                    </label>
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Định vị GPS" checked>
+                                        <span><i class="fa-solid fa-location-crosshairs"></i> Định vị GPS</span>
+                                    </label>
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Ghế trẻ em">
+                                        <span><i class="fa-solid fa-child"></i> Ghế trẻ em</span>
+                                    </label>
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Khe cắm USB" checked>
+                                        <span><i class="fa-solid fa-usb"></i> Khe cắm USB</span>
+                                    </label>
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Túi khí an toàn" checked>
+                                        <span><i class="fa-solid fa-shield-heart"></i> Túi khí an toàn</span>
+                                    </label>
+                                    <label class="amenity-checkbox-label">
+                                        <input type="checkbox" name="amenity" value="Cửa sổ trời">
+                                        <span><i class="fa-solid fa-sun"></i> Cửa sổ trời</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 4. Điều khoản riêng của chủ xe -->
+                            <div class="reg-policy-card" style="margin-top: 18px;">
+                                <div class="reg-policy-card-title">
+                                    <i class="fa-solid fa-gavel" style="color: #00a550;"></i>
+                                    <h5>4. Quy định &amp; Điều khoản riêng của bạn</h5>
+                                </div>
+                                <p class="reg-policy-card-desc">Các yêu cầu riêng biệt mà khách thuê bắt buộc phải tuân thủ (mỗi dòng một điều khoản):</p>
+                                
+                                <div class="form-group">
+                                    <textarea id="reg-custom-terms" rows="4" placeholder="Nhập các điều khoản riêng...">• Sử dụng xe đúng mục đích, không vi phạm pháp luật giao thông.
+• Nghiêm cấm hút thuốc lá, thuốc lá điện tử hoặc xả rác bừa bãi trong khoang xe.
+• Không vận chuyển hàng cấm, vũ khí, chất cháy nổ hoặc động vật, thực phẩm có mùi tanh.
+• Vui lòng giữ gìn xe sạch sẽ và hoàn trả đúng hẹn theo hợp đồng.</textarea>
+                                </div>
+                            </div>
+
+                            <div class="pane-actions" style="margin-top: 24px;">
+                                <button class="btn-step-prev" type="button" data-prev="2">
+                                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+                                </button>
+                                <button class="btn-step-next" type="button" id="btn-submit-registration">
+                                    Gửi hồ sơ đăng ký xe <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- BƯỚC 4: Kết quả gửi duyệt & Thẩm định -->
+                    <div class="reg-step-pane" id="pane-step-4" hidden>
                         <div class="review-status-card">
                             <div class="status-pulse-circle">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
                             </div>
                             <h4>Hồ sơ đăng ký xe đã được gửi thành công!</h4>
-                            <p class="review-lead">Đội ngũ AZU Car đang tiến hành thẩm định và sẽ sớm liên hệ hỗ trợ bạn.</p>
+                            <p class="review-lead">Đội ngũ AZU Car đang tiến hành thẩm định thông tin và biểu phí của xe để hiển thị công khai trên ứng dụng.</p>
 
                             <div class="review-summary-box">
                                 <div class="summary-item">
@@ -296,6 +442,10 @@
                                     <strong id="summary-owner-name">Nguyễn Văn A</strong>
                                 </div>
                                 <div class="summary-item">
+                                    <span class="summary-label">Thế chấp áp dụng:</span>
+                                    <strong id="summary-collateral">Miễn thế chấp</strong>
+                                </div>
+                                <div class="summary-item">
                                     <span class="summary-label">Trạng thái hồ sơ:</span>
                                     <span class="status-badge-pending"><i class="fa-solid fa-spinner fa-spin"></i> Chờ duyệt (Pending)</span>
                                 </div>
@@ -304,7 +454,7 @@
                             <div class="review-checklist">
                                 <div class="check-row done">
                                     <i class="fa-solid fa-circle-check"></i>
-                                    <span>Tiếp nhận thông tin xe &amp; hình ảnh kiểm định</span>
+                                    <span>Tiếp nhận thông tin xe, hình ảnh kiểm định &amp; chính sách phụ phí</span>
                                 </div>
                                 <div class="check-row pending">
                                     <i class="fa-regular fa-clock"></i>
@@ -312,48 +462,13 @@
                                 </div>
                                 <div class="check-row">
                                     <i class="fa-regular fa-circle"></i>
-                                    <span>Kích hoạt gói bảo hiểm chuyến đi MIC toàn diện</span>
-                                </div>
-                            </div>
-
-                            <div class="pane-actions center-actions">
-                                <button class="btn-step-next" type="button" id="btn-to-step-4">
-                                    Xem bước tiếp theo <i class="fa-solid fa-arrow-right"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- BƯỚC 4: Bắt đầu cho thuê -->
-                    <div class="reg-step-pane" id="pane-step-4" hidden>
-                        <div class="ready-status-card">
-                            <div class="ready-icon-circle">
-                                <i class="fa-solid fa-circle-check"></i>
-                            </div>
-                            <h4>Chào mừng bạn đến với cộng đồng chủ xe AZU Car!</h4>
-                            <p class="ready-lead">Xe của bạn đã sẵn sàng được niêm yết đón những hành khách đầu tiên.</p>
-
-                            <div class="benefits-grid">
-                                <div class="benefit-card">
-                                    <i class="fa-solid fa-calendar-check"></i>
-                                    <h5>Chủ động lịch xe</h5>
-                                    <p>Bật/tắt lịch cho thuê linh hoạt theo thời gian rảnh rỗi của bạn.</p>
-                                </div>
-                                <div class="benefit-card">
-                                    <i class="fa-solid fa-shield-halved"></i>
-                                    <h5>Bảo vệ toàn diện</h5>
-                                    <p>100% chuyến xe được định vị GPS và bảo hiểm vật chất chuyến đi.</p>
-                                </div>
-                                <div class="benefit-card">
-                                    <i class="fa-solid fa-wallet"></i>
-                                    <h5>Thu nhập minh bạch</h5>
-                                    <p>Tiền thuê chuyển trực tiếp vào tài khoản ngân hàng sau mỗi chuyến.</p>
+                                    <span>Kích hoạt gói bảo hiểm chuyến đi MIC toàn diện &amp; đưa xe lên sàn</span>
                                 </div>
                             </div>
 
                             <div class="pane-actions center-actions">
                                 <a href="/become-owner#danh-sach-xe-content" class="btn-finish-reg">
-                                    <i class="fa-solid fa-car"></i> Đến trang Quản lý xe
+                                    <i class="fa-solid fa-car"></i> Đến trang Quản lý xe của tôi
                                 </a>
                             </div>
                         </div>

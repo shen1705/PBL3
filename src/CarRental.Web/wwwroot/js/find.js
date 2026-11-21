@@ -2230,15 +2230,48 @@ function openBookingModal() {
     if (emailInput) emailInput.value = savedEmail;
     if (idInput && !idInput.value && savedId) idInput.value = savedId;
 
-    // reset contract & signature
+    // reset contract & signature (Flaw 4)
     const agreeCheck = document.getElementById('checkAgreeContract');
-    if (agreeCheck) agreeCheck.checked = false;
+    if (agreeCheck) {
+        agreeCheck.checked = false;
+        agreeCheck.dataset.acceptedByModal = '';
+    }
+    const noticeEl = document.getElementById('contractAgreePromptNotice');
+    if (noticeEl) {
+        noticeEl.innerHTML = '<i class="fa-solid fa-hand-pointer"></i> Nhấp để mở hợp đồng &amp; bấm Xác nhận bên trong (Không thể tích chọn trực tiếp)';
+        noticeEl.style.color = '#b45309';
+    }
+    const wrap = document.getElementById('checkAgreeContractWrapper');
+    if (wrap) {
+        wrap.style.borderColor = '#cbd5e1';
+        wrap.style.background = '#f8fafc';
+    }
 
     const sigInput = document.getElementById('bookElectronicSignature');
     if (sigInput) sigInput.value = savedName === 'Người dùng' ? '' : savedName;
 
     const contractCode = document.getElementById('contractTempCode');
     if (contractCode) contractCode.textContent = Date.now().toString().slice(-8);
+
+    // Collateral requirement acknowledgment (Flaw 2)
+    const colText = document.getElementById('popupCarCollateralText')?.textContent?.trim() || 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.';
+    const bookColText = document.getElementById('bookCollateralText');
+    const bookColTitle = document.getElementById('bookCollateralTitle');
+    const bookColTag = document.getElementById('bookCollateralTag');
+    if (bookColText) bookColText.textContent = colText;
+    if (colText.includes('Không yêu cầu') || colText.includes('Miễn thế chấp')) {
+        if (bookColTitle) bookColTitle.textContent = 'Miễn thế chấp';
+        if (bookColTag) {
+            bookColTag.style.background = '#059669';
+            bookColTag.innerHTML = '<i class="fa-solid fa-circle-check"></i> Miễn thế chấp';
+        }
+    } else {
+        if (bookColTitle) bookColTitle.textContent = 'Yêu cầu thế chấp tài sản';
+        if (bookColTag) {
+            bookColTag.style.background = '#d97706';
+            bookColTag.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Có yêu cầu thế chấp';
+        }
+    }
 
     // booking summary
     const thumbEl = document.getElementById('bookCarThumb');
@@ -2319,15 +2352,19 @@ document.getElementById('btnRentCarSubmit')?.addEventListener('click', () => {
         return;
     }
 
-    // check driver license
+    // check driver license (Flaw 3: Must be verified)
     const user = window.AzuStore.getUser ? window.AzuStore.getUser() : null;
-    const hasDl = user && (user.hasDriverLicense === true || sessionStorage.getItem('azuCarHasDriverLicense') === 'true');
-    if (!hasDl) {
+    const isDlVerified = user && (
+        user.isDriverLicenseVerified === true ||
+        (user.hasDriverLicense === true && user.driverLicenseStatus === 'Approved') ||
+        sessionStorage.getItem('azuCarLicenseVerified') === 'true'
+    );
+    if (!isDlVerified) {
         const gplxModal = document.getElementById('gplxRequiredModal');
         if (gplxModal) {
             gplxModal.hidden = false;
         } else {
-            alert('Bạn cần cập nhật và xác thực Giấy phép lái xe (GPLX) trước khi thuê xe.');
+            alert('Tài khoản của bạn chưa xác thực Giấy phép lái xe (GPLX). Vui lòng cập nhật GPLX trước khi thuê xe.');
             window.location.href = '/account#license';
         }
         return;
@@ -2434,9 +2471,32 @@ document.getElementById('linkOpenSampleContract')?.addEventListener('click', ope
 document.getElementById('closeSampleContractModal')?.addEventListener('click', closeSampleContractModal);
 document.getElementById('btnCloseSampleContractBottom')?.addEventListener('click', closeSampleContractModal);
 
+// Flaw 4: Do not allow direct checking of contract checkbox; clicking it or its box opens the contract modal
+document.getElementById('checkAgreeContractWrapper')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openSampleContractModal();
+});
+document.getElementById('checkAgreeContract')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openSampleContractModal();
+});
+
 document.getElementById('btnAcceptSampleContract')?.addEventListener('click', () => {
     const agreeCheck = document.getElementById('checkAgreeContract');
-    if (agreeCheck) agreeCheck.checked = true;
+    if (agreeCheck) {
+        agreeCheck.checked = true;
+        agreeCheck.dataset.acceptedByModal = 'true';
+    }
+    const noticeEl = document.getElementById('contractAgreePromptNotice');
+    if (noticeEl) {
+        noticeEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã đồng ý và ký kết hợp đồng thuê xe điện tử';
+        noticeEl.style.color = '#16a34a';
+    }
+    const wrap = document.getElementById('checkAgreeContractWrapper');
+    if (wrap) {
+        wrap.style.borderColor = '#16a34a';
+        wrap.style.background = '#f0fdf4';
+    }
     closeSampleContractModal();
 });
 
@@ -2448,24 +2508,34 @@ let isOwnerEditModeActive = false;
 function loadCustomListingAttributes(vehicleId) {
     if (!vehicleId) return;
 
+    // Parse metadata from car description if available
+    let meta = null;
+    if (currentPopupCar && currentPopupCar.description) {
+        const m = currentPopupCar.description.match(/<!--AZU_POLICY:(.*?)-->/);
+        if (m) {
+            try { meta = JSON.parse(m[1]); } catch (e) {}
+        }
+    }
+
     // 1. Tài sản thế chấp
-    const savedCollateral = localStorage.getItem(`azu_car_collateral_${vehicleId}`);
+    const savedCollateral = meta?.collateral?.text || localStorage.getItem(`azu_car_collateral_${vehicleId}`);
     const colEl = document.getElementById('popupCarCollateralText');
     if (colEl) {
         colEl.textContent = savedCollateral || 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.';
     }
 
     // 2. Điều khoản riêng
-    const savedTerms = localStorage.getItem(`azu_car_terms_${vehicleId}`);
+    let termsList = meta?.terms;
+    if (!termsList) {
+        const savedTerms = localStorage.getItem(`azu_car_terms_${vehicleId}`);
+        if (savedTerms) {
+            try { termsList = JSON.parse(savedTerms); } catch (e) {}
+        }
+    }
     const termsUl = document.getElementById('popupCarTermsList');
     if (termsUl) {
-        if (savedTerms) {
-            try {
-                const list = JSON.parse(savedTerms);
-                if (Array.isArray(list) && list.length > 0) {
-                    termsUl.innerHTML = list.map(item => `<li>${item}</li>`).join('');
-                }
-            } catch (e) {}
+        if (Array.isArray(termsList) && termsList.length > 0) {
+            termsUl.innerHTML = termsList.map(item => `<li>${item}</li>`).join('');
         } else {
             termsUl.innerHTML = `
                 <li>Sử dụng xe đúng mục đích di chuyển an toàn.</li>
@@ -2478,33 +2548,35 @@ function loadCustomListingAttributes(vehicleId) {
     }
 
     // 3. Phụ phí có thể phát sinh
-    const savedFees = localStorage.getItem(`azu_car_extrafees_${vehicleId}`);
-    if (savedFees) {
-        try {
-            const fees = JSON.parse(savedFees);
-            if (fees.feeLimit && fees.limitKm) {
-                const d = document.getElementById('extraFeeLimitDesc');
-                const c = document.getElementById('extraFeeLimitCost');
-                if (d) d.textContent = `Phụ phí phát sinh nếu lộ trình di chuyển vượt quá ${fees.limitKm}km/ngày.`;
-                if (c) c.textContent = `${Number(fees.feeLimit).toLocaleString('vi-VN')}đ/km`;
-            }
-            if (fees.feeOvertime) {
-                const c = document.getElementById('extraFeeOvertimeCost');
-                if (c) c.textContent = `${Number(fees.feeOvertime).toLocaleString('vi-VN')}đ/giờ`;
-            }
-            if (fees.feeClean) {
-                const c = document.getElementById('extraFeeCleanCost');
-                if (c) c.textContent = `${Number(fees.feeClean).toLocaleString('vi-VN')}đ`;
-            }
-            if (fees.feeDeodor) {
-                const c = document.getElementById('extraFeeDeodorCost');
-                if (c) c.textContent = `${Number(fees.feeDeodor).toLocaleString('vi-VN')}đ`;
-            }
-        } catch (e) {}
-    } else {
-        const dLimit = document.getElementById('extraFeeLimitDesc');
-        const cLimit = document.getElementById('extraFeeLimitCost');
-        if (dLimit) dLimit.textContent = 'Phụ phí phát sinh nếu lộ trình di chuyển vượt quá 300km/ngày.';
+    let fees = meta?.extraFees;
+    if (!fees) {
+        const savedFees = localStorage.getItem(`azu_car_extrafees_${vehicleId}`);
+        if (savedFees) {
+            try { fees = JSON.parse(savedFees); } catch (e) {}
+        }
+    }
+
+    const limitKm = fees?.limitKm || 300;
+    const limitFee = fees?.limitFee || fees?.feeLimit || 3000;
+    const overtimeFee = fees?.overtimeFee || fees?.feeOvertime || 70000;
+    const cleanFee = fees?.cleanFee || fees?.feeClean || 80000;
+    const deodorFee = fees?.deodorFee || fees?.feeDeodor || 500000;
+
+    const dLimit = document.getElementById('extraFeeLimitDesc');
+    const cLimit = document.getElementById('extraFeeLimitCost');
+    if (dLimit) dLimit.textContent = `Phụ phí phát sinh nếu lộ trình di chuyển vượt quá ${limitKm}km/ngày.`;
+    if (cLimit) cLimit.textContent = `${Number(limitFee).toLocaleString('vi-VN')}đ/km`;
+
+    const dOvertime = document.getElementById('extraFeeOvertimeDesc');
+    const cOvertime = document.getElementById('extraFeeOvertimeCost');
+    if (dOvertime) dOvertime.textContent = 'Phụ phí phát sinh khi hoàn trả xe trễ giờ. Thuê thêm 1 ngày nếu trễ quá 5 giờ.';
+    if (cOvertime) cOvertime.textContent = `${Number(overtimeFee).toLocaleString('vi-VN')}đ/giờ`;
+
+    const cClean = document.getElementById('extraFeeCleanCost');
+    if (cClean) cClean.textContent = `${Number(cleanFee).toLocaleString('vi-VN')}đ`;
+
+    const cDeodor = document.getElementById('extraFeeDeodorCost');
+    if (cDeodor) cDeodor.textContent = `${Number(deodorFee).toLocaleString('vi-VN')}đ`;
         if (cLimit) cLimit.textContent = '3.000đ/km';
 
         const dOvertime = document.getElementById('extraFeeOvertimeDesc');
@@ -3098,14 +3170,14 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
         errorBanner.textContent = '';
     }
 
-    // 1. Verify contract agreement checkbox
+    // 1. Verify contract agreement checkbox (Must be confirmed inside sample contract modal)
     const agreeCheck = document.getElementById('checkAgreeContract');
-    if (agreeCheck && !agreeCheck.checked) {
+    if (agreeCheck && (!agreeCheck.checked || !agreeCheck.dataset.acceptedByModal)) {
         if (errorBanner) {
-            errorBanner.textContent = 'Vui lòng đọc và tích chọn đồng ý với Hợp đồng thuê xe điện tử và chính sách của AZU Car.';
+            errorBanner.textContent = 'Vui lòng mở Hợp đồng thuê xe điện tử và nhấn "Tôi đồng ý & Ký kết" bên trong hợp đồng.';
             errorBanner.style.display = 'block';
         }
-        agreeCheck.focus();
+        openSampleContractModal();
         return;
     }
 
@@ -3120,10 +3192,14 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
         return;
     }
 
-    // 3. Verify driver license again
+    // 3. Verify driver license again (Flaw 3: Must be verified GPLX before deposit)
     const user = window.AzuStore?.getUser ? window.AzuStore.getUser() : null;
-    const hasDl = user && (user.hasDriverLicense === true || sessionStorage.getItem('azuCarHasDriverLicense') === 'true');
-    if (!hasDl) {
+    const isDlVerified = user && (
+        user.isDriverLicenseVerified === true ||
+        (user.hasDriverLicense === true && user.driverLicenseStatus === 'Approved') ||
+        sessionStorage.getItem('azuCarLicenseVerified') === 'true'
+    );
+    if (!isDlVerified) {
         const gplxModal = document.getElementById('gplxRequiredModal');
         if (gplxModal) gplxModal.hidden = false;
         return;

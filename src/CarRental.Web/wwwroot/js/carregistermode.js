@@ -199,9 +199,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // step 2 submit to api
+    // step 2 to step 3
+    const btnToStep3 = document.getElementById('btn-to-step-3');
+    if (btnToStep3) {
+        btnToStep3.addEventListener('click', () => {
+            if (!vehicleDraft.plate || !vehicleDraft.brand || !vehicleDraft.model) {
+                alert('Vui lòng hoàn thành bước 1 (Điền thông tin xe) trước khi tiếp tục.');
+                goToStep(1);
+                return;
+            }
+            goToStep(3);
+        });
+    }
+
+    // step 3 collateral custom toggle
+    const regCollateralType = document.getElementById('reg-collateral-type');
+    const regCollateralCustomWrap = document.getElementById('reg-collateral-custom-wrap');
+    if (regCollateralType && regCollateralCustomWrap) {
+        regCollateralType.addEventListener('change', () => {
+            regCollateralCustomWrap.style.display = regCollateralType.value === 'custom' ? 'block' : 'none';
+        });
+    }
+
+    // step 3 submit to api
     if (btnSubmitReg) {
-        btnSubmitReg.addEventListener('click', async () => {
+        btnSubmitReg.addEventListener('click', async (e) => {
+            e.preventDefault();
             const fullCarName = `${vehicleDraft.brand} ${vehicleDraft.model} ${vehicleDraft.year}`.trim();
 
             if (!vehicleDraft.plate || !vehicleDraft.brand || !vehicleDraft.model) {
@@ -221,6 +244,38 @@ document.addEventListener('DOMContentLoaded', () => {
             btnSubmitReg.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi hồ sơ...';
 
             try {
+                // Collect Step 3 data
+                const colType = regCollateralType ? regCollateralType.value : 'none';
+                let colText = 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.';
+                if (colType === 'bike_or_cash') {
+                    colText = 'Yêu cầu thế chấp: Xe máy chính chủ (kèm cà vẹt gốc) HOẶC 15.000.000 đ tiền mặt khi nhận xe.';
+                } else if (colType === 'cash_only') {
+                    colText = 'Yêu cầu thế chấp Tiền mặt ký quỹ 15.000.000 đ khi nhận xe.';
+                } else if (colType === 'custom') {
+                    const customInput = document.getElementById('reg-collateral-custom-text')?.value.trim();
+                    colText = customInput || 'Quy định thế chấp riêng theo thỏa thuận với chủ xe.';
+                }
+
+                const fees = {
+                    limitKm: Number(document.getElementById('reg-fee-limit-km')?.value) || 300,
+                    limitFee: Number(document.getElementById('reg-fee-limit-cost')?.value) || 3000,
+                    overtimeFee: Number(document.getElementById('reg-fee-overtime')?.value) || 70000,
+                    cleanFee: Number(document.getElementById('reg-fee-clean')?.value) || 80000,
+                    deodorFee: Number(document.getElementById('reg-fee-deodor')?.value) || 500000
+                };
+
+                const checkedAmenities = Array.from(document.querySelectorAll('input[name="amenity"]:checked')).map(el => el.value);
+                const termsRaw = document.getElementById('reg-custom-terms')?.value.trim() || '';
+                const terms = termsRaw ? termsRaw.split('\n').map(t => t.trim().replace(/^[•\-\*]\s*/, '')).filter(Boolean) : [];
+
+                const policyMeta = {
+                    collateral: { type: colType, text: colText },
+                    extraFees: fees,
+                    amenities: checkedAmenities,
+                    terms: terms
+                };
+                const metaBlock = `\n<!--AZU_POLICY:${JSON.stringify(policyMeta)}-->`;
+
                 // parse city and district
                 const locStr = vehicleDraft.location || 'Quận Hải Châu, TP. Đà Nẵng';
                 let city = 'TP. Đà Nẵng';
@@ -258,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     city: city,
                     district: district,
                     location: locStr,
-                    description: `Xe ${vehicleDraft.brand} ${vehicleDraft.model} ${vehicleDraft.year} chính chủ cho thuê. Đầy đủ tiện nghi, bảo dưỡng định kỳ, giao xe đúng hẹn.`,
+                    description: `Xe ${vehicleDraft.brand} ${vehicleDraft.model} ${vehicleDraft.year} chính chủ cho thuê. Đầy đủ tiện nghi, bảo dưỡng định kỳ, giao xe đúng hẹn.${metaBlock}`,
                     imageUrls: imagesList,
                     registrationCertImage: sampleDoc,
                     inspectionCertImage: sampleDoc,
@@ -281,6 +336,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                const vehicleId = resData.data?.vehicleId || Date.now();
+
+                // Save custom policies to localStorage
+                try {
+                    localStorage.setItem(`azu_car_collateral_${vehicleId}`, colText);
+                    localStorage.setItem(`azu_car_extrafees_${vehicleId}`, JSON.stringify(fees));
+                    localStorage.setItem(`azu_car_amenities_${vehicleId}`, JSON.stringify(checkedAmenities));
+                    localStorage.setItem(`azu_car_terms_${vehicleId}`, JSON.stringify(terms));
+                } catch (e) {
+                    console.warn('LocalStorage save warning:', e);
+                }
+
                 // add owner role
                 try {
                     const roles = JSON.parse(sessionStorage.getItem('azuCarRoles') || '[]');
@@ -294,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // cache local
                 if (window.AzuStore?.addOwnerCar) {
                     window.AzuStore.addOwnerCar({
-                        id: resData.data?.vehicleId || Date.now(),
+                        id: vehicleId,
                         name: fullCarName,
                         plate: vehicleDraft.plate,
                         ownerName: vehicleDraft.ownerName,
@@ -311,16 +378,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     sessionStorage.setItem('azuCarPhone', vehicleDraft.phone);
                 }
 
-                // summary step 3
+                // summary step 4
                 const summaryName = document.getElementById('summary-car-name');
                 const summaryPlate = document.getElementById('summary-car-plate');
                 const summaryOwner = document.getElementById('summary-owner-name');
+                const summaryCollateral = document.getElementById('summary-collateral');
 
                 if (summaryName) summaryName.textContent = fullCarName;
                 if (summaryPlate) summaryPlate.textContent = vehicleDraft.plate || 'Đang cập nhật';
                 if (summaryOwner) summaryOwner.textContent = vehicleDraft.ownerName || 'Chủ xe';
+                if (summaryCollateral) summaryCollateral.textContent = colText;
 
-                goToStep(3);
+                goToStep(4);
             } catch (err) {
                 console.error('Lỗi khi gửi hồ sơ xe:', err);
                 alert('Lỗi kết nối máy chủ khi đăng ký xe. Vui lòng thử lại.');
@@ -331,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // step 3 submit
+    // step 3 submit (legacy)
     if (btnToStep4) {
         btnToStep4.addEventListener('click', () => {
             goToStep(4);
