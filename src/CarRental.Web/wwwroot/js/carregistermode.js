@@ -175,7 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // preview images
+    // preview images & store data
+    const uploadedPhotos = { front: '', back: '', interior: '', doc: '' };
     const photoInputs = document.querySelectorAll('.photo-file-input');
     photoInputs.forEach(input => {
         input.addEventListener('change', () => {
@@ -184,13 +185,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const card = input.closest('.photo-card');
             const preview = card?.querySelector('.photo-preview');
-            if (preview) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
+            const slotId = card?.id || '';
+            const key = slotId.replace('slot-', '');
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                uploadedPhotos[key] = event.target.result;
+                if (preview) {
                     preview.innerHTML = `<img src="${event.target.result}" alt="Ảnh xe" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`;
-                };
-                reader.readAsDataURL(file);
-            }
+                }
+            };
+            reader.readAsDataURL(file);
         });
     });
 
@@ -231,6 +236,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const seatsNum = parseInt(String(vehicleDraft.seats).replace(/\D/g, ''), 10) || 5;
                 const isElec = /vf|vinfast|điện|electric/i.test(`${vehicleDraft.brand} ${vehicleDraft.model}`);
 
+                // Collect uploaded or sample images
+                const defaultCover = (window.AzuVehicleImages?.resolve && window.AzuVehicleImages.resolve(`${vehicleDraft.brand} ${vehicleDraft.model}`)) || 'https://upload.wikimedia.org/wikipedia/commons/6/62/VinFast_VF_9_Plus_IMG_1523.jpg';
+                const imagesList = [];
+                if (uploadedPhotos.front) imagesList.push(uploadedPhotos.front);
+                if (uploadedPhotos.back) imagesList.push(uploadedPhotos.back);
+                if (uploadedPhotos.interior) imagesList.push(uploadedPhotos.interior);
+                if (imagesList.length === 0) imagesList.push(defaultCover);
+
+                const sampleDoc = uploadedPhotos.doc || 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Giay_chung_nhan_dang_ky_xe_o_to.jpg/640px-Giay_chung_nhan_dang_ky_xe_o_to.jpg';
+
                 const payload = {
                     brand: vehicleDraft.brand,
                     model: vehicleDraft.model,
@@ -243,8 +258,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     city: city,
                     district: district,
                     location: locStr,
-                    description: `Xe ${vehicleDraft.brand} ${vehicleDraft.model} ${vehicleDraft.year} chính chủ cho thuê. Đầy đủ tiện nghi, giao xe đúng hẹn.`,
-                    imageUrls: []
+                    description: `Xe ${vehicleDraft.brand} ${vehicleDraft.model} ${vehicleDraft.year} chính chủ cho thuê. Đầy đủ tiện nghi, bảo dưỡng định kỳ, giao xe đúng hẹn.`,
+                    imageUrls: imagesList,
+                    registrationCertImage: sampleDoc,
+                    inspectionCertImage: sampleDoc,
+                    insuranceImage: sampleDoc,
+                    inspectionExpiryDate: '2027-12-31',
+                    insuranceExpiryDate: '2027-12-31'
                 };
 
                 const res = await fetch('/api/vehicles', {
