@@ -94,9 +94,7 @@ node_modules/
 /docs/report/exports/
 
 
-# Session notes (local developer/session documentation - do not commit to repository)
-SESSION_NOTE.md
-*SESSION_NOTE*
+# Session notes (local notes)
 session_notes/
 *.session.md
 docs/architecture/code-specification.md
