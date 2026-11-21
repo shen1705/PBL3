@@ -1873,7 +1873,7 @@ function renderOwnerTrips(items) {
         topRow.append(titleWrap, statusSpan);
 
         const details = document.createElement('div');
-        details.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 13px; color: #475569;';
+        details.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px 24px; font-size: 13.5px; color: #475569; margin: 4px 0;';
 
         const startStr = formatVnTripDate(req.startDate);
         const endStr = formatVnTripDate(req.endDate);
@@ -1886,30 +1886,20 @@ function renderOwnerTrips(items) {
             </div>`;
         }
 
-        let completedTimeInfo = '';
-        if (req.status === 'Completed' && req.completedAt) {
-            completedTimeInfo = `<p style="margin: 4px 0 0; color: #15803d; font-size: 12px;"><i class="fa-solid fa-circle-check" style="width: 16px;"></i> Hoàn tất lúc: <strong>${formatVnTripDate(req.completedAt, true)}</strong></p>`;
-        }
-
         details.innerHTML = `
             ${renterReturnAlert}
             <div>
-                <p style="margin: 0 0 4px;"><i class="fa-regular fa-user" style="color: #64748b; width: 16px;"></i> Khách thuê: <strong>${req.renterName}</strong> ${req.renterPhone ? `(${req.renterPhone})` : ''}</p>
+                <p style="margin: 0 0 6px;"><i class="fa-regular fa-user" style="color: #64748b; width: 16px;"></i> Khách thuê: <strong>${req.renterName}</strong></p>
                 <p style="margin: 0;"><i class="fa-solid fa-location-dot" style="color: #64748b; width: 16px;"></i> Khu vực: ${req.district ? req.district + ', ' : ''}${req.city || 'TP. Đà Nẵng'}</p>
-                ${completedTimeInfo}
             </div>
             <div>
-                <p style="margin: 0 0 4px;"><i class="fa-regular fa-calendar-days" style="color: #64748b; width: 16px;"></i> Thời gian: <strong>${startStr} - ${endStr}</strong> (${req.rentalDays} ngày)</p>
-                <p style="margin: 0;"><i class="fa-solid fa-receipt" style="color: #16a34a; width: 16px;"></i> Tổng tiền: <strong style="color: #1e293b;">${Number(req.priceLockedTotal || 0).toLocaleString('vi-VN')} đ</strong></p>
-            </div>
-            <div>
-                <p style="margin: 0 0 4px; color: #1d4ed8;"><i class="fa-solid fa-shield-halved" style="width: 16px;"></i> Cọc AZU giữ: <strong>${Number(req.depositAmount || 0).toLocaleString('vi-VN')} đ (25%)</strong></p>
-                <p style="margin: 0; color: #64748b;"><i class="fa-solid fa-hand-holding-dollar" style="width: 16px;"></i> Còn lại khi nhận xe: <strong>${Number(req.remainingAmount || 0).toLocaleString('vi-VN')} đ</strong></p>
+                <p style="margin: 0 0 6px;"><i class="fa-regular fa-calendar-days" style="color: #64748b; width: 16px;"></i> Thời gian: <strong>${startStr} - ${endStr}</strong> (${req.rentalDays} ngày)</p>
+                <p style="margin: 0;"><i class="fa-solid fa-receipt" style="color: #16a34a; width: 16px;"></i> Tổng tiền: <strong style="color: #1e293b; font-size: 14.5px;">${Number(req.priceLockedTotal || 0).toLocaleString('vi-VN')} đ</strong></p>
             </div>
         `;
 
         const actionsRow = document.createElement('div');
-        actionsRow.style.cssText = 'display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding-top: 8px; border-top: 1px dashed #e2e8f0;';
+        actionsRow.style.cssText = 'display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; padding-top: 10px; border-top: 1px dashed #e2e8f0;';
 
         if (req.status === 'Pending') {
             const acceptBtn = document.createElement('button');

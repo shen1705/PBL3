@@ -1137,7 +1137,7 @@ function renderTripDetail(booking, tab = 'overview') {
                 <div class="trip-detail-vehicle">
                     ${image ? `<img src="${escapeTripHtml(image)}" alt="${escapeTripHtml(vehicleName)}">` : '<div class="trip-detail-image-placeholder"><i class="fa-solid fa-car-side"></i></div>'}
                     <div><h3>${escapeTripHtml(vehicleName)}</h3><p>${escapeTripHtml(booking.city || 'Chưa có địa điểm')}${booking.district ? ` · ${escapeTripHtml(booking.district)}` : ''}</p>
-                    ${booking.licensePlate ? `<p class="trip-detail-plate"><span>Biển số</span><strong>${escapeTripHtml(hasBeenAccepted ? booking.licensePlate : maskLicensePlate(booking.licensePlate))}</strong><small>${hasBeenAccepted ? 'Đã hiển thị sau khi chủ xe duyệt' : 'Hiện rõ sau khi chủ xe duyệt đơn'}</small></p>` : ''}</div>
+                    ${booking.licensePlate ? `<p class="trip-detail-plate"><span>Biển số</span><strong>${escapeTripHtml(booking.licensePlate)}</strong></p>` : ''}</div>
                 </div>
                 <h3>Lịch trình</h3>
                 ${tripDetailRow('Nhận xe', formatTripDate(booking.startDate, true))}
@@ -1146,30 +1146,36 @@ function renderTripDetail(booking, tab = 'overview') {
                 <details class="trip-rental-calendar"><summary>Lịch hoạt động &amp; ngày bận</summary>${renderRentalCalendar(booking)}</details>
                 ${tripDetailRow('Hình thức nhận xe', booking.deliveryMethod || 'Nhận tại địa điểm xe')}
                 ${booking.deliveryAddress ? tripDetailRow('Địa chỉ giao xe', booking.deliveryAddress) : ''}
+                <h3 class="trip-detail-subheading">Thông tin khách hàng</h3>
+                ${tripDetailRow('Khách thuê', booking.renterName || (isOwner ? 'Khách thuê' : 'Tôi'))}
+                ${tripDetailRow('Số điện thoại', booking.renterPhone || 'Chưa cung cấp')}
+                ${isOwner ? '' : `
                 <h3 class="trip-detail-subheading">Liên hệ chủ xe</h3>
-                ${tripDetailRow('Chủ xe', booking.ownerName)}
-                ${tripDetailRow('Điện thoại', hasBeenAccepted ? (booking.ownerPhone || 'Chưa cung cấp') : 'Hiển thị sau khi chủ xe duyệt')}
+                ${tripDetailRow('Chủ xe', booking.ownerName || 'Chủ xe')}
+                ${tripDetailRow('Số điện thoại', booking.ownerPhone || 'Chưa cung cấp')}
+                `}
             </div>
             <aside class="trip-detail-payment">
                 <h3>Cọc &amp; thanh toán</h3>
                 <div class="trip-payment-line">
-                    <div><span>Giá thuê</span><small>${hasPriceBreakdown ? `${formatTripMoney(booking.pricePerDayAtBooking)} × ${booking.rentalDays || 0} ngày` : 'Giá đã khóa theo đơn thuê'}</small></div>
+                    <div><span>Giá thuê</span>${hasPriceBreakdown ? `<small>${formatTripMoney(booking.pricePerDayAtBooking)} × ${booking.rentalDays || 0} ngày</small>` : ''}</div>
                     <strong>${formatTripMoney(rentalSubtotal)}</strong>
                 </div>
                 <div class="trip-payment-line">
-                    <div><span>Phụ phí phát sinh</span><small>${escapeTripHtml(feeNotes)}</small></div>
-                    <strong>${extraFees == null ? '—' : formatTripMoney(extraFees)}</strong>
+                    <div><span>Phụ phí phát sinh</span>${extraFees && extraFees > 0 ? `<small>${escapeTripHtml(feeNotes)}</small>` : ''}</div>
+                    <strong>${extraFees && extraFees > 0 ? formatTripMoney(extraFees) : '0 đ'}</strong>
                 </div>
                 <div class="trip-payment-total"><span>Tổng giá trị thuê</span><strong>${formatTripMoney(booking.priceLockedTotal)}</strong></div>
                 <div class="trip-payment-deposit">
-                    <div class="trip-payment-line"><div><span>Tiền cọc (25%)</span><small class="trip-payment-status">${escapeTripHtml(depositLabel)}</small></div><strong>${formatTripMoney(booking.depositAmount)}</strong></div>
-                    <small class="trip-payment-meta">Thanh toán mô phỏng · ${escapeTripHtml(formatTripDate(depositRecordedAt, true))} · ${escapeTripHtml(depositReference)}</small>
+                    <div class="trip-payment-line">
+                        <div><span>Tiền cọc (25%)</span><span class="trip-payment-status">${escapeTripHtml(depositLabel)}</span></div>
+                        <strong>${formatTripMoney(booking.depositAmount)}</strong>
+                    </div>
                 </div>
                 <div class="trip-payment-line trip-payment-remaining">
-                    <div><span>Bạn trả trực tiếp cho chủ xe</span><small>Ngoài hệ thống · hai bên tự thỏa thuận thời điểm và cách trả</small></div>
+                    <div><span>${isOwner ? 'Khách thanh toán trực tiếp khi nhận xe' : 'Thanh toán trực tiếp cho chủ xe khi nhận xe'}</span></div>
                     <strong>${formatTripMoney(booking.remainingAmount)}</strong>
                 </div>
-                <p class="trip-payment-note">Khi chủ xe từ chối, đơn hết hạn hoặc có sự cố, trạng thái và tiền cọc được xử lý theo kết quả của đơn.</p>
             </aside>
         </div>
         ${isCancelled ? `<div class="trip-detail-notice is-warning">${escapeTripHtml(booking.cancelReason || booking.rejectReason || badge.text)}</div>` : ''}`;
@@ -1480,40 +1486,85 @@ async function renderTrips() {
         visibleTrips.forEach(trip => {
             const card = document.createElement('article');
             card.className = 'trip-card';
-            card.style.position = 'relative';
+            card.style.cssText = 'display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; transition: box-shadow 0.2s ease; position: relative;';
+            card.addEventListener('mouseenter', () => { card.style.boxShadow = '0 6px 18px rgba(0,0,0,0.06)'; });
+            card.addEventListener('mouseleave', () => { card.style.boxShadow = 'none'; });
+
+            const thumb = document.createElement('div');
+            thumb.style.cssText = 'width: 100%; height: 130px; border-radius: 8px; overflow: hidden; background: #f8fafc; display: flex; align-items: center; justify-content: center;';
 
             const image = document.createElement('img');
             image.src = window.AzuVehicleImages?.resolve(trip.name, trip.image || '') || trip.image || '';
+            image.alt = trip.name || 'Xe đã đặt';
+            image.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
             image.addEventListener('error', () => {
                 image.src = window.AzuVehicleImages?.placeholder || '';
             }, { once: true });
-            image.alt = trip.name || 'Xe đã đặt';
+            thumb.appendChild(image);
 
             const info = document.createElement('div');
-            const title = document.createElement('h2');
+            info.style.cssText = 'display: flex; flex-direction: column; justify-content: space-between; gap: 8px; min-width: 0;';
+
+            const topRow = document.createElement('div');
+            topRow.style.cssText = 'display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;';
+
+            const title = document.createElement('h3');
+            title.style.cssText = 'margin: 0; font-size: 16px; font-weight: 700;';
             const bId = trip.bookingId || trip.id;
             if (bId) {
                 const titleLink = document.createElement('a');
-                titleLink.href = `/booking/${bId}`;
-                titleLink.textContent = trip.name;
+                titleLink.href = `/account?bookingId=${bId}#trips`;
+                titleLink.textContent = `#${bId} - ${trip.name}`;
                 titleLink.title = 'Xem chi tiết đơn thuê xe';
-                titleLink.style.cssText = 'color: #1c2635; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
+                titleLink.style.cssText = 'color: #1e293b; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
                 titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#2563eb'; });
-                titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1c2635'; });
+                titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1e293b'; });
+                titleLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openTripDetails(bId);
+                });
                 title.appendChild(titleLink);
             } else {
                 title.textContent = trip.name;
             }
-            const meta = document.createElement('p');
-            meta.textContent = `${trip.location || 'TP. Đà Nẵng'} • ${trip.pickup || ''} - ${trip.return || ''}`;
-            const status = document.createElement('span');
-            status.className = 'trip-status';
-            status.textContent = trip.status === 'confirmed' ? 'Đã duyệt' : 'Chờ duyệt';
-            const price = document.createElement('strong');
-            price.textContent = trip.total || (trip.price ? `${trip.price}/ngày` : '');
-            info.append(title, meta, status, price);
 
-            card.append(image, info);
+            const status = document.createElement('span');
+            status.style.cssText = 'background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap;';
+            status.textContent = trip.status === 'confirmed' ? 'Đã duyệt' : 'Chờ duyệt';
+            topRow.append(title, status);
+
+            const details = document.createElement('div');
+            details.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px 24px; font-size: 13.5px; color: #475569; margin: 4px 0;';
+            details.innerHTML = `
+                <div>
+                    <p style="margin: 0 0 6px;"><i class="fa-regular fa-user" style="color: #64748b; width: 16px;"></i> Chủ xe: <strong>${trip.owner || 'Chủ xe'}</strong></p>
+                    <p style="margin: 0;"><i class="fa-solid fa-location-dot" style="color: #64748b; width: 16px;"></i> Khu vực: ${trip.location || 'TP. Đà Nẵng'}</p>
+                </div>
+                <div>
+                    <p style="margin: 0 0 6px;"><i class="fa-regular fa-calendar-days" style="color: #64748b; width: 16px;"></i> Thời gian: <strong>${trip.pickup || ''} - ${trip.return || ''}</strong></p>
+                    <p style="margin: 0;"><i class="fa-solid fa-receipt" style="color: #16a34a; width: 16px;"></i> Tổng tiền: <strong style="color: #1e293b; font-size: 14.5px;">${trip.total || (trip.price ? `${trip.price}/ngày` : '—')}</strong></p>
+                </div>
+            `;
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.style.cssText = 'display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; padding-top: 10px; border-top: 1px dashed #e2e8f0;';
+            if (bId) {
+                const detailLink = document.createElement('a');
+                detailLink.href = `/account?bookingId=${bId}#trips`;
+                detailLink.className = 'trip-detail-open';
+                detailLink.style.cssText = 'color: #8f6b24; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; font-weight: 600; margin-left: auto; cursor: pointer; background: transparent; border: 0;';
+                detailLink.textContent = 'Xem chi tiết';
+                detailLink.addEventListener('mouseenter', () => { detailLink.style.color = '#6f5018'; });
+                detailLink.addEventListener('mouseleave', () => { detailLink.style.color = '#8f6b24'; });
+                detailLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openTripDetails(bId);
+                });
+                actionsDiv.appendChild(detailLink);
+            }
+
+            info.append(topRow, details, actionsDiv);
+            card.append(thumb, info);
             tripsList.append(card);
         });
         return;
@@ -1525,71 +1576,88 @@ async function renderTrips() {
     apiTrips.forEach(trip => {
         const card = document.createElement('article');
         card.className = 'trip-card';
-        card.style.position = 'relative';
+        card.style.cssText = 'display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 20px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; transition: box-shadow 0.2s ease; position: relative;';
+        card.addEventListener('mouseenter', () => { card.style.boxShadow = '0 6px 18px rgba(0,0,0,0.06)'; });
+        card.addEventListener('mouseleave', () => { card.style.boxShadow = 'none'; });
+
+        const thumb = document.createElement('div');
+        thumb.style.cssText = 'width: 100%; height: 130px; border-radius: 8px; overflow: hidden; background: #f8fafc; display: flex; align-items: center; justify-content: center;';
 
         const image = document.createElement('img');
         image.src = window.AzuVehicleImages?.resolve(trip.vehicleName, trip.coverImageUrl || '') || trip.coverImageUrl || '';
+        image.alt = trip.vehicleName || 'Xe đã đặt';
+        image.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
         image.addEventListener('error', () => {
             image.src = window.AzuVehicleImages?.placeholder || '';
         }, { once: true });
-        image.alt = trip.vehicleName;
+        thumb.appendChild(image);
 
         const info = document.createElement('div');
-        const title = document.createElement('h2');
+        info.style.cssText = 'display: flex; flex-direction: column; justify-content: space-between; gap: 8px; min-width: 0;';
+
+        const topRow = document.createElement('div');
+        topRow.style.cssText = 'display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;';
+
+        const titleWrap = document.createElement('div');
+        titleWrap.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-wrap: wrap;';
+
+        const title = document.createElement('h3');
+        title.style.cssText = 'margin: 0; font-size: 16px; font-weight: 700;';
+
         const titleLink = document.createElement('a');
         titleLink.href = `/account?bookingId=${trip.bookingId}#trips`;
-        titleLink.textContent = trip.vehicleName;
+        titleLink.textContent = `#${trip.bookingId} - ${trip.vehicleName}`;
         titleLink.title = 'Xem chi tiết đơn thuê xe';
-        titleLink.style.cssText = 'color: #1c2635; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
+        titleLink.style.cssText = 'color: #1e293b; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
         titleLink.addEventListener('mouseenter', () => { titleLink.style.color = '#2563eb'; });
-        titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1c2635'; });
+        titleLink.addEventListener('mouseleave', () => { titleLink.style.color = '#1e293b'; });
         titleLink.addEventListener('click', (e) => {
             e.preventDefault();
             openTripDetails(trip.bookingId);
         });
 
         title.appendChild(titleLink);
-        if (trip.licensePlate) {
-            const plateSmall = document.createElement('small');
-            plateSmall.style.cssText = 'font-size: 13px; color: #64748b; font-weight: normal; margin-left: 6px;';
-            plateSmall.textContent = `(${trip.licensePlate})`;
-            title.appendChild(plateSmall);
-        }
-        const perspective = document.createElement('span');
-        perspective.className = 'trip-role-label';
-        perspective.textContent = `Chủ xe: ${trip.ownerName || 'Chủ xe'}`;
+        titleWrap.appendChild(title);
 
-        const startStr = new Date(trip.startDate).toLocaleDateString('vi-VN');
-        const endStr = new Date(trip.endDate).toLocaleDateString('vi-VN');
-        const meta = document.createElement('p');
-        meta.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${trip.city || 'TP. Đà Nẵng'} &bull; <i class="fa-regular fa-calendar-days"></i> ${startStr} - ${endStr} (${trip.rentalDays} ngày)`;
+        if (trip.licensePlate) {
+            const plateBadge = document.createElement('span');
+            plateBadge.style.cssText = 'background: #f1f5f9; color: #475569; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #cbd5e1;';
+            plateBadge.textContent = trip.licensePlate;
+            titleWrap.appendChild(plateBadge);
+        }
 
         const badge = getStatusBadgeInfo(trip.status);
         const statusSpan = document.createElement('span');
-        statusSpan.className = 'trip-status';
+        statusSpan.style.cssText = `background: ${badge.bg}; color: ${badge.color}; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap;`;
         statusSpan.textContent = badge.text;
-        statusSpan.style.backgroundColor = badge.bg;
-        statusSpan.style.color = badge.color;
 
-        const price = document.createElement('strong');
-        price.textContent = `Tổng: ${Number(trip.priceLockedTotal || 0).toLocaleString('vi-VN')} đ`;
+        topRow.append(titleWrap, statusSpan);
 
-        const depositSmall = document.createElement('div');
-        depositSmall.style.fontSize = '13px';
-        depositSmall.style.color = '#1d4ed8';
-        depositSmall.style.marginTop = '4px';
-        depositSmall.textContent = `Đã cọc trực tuyến: ${Number(trip.depositAmount || 0).toLocaleString('vi-VN')} đ (25%)`;
+        const details = document.createElement('div');
+        details.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px 24px; font-size: 13.5px; color: #475569; margin: 4px 0;';
 
-        info.append(title, perspective, meta, statusSpan, price, depositSmall);
+        const startStr = formatTripDate(trip.startDate);
+        const endStr = formatTripDate(trip.endDate);
+
+        details.innerHTML = `
+            <div>
+                <p style="margin: 0 0 6px;"><i class="fa-regular fa-user" style="color: #64748b; width: 16px;"></i> Chủ xe: <strong>${trip.ownerName || 'Chủ xe'}</strong></p>
+                <p style="margin: 0;"><i class="fa-solid fa-location-dot" style="color: #64748b; width: 16px;"></i> Khu vực: ${trip.district ? trip.district + ', ' : ''}${trip.city || 'TP. Đà Nẵng'}</p>
+            </div>
+            <div>
+                <p style="margin: 0 0 6px;"><i class="fa-regular fa-calendar-days" style="color: #64748b; width: 16px;"></i> Thời gian: <strong>${startStr} - ${endStr}</strong> (${trip.rentalDays} ngày)</p>
+                <p style="margin: 0;"><i class="fa-solid fa-receipt" style="color: #16a34a; width: 16px;"></i> Tổng tiền: <strong style="color: #1e293b; font-size: 14.5px;">${Number(trip.priceLockedTotal || 0).toLocaleString('vi-VN')} đ</strong></p>
+            </div>
+        `;
 
         const actionsDiv = document.createElement('div');
-        actionsDiv.style.cssText = 'margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
+        actionsDiv.style.cssText = 'display: flex; gap: 10px; align-items: center; flex-wrap: nowrap; padding-top: 10px; border-top: 1px dashed #e2e8f0;';
 
         // 1. Nhận xe
         if (trip.status === 'Accepted') {
             const pickupBtn = document.createElement('button');
             pickupBtn.type = 'button';
-            pickupBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            pickupBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
             pickupBtn.innerHTML = '<i class="fa-solid fa-key"></i> Xác nhận nhận xe';
             pickupBtn.addEventListener('click', async () => {
                 const conf = confirm(`Xác nhận bạn đã nhận bàn giao xe ${trip.vehicleName}? Chuyến đi sẽ chính thức bắt đầu.`);
@@ -1621,7 +1689,7 @@ async function renderTrips() {
         if (trip.status === 'Ongoing') {
             const returnBtn = document.createElement('button');
             returnBtn.type = 'button';
-            returnBtn.style.cssText = 'background: #2563eb; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+            returnBtn.style.cssText = 'background: #2563eb; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
             returnBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Xác nhận trả xe';
             returnBtn.addEventListener('click', async () => {
                 const conf = confirm(`Xác nhận hoàn tất chuyến đi và trả lại xe ${trip.vehicleName} cho chủ xe?`);
@@ -1663,7 +1731,7 @@ async function renderTrips() {
             } else {
                 const disputeBtn = document.createElement('button');
                 disputeBtn.type = 'button';
-                disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+                disputeBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 7px 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
                 disputeBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Khiếu nại sự cố';
                 disputeBtn.addEventListener('click', () => {
                     if (window.AzuDisputeModal) {
@@ -1688,13 +1756,13 @@ async function renderTrips() {
             if (!trip.hasReviewed) {
                 const reviewBtn = document.createElement('button');
                 reviewBtn.type = 'button';
-                reviewBtn.style.cssText = 'background: #f59e0b; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+                reviewBtn.style.cssText = 'background: #f59e0b; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
                 reviewBtn.innerHTML = '<i class="fa-solid fa-star"></i> Đánh giá chuyến đi';
                 reviewBtn.addEventListener('click', () => openReviewModal(trip));
                 actionsDiv.appendChild(reviewBtn);
             } else {
                 const reviewedBadge = document.createElement('span');
-                reviewedBadge.style.cssText = 'font-size: 13px; color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
+                reviewedBadge.style.cssText = 'font-size: 12.5px; color: #16a34a; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;';
                 reviewedBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã gửi đánh giá';
                 actionsDiv.appendChild(reviewedBadge);
             }
@@ -1705,10 +1773,10 @@ async function renderTrips() {
         if (canCancelOnCard) {
             const cancelBtn = document.createElement('button');
             cancelBtn.type = 'button';
-            cancelBtn.style.cssText = 'background: #dc2626; color: #fff; border: 1px solid #dc2626; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;';
+            cancelBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #dc2626; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;';
             cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Hủy chuyến này';
-            cancelBtn.addEventListener('mouseenter', () => { cancelBtn.style.background = '#b91c1c'; });
-            cancelBtn.addEventListener('mouseleave', () => { cancelBtn.style.background = '#dc2626'; });
+            cancelBtn.addEventListener('mouseenter', () => { cancelBtn.style.background = '#fef2f2'; });
+            cancelBtn.addEventListener('mouseleave', () => { cancelBtn.style.background = '#fff'; });
             cancelBtn.addEventListener('click', async () => {
                 const reason = prompt('Nhập lý do hủy chuyến:');
                 if (reason === null) return;
@@ -1735,19 +1803,21 @@ async function renderTrips() {
             actionsDiv.appendChild(cancelBtn);
         }
 
-        const detailBtn = document.createElement('button');
-        detailBtn.type = 'button';
-        detailBtn.className = 'trip-detail-open';
-        detailBtn.textContent = 'Xem chi tiết';
-        detailBtn.style.marginLeft = 'auto';
-        detailBtn.addEventListener('click', () => openTripDetails(trip.bookingId));
-        actionsDiv.appendChild(detailBtn);
+        const detailLink = document.createElement('a');
+        detailLink.href = `/account?bookingId=${trip.bookingId}#trips`;
+        detailLink.className = 'trip-detail-open';
+        detailLink.style.cssText = 'color: #8f6b24; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; font-weight: 600; margin-left: auto; cursor: pointer; background: transparent; border: 0;';
+        detailLink.textContent = 'Xem chi tiết';
+        detailLink.addEventListener('mouseenter', () => { detailLink.style.color = '#6f5018'; });
+        detailLink.addEventListener('mouseleave', () => { detailLink.style.color = '#8f6b24'; });
+        detailLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            openTripDetails(trip.bookingId);
+        });
+        actionsDiv.appendChild(detailLink);
 
-        if (actionsDiv.children.length > 0) {
-            info.appendChild(actionsDiv);
-        }
-
-        card.append(image, info);
+        info.append(topRow, details, actionsDiv);
+        card.append(thumb, info);
         tripsList.append(card);
     });
 
