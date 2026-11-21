@@ -158,10 +158,10 @@ function createSampleCarCard(car) {
     badgesRow.className = 'car-badges-row';
     const bDeposit = document.createElement('span');
     bDeposit.className = 'badge-tag badge-deposit';
-    bDeposit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Miễn thế chấp';
+    bDeposit.textContent = 'Miễn thế chấp';
     const bDelivery = document.createElement('span');
     bDelivery.className = 'badge-tag badge-delivery';
-    bDelivery.innerHTML = '<i class="fa-solid fa-map-pin"></i> Giao xe tận nơi';
+    bDelivery.textContent = 'Giao xe tận nơi';
     badgesRow.append(bDeposit, bDelivery);
 
     const name = document.createElement('h3');
@@ -191,12 +191,25 @@ function createSampleCarCard(car) {
     footer.className = 'car-footer';
 
     const ratingTrips = document.createElement('div');
-    ratingTrips.className = 'car-rating-trips car-rating-loc';
-    ratingTrips.innerHTML = `
-        <span class="rating-val"><i class="fa-solid fa-star star-gold"></i> ${car.rating}</span>
-        <span class="dot-sep">·</span>
-        <span class="trips-val"><i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> ${car.trips} chuyến</span>
-    `;
+    ratingTrips.className = 'car-rating-trips';
+    const hasSampleRating = car.rating && parseFloat(car.rating) > 0;
+    const sampleTrips = car.trips || 0;
+
+    if (hasSampleRating) {
+        ratingTrips.innerHTML = `
+            <span class="rating-val"><i class="fa-solid fa-star star-gold"></i> ${car.rating}</span>
+            <span class="dot-sep">·</span>
+            <span class="trips-val"><i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> ${sampleTrips} chuyến</span>
+        `;
+    } else if (sampleTrips > 0) {
+        ratingTrips.innerHTML = `
+            <span class="trips-val"><i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> ${sampleTrips} chuyến</span>
+        `;
+    } else {
+        ratingTrips.innerHTML = `
+            <span class="rating-val text-muted">Chưa có đánh giá</span>
+        `;
+    }
 
     const price = document.createElement('span');
     price.className = 'car-price';
@@ -297,13 +310,13 @@ function createCarCardFromApi(car) {
     if (hasDeposit) {
         const bDeposit = document.createElement('span');
         bDeposit.className = 'badge-tag badge-deposit';
-        bDeposit.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Miễn thế chấp';
+        bDeposit.textContent = 'Miễn thế chấp';
         badgesRow.appendChild(bDeposit);
     }
     if (hasDelivery) {
         const bDelivery = document.createElement('span');
         bDelivery.className = 'badge-tag badge-delivery';
-        bDelivery.innerHTML = '<i class="fa-solid fa-map-pin"></i> Giao xe tận nơi';
+        bDelivery.textContent = 'Giao xe tận nơi';
         badgesRow.appendChild(bDelivery);
     }
 
@@ -333,7 +346,7 @@ function createCarCardFromApi(car) {
     footer.className = 'car-footer';
 
     const ratingTrips = document.createElement('div');
-    ratingTrips.className = 'car-rating-trips car-rating-loc';
+    ratingTrips.className = 'car-rating-trips';
     
     const hasRating = typeof car.rating === 'number' && car.rating > 0;
     const ratingVal = hasRating ? car.rating.toFixed(1) : '';
@@ -345,11 +358,13 @@ function createCarCardFromApi(car) {
             <span class="dot-sep">·</span>
             <span class="trips-val"><i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> ${tripsVal} chuyến</span>
         `;
+    } else if (tripsVal > 0) {
+        ratingTrips.innerHTML = `
+            <span class="trips-val"><i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> ${tripsVal} chuyến</span>
+        `;
     } else {
         ratingTrips.innerHTML = `
             <span class="rating-val text-muted">Chưa có đánh giá</span>
-            <span class="dot-sep">·</span>
-            <span class="trips-val"><i class="fa-solid fa-suitcase-rolling trip-bag-icon"></i> ${tripsVal} chuyến</span>
         `;
     }
 
