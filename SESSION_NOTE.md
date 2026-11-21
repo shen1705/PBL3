@@ -260,15 +260,50 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 [10. User Dropdown, Notification Center & Admin Password Flow] (Hoàn tất 100% - Session 12)
        │
        ▼
-[11. Misue Logout Modal Integration & Header Dropdown Hookup] (Hoàn tất 100% - Session 13) ◄─── (VỪA HOÀN THÀNH)
+[11. Misue Logout Modal Integration & Header Dropdown Hookup] (Hoàn tất 100% - Session 13)
        │
        ▼
-[12. Inspect Deferred Find.cshtml Links (Task 2 - Mục 4) / Favorite Vehicles]
+[12. Payment Cards, Full Human License Moderation & AI Text Purge] (Hoàn tất 100% - Session 14) ◄─── (VỪA HOÀN THÀNH)
+       │
+       ▼
+[13. Inspect Deferred Find.cshtml Links (Task 2 - Mục 4) / Favorite Vehicles]
 ```
 
 ---
 
 ## 7. Chi Tiết Session 13: Tích Hợp Popup Đăng Xuất Chuẩn Của Misue
+... (đã hoàn tất)
+
+---
+
+## 8. Chi Tiết Session 14: Thẻ Thanh Toán Hồ Sơ, Rà Soát Phê Duyệt GPLX & Tẩy Sạch Văn Mẫu AI
+
+### Bối cảnh & Yêu cầu:
+1. **Thẻ thanh toán (100% Ký quỹ/Thanh toán trực tuyến):** Bổ sung mục Thẻ thanh toán trong trang Hồ sơ cá nhân (`/account#cards`) khớp với mockup (trạng thái trống có hình vẽ minh họa điện thoại + thẻ + huy hiệu link xanh lá và câu "Bạn chưa có thẻ nào", nút "Thêm thẻ (+)", danh sách thẻ liên kết, xóa thẻ, đặt mặc định, kèm modal thêm thẻ).
+2. **Loại bỏ tính năng duyệt tự động GPLX (AI Verification):** Bỏ triệt để nút "Quét & Duyệt tự động GPLX" và toàn bộ logic backend tự động; quy trình duyệt giấy phép lái xe phải do nhân sự quản trị kiểm duyệt thủ công 100%.
+3. **Lược bỏ huy hiệu bảo mật và nút đăng xuất thừa:** Gỡ bỏ mục "Bảo mật tài khoản" kèm icon khiên tại trang Đổi mật khẩu; gỡ bỏ nút đăng xuất trong sidebar panel của Admin.
+4. **Chuẩn hóa thuật ngữ & Xóa văn mẫu AI:** Thay thế toàn bộ từ tiếng Anh "Escrow" bằng "ký quỹ / tiền cọc / tài khoản bảo chứng"; xóa bỏ các câu văn mẫu AI rập khuôn như *"Đã ghi nhận trong CSDL"*, *"Hệ Thống Quản Trị Vận Hành"*, *"● HỆ THỐNG TRỰC TUYẾN"*.
+5. **Khắc phục lỗi treo tải trang Tìm xe (`/find`):** Khắc phục lỗi ReferenceError JavaScript và lỗi khởi động Migration khiến server gián đoạn.
+
+### Các thay đổi kỹ thuật:
+1. **Hạ tầng Dữ liệu & Dịch vụ Thẻ thanh toán:**
+   - **Entity**: [PaymentCard.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Models/Entities/PaymentCard.cs) lưu trữ `CardNumberMasked`, `CardBrand`, `ExpiryMonth`, `ExpiryYear`, `BankName`, `IsDefault`, v.v.
+   - **DTOs**: [PaymentCardDto.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Models/DTOs/PaymentCards/PaymentCardDto.cs) và [AddPaymentCardRequest.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Models/DTOs/PaymentCards/AddPaymentCardRequest.cs).
+   - **Service & Controller**: [IPaymentCardService.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/PaymentCards/IPaymentCardService.cs), [PaymentCardService.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/PaymentCards/PaymentCardService.cs), và [PaymentCardsController.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Controllers/PaymentCardsController.cs).
+   - **EF Migration**: Áp dụng migration `20261121103131_AddPaymentCardsTable` vào MySQL và nạp dữ liệu mẫu ban đầu cho `renter1`.
+2. **Giao diện & Tương tác Thẻ thanh toán:**
+   - **`Account.cshtml`**: Thêm panel `#payment-card-panel` với minh họa SVG rực rỡ khớp ảnh mockup, nút "Thêm thẻ (+)" và container danh sách thẻ liên kết.
+   - **`_Modals.cshtml`**: Bổ sung modal `#addPaymentCardModal` với tự động nhận diện thương hiệu thẻ (Visa, Mastercard, JCB, Napas) và định dạng tự động số thẻ, hạn MM/YY.
+   - **`account.js` & `mytrips.css`**: Điều khiển hiển thị danh sách thẻ, gọi API thêm mới, xóa và đặt làm thẻ mặc định.
+3. **Loại bỏ Tự động duyệt GPLX (Full Human Moderation):**
+   - Xóa bỏ nút `#btnBatchAutoVerifyLicenses` và modal kết quả quét trong [admin/app.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/admin/app.js).
+   - Gỡ bỏ hoàn toàn action `AutoVerifyDriverLicense` và `BatchAutoVerifyLicenses` trong [AdminUsersController.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Controllers/AdminUsersController.cs), [IAdminUserService.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/Admin/IAdminUserService.cs) và [AdminUserService.cs](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Services/Admin/AdminUserService.cs).
+4. **Vệ sinh giao diện & Gỡ bỏ văn AI:**
+   - Gỡ bỏ `.password-security-badge` khỏi `Account.cshtml`.
+   - Gỡ bỏ nút đăng xuất trong sidebar của Admin (`admin/js/layout.js`).
+   - Gỡ bỏ badge `● HỆ THỐNG TRỰC TUYẾN` và chân trang thừa `<footer>` trong `admin/index.html`.
+   - Thay thế toàn bộ từ "Escrow" thành thuật ngữ tiếng Việt chuẩn trong `Find.cshtml`, `admin/app.js`, `dispute-modal.js`, và `mytrips.js`.
+   - Sửa lỗi `vehicleImagePlaceholder` và bộ đếm giả lập 403 trong `find.js` và `admin/app.js`.
 
 ### Bối cảnh & Vấn đề:
 * Nút "Đăng xuất" trong Header Dropdown (`#btnUserHeaderLogout`) chưa hoạt động đúng do cơ chế mở modal trước đó thiếu class `active` và chưa kết nối tới popup đăng xuất chuẩn của nhóm do Misue thiết kế.
