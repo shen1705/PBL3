@@ -160,7 +160,7 @@ body {
     align-items: center;
     gap: 14px;
     width: 100%;
-    max-width: 850px;
+    max-width: 1000px;
     margin: 0 auto 18px auto;
     padding: 0;
 }
@@ -205,7 +205,7 @@ body {
 .management-card,
 .trips-card {
     position: relative;
-    max-width: 850px;
+    max-width: 1000px;
     width: 100%;
     margin: 0 auto;
     min-height: 420px;
@@ -309,27 +309,23 @@ body {
 
 .trip-card {
     display: grid;
-    grid-template-columns: 200px minmax(0, 1fr);
-    gap: 18px;
-    overflow: hidden;
-    border: 1px solid #edf0f3;
-    border-radius: 12px;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 20px;
     background: #fff;
-    transition: box-shadow 0.2s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .trip-card:hover {
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
 .trip-card img {
     width: 100%;
-    height: 140px;
+    height: 100%;
     object-fit: cover;
-}
-
-.trip-card div {
-    padding: 16px 16px 16px 0;
 }
 
 .trip-card h2 {
@@ -491,9 +487,14 @@ body {
 
 .trip-detail-task-actions {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.trip-detail-task-actions .trip-detail-action {
+    white-space: nowrap;
 }
 
 .trip-detail-action {
@@ -1278,10 +1279,6 @@ body {
 
     .trip-card {
         grid-template-columns: 1fr;
-    }
-
-    .trip-card div {
-        padding: 0 16px 16px;
     }
 }
 

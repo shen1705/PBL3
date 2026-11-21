@@ -364,6 +364,20 @@
                         </div>
                     </div>
 
+                    <!-- Banner thông báo Chế độ Chỉnh sửa cho Chủ xe -->
+                    <div class="owner-edit-mode-banner" id="ownerEditModeBanner" style="display: none;">
+                        <div class="banner-content">
+                            <i class="fa-solid fa-pen-ruler banner-icon"></i>
+                            <div>
+                                <strong>Chế độ chỉnh sửa bài đăng đang BẬT</strong>
+                                <p>Bấm vào biểu tượng cây bút (<i class="fa-solid fa-pen"></i>) tại từng phần để cập nhật nội dung trực tiếp.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-exit-edit-banner" id="btnExitEditBanner">
+                            <i class="fa-solid fa-check"></i> Xong
+                        </button>
+                    </div>
+
                     <!-- Đặc điểm -->
                     <div class="car-popup-section">
                         <h2 class="section-subheading">Đặc điểm</h2>
@@ -400,14 +414,31 @@
                     </div>
 
                     <!-- Mô tả -->
-                    <div class="car-popup-section">
-                        <h2 class="section-subheading">Mô tả</h2>
-                        <div class="car-description-content" id="popupCarDescription">
-                            <p><i class="fa-solid fa-car-side"></i> Xe đời mới, sạch sẽ, bảo dưỡng định kỳ chính hãng.</p>
-                            <p><i class="fa-solid fa-charging-station"></i> Miễn phí sạc tại các trạm sạc đối với xe điện hoặc giao nhận xe sạch sẽ đầy nhiên liệu.</p>
-                            <p><i class="fa-solid fa-camera"></i> Trang bị camera lùi và camera hành trình góc rộng sắc nét.</p>
-                            <p><i class="fa-solid fa-shield-halved"></i> Dán phim cách nhiệt cao cấp Ceramax, giảm nóng hiệu quả khi đi đường dài.</p>
-                            <p>Ghế da êm ái, máy lạnh sâu thơm tho, mang lại cảm giác thoải mái suốt chuyến đi.</p>
+                    <div class="car-popup-section" id="sectionCarDesc">
+                        <div class="section-header-inline">
+                            <h2 class="section-subheading">Mô tả</h2>
+                            <button type="button" class="btn-inline-pencil" id="secDescPencilBtn" data-target="description" title="Chỉnh sửa mô tả" style="display: none;">
+                                <i class="fa-solid fa-pen"></i> Chỉnh sửa
+                            </button>
+                        </div>
+                        <div id="viewCarDescWrapper">
+                            <div class="car-description-content" id="popupCarDescription">
+                                <p><i class="fa-solid fa-car-side"></i> Xe đời mới, sạch sẽ, bảo dưỡng định kỳ chính hãng.</p>
+                                <p><i class="fa-solid fa-charging-station"></i> Miễn phí sạc tại các trạm sạc đối với xe điện hoặc giao nhận xe sạch sẽ đầy nhiên liệu.</p>
+                                <p><i class="fa-solid fa-camera"></i> Trang bị camera lùi và camera hành trình góc rộng sắc nét.</p>
+                                <p><i class="fa-solid fa-shield-halved"></i> Dán phim cách nhiệt cao cấp Ceramax, giảm nóng hiệu quả khi đi đường dài.</p>
+                                <p>Ghế da êm ái, máy lạnh sâu thơm tho, mang lại cảm giác thoải mái suốt chuyến đi.</p>
+                            </div>
+                        </div>
+                        <div class="section-inline-editor" id="editCarDescWrapper" style="display: none;">
+                            <div class="inline-form-group">
+                                <label>Nội dung mô tả xe &amp; lưu ý cho khách thuê</label>
+                                <textarea id="inlineEditDescText" class="inline-textarea" rows="6" placeholder="Mô tả các tiện ích của xe, điều kiện nhận xe, lưu ý khi thuê..."></textarea>
+                            </div>
+                            <div class="inline-editor-actions">
+                                <button type="button" class="btn-inline-cancel" data-target="description">Hủy</button>
+                                <button type="button" class="btn-inline-save" data-target="description"><i class="fa-solid fa-floppy-disk"></i> Lưu mô tả</button>
+                            </div>
                         </div>
                     </div>
 
@@ -430,47 +461,26 @@
                     <!-- Lịch trạng thái bận & trống -->
                     <div class="car-popup-section" id="popupAvailabilityCalendarSection">
                         <div class="section-header-inline">
-                            <h2 class="section-subheading"><i class="fa-regular fa-calendar-days" style="color: #d1a34b;"></i> Lịch xe bận &amp; trống</h2>
-                            <span class="cal-status-pill"><i class="fa-solid fa-bolt"></i> Chọn ngày trực tiếp</span>
+                            <h2 class="section-subheading"><i class="fa-regular fa-calendar-days" style="color: #00a550;"></i> Lịch xe bận &amp; trống</h2>
+                            <span class="cal-status-pill"><i class="fa-solid fa-bolt"></i> Cập nhật theo thời gian thực</span>
                         </div>
                         <p class="section-plain-text" style="margin-bottom: 12px; font-size: 13.5px; color: #64748b;">
-                            Xem lịch bận/trống thực tế của xe. Bấm trực tiếp vào ngày trên lịch để chọn ngày nhận và trả xe thay vì phải lọc lại bên ngoài:
+                            Xem lịch bận/trống thực tế của xe và chọn ngày nhận - trả xe phù hợp với lộ trình của bạn:
                         </p>
 
-                        <div class="car-availability-calendar-box">
-                            <div class="cal-header-bar">
-                                <button type="button" class="cal-btn-nav" id="calPrevMonthBtn" title="Tháng trước">
-                                    <i class="fa-solid fa-chevron-left"></i>
-                                </button>
-                                <span class="cal-current-month" id="calMonthTitle">Tháng 11 / 2026</span>
-                                <button type="button" class="cal-btn-nav" id="calNextMonthBtn" title="Tháng sau">
-                                    <i class="fa-solid fa-chevron-right"></i>
-                                </button>
-                            </div>
-
-                            <div class="cal-weekdays-row">
-                                <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span class="weekend">T7</span><span class="weekend">CN</span>
-                            </div>
-
-                            <div class="cal-days-grid" id="calDaysGrid">
-                                <!-- Rendered dynamically by find.js -->
-                            </div>
-
-                            <div class="cal-legend-bar">
-                                <div class="legend-badge"><span class="badge-dot dot-available"></span> Trống (Có thể thuê)</div>
-                                <div class="legend-badge"><span class="badge-dot dot-busy"></span> Đã bận / Có người đặt</div>
-                                <div class="legend-badge"><span class="badge-dot dot-selected"></span> Khoảng ngày bạn chọn</div>
-                            </div>
-
-                            <div class="cal-selection-bar" id="calSelectionBar">
-                                <div class="selection-info">
-                                    <i class="fa-solid fa-calendar-check" style="color: #d1a34b;"></i>
-                                    <span id="calSelectionText">Đang áp dụng lịch hiện tại</span>
+                        <div class="calendar-trigger-card">
+                            <div class="cal-trigger-left">
+                                <div class="cal-trigger-icon">
+                                    <i class="fa-regular fa-calendar-days"></i>
                                 </div>
-                                <button type="button" class="cal-reset-btn" id="calResetSelectionBtn" style="display: none;">
-                                    <i class="fa-solid fa-rotate-left"></i> Chọn lại ngày
-                                </button>
+                                <div>
+                                    <strong id="calQuickSummaryText" style="font-size: 14.5px; color: #1e293b; display: block;">Lịch xe bận &amp; trống</strong>
+                                    <small id="calQuickSelectedDatesText" style="display: block; color: #64748b; margin-top: 3px;">Nhấp để mở xem chi tiết các ngày đã có người đặt và chọn ngày thuê</small>
+                                </div>
                             </div>
+                            <button type="button" class="btn-open-calendar-modal" id="btnOpenCarCalendarModal">
+                                <i class="fa-solid fa-calendar-week"></i> Xem lịch xe
+                            </button>
                         </div>
                     </div>
 
@@ -494,27 +504,67 @@
                     </div>
 
                     <!-- Tài sản thế chấp -->
-                    <div class="car-popup-section">
+                    <div class="car-popup-section" id="sectionCarCollateral">
                         <div class="section-header-inline">
                             <h2 class="section-subheading">Tài sản thế chấp</h2>
                             <i class="fa-regular fa-circle-question info-icon"></i>
+                            <button type="button" class="btn-inline-pencil" id="secCollateralPencilBtn" data-target="collateral" title="Chỉnh sửa tài sản thế chấp" style="display: none;">
+                                <i class="fa-solid fa-pen"></i> Chỉnh sửa
+                            </button>
                         </div>
-                        <p class="section-plain-text">Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.</p>
+                        <div id="viewCarCollateralWrapper">
+                            <p class="section-plain-text" id="popupCarCollateralText">Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.</p>
+                        </div>
+                        <div class="section-inline-editor" id="editCarCollateralWrapper" style="display: none;">
+                            <div class="inline-form-group" style="margin-bottom: 10px;">
+                                <label>Hình thức yêu cầu thế chấp</label>
+                                <select id="inlineCollateralTypeSelect" class="inline-select">
+                                    <option value="none">Miễn thế chấp (Không yêu cầu tiền mặt hoặc xe máy)</option>
+                                    <option value="bike_or_cash">Yêu cầu thế chấp: Xe máy (kèm cavet gốc) hoặc Tiền mặt</option>
+                                    <option value="cash_only">Yêu cầu thế chấp Tiền mặt ký quỹ</option>
+                                    <option value="custom">Quy định riêng khác</option>
+                                </select>
+                            </div>
+                            <div class="inline-form-group" id="inlineCollateralCustomGroup" style="display: none;">
+                                <label>Chi tiết tài sản / Số tiền thế chấp yêu cầu</label>
+                                <input type="text" id="inlineCollateralCustomInput" class="inline-input" placeholder="Ví dụ: 15.000.000đ hoặc Xe máy trị giá > 15 triệu kèm cavet chính chủ">
+                            </div>
+                            <div class="inline-editor-actions">
+                                <button type="button" class="btn-inline-cancel" data-target="collateral">Hủy</button>
+                                <button type="button" class="btn-inline-save" data-target="collateral"><i class="fa-solid fa-floppy-disk"></i> Lưu thế chấp</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Điều khoản -->
-                    <div class="car-popup-section">
-                        <h2 class="section-subheading">Điều khoản</h2>
-                        <div class="terms-content">
-                            <p><strong>Quy định chung:</strong></p>
-                            <ul>
-                                <li>Sử dụng xe đúng mục đích di chuyển an toàn.</li>
-                                <li>Không sử dụng xe vào mục đích phi pháp, vi phạm pháp luật.</li>
-                                <li>Không sử dụng xe thuê để cầm cố, thế chấp hoặc chuyển giao bên thứ ba.</li>
-                                <li>Không hút thuốc, nhả kẹo cao su, xả rác bừa bãi trong xe.</li>
-                                <li>Không chở hoa quả, thực phẩm tươi sống nặng mùi trong khoang xe.</li>
-                            </ul>
-                            <a href="#" class="link-expand">Xem thêm <i class="fa-solid fa-chevron-right"></i></a>
+                    <div class="car-popup-section" id="sectionCarTerms">
+                        <div class="section-header-inline">
+                            <h2 class="section-subheading">Điều khoản riêng của xe</h2>
+                            <button type="button" class="btn-inline-pencil" id="secTermsPencilBtn" data-target="terms" title="Chỉnh sửa điều khoản riêng" style="display: none;">
+                                <i class="fa-solid fa-pen"></i> Chỉnh sửa
+                            </button>
+                        </div>
+                        <div id="viewCarTermsWrapper">
+                            <div class="terms-content">
+                                <p><strong>Quy định chung của chủ xe:</strong></p>
+                                <ul id="popupCarTermsList">
+                                    <li>Sử dụng xe đúng mục đích di chuyển an toàn.</li>
+                                    <li>Không sử dụng xe vào mục đích phi pháp, vi phạm pháp luật.</li>
+                                    <li>Không sử dụng xe thuê để cầm cố, thế chấp hoặc chuyển giao bên thứ ba.</li>
+                                    <li>Không hút thuốc, nhả kẹo cao su, xả rác bừa bãi trong xe.</li>
+                                    <li>Không chở hoa quả, thực phẩm tươi sống nặng mùi trong khoang xe.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="section-inline-editor" id="editCarTermsWrapper" style="display: none;">
+                            <div class="inline-form-group">
+                                <label>Quy định &amp; Điều khoản riêng của bạn (mỗi dòng một điều khoản)</label>
+                                <textarea id="inlineTermsTextarea" class="inline-textarea" rows="6" placeholder="Nhập các điều khoản riêng của bạn (mỗi dòng một điều khoản)..."></textarea>
+                            </div>
+                            <div class="inline-editor-actions">
+                                <button type="button" class="btn-inline-cancel" data-target="terms">Hủy</button>
+                                <button type="button" class="btn-inline-save" data-target="terms"><i class="fa-solid fa-floppy-disk"></i> Lưu điều khoản</button>
+                            </div>
                         </div>
                     </div>
 
@@ -526,12 +576,43 @@
                     </div>
 
                     <!-- Vị trí xe -->
-                    <div class="car-popup-section">
-                        <h2 class="section-subheading">Vị trí xe</h2>
-                        <p class="location-exact">
-                            <i class="fa-solid fa-location-dot"></i> <strong id="popupCarSpecificLoc">Phường Hòa Thuận Tây, Quận Hải Châu</strong>
-                        </p>
-                        <small class="location-hint">Địa chỉ cụ thể sẽ được hiển thị sau khi thanh toán giữ chỗ thành công.</small>
+                    <div class="car-popup-section" id="sectionCarLoc">
+                        <div class="section-header-inline">
+                            <h2 class="section-subheading">Vị trí xe</h2>
+                            <button type="button" class="btn-inline-pencil" id="secLocPencilBtn" data-target="location" title="Chỉnh sửa vị trí xe" style="display: none;">
+                                <i class="fa-solid fa-pen"></i> Chỉnh sửa
+                            </button>
+                        </div>
+                        <div id="viewCarLocWrapper">
+                            <p class="location-exact">
+                                <i class="fa-solid fa-location-dot"></i> <strong id="popupCarSpecificLoc">Phường Hòa Thuận Tây, Quận Hải Châu</strong>
+                            </p>
+                            <small class="location-hint">Địa chỉ cụ thể sẽ được hiển thị sau khi thanh toán giữ chỗ thành công.</small>
+                        </div>
+                        <div class="section-inline-editor" id="editCarLocWrapper" style="display: none;">
+                            <div class="inline-form-row">
+                                <div class="inline-form-group">
+                                    <label>Tỉnh / Thành phố</label>
+                                    <select id="inlineCitySelect" class="inline-select">
+                                        <option value="TP. Đà Nẵng">TP. Đà Nẵng</option>
+                                        <option value="Hà Nội">Hà Nội</option>
+                                        <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                    </select>
+                                </div>
+                                <div class="inline-form-group">
+                                    <label>Quận / Huyện</label>
+                                    <input type="text" id="inlineDistrictInput" class="inline-input" placeholder="Ví dụ: Hải Châu, Cẩm Lệ...">
+                                </div>
+                            </div>
+                            <div class="inline-form-group" style="margin-top: 8px;">
+                                <label>Địa chỉ giao nhận xe chi tiết</label>
+                                <input type="text" id="inlineLocationInput" class="inline-input" placeholder="Ví dụ: 123 Nguyễn Văn Linh...">
+                            </div>
+                            <div class="inline-editor-actions">
+                                <button type="button" class="btn-inline-cancel" data-target="location">Hủy</button>
+                                <button type="button" class="btn-inline-save" data-target="location"><i class="fa-solid fa-floppy-disk"></i> Lưu vị trí</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Chủ xe -->
@@ -637,9 +718,28 @@
 
                     <!-- Box Đặt xe & Tính tiền chính -->
                     <div class="booking-widget-card">
-                        <div class="widget-price-head">
-                            <span class="widget-price-big" id="widgetPriceBig">524K</span>
-                            <span class="widget-price-period">/ngày</span>
+                        <div class="widget-price-head" id="widgetPriceHead">
+                            <div style="display: flex; align-items: baseline; gap: 4px;">
+                                <span class="widget-price-big" id="widgetPriceBig">524K</span>
+                                <span class="widget-price-period">/ngày</span>
+                            </div>
+                            <button type="button" class="btn-inline-pencil" id="secPricePencilBtn" data-target="price" title="Chỉnh sửa đơn giá thuê" style="display: none;">
+                                <i class="fa-solid fa-pen"></i> Chỉnh sửa
+                            </button>
+                        </div>
+                        <div class="section-inline-editor" id="inlineEditPriceWrapper" style="display: none; margin-bottom: 12px;">
+                            <div class="inline-form-group">
+                                <label>Giá thuê theo ngày (VNĐ)</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="number" id="inlineEditPriceInput" class="inline-input" min="100000" max="100000000" step="50000" style="flex: 1;">
+                                    <span style="font-size: 13px; font-weight: 600; color: #64748b; white-space: nowrap;">đ/ngày</span>
+                                </div>
+                                <small style="color: #64748b; font-size: 11.5px; margin-top: 3px;">Giá mới áp dụng cho các lượt đặt mới.</small>
+                            </div>
+                            <div class="inline-editor-actions">
+                                <button type="button" class="btn-inline-cancel" data-target="price">Hủy</button>
+                                <button type="button" class="btn-inline-save" data-target="price"><i class="fa-solid fa-floppy-disk"></i> Lưu giá</button>
+                            </div>
                         </div>
 
                         <!-- Khung thời gian -->
@@ -705,40 +805,75 @@
                             </div>
                         </div>
 
-                        <!-- Nút Chọn thuê -->
+                        <!-- Nút Chọn thuê / Chỉnh sửa cho Chủ xe -->
                         <button type="button" class="btn-rent-now" id="btnRentCarSubmit">CHỌN THUÊ</button>
-                        <a href="/become-owner#danh-sach-xe-content" class="btn-rent-now" id="btnOwnerManageCar" style="display: none; background: #1e293b; color: #fff; text-decoration: none; align-items: center; justify-content: center; gap: 8px;">
-                            <i class="fa-solid fa-sliders"></i> Quản lý xe của bạn
-                        </a>
+                        <button type="button" class="btn-rent-now" id="btnOwnerManageCar" style="display: none; background: #1e293b; color: #fff; text-decoration: none; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer;">
+                            <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
+                        </button>
                     </div>
 
                     <!-- Box Phụ phí có thể phát sinh -->
-                    <div class="side-panel-box extra-fees-box">
-                        <h4>Phụ phí có thể phát sinh</h4>
-                        <div class="extra-fee-item">
-                            <div class="fee-name">Phí vượt giới hạn <i class="fa-regular fa-circle-question"></i></div>
-                            <div class="fee-desc">Phụ phí phát sinh nếu lộ trình di chuyển vượt quá 300km/ngày.</div>
-                            <strong class="fee-cost">3.000đ/km</strong>
+                    <div class="side-panel-box extra-fees-box" id="sectionExtraFees">
+                        <div class="section-header-inline" style="margin-bottom: 10px;">
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #1e293b;">Phụ phí có thể phát sinh</h4>
+                            <button type="button" class="btn-inline-pencil" id="secExtraFeesPencilBtn" data-target="extra-fees" title="Chỉnh sửa các khoản phụ phí" style="display: none;">
+                                <i class="fa-solid fa-pen"></i> Chỉnh sửa
+                            </button>
                         </div>
-                        <div class="extra-fee-item">
-                            <div class="fee-name">Phí quá giờ <i class="fa-regular fa-circle-question"></i></div>
-                            <div class="fee-desc">Phụ phí phát sinh khi hoàn trả xe trễ giờ. Thuê thêm 1 ngày nếu trễ quá 5 giờ.</div>
-                            <strong class="fee-cost">70.000đ/giờ</strong>
+                        <div id="viewExtraFeesList">
+                            <div class="extra-fee-item">
+                                <div class="fee-name">Phí vượt giới hạn <i class="fa-regular fa-circle-question"></i></div>
+                                <div class="fee-desc" id="extraFeeLimitDesc">Phụ phí phát sinh nếu lộ trình di chuyển vượt quá 300km/ngày.</div>
+                                <strong class="fee-cost" id="extraFeeLimitCost">3.000đ/km</strong>
+                            </div>
+                            <div class="extra-fee-item">
+                                <div class="fee-name">Phí quá giờ <i class="fa-regular fa-circle-question"></i></div>
+                                <div class="fee-desc" id="extraFeeOvertimeDesc">Phụ phí phát sinh khi hoàn trả xe trễ giờ. Thuê thêm 1 ngày nếu trễ quá 5 giờ.</div>
+                                <strong class="fee-cost" id="extraFeeOvertimeCost">70.000đ/giờ</strong>
+                            </div>
+                            <div class="extra-fee-item">
+                                <div class="fee-name">Phí vệ sinh <i class="fa-regular fa-circle-question"></i></div>
+                                <div class="fee-desc" id="extraFeeCleanDesc">Phụ phí phát sinh khi xe không được vệ sinh sạch sẽ khi hoàn trả.</div>
+                                <strong class="fee-cost" id="extraFeeCleanCost">80.000đ</strong>
+                            </div>
+                            <div class="extra-fee-item">
+                                <div class="fee-name">Phí khử mùi <i class="fa-regular fa-circle-question"></i></div>
+                                <div class="fee-desc" id="extraFeeDeodorDesc">Phụ phí phát sinh khi xe có mùi khó chịu do hút thuốc, thực phẩm nặng mùi.</div>
+                                <strong class="fee-cost" id="extraFeeDeodorCost">500.000đ</strong>
+                            </div>
+                            <div class="extra-fee-item">
+                                <div class="fee-name">Phí sạc pin / xăng</div>
+                                <div class="fee-desc">Khách thuê vui lòng hoàn trả xe với mức pin/xăng tương đương khi nhận xe.</div>
+                                <strong class="fee-cost">Đơn giá sạc + 20.000đ/lần</strong>
+                            </div>
                         </div>
-                        <div class="extra-fee-item">
-                            <div class="fee-name">Phí vệ sinh <i class="fa-regular fa-circle-question"></i></div>
-                            <div class="fee-desc">Phụ phí phát sinh khi xe không được vệ sinh sạch sẽ khi hoàn trả.</div>
-                            <strong class="fee-cost">80.000đ</strong>
-                        </div>
-                        <div class="extra-fee-item">
-                            <div class="fee-name">Phí khử mùi <i class="fa-regular fa-circle-question"></i></div>
-                            <div class="fee-desc">Phụ phí phát sinh khi xe có mùi khó chịu do hút thuốc, thực phẩm nặng mùi.</div>
-                            <strong class="fee-cost">500.000đ</strong>
-                        </div>
-                        <div class="extra-fee-item">
-                            <div class="fee-name">Phí sạc pin / xăng</div>
-                            <div class="fee-desc">Khách thuê vui lòng hoàn trả xe với mức pin/xăng tương đương khi nhận xe.</div>
-                            <strong class="fee-cost">Đơn giá sạc + 20.000đ/lần</strong>
+
+                        <!-- Inline Edit mode for Extra Fees -->
+                        <div class="section-inline-editor" id="editExtraFeesEditor" style="display: none;">
+                            <div class="inline-form-group" style="margin-bottom: 8px;">
+                                <label>Phí vượt giới hạn (VNĐ/km)</label>
+                                <input type="number" id="inlineFeeLimitInput" class="inline-input" step="500" value="3000">
+                            </div>
+                            <div class="inline-form-group" style="margin-bottom: 8px;">
+                                <label>Giới hạn quãng đường (km/ngày)</label>
+                                <input type="number" id="inlineFeeLimitKmInput" class="inline-input" step="50" value="300">
+                            </div>
+                            <div class="inline-form-group" style="margin-bottom: 8px;">
+                                <label>Phí quá giờ (VNĐ/giờ)</label>
+                                <input type="number" id="inlineFeeOvertimeInput" class="inline-input" step="10000" value="70000">
+                            </div>
+                            <div class="inline-form-group" style="margin-bottom: 8px;">
+                                <label>Phí vệ sinh xe (VNĐ)</label>
+                                <input type="number" id="inlineFeeCleanInput" class="inline-input" step="10000" value="80000">
+                            </div>
+                            <div class="inline-form-group" style="margin-bottom: 8px;">
+                                <label>Phí khử mùi hôi/thuốc lá (VNĐ)</label>
+                                <input type="number" id="inlineFeeDeodorInput" class="inline-input" step="50000" value="500000">
+                            </div>
+                            <div class="inline-editor-actions">
+                                <button type="button" class="btn-inline-cancel" data-target="extra-fees">Hủy</button>
+                                <button type="button" class="btn-inline-save" data-target="extra-fees"><i class="fa-solid fa-floppy-disk"></i> Lưu phụ phí</button>
+                            </div>
                         </div>
 
                         <div class="report-car-row">
@@ -1037,64 +1172,61 @@
         </div>
     </div>
 
-    <!-- Modal Giả lập Thanh toán Ký quỹ (25% Cọc) -->
+    <!-- Modal Thanh toán Ký quỹ (25% Cọc) -->
     <div class="payment-sim-overlay" id="paymentSimulationModal" hidden>
         <div class="payment-sim-dialog" role="dialog" aria-modal="true" aria-labelledby="paySimTitle">
-            <button class="payment-sim-close" id="closePaymentSimModal" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" class="payment-sim-close" id="closePaymentSimModal" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
 
             <div class="pay-sim-header">
-                <h3 id="paySimTitle">Thanh toán cọc giữ xe</h3>
-                <p class="pay-sim-car-meta" id="paySimCarMeta">Honda City 2022 · Thuê 2 ngày</p>
+                <div class="pay-sim-badge"><i class="fa-solid fa-shield-halved"></i> CỔNG KÝ QUỸ AZU ESCROW SECURE</div>
+                <h3 id="paySimTitle">Thanh toán cọc giữ xe (25%)</h3>
+                <p>Khoản thanh toán được bảo lưu an toàn tại tài khoản bảo chứng trung gian cho đến khi nhận bàn giao xe.</p>
             </div>
 
             <div class="pay-sim-body">
                 <div class="pay-sim-amount-card">
-                    <span class="pay-sim-amount-label">Tiền cọc <strong>(25%)</strong></span>
-                    <strong class="pay-sim-amount-val" id="paySimAmount">350.000 đ</strong>
+                    <span class="pay-sim-amount-label">SỐ TIỀN CỌC CẦN THANH TOÁN (25%)</span>
+                    <strong class="pay-sim-amount-val" id="paySimAmount">0 đ</strong>
+                    <div class="pay-sim-car-meta" id="paySimCarMeta">Thuê xe Vinfast VF3 • 2 ngày</div>
                 </div>
 
-                <div class="pay-sim-transfer-section">
-                    <h4 class="pay-sim-transfer-title">Thông tin chuyển khoản</h4>
-                    <div class="pay-sim-qr-box">
-                        <div class="qr-col">
-                            <div class="qr-frame">
-                                <img id="paySimQrImage" src="/seed/vietqr-escrow.png" alt="Mã VietQR Thanh toán mô phỏng" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=AZU_ESCROW_CAR_RENTAL'">
-                            </div>
-                            <div class="qr-caption">QR minh họa</div>
+                <div class="pay-sim-qr-box">
+                    <div class="qr-frame">
+                        <img id="paySimQrImage" src="/seed/vietqr-escrow.png" alt="Mã VietQR Thanh toán ký quỹ" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=AZU_ESCROW_CAR_RENTAL'">
+                        <div class="qr-scan-line"></div>
+                    </div>
+                    <div class="qr-details">
+                        <div class="qr-detail-row">
+                            <span>Ngân hàng thụ hưởng:</span>
+                            <strong>MBBank (Ngoại thương &amp; Quân Đội)</strong>
                         </div>
-                        <div class="qr-details">
-                            <div class="qr-detail-row">
-                                <span class="qr-row-label">Ngân hàng</span>
-                                <strong class="qr-row-value">MBBank</strong>
-                            </div>
-                            <div class="qr-detail-row">
-                                <span class="qr-row-label">Số tài khoản bảo chứng</span>
-                                <strong class="qr-row-value">AZU-ESCROW-88899</strong>
-                            </div>
-                            <div class="qr-detail-row">
-                                <span class="qr-row-label">Chủ tài khoản</span>
-                                <strong class="qr-row-value">AZU CAR RENTAL ESCROW</strong>
-                            </div>
-                            <div class="qr-detail-row">
-                                <span class="qr-row-label">Nội dung chuyển khoản</span>
-                                <strong class="qr-row-value" id="paySimTransferMemo">AZUPAY019242</strong>
-                            </div>
-                            <div class="qr-detail-row qr-timer-row">
-                                <span class="qr-row-label">Thời gian còn lại</span>
-                                <strong class="qr-row-value qr-countdown" id="paySimCountdown">14:57</strong>
-                            </div>
+                        <div class="qr-detail-row">
+                            <span>Số tài khoản bảo chứng:</span>
+                            <strong style="color: #0284c7; font-size: 15px;">AZU-ESCROW-88899</strong>
+                        </div>
+                        <div class="qr-detail-row">
+                            <span>Chủ tài khoản:</span>
+                            <strong>AZU CAR RENTAL ESCROW</strong>
+                        </div>
+                        <div class="qr-detail-row">
+                            <span>Nội dung chuyển khoản:</span>
+                            <strong id="paySimTransferMemo" style="color: #b45309;">AZUPAY 20261111</strong>
+                        </div>
+                        <div class="qr-timer-pill">
+                            <i class="fa-solid fa-clock-rotate-left"></i> Giao dịch hết hạn trong: <strong id="paySimCountdown">14:59</strong>
                         </div>
                     </div>
                 </div>
 
                 <div class="pay-sim-instruction">
-                    Tiền cọc được giữ tại tài khoản bảo chứng đến khi bạn nhận xe. Đây là giao dịch mô phỏng.
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Quét mã QR qua ứng dụng ngân hàng hoặc bấm nút bên dưới để xác nhận hoàn tất chuyển khoản cọc.</span>
                 </div>
             </div>
 
             <div class="pay-sim-footer">
                 <button type="button" class="btn-confirm-sim-payment" id="btnConfirmPaymentSimulation">
-                    Xác nhận thanh toán mô phỏng
+                    <i class="fa-solid fa-circle-check"></i> Xác nhận thanh toán thành công
                 </button>
                 <button type="button" class="btn-cancel-sim-payment" id="btnCancelPaymentSimulation">
                     Quay lại chỉnh sửa đơn
@@ -1123,6 +1255,65 @@
                 </a>
                 <button type="button" class="btn-close-gplx-modal" id="btnCancelGplxModal">
                     Để sau
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Lịch xe bận & trống (Popup) -->
+    <div class="car-calendar-overlay" id="carCalendarModal" hidden>
+        <div class="car-calendar-dialog" role="dialog" aria-modal="true" aria-labelledby="carCalendarTitle">
+            <button class="car-calendar-close" id="closeCarCalendarModal" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+            <div class="car-calendar-header">
+                <div class="car-calendar-icon-wrap">
+                    <i class="fa-regular fa-calendar-days"></i>
+                </div>
+                <div>
+                    <h3 id="carCalendarTitle">Lịch xe bận &amp; trống</h3>
+                    <p class="car-calendar-subtitle">Kiểm tra các ngày xe bận hoặc chọn ngày nhận - trả xe trực tiếp</p>
+                </div>
+            </div>
+
+            <div class="car-availability-calendar-box in-modal">
+                <div class="cal-header-bar">
+                    <button type="button" class="cal-btn-nav" id="calPrevMonthBtn" title="Tháng trước">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <span class="cal-current-month" id="calMonthTitle">Tháng 11 / 2026</span>
+                    <button type="button" class="cal-btn-nav" id="calNextMonthBtn" title="Tháng sau">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="cal-weekdays-row">
+                    <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span class="weekend">T7</span><span class="weekend">CN</span>
+                </div>
+
+                <div class="cal-days-grid" id="calDaysGrid">
+                    <!-- Rendered dynamically by find.js -->
+                </div>
+
+                <div class="cal-legend-bar">
+                    <div class="legend-badge"><span class="badge-dot dot-available"></span> Trống (Có thể thuê)</div>
+                    <div class="legend-badge"><span class="badge-dot dot-busy"></span> Đã bận / Có người đặt</div>
+                    <div class="legend-badge"><span class="badge-dot dot-selected"></span> Khoảng ngày bạn chọn</div>
+                </div>
+
+                <div class="cal-selection-bar" id="calSelectionBar">
+                    <div class="selection-info">
+                        <i class="fa-solid fa-calendar-check" style="color: #00a550;"></i>
+                        <span id="calSelectionText">Đang áp dụng lịch hiện tại</span>
+                    </div>
+                    <button type="button" class="cal-reset-btn" id="calResetSelectionBtn" style="display: none;">
+                        <i class="fa-solid fa-rotate-left"></i> Chọn lại ngày
+                    </button>
+                </div>
+            </div>
+
+            <div class="car-calendar-footer">
+                <button type="button" class="btn-cancel-cal" id="btnCloseCarCalendarBottom">Đóng</button>
+                <button type="button" class="btn-apply-cal" id="btnApplyCalendarSelection">
+                    <i class="fa-solid fa-check"></i> Áp dụng ngày chọn
                 </button>
             </div>
         </div>

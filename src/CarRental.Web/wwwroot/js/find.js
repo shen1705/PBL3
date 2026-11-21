@@ -2904,7 +2904,7 @@ function startSimCountdown(durationSeconds) {
         if (remaining <= 0) {
             clearInterval(simCountdownTimer);
             updateDisplay();
-            alert('Đã hết thời gian phiên thanh toán mô phỏng. Vui lòng thử lại.');
+            alert('Đã hết thời gian phiên thanh toán. Vui lòng thử lại.');
             closePaymentSimulationModal();
         } else {
             updateDisplay();
@@ -2998,7 +2998,7 @@ document.getElementById('btnConfirmPaymentSimulation')?.addEventListener('click'
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = 'Xác nhận thanh toán mô phỏng';
+            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Xác nhận thanh toán thành công';
         }
     }
 });
