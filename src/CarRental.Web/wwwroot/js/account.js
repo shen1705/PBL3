@@ -843,7 +843,7 @@ async function renderTrips() {
         depositSmall.style.fontSize = '13px';
         depositSmall.style.color = '#1d4ed8';
         depositSmall.style.marginTop = '4px';
-        depositSmall.textContent = `Đã cọc trực tuyến: ${Number(trip.depositAmount || 0).toLocaleString('vi-VN')} đ (25%)`;
+        depositSmall.textContent = `Đã thanh toán ký quỹ: ${Number(trip.depositAmount || 0).toLocaleString('vi-VN')} đ (100%)`;
 
         info.append(title, meta, statusSpan, price, depositSmall);
 

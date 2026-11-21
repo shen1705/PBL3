@@ -1090,7 +1090,7 @@ function renderTripDetail(booking, tab = 'overview') {
             <div class="trip-detail-clauses">
                 <h4>Điều khoản áp dụng</h4>
                 <ul>
-                    <li>Tiền cọc trực tuyến bằng 25% tổng giá thuê; phần còn lại hai bên thanh toán trực tiếp.</li>
+                    <li>Thanh toán ký quỹ 100% tổng giá thuê trực tuyến qua sàn AZU Car Escrow; không trả tiền thuê bằng tiền mặt khi nhận xe.</li>
                     <li>Chỉ có thể hủy khi đơn đang chờ duyệt hoặc đã được duyệt; đơn đã duyệt không thể hủy từ thời điểm nhận xe.</li>
                     <li>Nếu chủ xe không bàn giao xe, gửi báo sự cố kèm thông tin/bằng chứng để Staff xác minh. Nếu xác định lỗi chủ xe, đơn được xử lý theo quy trình khiếu nại và tiền cọc được hoàn theo kết quả xử lý.</li>
                 </ul>
@@ -1168,13 +1168,13 @@ function renderTripDetail(booking, tab = 'overview') {
                 <div class="trip-payment-total"><span>Tổng giá trị thuê</span><strong>${formatTripMoney(booking.priceLockedTotal)}</strong></div>
                 <div class="trip-payment-deposit">
                     <div class="trip-payment-line">
-                        <div><span>Tiền cọc (25%)</span><span class="trip-payment-status">${escapeTripHtml(depositLabel)}</span></div>
+                        <div><span>Thanh toán Ký quỹ (100%)</span><span class="trip-payment-status">${escapeTripHtml(depositLabel)}</span></div>
                         <strong>${formatTripMoney(booking.depositAmount)}</strong>
                     </div>
                 </div>
-                <div class="trip-payment-line trip-payment-remaining">
-                    <div><span>${isOwner ? 'Khách thanh toán trực tiếp khi nhận xe' : 'Thanh toán trực tiếp cho chủ xe khi nhận xe'}</span></div>
-                    <strong>${formatTripMoney(booking.remainingAmount)}</strong>
+                <div class="trip-payment-line trip-payment-remaining" style="color: #16a34a;">
+                    <div><span>${isOwner ? 'Tiền thuê thanh toán khi nhận xe' : 'Tiền thuê phải trả khi nhận xe'}</span></div>
+                    <strong>0 đ (Đã thanh toán đủ)</strong>
                 </div>
             </aside>
         </div>

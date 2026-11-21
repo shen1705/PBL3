@@ -348,13 +348,13 @@
 
                 <div class="azu-disp-notice">
                     <div class="azu-disp-notice-row">
-                        <span><i class="fa-solid fa-shield-halved"></i> Tiền cọc bảo chứng (AZU Escrow):</span>
+                        <span><i class="fa-solid fa-shield-halved"></i> Tiền thanh toán ký quỹ (AZU Escrow):</span>
                         <span style="font-size:15px; color:#b45309">${Number(depositAmount || 0).toLocaleString('vi-VN')} đ</span>
                     </div>
                     <p class="azu-disp-notice-desc">
                         ${isOwner
-                            ? 'Hệ thống sẽ <strong>phong tỏa tiền cọc 25%</strong> của khách thuê. Khoản phụ phí/phạt bồi thường đề xuất của bạn sẽ được chuyển đến <strong>Quản trị viên (Admin)</strong> đối chiếu chứng cứ và phê duyệt khấu trừ trực tiếp từ nguồn cọc này bồi hoàn cho bạn.'
-                            : 'Khiếu nại sẽ được chuyển đến Quản trị viên để thụ lý, tạm hoãn hoàn cọc và quyết toán cho đến khi có phán quyết thỏa đáng.'}
+                            ? 'Hệ thống sẽ <strong>phong tỏa toàn bộ tiền ký quỹ</strong> của đơn thuê. Khoản phụ phí/phạt bồi thường đề xuất của bạn sẽ được chuyển đến <strong>Quản trị viên (Admin)</strong> đối chiếu chứng cứ và phê duyệt khấu trừ trực tiếp từ nguồn ký quỹ này bồi hoàn cho bạn.'
+                            : 'Khiếu nại sẽ được chuyển đến Quản trị viên để thụ lý, tạm hoãn hoàn tiền và quyết toán cho đến khi có phán quyết thỏa đáng.'}
                     </p>
                 </div>
 

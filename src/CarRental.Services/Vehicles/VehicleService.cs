@@ -461,6 +461,15 @@ public class VehicleService : IVehicleService
                     "Tài khoản của bạn đang bị áp dụng chế tài kỷ luật hoặc nợ phạt chưa thanh toán (UC-AS-11). Vui lòng liên hệ Quản trị viên để được hỗ trợ.", ErrorCodes.Forbidden);
             }
 
+            // Task 1 - Flaw 1: Kiểm tra hồ sơ chủ xe (OwnerProfile) bắt buộc phải tồn tại và đã được duyệt (Approved)
+            var ownerProfile = await _db.OwnerProfiles.AsNoTracking()
+                .FirstOrDefaultAsync(op => op.UserId == ownerId, ct);
+            if (ownerProfile == null || ownerProfile.ApprovalStatus != OwnerApprovalStatuses.Approved)
+            {
+                return ServiceResult<VehicleDetailDto>.Fail(
+                    "Bạn cần hoàn tất hồ sơ đăng ký chủ xe (CCCD) và được Quản trị viên phê duyệt trước khi đăng ký xe mới.", ErrorCodes.Forbidden);
+            }
+
             // check license plate
             var cleanPlate = request.LicensePlate.Trim().ToUpperInvariant();
             var plateExists = await _db.Vehicles
@@ -713,10 +722,18 @@ public class VehicleService : IVehicleService
             if (vehicle.OwnerId != ownerId)
                 return ServiceResult<int>.Fail("Bạn không có quyền khóa lịch của xe này.", ErrorCodes.Forbidden);
 
-            var start = request.StartDate.Date;
-            var end = request.EndDate.Date == request.StartDate.Date
-                ? request.StartDate.Date.AddDays(1).AddSeconds(-1)
-                : request.EndDate.Date.AddDays(1).AddSeconds(-1);
+            // Task 1 - Flaw 6: Hỗ trợ khóa lịch linh hoạt theo giờ hoặc cả ngày
+            DateTime start, end;
+            if (request.StartDate.TimeOfDay == TimeSpan.Zero && request.EndDate.TimeOfDay == TimeSpan.Zero)
+            {
+                start = request.StartDate.Date;
+                end = request.EndDate.Date.AddDays(1).AddSeconds(-1);
+            }
+            else
+            {
+                start = request.StartDate;
+                end = request.EndDate;
+            }
 
             // check conflicting bookings
             var lockingStatuses = BookingStatuses.Locking.ToArray();

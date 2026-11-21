@@ -245,7 +245,7 @@ public class AdminDisputeService : IAdminDisputeService
                 payment = new Payment
                 {
                     BookingId = booking.BookingId,
-                    DepositStatus = DepositStatuses.Refunded,
+                    DepositStatus = DepositStatuses.Transferred,
                     PenaltyAmount = penaltyAmount > 0 ? penaltyAmount : null,
                     CommissionRate = commissionRate,
                     CommissionAmount = commissionAmount,
@@ -255,7 +255,7 @@ public class AdminDisputeService : IAdminDisputeService
             }
             else
             {
-                payment.DepositStatus = DepositStatuses.Refunded;
+                payment.DepositStatus = DepositStatuses.Transferred;
                 if (penaltyAmount > 0)
                 {
                     payment.PenaltyAmount = penaltyAmount;

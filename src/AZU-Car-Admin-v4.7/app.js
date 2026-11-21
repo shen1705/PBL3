@@ -698,9 +698,9 @@ async function renderFees() {
           <div class="help">Mặc định 5%. Trích từ tổng giá trị hợp đồng khi đối soát chuyến hoàn tất.</div>
         </div>
         <div class="field">
-          <label for="depositRateInput">Tỷ lệ tiền cọc bảo chứng Escrow (%)</label>
-          <input id="depositRateInput" type="number" min="10" max="90" step="5" value="${depPct}">
-          <div class="help">Mặc định 25%. Tiền cọc giữ trong tài khoản trung gian ký quỹ trước khi giao xe.</div>
+          <label for="depositRateInput">Tỷ lệ thanh toán ký quỹ trực tuyến Escrow (%)</label>
+          <input id="depositRateInput" type="number" min="10" max="100" step="5" value="${depPct}">
+          <div class="help">Mặc định 100%. Tiền thuê được giữ an toàn trong tài khoản ký quỹ trung gian Escrow trước khi đối soát bàn giao xe.</div>
         </div>
         <div class="field">
           <label for="penaltyRateInput">Tỷ lệ phạt hủy đơn phía Chủ xe (%)</label>
@@ -1575,7 +1575,7 @@ document.body.addEventListener('click', e => {
     const deadlineVal = Number(document.getElementById('deadlineInput')?.value);
 
     if (isNaN(commVal) || commVal < 1 || commVal > 50) return toast('Hoa hồng từ 1% đến 50%');
-    if (isNaN(depVal) || depVal < 10 || depVal > 90) return toast('Tiền cọc từ 10% đến 90%');
+    if (isNaN(depVal) || depVal < 10 || depVal > 100) return toast('Tỷ lệ ký quỹ từ 10% đến 100%');
     if (isNaN(penVal) || penVal < 5 || penVal > 50) return toast('Phạt hủy từ 5% đến 50%');
 
     showModal('Cập nhật cấu hình tài chính toàn sàn', `
