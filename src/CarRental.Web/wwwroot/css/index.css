@@ -2260,3 +2260,99 @@ body {
         display: none;
     }
 }
+
+/* ==========================================================================
+   Misue Logout Dialog (Standardized AZU Car Logout Popup)
+   ========================================================================== */
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100250;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(17, 24, 39, 0.65);
+    backdrop-filter: blur(2px);
+    box-sizing: border-box;
+}
+
+.dialog-backdrop[hidden] {
+    display: none !important;
+}
+
+.register-dialog {
+    position: relative;
+    width: min(100% - 32px, 450px);
+    padding: 36px 32px 32px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    animation: dialogPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dialogPopIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.register-dialog h2 {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1c2635;
+}
+
+.register-dialog p {
+    margin: 0 0 28px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dialog-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: #4b5563;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.dialog-close:hover {
+    background: #e5e7eb;
+}
+
+.register-dialog .primary-button {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 12px;
+    background: #212529;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: none;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.register-dialog .primary-button:hover {
+    background: #111827;
+}

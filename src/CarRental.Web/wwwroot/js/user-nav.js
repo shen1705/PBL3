@@ -357,53 +357,99 @@
             });
         });
 
-        // Logout Confirmation Modal
+        // Logout Confirmation Modal (Misue Pattern)
         const logoutTrigger = document.getElementById('btnUserHeaderLogout');
-        const logoutModal = document.getElementById('userLogoutConfirmModal');
-        const closeLogoutBtn = document.getElementById('closeUserLogoutModalBtn');
-        const cancelLogoutBtn = document.getElementById('btnCancelUserLogout');
-        const confirmLogoutBtn = document.getElementById('btnConfirmUserLogout');
+        const logoutModal = document.getElementById('logout-modal');
+        const closeLogoutBtn = document.getElementById('close-modal-btn');
+        const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
+
+        function openLogoutDialog() {
+            closeAllDropdowns();
+            if (logoutModal) {
+                logoutModal.hidden = false;
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeLogoutDialog() {
+            if (logoutModal) {
+                logoutModal.hidden = true;
+                document.body.style.overflow = '';
+            }
+        }
 
         if (logoutTrigger && logoutModal) {
-            logoutTrigger.addEventListener('click', () => {
-                closeAllDropdowns();
-                openUserModal(logoutModal);
+            logoutTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                openLogoutDialog();
             });
         }
 
-        if (closeLogoutBtn && logoutModal) {
-            closeLogoutBtn.addEventListener('click', () => closeUserModal(logoutModal));
+        // Support any legacy trigger if present
+        document.querySelectorAll('#trip-logout').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                openLogoutDialog();
+            });
+        });
+
+        if (closeLogoutBtn) {
+            closeLogoutBtn.addEventListener('click', closeLogoutDialog);
         }
 
-        if (cancelLogoutBtn && logoutModal) {
-            cancelLogoutBtn.addEventListener('click', () => closeUserModal(logoutModal));
+        if (logoutModal) {
+            logoutModal.addEventListener('click', (e) => {
+                if (e.target === logoutModal) closeLogoutDialog();
+            });
         }
 
-        if (confirmLogoutBtn) {
-            confirmLogoutBtn.addEventListener('click', () => {
-                sessionStorage.clear();
-                window.location.href = '/logout';
+        if (confirmLogoutBtn && !confirmLogoutBtn.dataset.bound) {
+            confirmLogoutBtn.dataset.bound = 'true';
+            confirmLogoutBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                confirmLogoutBtn.disabled = true;
+                confirmLogoutBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang đăng xuất...';
+                try {
+                    if (window.AzuStore?.logout) {
+                        await window.AzuStore.logout();
+                    } else {
+                        sessionStorage.clear();
+                        window.location.href = '/logout';
+                    }
+                } catch (err) {
+                    console.error('Logout error:', err);
+                    sessionStorage.clear();
+                    window.location.href = '/logout';
+                }
             });
         }
 
         // Close on backdrop click
-        [changePwdModal, logoutModal].forEach(modal => {
-            if (modal) {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) closeUserModal(modal);
-                });
+        if (changePwdModal) {
+            changePwdModal.addEventListener('click', (e) => {
+                if (e.target === changePwdModal) closeUserModal(changePwdModal);
+            });
+        }
+
+        // ESC key closes modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (logoutModal && !logoutModal.hidden) closeLogoutDialog();
+                if (changePwdModal && changePwdModal.classList.contains('active')) closeUserModal(changePwdModal);
             }
         });
     }
 
     function openUserModal(modal) {
         if (!modal) return;
+        modal.classList.add('active');
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
     function closeUserModal(modal) {
         if (!modal) return;
+        modal.classList.remove('active');
         modal.style.display = 'none';
         document.body.style.overflow = '';
     }

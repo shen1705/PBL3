@@ -257,8 +257,33 @@ Phiên làm việc này tập trung dọn dẹp các thành phần giao diện k
 [9. 7 Operational Flaws Fix & 100% Online Escrow Transition] (Hoàn tất 100% - Session 11)
        │
        ▼
-[10. User Dropdown, Notification Center & Admin Password Flow] (Hoàn tất 100% - Session 12) ◄─── (VỪA HOÀN THÀNH)
+[10. User Dropdown, Notification Center & Admin Password Flow] (Hoàn tất 100% - Session 12)
        │
        ▼
-[11. Inspect Deferred Find.cshtml Links (Task 2 - Mục 4) / Favorite Vehicles]
+[11. Misue Logout Modal Integration & Header Dropdown Hookup] (Hoàn tất 100% - Session 13) ◄─── (VỪA HOÀN THÀNH)
+       │
+       ▼
+[12. Inspect Deferred Find.cshtml Links (Task 2 - Mục 4) / Favorite Vehicles]
 ```
+
+---
+
+## 7. Chi Tiết Session 13: Tích Hợp Popup Đăng Xuất Chuẩn Của Misue
+
+### Bối cảnh & Vấn đề:
+* Nút "Đăng xuất" trong Header Dropdown (`#btnUserHeaderLogout`) chưa hoạt động đúng do cơ chế mở modal trước đó thiếu class `active` và chưa kết nối tới popup đăng xuất chuẩn của nhóm do Misue thiết kế.
+* Trước đó popup của Misue (`#logout-modal` với class `.register-dialog`, viền bo góc, nút đen `#212529`) bị đặt cục bộ tại `Account.cshtml`, `BecomeOwner.cshtml`, và `MyTrips.cshtml`, không xuất hiện ở các trang khác như Trang chủ (`/`), Tìm xe (`/find`), v.v.
+
+### Các thay đổi kỹ thuật:
+1. **Global hóa Popup Misue vào `_Modals.cshtml`:**
+   * Di dời markup popup `#logout-modal` (`.dialog-backdrop` + `.register-dialog` + `#close-modal-btn` + `#confirm-logout-btn`) vào [src/CarRental.Web/Views/Shared/_Modals.cshtml](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Shared/_Modals.cshtml).
+   * Xóa bỏ các khối markup trùng lặp tại [Account.cshtml](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Home/Account.cshtml), [BecomeOwner.cshtml](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Home/BecomeOwner.cshtml), và [MyTrips.cshtml](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/Views/Home/MyTrips.cshtml).
+2. **Đồng bộ CSS toàn cục trong `index.css`:**
+   * Bổ sung styles chuẩn của Misue (`.dialog-backdrop`, `.register-dialog`, `.dialog-close`, animation `dialogPopIn`, v.v.) vào [src/CarRental.Web/wwwroot/css/index.css](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/css/index.css) để popup hiển thị đồng nhất 100% trên mọi trang.
+3. **Nối sự kiện tương tác trong `user-nav.js`:**
+   * Bắt sự kiện click `#btnUserHeaderLogout` mở `#logout-modal` (`logoutModal.hidden = false`).
+   * Hỗ trợ đóng popup qua nút `X` (`#close-modal-btn`), click ra ngoài nền backdrop, hoặc phím `Escape`.
+   * Gắn xử lý đăng xuất an toàn qua `window.AzuStore.logout()` (gọi API xóa session, xóa local state và điều hướng mượt mà).
+   * Khắc phục hàm `openUserModal`/`closeUserModal` hỗ trợ thêm class `.active` cho các popup khác như Đổi mật khẩu.
+4. **Phòng tránh trùng lặp sự kiện (Event Debouncing):**
+   * Đặt cờ `dataset.bound = 'true'` trên `#confirm-logout-btn` trong `user-nav.js`, [account.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/account.js), [mytrips.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/mytrips.js), và [become-owner.js](file:///C:/Users/admin/documents/PBL3/PBL3/src/CarRental.Web/wwwroot/js/become-owner.js).

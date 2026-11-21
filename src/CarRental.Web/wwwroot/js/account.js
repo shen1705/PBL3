@@ -1065,14 +1065,17 @@ logoutModal?.addEventListener('click', (e) => {
     }
 });
 
-confirmLogoutBtn?.addEventListener('click', async () => {
-    if (window.AzuStore?.logout) {
-        await window.AzuStore.logout();
-    } else {
-        sessionStorage.clear();
-        window.location.href = '/';
-    }
-});
+if (confirmLogoutBtn && !confirmLogoutBtn.dataset.bound) {
+    confirmLogoutBtn.dataset.bound = 'true';
+    confirmLogoutBtn.addEventListener('click', async () => {
+        if (window.AzuStore?.logout) {
+            await window.AzuStore.logout();
+        } else {
+            sessionStorage.clear();
+            window.location.href = '/';
+        }
+    });
+}
 
 // address management
 
