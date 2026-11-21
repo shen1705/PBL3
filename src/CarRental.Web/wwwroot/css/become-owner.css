@@ -604,11 +604,12 @@ a {
 .dialog-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 10;
+    z-index: 1000;
     display: grid;
     padding: 20px;
     place-items: center;
     background: rgba(17, 24, 39, 0.42);
+    overflow-y: auto;
 }
 
 .register-dialog {

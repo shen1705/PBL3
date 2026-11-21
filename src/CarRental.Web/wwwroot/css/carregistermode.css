@@ -522,14 +522,38 @@ input {
 .registration-overlay.wizard-inpage-mode .registration-modal-card {
     width: 100%;
     max-height: none;
+    height: auto;
+    overflow: visible;
     box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
     border: 1px solid #e2e8f0;
+}
+
+.registration-overlay.wizard-inpage-mode .registration-wizard-grid {
+    max-height: none;
+    min-height: 560px;
+    height: auto;
+    grid-template-rows: auto;
+}
+
+.registration-overlay.wizard-inpage-mode .reg-wizard-main {
+    max-height: none;
+    height: auto;
+    overflow-y: visible;
+}
+
+.registration-overlay.wizard-inpage-mode .reg-stepper-sidebar {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    height: fit-content;
+    min-height: 500px;
 }
 
 .registration-modal-card {
     position: relative;
     width: min(940px, 96vw);
-    max-height: 90vh;
+    height: min(92vh, 860px);
+    max-height: 92vh;
     background: #ffffff;
     border-radius: 20px;
     box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.4);
@@ -565,8 +589,11 @@ input {
 .registration-wizard-grid {
     display: grid;
     grid-template-columns: 310px 1fr;
-    min-height: 540px;
-    max-height: 90vh;
+    grid-template-rows: 100%;
+    min-height: 0;
+    height: 100%;
+    flex: 1;
+    max-height: 100%;
 }
 
 /* Sidebar Stepper (Tông màu Trắng & Xanh Navy) */
@@ -577,6 +604,8 @@ input {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .reg-stepper-header {
@@ -735,6 +764,29 @@ input {
     padding: 32px 36px;
     overflow-y: auto;
     background: #ffffff;
+    min-height: 0;
+    height: 100%;
+}
+
+.reg-wizard-main::-webkit-scrollbar,
+.reg-stepper-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.reg-wizard-main::-webkit-scrollbar-track,
+.reg-stepper-sidebar::-webkit-scrollbar-track {
+    background: #f8fafc;
+}
+
+.reg-wizard-main::-webkit-scrollbar-thumb,
+.reg-stepper-sidebar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 99px;
+}
+
+.reg-wizard-main::-webkit-scrollbar-thumb:hover,
+.reg-stepper-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .pane-header {
@@ -1147,8 +1199,19 @@ input {
 @media (max-width: 768px) {
     .registration-wizard-grid {
         grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
         max-height: 90vh;
         overflow-y: auto;
+    }
+    .registration-overlay.wizard-inpage-mode .registration-wizard-grid {
+        max-height: none;
+        overflow-y: visible;
+        grid-template-rows: auto;
+    }
+    .registration-overlay.wizard-inpage-mode .reg-stepper-sidebar {
+        position: static;
+        min-height: auto;
+        height: auto;
     }
     .reg-stepper-sidebar {
         border-right: none;

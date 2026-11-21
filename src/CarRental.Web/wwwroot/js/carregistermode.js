@@ -65,6 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // scroll top
         const mainPanel = document.querySelector('.reg-wizard-main');
         if (mainPanel) mainPanel.scrollTop = 0;
+        if (registrationOverlay && registrationOverlay.classList.contains('wizard-inpage-mode')) {
+            window.scrollTo({ top: Math.max(0, registrationOverlay.offsetTop - 20), behavior: 'smooth' });
+        }
     }
 
     // stepper click
