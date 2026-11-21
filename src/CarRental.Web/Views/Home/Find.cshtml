@@ -916,6 +916,25 @@
                         </div>
                     </div>
 
+                    <!-- Phần 2b: Quy định Tài sản thế chấp của chủ xe (Flaw 2) -->
+                    <div class="booking-section-card booking-collateral-alert-card">
+                        <h4 class="section-card-title"><i class="fa-solid fa-shield-halved" style="color: #0284c7;"></i> Quy định tài sản thế chấp khi nhận xe</h4>
+                        <div class="booking-collateral-content" id="bookCollateralContent" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px 14px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                <span class="collateral-type-tag" id="bookCollateralTag" style="background: #0284c7; color: #fff; font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">
+                                    <i class="fa-solid fa-circle-info"></i> Yêu cầu từ chủ xe
+                                </span>
+                                <strong id="bookCollateralTitle" style="font-size: 13.5px; color: #0369a1;">Quy định thế chấp</strong>
+                            </div>
+                            <p class="collateral-desc-text" id="bookCollateralText" style="margin: 0 0 6px 0; font-size: 13px; color: #0c4a6e; line-height: 1.45;">
+                                Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.
+                            </p>
+                            <small class="collateral-hint-text" style="display: block; font-size: 12px; color: #0284c7;">
+                                <i class="fa-solid fa-hand-holding-hand"></i> Bạn sẽ giao tài sản thế chấp (nếu có) trực tiếp cho chủ xe lúc nhận chìa khóa và nhận lại đầy đủ ngay khi hoàn tất trả xe.
+                            </small>
+                        </div>
+                    </div>
+
                     <!-- Phần 3: Phương thức thanh toán -->
                     <div class="booking-section-card">
                         <h4 class="section-card-title"><i class="fa-solid fa-credit-card"></i> Phương thức thanh toán</h4>
@@ -964,10 +983,15 @@
                         </div>
 
                         <div class="contract-checkbox-row" style="margin-top: 10px;">
-                            <label class="custom-check-label" style="display: flex; gap: 8px; align-items: flex-start; cursor: pointer; font-size: 13.5px; color: #334155; line-height: 1.45;">
-                                <input type="checkbox" id="checkAgreeContract" required style="margin-top: 3px; accent-color: #00a550; width: 16px; height: 16px;">
-                                <span>Tôi đã đọc, hiểu rõ nội dung <a href="javascript:void(0)" id="linkOpenSampleContract" style="color: #00a550; text-decoration: underline; font-weight: 600;">Hợp đồng thuê xe</a> và cam kết tuân thủ Chính sách bảo mật &amp; Điều khoản thuê xe của AZU Car. <span class="req">*</span></span>
-                            </label>
+                            <div class="custom-check-box-wrap" id="checkAgreeContractWrapper" style="display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 13.5px; color: #334155; line-height: 1.45; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; transition: border-color 0.2s;">
+                                <input type="checkbox" id="checkAgreeContract" required style="margin-top: 3px; accent-color: #00a550; width: 18px; height: 18px; pointer-events: none;">
+                                <div>
+                                    <span>Tôi đã đọc, hiểu rõ nội dung <a href="javascript:void(0)" id="linkOpenSampleContract" style="color: #00a550; text-decoration: underline; font-weight: 600;">Hợp đồng thuê xe điện tử</a> và cam kết tuân thủ Chính sách bảo mật &amp; Điều khoản thuê xe của AZU Car. <span class="req">*</span></span>
+                                    <div id="contractAgreePromptNotice" style="font-size: 12px; color: #b45309; margin-top: 4px; font-weight: 500;">
+                                        <i class="fa-solid fa-hand-pointer"></i> Nhấp để mở hợp đồng &amp; bấm Xác nhận bên trong (Không thể tích chọn trực tiếp)
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1002,6 +1002,33 @@ async function showDetail(kind, id) {
     const insImg = l.insuranceImage ? (l.insuranceImage.startsWith('/') ? l.insuranceImage : '/' + l.insuranceImage) : '';
     const inspImg = l.inspectionCertImage ? (l.inspectionCertImage.startsWith('/') ? l.inspectionCertImage : '/' + l.inspectionCertImage) : '';
 
+    // Parse policy metadata if available in description or localStorage
+    let policy = null;
+    let cleanDesc = l.description || '';
+    const match = cleanDesc.match(/<!--AZU_POLICY:(.*?)-->/);
+    if (match) {
+      try {
+        policy = JSON.parse(match[1]);
+        cleanDesc = cleanDesc.replace(/<!--AZU_POLICY:(.*?)-->/, '').trim();
+      } catch (e) {}
+    }
+    if (!policy) {
+      try {
+        const savedCol = localStorage.getItem(`azu_car_collateral_${l.vehicleId}`);
+        const savedFees = JSON.parse(localStorage.getItem(`azu_car_extrafees_${l.vehicleId}`) || 'null');
+        const savedAmenities = JSON.parse(localStorage.getItem(`azu_car_amenities_${l.vehicleId}`) || 'null');
+        const savedTerms = JSON.parse(localStorage.getItem(`azu_car_terms_${l.vehicleId}`) || 'null');
+        if (savedCol || savedFees || savedAmenities || savedTerms) {
+          policy = {
+            collateral: { text: savedCol || 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.' },
+            extraFees: savedFees,
+            amenities: savedAmenities,
+            terms: savedTerms
+          };
+        }
+      } catch (e) {}
+    }
+
     const content = `
       <div class="detail-list">
         <div><span class="label">Mã tin đăng</span><strong>#${l.listingId}</strong></div>
@@ -1020,7 +1047,57 @@ async function showDetail(kind, id) {
       </div>
 
       <h4 style="margin:16px 0 8px 0">Mô tả bài đăng</h4>
-      <p style="background:var(--bg);padding:12px;border-radius:8px;font-size:14px;line-height:1.5">${escapeHtml(l.description || 'Không có mô tả')}</p>
+      <p style="background:var(--bg);padding:12px;border-radius:8px;font-size:14px;line-height:1.5">${escapeHtml(cleanDesc || 'Không có mô tả')}</p>
+
+      <h4 style="margin:16px 0 8px 0">Chính sách thuê, Phụ phí &amp; Tiện nghi xe</h4>
+      <div style="background:var(--surface,#fff);border:1px solid var(--line,#e2e8f0);border-radius:8px;padding:14px;margin-bottom:16px;display:flex;flex-direction:column;gap:12px">
+        <div>
+          <strong style="font-size:13px;display:block;margin-bottom:4px;color:var(--ink)">1. Quy định thế chấp tài sản khi bàn giao xe</strong>
+          <span style="font-size:13.5px;color:var(--ink);background:#f1f5f9;padding:6px 10px;border-radius:6px;display:inline-block">
+            <i class="fa-solid fa-shield-halved" style="color:#059669;margin-right:6px"></i> ${escapeHtml(policy?.collateral?.text || 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.')}
+          </span>
+        </div>
+
+        <div>
+          <strong style="font-size:13px;display:block;margin-bottom:6px;color:var(--ink)">2. Bảng phụ phí phát sinh quy định</strong>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:8px">
+            <div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12.5px">
+              <span style="color:var(--muted);display:block">Giới hạn quãng đường:</span>
+              <strong>${policy?.extraFees?.limitKm || 300} km/ngày</strong> (Vượt: ${money(policy?.extraFees?.limitFee || 3000)}/km)
+            </div>
+            <div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12.5px">
+              <span style="color:var(--muted);display:block">Phụ phí quá giờ:</span>
+              <strong>${money(policy?.extraFees?.overtimeFee || 70000)} / giờ</strong>
+            </div>
+            <div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12.5px">
+              <span style="color:var(--muted);display:block">Phí vệ sinh xe bẩn:</span>
+              <strong>${money(policy?.extraFees?.cleanFee || 80000)}</strong>
+            </div>
+            <div style="background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:12.5px">
+              <span style="color:var(--muted);display:block">Phí khử mùi hôi:</span>
+              <strong>${money(policy?.extraFees?.deodorFee || 500000)}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <strong style="font-size:13px;display:block;margin-bottom:6px;color:var(--ink)">3. Trang bị tiện nghi trên xe</strong>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${(policy?.amenities && policy.amenities.length) 
+              ? policy.amenities.map(a => `<span style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600">✓ ${escapeHtml(a)}</span>`).join('')
+              : '<span style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600">✓ Bản đồ dẫn đường</span><span style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600">✓ Bluetooth</span><span style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600">✓ Camera lùi</span><span style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600">✓ Túi khí an toàn</span>'}
+          </div>
+        </div>
+
+        <div>
+          <strong style="font-size:13px;display:block;margin-bottom:4px;color:var(--ink)">4. Điều khoản riêng của chủ xe</strong>
+          <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.5;color:#334155">
+            ${(policy?.terms && policy.terms.length)
+              ? policy.terms.map(t => `<li>${escapeHtml(t)}</li>`).join('')
+              : '<li>Sử dụng xe đúng mục đích, không vi phạm pháp luật.</li><li>Không hút thuốc, giữ gìn vệ sinh xe.</li>'}
+          </ul>
+        </div>
+      </div>
 
       <h4 style="margin:16px 0 8px 0">Hồ sơ pháp lý & Giấy tờ xe</h4>
       <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:16px">

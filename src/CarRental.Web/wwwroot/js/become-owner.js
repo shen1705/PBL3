@@ -1965,27 +1965,19 @@ function renderOwnerTrips(items) {
             handoverBtn.type = 'button';
             handoverBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
             handoverBtn.innerHTML = '<i class="fa-solid fa-car-side"></i> Bàn giao xe cho khách';
-            handoverBtn.addEventListener('click', async () => {
-                if (!confirm(`Xác nhận giao xe ${req.vehicleName} cho khách thuê ${req.renterName}? Chuyến đi sẽ chính thức bắt đầu.`)) return;
-                handoverBtn.disabled = true;
-                try {
-                    const r = await fetch(`/api/bookings/${req.bookingId}/pickup`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'Pickup' })
+            handoverBtn.addEventListener('click', () => {
+                if (window.AzuTripModal?.openHandoverModal) {
+                    window.AzuTripModal.openHandoverModal({
+                        type: 'Pickup',
+                        trip: req,
+                        isOwner: true,
+                        onSuccess: () => {
+                            loadOwnerTrips();
+                            loadOwnerRevenue();
+                        }
                     });
-                    const d = await r.json();
-                    if (r.ok && d.isSuccess) {
-                        alert('Đã xác nhận bàn giao xe thành công! Chuyến đi chuyển sang trạng thái Đang trong chuyến.');
-                        loadOwnerTrips();
-                        loadOwnerRevenue();
-                    } else {
-                        alert('Lỗi: ' + (d?.message || 'Không thể xác nhận bàn giao'));
-                    }
-                } catch(e) {
-                    alert('Lỗi kết nối máy chủ.');
-                } finally {
-                    handoverBtn.disabled = false;
+                } else {
+                    alert('Đang tải mô-đun bàn giao xe, vui lòng thử lại.');
                 }
             });
             actionsRow.appendChild(handoverBtn);
@@ -1993,29 +1985,20 @@ function renderOwnerTrips(items) {
             const completeBtn = document.createElement('button');
             completeBtn.type = 'button';
             completeBtn.style.cssText = 'background: #2563eb; color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
-            completeBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Nghiệm thu xe & Quyết toán hoàn tất';
-            completeBtn.addEventListener('click', async () => {
-                const remaining = Number(req.priceLockedTotal || 0) - Number(req.depositAmount || 0);
-                if (!confirm(`Xác nhận bạn ĐÃ KIỂM TRA XE và đồng ý nhận lại xe ${req.vehicleName} từ khách ${req.renterName}?\n\nSố tiền thuê còn lại khách thanh toán cho bạn: ${remaining.toLocaleString('vi-VN')} đ.\nTiền cọc của khách sẽ được giải phóng hoàn trả. Doanh thu của bạn sẽ được ghi nhận vào hệ thống.`)) return;
-                completeBtn.disabled = true;
-                try {
-                    const r = await fetch(`/api/bookings/${req.bookingId}/return`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'Return' })
+            completeBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Nghiệm thu xe &amp; Quyết toán hoàn tất';
+            completeBtn.addEventListener('click', () => {
+                if (window.AzuTripModal?.openHandoverModal) {
+                    window.AzuTripModal.openHandoverModal({
+                        type: 'Return',
+                        trip: req,
+                        isOwner: true,
+                        onSuccess: () => {
+                            loadOwnerTrips();
+                            loadOwnerRevenue();
+                        }
                     });
-                    const d = await r.json();
-                    if (r.ok && d.isSuccess) {
-                        alert('Đã nghiệm thu xe và hoàn tất chuyến đi thành công! Doanh thu đã được ghi nhận.');
-                        loadOwnerTrips();
-                        loadOwnerRevenue();
-                    } else {
-                        alert('Lỗi: ' + (d?.message || 'Không thể hoàn tất chuyến'));
-                    }
-                } catch(e) {
-                    alert('Lỗi kết nối máy chủ.');
-                } finally {
-                    completeBtn.disabled = false;
+                } else {
+                    alert('Đang tải mô-đun nghiệm thu trả xe, vui lòng thử lại.');
                 }
             });
             actionsRow.appendChild(completeBtn);

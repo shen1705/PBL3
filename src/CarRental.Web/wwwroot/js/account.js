@@ -850,65 +850,43 @@ async function renderTrips() {
         const actionsDiv = document.createElement('div');
         actionsDiv.style.cssText = 'margin-top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;';
 
-        // 1. Nhận xe
+        // 1. Nhận xe (Flaw 1: Modal biên bản bàn giao kèm Odometer, nhiên liệu, thanh toán)
         if (trip.status === 'Accepted') {
             const pickupBtn = document.createElement('button');
             pickupBtn.type = 'button';
             pickupBtn.style.cssText = 'background: #16a34a; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
             pickupBtn.innerHTML = '<i class="fa-solid fa-key"></i> Bàn giao / Nhận xe';
-            pickupBtn.addEventListener('click', async () => {
-                const conf = confirm(`Xác nhận bạn đã nhận bàn giao xe ${trip.vehicleName}? Chuyến đi sẽ chính thức bắt đầu.`);
-                if (!conf) return;
-                pickupBtn.disabled = true;
-                try {
-                    const r = await fetch(`/api/bookings/${trip.bookingId}/pickup`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'Pickup' })
+            pickupBtn.addEventListener('click', () => {
+                if (window.AzuTripModal?.openHandoverModal) {
+                    window.AzuTripModal.openHandoverModal({
+                        type: 'Pickup',
+                        trip,
+                        isOwner: false,
+                        onSuccess: () => renderTrips()
                     });
-                    const d = await r.json();
-                    if (r.ok && d.isSuccess) {
-                        alert('Xác nhận nhận xe thành công! Chúc bạn có một hành trình an toàn và vui vẻ.');
-                        renderTrips();
-                    } else {
-                        alert('Lỗi: ' + (d?.message || 'Không thể xác nhận nhận xe'));
-                    }
-                } catch (e) {
-                    alert('Lỗi kết nối máy chủ.');
-                } finally {
-                    pickupBtn.disabled = false;
+                } else {
+                    alert('Đang tải mô-đun bàn giao xe, vui lòng thử lại.');
                 }
             });
             actionsDiv.appendChild(pickupBtn);
         }
 
-        // 2. Trả xe
+        // 2. Trả xe (Flaw 1: Modal nghiệm thu kèm Odometer, nhiên liệu, phụ phí)
         if (trip.status === 'Ongoing') {
             const returnBtn = document.createElement('button');
             returnBtn.type = 'button';
             returnBtn.style.cssText = 'background: #2563eb; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
             returnBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> Xác nhận trả xe';
-            returnBtn.addEventListener('click', async () => {
-                const conf = confirm(`Xác nhận hoàn tất chuyến đi và trả lại xe ${trip.vehicleName} cho chủ xe?`);
-                if (!conf) return;
-                returnBtn.disabled = true;
-                try {
-                    const r = await fetch(`/api/bookings/${trip.bookingId}/return`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ type: 'Return' })
+            returnBtn.addEventListener('click', () => {
+                if (window.AzuTripModal?.openHandoverModal) {
+                    window.AzuTripModal.openHandoverModal({
+                        type: 'Return',
+                        trip,
+                        isOwner: false,
+                        onSuccess: () => renderTrips()
                     });
-                    const d = await r.json();
-                    if (r.ok && d.isSuccess) {
-                        alert('Xác nhận trả xe thành công! Cảm ơn bạn đã đồng hành cùng AZU Car.');
-                        renderTrips();
-                    } else {
-                        alert('Lỗi: ' + (d?.message || 'Không thể xác nhận trả xe'));
-                    }
-                } catch (e) {
-                    alert('Lỗi kết nối máy chủ.');
-                } finally {
-                    returnBtn.disabled = false;
+                } else {
+                    alert('Đang tải mô-đun nghiệm thu trả xe, vui lòng thử lại.');
                 }
             });
             actionsDiv.appendChild(returnBtn);
@@ -1003,33 +981,21 @@ async function renderTrips() {
             }
         }
 
-        // 4. Hủy chuyến
+        // 4. Hủy chuyến (Flaw 4: Modal cảnh báo hệ quả tài chính phạt 8% / mất cọc 25%)
         if (trip.status === 'Pending' || trip.status === 'Accepted') {
             const cancelBtn = document.createElement('button');
             cancelBtn.type = 'button';
             cancelBtn.style.cssText = 'background: #fff; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
             cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Hủy chuyến này';
-            cancelBtn.addEventListener('click', async () => {
-                const reason = prompt('Nhập lý do hủy chuyến:');
-                if (reason === null) return;
-                cancelBtn.disabled = true;
-                try {
-                    const r = await fetch(`/api/bookings/${trip.bookingId}/cancel`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ reason: reason || 'Khách thuê chủ động hủy chuyến' })
+            cancelBtn.addEventListener('click', () => {
+                if (window.AzuTripModal?.openCancelBookingModal) {
+                    window.AzuTripModal.openCancelBookingModal({
+                        trip,
+                        isOwner: false,
+                        onSuccess: () => renderTrips()
                     });
-                    const d = await r.json();
-                    if (r.ok && d.isSuccess) {
-                        alert('Hủy chuyến thành công! Tiền cọc đã được giải phóng.');
-                        renderTrips();
-                    } else {
-                        alert('Lỗi: ' + (d?.message || 'Không thể hủy chuyến'));
-                    }
-                } catch (e) {
-                    alert('Lỗi kết nối máy chủ.');
-                } finally {
-                    cancelBtn.disabled = false;
+                } else {
+                    alert('Đang tải mô-đun hủy chuyến, vui lòng thử lại.');
                 }
             });
             actionsDiv.appendChild(cancelBtn);
