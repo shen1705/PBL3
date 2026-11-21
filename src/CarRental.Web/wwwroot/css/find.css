@@ -959,10 +959,9 @@ body {
 .badge-tag {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
     font-size: 11px;
     font-weight: 600;
-    padding: 2px 7px;
+    padding: 2.5px 8px;
     border-radius: 999px;
     line-height: 1.35;
 }
@@ -1066,6 +1065,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
     min-height: 28px;
     padding-top: 8px;
     margin-top: 4px;
@@ -1076,9 +1076,13 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 13px;
+    font-size: 12.5px;
     color: #475569;
     white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
 }
 
 .car-rating-trips .star-gold {
@@ -1093,7 +1097,9 @@ body {
 
 .car-rating-trips .rating-val.text-muted {
     font-weight: 500;
+    font-size: 12px;
     color: #64748b;
+    white-space: nowrap;
 }
 
 .car-rating-trips .dot-sep {
@@ -1118,6 +1124,9 @@ body {
     font-weight: 800;
     line-height: 1.1;
     white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: auto;
+    text-align: right;
 }
 
 .car-price span {
