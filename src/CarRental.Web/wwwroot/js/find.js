@@ -2209,8 +2209,14 @@ async function refreshBookingPrice() {
     document.getElementById('bookDepositPrice') && (document.getElementById('bookDepositPrice').textContent = `${deposit.toLocaleString('vi-VN')} đ`);
 }
 
-function openBookingModal() {
+function openBookingModal(car) {
+    if (car) currentPopupCar = car;
     if (!currentPopupCar) return;
+
+    // Đảm bảo đóng/ẩn hoàn toàn popup bài đăng cũ, không bao giờ hiện popup chồng lên nhau
+    if (carDetailModal) {
+        carDetailModal.hidden = true;
+    }
 
     // autofill user info
     const user = window.AzuStore?.getUser ? window.AzuStore.getUser() : null;
@@ -2242,7 +2248,7 @@ function openBookingModal() {
     if (contractCode) contractCode.textContent = Date.now().toString().slice(-8);
 
     // Collateral requirement acknowledgment (Flaw 2)
-    const colText = document.getElementById('popupCarCollateralText')?.textContent?.trim() || 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.';
+    const colText = currentPopupCar.collateralText || document.getElementById('popupCarCollateralText')?.textContent?.trim() || 'Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.';
     const bookColText = document.getElementById('bookCollateralText');
     const bookColTitle = document.getElementById('bookCollateralTitle');
     const bookColTag = document.getElementById('bookCollateralTag');
@@ -2272,12 +2278,12 @@ function openBookingModal() {
     if (locEl) locEl.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${currentPopupCar.location || 'TP. Đà Nẵng'}`;
     if (hostLocEl) hostLocEl.textContent = `${currentPopupCar.location || 'TP. Đà Nẵng'} (Miễn phí)`;
 
-    const pickupTime = document.getElementById('widgetPickupTime')?.textContent.trim() || '21:00, 15/10/2026';
-    const returnTime = document.getElementById('widgetReturnTime')?.textContent.trim() || '21:00, 16/10/2026';
-    const basePrice = document.getElementById('calcBasePrice')?.textContent.trim() || `${currentPopupCar.price}/ngày`;
-    const insPrice = document.getElementById('calcInsurancePrice')?.textContent.trim() || '66.501đ /ngày';
-    const deliveryFee = document.getElementById('calcDeliveryFee')?.textContent.trim() || 'Miễn phí';
-    const totalPrice = document.getElementById('calcTotalPrice')?.textContent.trim() || `${currentPopupCar.price}/ngày`;
+    const pickupTime = document.getElementById('pickupTimeText')?.textContent.trim() || document.getElementById('widgetPickupTime')?.textContent.trim() || '21:00, 15/10/2026';
+    const returnTime = document.getElementById('returnTimeText')?.textContent.trim() || document.getElementById('widgetReturnTime')?.textContent.trim() || '21:00, 16/10/2026';
+    const basePrice = `${currentPopupCar.price}/ngày`;
+    const insPrice = '66.501đ /ngày';
+    const deliveryFee = 'Miễn phí';
+    const totalPrice = `${currentPopupCar.price}/ngày`;
 
     document.getElementById('bookPickupTime') && (document.getElementById('bookPickupTime').textContent = pickupTime);
     document.getElementById('bookReturnTime') && (document.getElementById('bookReturnTime').textContent = returnTime);
@@ -2288,6 +2294,7 @@ function openBookingModal() {
 
     if (bookingModal) {
         bookingModal.hidden = false;
+        document.body.style.overflow = 'hidden';
         refreshBookingPrice();
         if (!nameInput?.value) nameInput?.focus();
         else if (!phoneInput?.value) phoneInput?.focus();
@@ -2299,6 +2306,10 @@ function closeBookingModal() {
     if (bookingModal) {
         bookingModal.hidden = true;
     }
+    if (carDetailModal) {
+        carDetailModal.hidden = true;
+    }
+    document.body.style.overflow = '';
 }
 
 // delivery method
@@ -3226,5 +3237,47 @@ carsGrid?.addEventListener('click', event => {
     if (!card) return;
     const car = carFromCard(card);
     window.AzuStore.setSelectedCar(car);
-    openCarPopup(car);
+
+    // Không mở popup bài đăng cũ, đảm bảo không có popup chồng lên nhau
+    if (carDetailModal) {
+        carDetailModal.hidden = true;
+    }
+
+    // Kiểm tra xe của chính mình
+    const currentUserId = sessionStorage.getItem('azuCarUserId');
+    if (currentUserId && car.ownerId && currentUserId === car.ownerId) {
+        alert('Đây là xe do bạn sở hữu. Bạn không thể tự thuê xe của chính mình.');
+        return;
+    }
+
+    // Kiểm tra đăng nhập
+    if (!window.AzuStore || !window.AzuStore.isLoggedIn()) {
+        sessionStorage.setItem('azuCarPromptLogin', '1');
+        const loginModal = document.getElementById('loginModal');
+        if (loginModal) {
+            loginModal.classList.add('active');
+        } else {
+            window.location.href = '/';
+        }
+        return;
+    }
+
+    // Kiểm tra điều kiện xác minh GPLX
+    const user = window.AzuStore.getUser ? window.AzuStore.getUser() : null;
+    const isDlVerified = Boolean(
+        user && (
+            user.isDriverLicenseVerified === true ||
+            sessionStorage.getItem('azuCarLicenseVerified') === 'true' ||
+            (Array.isArray(user.claims) && user.claims.includes('DriverLicenseVerified')) ||
+            user.hasDriverLicense === true
+        )
+    );
+    if (!isDlVerified) {
+        alert('Tài khoản của bạn chưa xác thực Giấy phép lái xe (GPLX). Vui lòng cập nhật GPLX trong phần tài khoản trước khi thuê xe.');
+        window.location.href = '/account#license';
+        return;
+    }
+
+    // Mở trực tiếp popup điền thông tin thuê xe (bỏ qua popup bài đăng)
+    openBookingModal(car);
 });
