@@ -29,6 +29,7 @@ public static class DbInitializer
         var users = await SeedUsersAsync(db, userManager);
         await SeedSettingsAndBankAsync(db, users);
         await SeedVehiclesAndBookingsAsync(db, users);
+        await SeedNotificationsAsync(db, users);
 
         // seed staff role
         var staff1User = await userManager.FindByNameAsync("staff1");
@@ -1006,5 +1007,68 @@ public static class DbInitializer
 
             await db.SaveChangesAsync();
         }
+    }
+
+    private static async Task SeedNotificationsAsync(
+        ApplicationDbContext db,
+        Dictionary<string, ApplicationUser> u)
+    {
+        if (await db.Notifications.AnyAsync()) return;
+
+        var now = DateTime.UtcNow;
+
+        if (u.TryGetValue("renter1", out var r1))
+        {
+            db.Notifications.AddRange(
+                new Notification
+                {
+                    UserId = r1.Id,
+                    Title = "Chủ xe đã duyệt yêu cầu!",
+                    Message = "Chủ xe Trần Thị B đã phê duyệt đơn thuê xe Toyota Vios 2023. Chuyến đi bắt đầu lúc 09:00 ngày mai.",
+                    Type = "trip",
+                    ActionUrl = "/account#trips",
+                    IsRead = false,
+                    CreatedAt = now.AddMinutes(-25)
+                },
+                new Notification
+                {
+                    UserId = r1.Id,
+                    Title = "Đặt xe & Ký quỹ thành công",
+                    Message = "Đơn thuê xe Hyundai Tucson (#BK-1004) đã được ký quỹ trực tuyến 100% an toàn tại tài khoản bảo chứng AZU Escrow.",
+                    Type = "trip",
+                    ActionUrl = "/account#trips",
+                    IsRead = true,
+                    CreatedAt = now.AddHours(-3)
+                }
+            );
+        }
+
+        if (u.TryGetValue("owner1", out var o1))
+        {
+            db.Notifications.AddRange(
+                new Notification
+                {
+                    UserId = o1.Id,
+                    Title = "Yêu cầu thuê xe mới",
+                    Message = "Khách thuê Nguyễn Văn A vừa gửi yêu cầu thuê xe Mazda CX-5 (43A-999.88). Hạn phản hồi: 20:00 tối nay.",
+                    Type = "trip",
+                    ActionUrl = "/owner",
+                    IsRead = false,
+                    CreatedAt = now.AddMinutes(-40)
+                },
+                new Notification
+                {
+                    UserId = o1.Id,
+                    Title = "Chuyến đi hoàn tất & Quyết toán",
+                    Message = "Đơn thuê xe Toyota Vios đã hoàn tất nghiệm thu. Doanh thu 1.710.000 đ (sau khi trừ 5% hoa hồng) đã được quyết toán chuyển về tài khoản của bạn.",
+                    Type = "trip",
+                    ActionUrl = "/owner",
+                    IsRead = true,
+                    CreatedAt = now.AddDays(-1)
+                }
+            );
+        }
+
+        await db.SaveChangesAsync();
     }
 }

@@ -696,6 +696,62 @@ namespace CarRental.Data.Migrations
                     b.ToTable("mock_bank_transactions", (string)null);
                 });
 
+            modelBuilder.Entity("CarRental.Models.Entities.Notification", b =>
+                {
+                    b.Property<int>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("notification_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<string>("ActionUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("action_url");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_read");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("message");
+
+                    b.Property<int?>("ReferenceId")
+                        .HasColumnType("int")
+                        .HasColumnName("reference_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("type");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("NotificationId");
+
+                    b.HasIndex("UserId", "IsRead");
+
+                    b.ToTable("notifications", (string)null);
+                });
+
             modelBuilder.Entity("CarRental.Models.Entities.OwnerProfile", b =>
                 {
                     b.Property<int>("OwnerProfileId")
@@ -1517,6 +1573,17 @@ namespace CarRental.Data.Migrations
                     b.Navigation("Payment");
 
                     b.Navigation("ToAccount");
+                });
+
+            modelBuilder.Entity("CarRental.Models.Entities.Notification", b =>
+                {
+                    b.HasOne("CarRental.Models.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CarRental.Models.Entities.OwnerProfile", b =>

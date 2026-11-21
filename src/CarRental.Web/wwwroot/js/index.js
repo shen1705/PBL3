@@ -49,10 +49,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const displayName = name.trim();
         if (!displayName) return;
 
+        const userAuthActions = document.getElementById('user-auth-actions');
+        const dropdownAvatar = document.getElementById('dropdownAvatar');
+        const dropdownUserName = document.getElementById('dropdownUserName');
+        const initial = Array.from(displayName)[0].toLocaleUpperCase('vi');
+
         if (accountName) accountName.textContent = displayName;
-        if (accountAvatar) accountAvatar.textContent = Array.from(displayName)[0].toLocaleUpperCase('vi');
-        if (guestActions) guestActions.hidden = true;
-        if (accountDisplay) accountDisplay.hidden = false;
+        if (accountAvatar) accountAvatar.textContent = initial;
+        if (dropdownAvatar) dropdownAvatar.textContent = initial;
+        if (dropdownUserName) dropdownUserName.textContent = displayName;
+
+        if (guestActions) guestActions.style.display = 'none';
+        if (userAuthActions) userAuthActions.style.display = 'inline-flex';
+        if (accountDisplay) accountDisplay.hidden = true;
         if (tripsNavLink) tripsNavLink.hidden = false;
     }
 

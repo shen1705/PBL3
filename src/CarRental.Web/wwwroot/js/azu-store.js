@@ -104,19 +104,31 @@
     function syncHeaderAuth() {
         const name = sessionStorage.getItem(KEYS.fullName) || sessionStorage.getItem(KEYS.name);
         const guestActions = document.getElementById('guest-actions');
+        const userAuthActions = document.getElementById('user-auth-actions');
         const accountDisplay = document.getElementById('account-display');
         const accountAvatar = document.getElementById('account-avatar');
+        const dropdownAvatar = document.getElementById('dropdownAvatar');
         const accountName = document.getElementById('account-name');
+        const dropdownUserName = document.getElementById('dropdownUserName');
+        const dropdownUserRole = document.getElementById('dropdownUserRole');
         const tripsNavLink = document.getElementById('trips-nav-link');
+        const roles = readJson(KEYS.roles, []);
+        const isOwner = Array.isArray(roles) && roles.includes('Owner');
 
         if (name) {
-            if (guestActions) guestActions.hidden = true;
-            if (accountDisplay) accountDisplay.hidden = false;
-            if (accountAvatar) accountAvatar.textContent = Array.from(name.trim())[0].toLocaleUpperCase('vi');
+            if (guestActions) guestActions.style.display = 'none';
+            if (userAuthActions) userAuthActions.style.display = 'inline-flex';
+            if (accountDisplay) accountDisplay.hidden = true;
+            const initial = Array.from(name.trim())[0].toLocaleUpperCase('vi');
+            if (accountAvatar) accountAvatar.textContent = initial;
+            if (dropdownAvatar) dropdownAvatar.textContent = initial;
             if (accountName) accountName.textContent = name;
+            if (dropdownUserName) dropdownUserName.textContent = name;
+            if (dropdownUserRole) dropdownUserRole.textContent = isOwner ? 'Chủ xe' : 'Khách thuê';
             if (tripsNavLink) tripsNavLink.hidden = false;
         } else {
-            if (guestActions) guestActions.hidden = false;
+            if (guestActions) guestActions.style.display = 'flex';
+            if (userAuthActions) userAuthActions.style.display = 'none';
             if (accountDisplay) accountDisplay.hidden = true;
         }
 
