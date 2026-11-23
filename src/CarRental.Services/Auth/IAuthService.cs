@@ -13,5 +13,6 @@ public interface IAuthService
     Task<ServiceResult> ResetPasswordAsync(ForgotPasswordRequest request, CancellationToken ct = default);
     Task<ServiceResult<UserProfileDto>> GetCurrentUserProfileAsync(CancellationToken ct = default);
     Task<ServiceResult<UserProfileDto>> GetUserProfileByIdAsync(string userId, CancellationToken ct = default);
+    Task<ServiceResult<bool>> UpdateDriverLicenseAsync(string userId, UpdateDriverLicenseRequest request, CancellationToken ct = default);
     Task<AccountSanction?> GetActiveSanctionAsync(string userId, CancellationToken ct = default);
 }

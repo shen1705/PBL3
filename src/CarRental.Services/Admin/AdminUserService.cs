@@ -15,6 +15,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using CarRental.Services.Notifications;
+
 namespace CarRental.Services.Admin;
 
 public class AdminUserService : IAdminUserService
@@ -24,19 +26,22 @@ public class AdminUserService : IAdminUserService
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IClock _clock;
     private readonly ILogger<AdminUserService> _logger;
+    private readonly INotificationService _notificationService;
 
     public AdminUserService(
         ApplicationDbContext db,
         UserManager<ApplicationUser> userManager,
         RoleManager<IdentityRole> roleManager,
         IClock clock,
-        ILogger<AdminUserService> logger)
+        ILogger<AdminUserService> logger,
+        INotificationService notificationService)
     {
         _db = db;
         _userManager = userManager;
         _roleManager = roleManager;
         _clock = clock;
         _logger = logger;
+        _notificationService = notificationService;
     }
 
     public async Task<ServiceResult<AdminUserMetricsDto>> GetUserMetricsAsync(CancellationToken ct = default)
@@ -197,6 +202,12 @@ public class AdminUserService : IAdminUserService
                 badgeColor = "amber";
                 badgeText = "Chờ duyệt hồ sơ";
             }
+            else if (hasDl && !verifiedLicenseUserIds.Contains(u.Id))
+            {
+                accountStatus = "PendingLicense";
+                badgeColor = "amber";
+                badgeText = "Chờ duyệt GPLX";
+            }
             else
             {
                 accountStatus = "Active";
@@ -245,7 +256,7 @@ public class AdminUserService : IAdminUserService
             else if (tab == "review" || tab == "sanctioned")
                 items = items.Where(x => x.IsSanctioned).ToList();
             else if (tab == "pending")
-                items = items.Where(x => x.AccountStatus == "PendingVerification" || !x.HasDriverLicense).ToList();
+                items = items.Where(x => x.AccountStatus == "PendingVerification" || (x.HasDriverLicense && !x.IsDriverLicenseVerified)).ToList();
         }
 
         // filter role
@@ -365,15 +376,18 @@ public class AdminUserService : IAdminUserService
 
         string accountStatus = isSanctioned ? "Sanctioned"
             : (op != null && op.ApprovalStatus == OwnerApprovalStatuses.Pending) ? "PendingVerification"
+            : (dl != null && !isDlVerified) ? "PendingLicense"
             : "Active";
 
         string badgeColor = isSanctioned ? "red"
             : (op != null && op.ApprovalStatus == OwnerApprovalStatuses.Pending) ? "amber"
+            : (dl != null && !isDlVerified) ? "amber"
             : "green";
 
         string badgeText = isSanctioned
             ? (activeSanction!.SanctionType == SanctionTypes.Ban ? "Tạm khóa vĩnh viễn" : "Bị hạn chế")
             : (op != null && op.ApprovalStatus == OwnerApprovalStatuses.Pending) ? "Chờ duyệt hồ sơ"
+            : (dl != null && !isDlVerified) ? "Chờ duyệt GPLX"
             : "Đang hoạt động";
 
         var detail = new AdminUserDetailDto
@@ -635,6 +649,7 @@ public class AdminUserService : IAdminUserService
                 await _userManager.AddClaimAsync(targetUser, new Claim(AppClaimTypes.DriverLicenseVerified, AppClaimTypes.GrantedValue));
             }
             _logger.LogInformation("Driver license for user {TargetUserId} APPROVED by admin/staff {CurrentUserId}", targetUserId, currentUserId);
+            await _notificationService.CreateNotificationAsync(targetUserId, "Xác thực GPLX thành công", "Giấy phép lái xe (GPLX) của bạn đã được kiểm duyệt và phê duyệt thành công. Bạn hiện có thể đặt thuê xe trên AZU Car.", "system", null, "/account", ct);
         }
         else
         {
@@ -643,6 +658,7 @@ public class AdminUserService : IAdminUserService
                 await _userManager.RemoveClaimAsync(targetUser, verifiedClaim);
             }
             _logger.LogInformation("Driver license for user {TargetUserId} REJECTED by admin/staff {CurrentUserId}. Reason: {Reason}", targetUserId, currentUserId, request.Reason);
+            await _notificationService.CreateNotificationAsync(targetUserId, "Yêu cầu cập nhật lại GPLX", $"Giấy phép lái xe của bạn chưa được duyệt. Lý do: {request.Reason ?? "Thông tin hoặc ảnh chụp chưa hợp lệ"}. Vui lòng cập nhật lại tại Hồ sơ cá nhân.", "system", null, "/account", ct);
         }
 
         return ServiceResult<bool>.Success(true);

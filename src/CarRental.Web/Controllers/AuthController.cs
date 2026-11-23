@@ -113,4 +113,25 @@ public class AuthController : ControllerBase
 
         return Ok(result);
     }
+
+    [Authorize]
+    [HttpPost("api/auth/driver-license")]
+    public async Task<IActionResult> UpdateDriverLicense([FromBody] UpdateDriverLicenseRequest request, CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+            return BadRequest(new { isSuccess = false, message = errors, errorCode = "VALIDATION_FAILED" });
+        }
+
+        var userId = _currentUserService.UserId;
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { isSuccess = false, message = "Phiên làm việc đã hết hạn." });
+
+        var result = await _authService.UpdateDriverLicenseAsync(userId, request, ct);
+        if (!result.IsSuccess)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
 }

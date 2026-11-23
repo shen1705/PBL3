@@ -15,6 +15,18 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.Converters.Add(new UtcNullableDateTimeJsonConverter());
     });
 
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = string.Join("; ", context.ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage)
+            .Where(m => !string.IsNullOrEmpty(m)));
+        return new Microsoft.AspNetCore.Mvc.BadRequestObjectResult(new { isSuccess = false, message = errors, errorCode = "VALIDATION_FAILED" });
+    };
+});
+
 builder.Services.AddData(builder.Configuration);
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o =>

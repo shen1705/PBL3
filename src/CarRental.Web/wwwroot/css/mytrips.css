@@ -3481,5 +3481,144 @@ body {
     pointer-events: none;
 }
 
+/* Xe da luu (Favorites) */
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 6px 0;
+}
+
+.fav-car-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.fav-car-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+}
+
+.fav-car-img-wrap {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: #f8fafc;
+}
+
+.fav-car-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.fav-car-card:hover .fav-car-img-wrap img {
+    transform: scale(1.03);
+}
+
+.btn-remove-fav {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #10b981;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.btn-remove-fav:hover {
+    background: #059669;
+    transform: scale(1.1);
+}
+
+.fav-car-content {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.fav-car-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}
+
+.fav-car-specs {
+    display: flex;
+    gap: 12px;
+    font-size: 12.5px;
+    color: #64748b;
+    margin-bottom: 8px;
+}
+
+.fav-car-specs span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.fav-car-loc {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.fav-car-foot {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.fav-car-price strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: #059669;
+}
+
+.fav-car-price span {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.btn-fav-rent {
+    background: #1e293b;
+    color: #ffffff;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.btn-fav-rent:hover {
+    background: #059669;
+    color: #ffffff;
+}
+
 
 

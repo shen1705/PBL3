@@ -16,6 +16,7 @@
                 <a class="trips-side-link active" href="#account" id="nav-account" aria-current="page"><i class="fa-regular fa-user"></i><span>Tài khoản của tôi</span></a>
                 <a class="trips-side-link" href="@(User.IsInRole("Owner") ? "/owner" : "/become-owner")" id="nav-become-owner"><i class="fa-solid fa-key"></i><span id="nav-become-owner-text" class="nav-become-owner-text">@(User.IsInRole("Owner") ? "Quản lý xe" : "Trở thành chủ xe")</span></a>
                 <a class="trips-side-link" href="#cards" id="nav-cards"><i class="fa-regular fa-credit-card"></i><span>Thẻ thanh toán</span></a>
+                <a class="trips-side-link" href="#favorites" id="nav-favorites"><i class="fa-regular fa-heart"></i><span>Xe đã lưu</span></a>
                 <a class="trips-side-link" href="#trips" id="nav-trips"><i class="fa-regular fa-calendar-days"></i><span>Lịch sử thuê</span></a>
                 <a class="trips-side-link" href="#address" id="nav-address"><i class="fa-solid fa-location-dot"></i><span>Địa chỉ của tôi</span></a>
                 <a class="trips-side-link" href="#password" id="nav-password"><i class="fa-solid fa-lock"></i><span>Đổi mật khẩu</span></a>
@@ -200,6 +201,25 @@
                     <a class="trips-primary-link" href="index.html">Khám phá xe ngay</a>
                 </section>
                 <section class="trip-detail-view" id="trip-detail-view" hidden aria-live="polite"></section>
+            </div>
+        </section>
+
+        <!-- Mục Xe đã lưu -->
+        <section class="trips-main" id="favorites-section" aria-labelledby="favorites-title" hidden>
+            <div class="section-page-heading">
+                <h1 id="favorites-title">Xe đã lưu</h1>
+            </div>
+
+            <div class="management-card favorites-card">
+                <div class="favorites-grid" id="favorites-grid" hidden></div>
+                <div class="trips-empty-state" id="favorites-empty">
+                    <div class="empty-art" aria-hidden="true">
+                        <i class="fa-regular fa-heart" style="font-size: 32px; color: #10b981;"></i>
+                    </div>
+                    <h2 id="empty-fav-title">Bạn chưa lưu xe nào</h2>
+                    <p id="empty-fav-description">Nhấn vào biểu tượng trái tim trên các bài đăng xe để lưu lại những chiếc xe bạn yêu thích và xem lại tại đây.</p>
+                    <a class="trips-primary-link" href="/find">Khám phá xe ngay</a>
+                </div>
             </div>
         </section>
 

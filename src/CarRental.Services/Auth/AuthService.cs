@@ -304,6 +304,48 @@ public class AuthService : IAuthService
         return ServiceResult<UserProfileDto>.Success(dto);
     }
 
+    public async Task<ServiceResult<bool>> UpdateDriverLicenseAsync(string userId, UpdateDriverLicenseRequest request, CancellationToken ct = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return ServiceResult<bool>.Fail("Không tìm thấy thông tin tài khoản.", "USER_NOT_FOUND");
+
+        var dl = await _db.DriverLicenses.FirstOrDefaultAsync(d => d.UserId == userId, ct);
+        if (dl == null)
+        {
+            dl = new DriverLicense
+            {
+                UserId = userId,
+                LicenseNumber = request.LicenseNumber.Trim(),
+                LicenseClass = string.IsNullOrWhiteSpace(request.LicenseClass) ? "B2" : request.LicenseClass.Trim(),
+                ExpiryDate = request.ExpiryDate ?? new DateOnly(2035, 12, 31),
+                ImageFront = string.IsNullOrWhiteSpace(request.ImageFront) ? $"/seed/license-renter1.jpg" : request.ImageFront.Trim()
+            };
+            _db.DriverLicenses.Add(dl);
+        }
+        else
+        {
+            dl.LicenseNumber = request.LicenseNumber.Trim();
+            if (!string.IsNullOrWhiteSpace(request.LicenseClass))
+                dl.LicenseClass = request.LicenseClass.Trim();
+            if (request.ExpiryDate.HasValue)
+                dl.ExpiryDate = request.ExpiryDate.Value;
+            if (!string.IsNullOrWhiteSpace(request.ImageFront))
+                dl.ImageFront = request.ImageFront.Trim();
+        }
+
+        var claims = await _userManager.GetClaimsAsync(user);
+        var verifiedClaim = claims.FirstOrDefault(c => c.Type == AppClaimTypes.DriverLicenseVerified);
+        if (verifiedClaim != null)
+        {
+            await _userManager.RemoveClaimAsync(user, verifiedClaim);
+        }
+
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Driver license updated for user {UserId}, awaiting admin moderation.", userId);
+        return ServiceResult<bool>.Success(true, "Cập nhật Giấy phép lái xe thành công. Hồ sơ đang chờ Quản trị viên duyệt.");
+    }
+
     public async Task<AccountSanction?> GetActiveSanctionAsync(string userId, CancellationToken ct = default)
     {
         var now = _clock.UtcNow;

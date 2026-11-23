@@ -2329,12 +2329,165 @@ document.querySelectorAll('input[name="deliveryMethod"]').forEach(radio => {
     });
 });
 
-// payment method
+// payment method & cards
+let userBookingCards = [];
+let selectedBookingCard = null;
+
+async function loadBookingPaymentCards() {
+    const cardSection = document.getElementById('bookingCardSelection');
+    const cardList = document.getElementById('bookingCardList');
+    if (!cardSection || !cardList) return;
+
+    try {
+        const res = await fetch('/api/payment-cards', { headers: { 'Accept': 'application/json' } });
+        if (res.ok) {
+            const data = await res.json();
+            userBookingCards = (data && data.isSuccess && Array.isArray(data.data)) ? data.data : [];
+        } else {
+            userBookingCards = [];
+        }
+    } catch {
+        userBookingCards = [];
+    }
+
+    if (userBookingCards.length === 0) {
+        selectedBookingCard = null;
+        cardList.innerHTML = `
+            <div style="background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; padding:12px; text-align:center;">
+                <p style="margin:0 0 8px 0; font-size:13px; color:#64748b;">Bạn chưa có thẻ thanh toán liên kết</p>
+                <button type="button" id="btnConnectCardEmpty" style="background:#059669; color:#fff; border:none; padding:6px 14px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer;">Kết nối thẻ ngay</button>
+            </div>
+        `;
+        document.getElementById('btnConnectCardEmpty')?.addEventListener('click', openAddPaymentCardModalFromBooking);
+    } else {
+        if (!selectedBookingCard) {
+            selectedBookingCard = userBookingCards.find(c => c.isDefault) || userBookingCards[0];
+        }
+
+        cardList.innerHTML = userBookingCards.map(c => {
+            const isChecked = selectedBookingCard && selectedBookingCard.cardId === c.cardId;
+            const brandIcon = (c.cardBrand || '').toLowerCase().includes('mastercard') ? 'fa-brands fa-cc-mastercard'
+                : (c.cardBrand || '').toLowerCase().includes('jcb') ? 'fa-brands fa-cc-jcb'
+                : 'fa-brands fa-cc-visa';
+
+            return `
+                <label style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border:1px solid ${isChecked ? '#059669' : '#e2e8f0'}; border-radius:8px; margin-bottom:6px; cursor:pointer; background:${isChecked ? '#f0fdf4' : '#fff'}; transition:all 0.2s;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <input type="radio" name="selectedCardId" value="${c.cardId}" ${isChecked ? 'checked' : ''} style="accent-color:#059669;">
+                        <i class="${brandIcon}" style="font-size:20px; color:#1e293b;"></i>
+                        <div>
+                            <strong style="display:block; font-size:13px; color:#1e293b; font-family:monospace;">${c.cardNumberMasked || ('•••• ' + c.last4Digits)}</strong>
+                            <span style="font-size:11.5px; color:#64748b;">${c.cardHolderName || 'Chủ thẻ'} · Hạn: ${String(c.expiryMonth).padStart(2, '0')}/${String(c.expiryYear).slice(-2)}</span>
+                        </div>
+                    </div>
+                    ${c.isDefault ? '<span style="font-size:11px; background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px; font-weight:600;">Mặc định</span>' : ''}
+                </label>
+            `;
+        }).join('');
+
+        cardList.querySelectorAll('input[name="selectedCardId"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const found = userBookingCards.find(c => c.cardId === Number(e.target.value));
+                if (found) {
+                    selectedBookingCard = found;
+                    loadBookingPaymentCards();
+                }
+            });
+        });
+    }
+}
+
+function openAddPaymentCardModalFromBooking() {
+    const modal = document.getElementById('addPaymentCardModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.hidden = false;
+        document.getElementById('card-number-input')?.focus();
+    }
+}
+
+document.getElementById('btnConnectNewCard')?.addEventListener('click', openAddPaymentCardModalFromBooking);
+
+const findAddCardForm = document.getElementById('add-payment-card-form');
+const findCloseAddCardBtn = document.getElementById('closeAddPaymentCardBtn');
+
+findCloseAddCardBtn?.addEventListener('click', () => {
+    const modal = document.getElementById('addPaymentCardModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.hidden = true;
+    }
+});
+
+findAddCardForm?.addEventListener('submit', async (e) => {
+    if (window.location.pathname.includes('/account')) return;
+    e.preventDefault();
+    const banner = document.getElementById('add-card-error-banner');
+    if (banner) banner.style.display = 'none';
+
+    const num = document.getElementById('card-number-input')?.value.replace(/\s+/g, '') || '';
+    const name = document.getElementById('card-holder-input')?.value.trim() || '';
+    const exp = document.getElementById('card-expiry-input')?.value.trim() || '';
+    const cvv = document.getElementById('card-cvv-input')?.value.trim() || '';
+
+    if (num.length < 15 || num.length > 19) {
+        if (banner) { banner.textContent = 'Số thẻ không hợp lệ (yêu cầu 15-19 chữ số).'; banner.style.display = 'block'; }
+        return;
+    }
+
+    const expParts = exp.split('/');
+    if (expParts.length !== 2) {
+        if (banner) { banner.textContent = 'Hạn sử dụng không đúng định dạng MM/YY.'; banner.style.display = 'block'; }
+        return;
+    }
+    const month = parseInt(expParts[0], 10);
+    const year = parseInt('20' + expParts[1], 10);
+
+    let brand = 'Visa';
+    if (/^5[1-5]/.test(num)) brand = 'MasterCard';
+    else if (/^35/.test(num)) brand = 'JCB';
+    else if (/^9704/.test(num)) brand = 'Napas';
+
+    try {
+        const resp = await fetch('/api/payment-cards', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+                cardNumber: num,
+                cardHolderName: name,
+                expiryMonth: month,
+                expiryYear: year,
+                cardBrand: brand,
+                cvv: cvv,
+                isDefault: true
+            })
+        });
+        const resData = await resp.json();
+        if (resp.ok && resData.isSuccess) {
+            const modal = document.getElementById('addPaymentCardModal');
+            if (modal) { modal.style.display = 'none'; modal.hidden = true; }
+            findAddCardForm.reset();
+            await loadBookingPaymentCards();
+            if (resData.data) selectedBookingCard = resData.data;
+        } else {
+            if (banner) { banner.textContent = resData?.message || 'Không thể liên kết thẻ.'; banner.style.display = 'block'; }
+        }
+    } catch {
+        if (banner) { banner.textContent = 'Lỗi kết nối khi kết nối thẻ.'; banner.style.display = 'block'; }
+    }
+});
+
 document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
     radio.addEventListener('change', () => {
         document.querySelectorAll('.payment-radio-label').forEach(lbl => {
             lbl.classList.toggle('active', lbl.contains(radio));
         });
+        const cardSection = document.getElementById('bookingCardSelection');
+        if (cardSection) {
+            const isCard = radio.value === 'card';
+            cardSection.style.display = isCard ? 'block' : 'none';
+            if (isCard) loadBookingPaymentCards();
+        }
     });
 });
 
@@ -3051,6 +3204,41 @@ function openPaymentSimulationModal() {
     if (paySimTransferMemo) {
         const memoCode = 'AZUPAY' + Date.now().toString().slice(-6);
         paySimTransferMemo.textContent = memoCode;
+    }
+
+    const isCardPay = pendingBookingData.payload.paymentMethod === 'card';
+    const paySimQrBox = document.getElementById('paySimQrBox');
+    const paySimCardBox = document.getElementById('paySimCardBox');
+    const confirmBtn = document.getElementById('btnConfirmPaymentSimulation');
+
+    if (isCardPay) {
+        if (paySimQrBox) paySimQrBox.style.display = 'none';
+        if (paySimCardBox) {
+            paySimCardBox.style.display = 'block';
+            const card = selectedBookingCard || (userBookingCards && userBookingCards[0]);
+            if (card) {
+                const brandIcon = (card.cardBrand || '').toLowerCase().includes('mastercard') ? 'fa-brands fa-cc-mastercard'
+                    : (card.cardBrand || '').toLowerCase().includes('jcb') ? 'fa-brands fa-cc-jcb'
+                    : 'fa-brands fa-cc-visa';
+                const iconEl = document.getElementById('paySimCardBrandIcon');
+                if (iconEl) iconEl.innerHTML = `<i class="${brandIcon}"></i>`;
+                const numEl = document.getElementById('paySimCardNumber');
+                if (numEl) numEl.textContent = card.cardNumberMasked || ('•••• •••• •••• ' + card.last4Digits);
+                const holderEl = document.getElementById('paySimCardHolder');
+                if (holderEl) holderEl.textContent = card.cardHolderName || 'Chủ thẻ';
+                const expEl = document.getElementById('paySimCardExpiry');
+                if (expEl) expEl.textContent = `${String(card.expiryMonth).padStart(2, '0')}/${String(card.expiryYear).slice(-2)}`;
+            }
+        }
+        if (confirmBtn) {
+            confirmBtn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Xác nhận thanh toán qua thẻ';
+        }
+    } else {
+        if (paySimQrBox) paySimQrBox.style.display = 'flex';
+        if (paySimCardBox) paySimCardBox.style.display = 'none';
+        if (confirmBtn) {
+            confirmBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Xác nhận thanh toán thành công';
+        }
     }
 
     startSimCountdown(15 * 60);

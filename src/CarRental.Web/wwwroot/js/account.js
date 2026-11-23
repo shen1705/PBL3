@@ -31,8 +31,12 @@ const tripsSection = document.getElementById('trips-section');
 const addressSection = document.getElementById('address-section');
 const privacySection = document.getElementById('privacy-section');
 const passwordSection = document.getElementById('password-section');
+const favoritesSection = document.getElementById('favorites-section');
+const favoritesGrid = document.getElementById('favorites-grid');
+const favoritesEmpty = document.getElementById('favorites-empty');
 const navAccount = document.getElementById('nav-account');
 const navCards = document.getElementById('nav-cards');
+const navFavorites = document.getElementById('nav-favorites');
 const navTrips = document.getElementById('nav-trips');
 const navOrders = document.getElementById('nav-orders');
 const navAddress = document.getElementById('nav-address');
@@ -78,12 +82,14 @@ function showView(viewName) {
     const isAddress = viewName === 'address';
     const isPrivacy = viewName === 'privacy';
     const isPassword = viewName === 'password';
-    const isTrips = !isAccount && !isAddress && !isPrivacy && !isPassword;
+    const isFavorites = viewName === 'favorites';
+    const isTrips = !isAccount && !isAddress && !isPrivacy && !isPassword && !isFavorites;
 
     if (accountSection) accountSection.hidden = !isAccount;
     if (addressSection) addressSection.hidden = !isAddress;
     if (privacySection) privacySection.hidden = !isPrivacy;
     if (passwordSection) passwordSection.hidden = !isPassword;
+    if (favoritesSection) favoritesSection.hidden = !isFavorites;
     if (tripsSection) tripsSection.hidden = !isTrips;
 
     document.querySelectorAll('.trips-side-nav .trips-side-link').forEach(link => {
@@ -100,6 +106,12 @@ function showView(viewName) {
             navAccount.setAttribute('aria-current', 'page');
         }
         renderAccountData();
+    } else if (isFavorites) {
+        if (navFavorites) {
+            navFavorites.classList.add('active');
+            navFavorites.setAttribute('aria-current', 'page');
+        }
+        loadFavoriteCars();
     } else if (isAddress) {
         if (navAddress) {
             navAddress.classList.add('active');
@@ -131,6 +143,8 @@ function handleHashNavigation() {
     const hash = window.location.hash;
     if (hash === '#trips' || hash === '#orders') {
         showView('trips');
+    } else if (hash === '#favorites') {
+        showView('favorites');
     } else if (hash === '#address') {
         showView('address');
     } else if (hash === '#privacy') {
@@ -165,6 +179,13 @@ navCards?.addEventListener('click', (e) => {
     setTimeout(() => {
         document.getElementById('payment-card-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 80);
+});
+
+navFavorites?.addEventListener('click', (e) => {
+    e.preventDefault();
+    history.pushState(null, '', '#favorites');
+    showView('favorites');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 navTrips?.addEventListener('click', (e) => {
@@ -527,12 +548,19 @@ function renderLicenseData() {
         licenseImage = `/seed/license-${userName.toLowerCase()}.jpg`;
     }
 
+    const isVerified = sessionStorage.getItem('azuCarLicenseVerified') === 'true';
     if (licenseStatusBadge) {
-        if (hasDl) {
+        if (hasDl && isVerified) {
             licenseStatusBadge.className = 'status status-verified';
+            licenseStatusBadge.style.cssText = '';
             licenseStatusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> Đã xác thực';
+        } else if (hasDl && !isVerified) {
+            licenseStatusBadge.className = 'status status-pending';
+            licenseStatusBadge.style.cssText = 'background:#fef3c7;color:#b45309;padding:4px 10px;border-radius:20px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;';
+            licenseStatusBadge.innerHTML = '<i class="fa-solid fa-clock"></i> Chờ duyệt';
         } else {
             licenseStatusBadge.className = 'status status-unverified';
+            licenseStatusBadge.style.cssText = '';
             licenseStatusBadge.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> Chưa xác thực';
         }
     }
@@ -571,8 +599,7 @@ async function syncUserProfile() {
                 sessionStorage.setItem(accountKeys.hasDriverLicense, u.hasDriverLicense ? 'true' : 'false');
                 const isDlVerified = Boolean(
                     u.isDriverLicenseVerified === true ||
-                    (Array.isArray(u.claims) && u.claims.includes('DriverLicenseVerified')) ||
-                    u.hasDriverLicense === true
+                    (Array.isArray(u.claims) && u.claims.includes('DriverLicenseVerified'))
                 );
                 sessionStorage.setItem('azuCarLicenseVerified', isDlVerified ? 'true' : 'false');
                 if (u.claims) sessionStorage.setItem('azuCarClaims', JSON.stringify(u.claims));
@@ -650,7 +677,7 @@ licenseImageInput?.addEventListener('change', () => {
     if (uploadPrompt) uploadPrompt.hidden = true;
 });
 
-licenseForm?.addEventListener('submit', (e) => {
+licenseForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!licenseForm.reportValidity()) return;
 
@@ -659,21 +686,55 @@ licenseForm?.addEventListener('submit', (e) => {
     const holder = String(values.get('holder') || '').trim();
     const bday = String(values.get('birthday') || '');
 
-    sessionStorage.setItem(accountKeys.licenseNumber, num);
-    sessionStorage.setItem(accountKeys.licenseHolder, holder);
-    sessionStorage.setItem(accountKeys.licenseBirthday, bday);
-    sessionStorage.setItem(accountKeys.hasDriverLicense, 'true');
-    sessionStorage.setItem('azuCarLicenseVerified', 'true');
-
     const userName = sessionStorage.getItem(accountKeys.username) || 'renter1';
-    if (!sessionStorage.getItem(accountKeys.licenseImageFront)) {
-        sessionStorage.setItem(accountKeys.licenseImageFront, `/seed/license-${userName.toLowerCase()}.jpg`);
+    let imageFront = sessionStorage.getItem(accountKeys.licenseImageFront) || `/seed/license-${userName.toLowerCase()}.jpg`;
+
+    if (licenseImageInput && licenseImageInput.files && licenseImageInput.files[0]) {
+        try {
+            imageFront = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => resolve(`/seed/license-${userName.toLowerCase()}.jpg`);
+                reader.readAsDataURL(licenseImageInput.files[0]);
+            });
+        } catch {
+            imageFront = `/seed/license-${userName.toLowerCase()}.jpg`;
+        }
     }
 
-    renderLicenseData();
-    setLicenseEditing(false);
-    alert('Đã cập nhật và lưu thông tin Giấy phép lái xe thành công!');
-    window.dispatchEvent(new CustomEvent('azu:auth-changed'));
+    try {
+        const resp = await fetch('/api/auth/driver-license', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                licenseNumber: num,
+                licenseClass: 'B2',
+                expiryDate: '2035-12-31',
+                imageFront: imageFront
+            })
+        });
+        const resData = await resp.json();
+        if (resp.ok && resData.isSuccess) {
+            sessionStorage.setItem(accountKeys.licenseNumber, num);
+            sessionStorage.setItem(accountKeys.licenseHolder, holder);
+            sessionStorage.setItem(accountKeys.licenseBirthday, bday);
+            sessionStorage.setItem(accountKeys.hasDriverLicense, 'true');
+            sessionStorage.setItem('azuCarLicenseVerified', 'false');
+            sessionStorage.setItem(accountKeys.licenseImageFront, imageFront);
+
+            renderLicenseData();
+            setLicenseEditing(false);
+            alert('Đã cập nhật thông tin GPLX thành công! Hồ sơ đang được chuyển tới Quản trị viên để kiểm duyệt.');
+            window.dispatchEvent(new CustomEvent('azu:auth-changed'));
+        } else {
+            alert(resData?.message || 'Không thể lưu thông tin GPLX.');
+        }
+    } catch {
+        alert('Lỗi kết nối khi lưu thông tin GPLX.');
+    }
 });
 
 // Dialog Close Buttons & ESC
@@ -1595,6 +1656,95 @@ async function loadPaymentCards() {
         });
     } catch (err) {
         console.error('Error loading payment cards:', err);
+    }
+}
+
+// Xe da luu (Favorites)
+async function loadFavoriteCars() {
+    if (!favoritesGrid || !favoritesEmpty) return;
+    let favIds = [];
+    try {
+        favIds = JSON.parse(localStorage.getItem('azuCarFavorites') || '[]');
+    } catch {
+        favIds = [];
+    }
+
+    if (!Array.isArray(favIds) || favIds.length === 0) {
+        favoritesGrid.hidden = true;
+        favoritesEmpty.hidden = false;
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/vehicles?pageSize=100', { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) {
+            favoritesGrid.hidden = true;
+            favoritesEmpty.hidden = false;
+            return;
+        }
+        const json = await res.json();
+        const allCars = (json && json.data && Array.isArray(json.data.items)) ? json.data.items : [];
+        const cars = allCars.filter(c => favIds.includes(String(c.id || c.vehicleId)));
+
+        if (cars.length === 0) {
+            favoritesGrid.hidden = true;
+            favoritesEmpty.hidden = false;
+            return;
+        }
+
+        favoritesEmpty.hidden = true;
+        favoritesGrid.hidden = false;
+
+        favoritesGrid.innerHTML = cars.map(car => {
+            const carId = car.id || car.vehicleId;
+            const img = car.coverImageUrl || '/seed/car-vf8.webp';
+            const price = Number(car.pricePerDay || 0).toLocaleString('vi-VN');
+            const seats = car.seats || 4;
+            const fuel = car.fuelType || 'Xăng';
+            const transmission = car.transmission || 'Tự động';
+            const location = car.district ? `${car.district}, ${car.city}` : (car.city || 'Đà Nẵng');
+
+            return `
+                <div class="fav-car-card" data-car-id="${carId}">
+                    <div class="fav-car-img-wrap">
+                        <img src="${img}" alt="${car.brand} ${car.model}" onerror="this.src='/seed/car-vf8.webp'">
+                        <button type="button" class="btn-remove-fav" data-fav-id="${carId}" title="Bỏ lưu xe">
+                            <i class="fa-solid fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="fav-car-content">
+                        <h3 class="fav-car-title">${car.brand} ${car.model} ${car.year ? `<small>(${car.year})</small>` : ''}</h3>
+                        <div class="fav-car-specs">
+                            <span><i class="fa-solid fa-user-group"></i> ${seats} chỗ</span>
+                            <span><i class="fa-solid fa-gear"></i> ${transmission}</span>
+                            <span><i class="fa-solid fa-gas-pump"></i> ${fuel}</span>
+                        </div>
+                        <div class="fav-car-loc"><i class="fa-solid fa-location-dot"></i> ${location}</div>
+                        <div class="fav-car-foot">
+                            <div class="fav-car-price"><strong>${price} đ</strong><span>/ngày</span></div>
+                            <a href="/find?vehicleId=${carId}" class="btn-fav-rent">Thuê xe</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        favoritesGrid.querySelectorAll('.btn-remove-fav').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const idToRemove = btn.getAttribute('data-fav-id');
+                if (!idToRemove) return;
+                let currentFavs = JSON.parse(localStorage.getItem('azuCarFavorites') || '[]');
+                currentFavs = currentFavs.filter(x => String(x) !== String(idToRemove));
+                localStorage.setItem('azuCarFavorites', JSON.stringify(currentFavs));
+                window.dispatchEvent(new CustomEvent('azuCarFavoritesChanged', { detail: { favorites: currentFavs } }));
+                loadFavoriteCars();
+            });
+        });
+    } catch {
+        favoritesGrid.hidden = true;
+        favoritesEmpty.hidden = false;
     }
 }
 

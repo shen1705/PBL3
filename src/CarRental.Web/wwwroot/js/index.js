@@ -264,6 +264,17 @@ document.addEventListener('DOMContentLoaded', function() {
             validatePasswordMatch();
             if (!registerForm.reportValidity()) return;
 
+            if (usernameInput.value.trim().length < 2) {
+                if (registerErrorBanner) {
+                    registerErrorBanner.textContent = 'Tên tài khoản phải có tối thiểu 2 ký tự.';
+                    registerErrorBanner.style.display = 'block';
+                } else {
+                    alert('Tên tài khoản phải có tối thiểu 2 ký tự.');
+                }
+                usernameInput.focus();
+                return;
+            }
+
             if (passwordInput.value.length < 6) {
                 if (registerErrorBanner) {
                     registerErrorBanner.textContent = 'Mật khẩu không đủ mạnh: Mật khẩu phải có tối thiểu 6 ký tự.';
@@ -297,11 +308,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     passwordConfirmInput.setCustomValidity('');
                     registerForm.reset();
                 } else {
+                    const errorMsg = res?.message || (res?.errors ? Object.values(res.errors).flat().join('; ') : 'Đăng ký không thành công. Vui lòng kiểm tra lại.');
                     if (registerErrorBanner) {
-                        registerErrorBanner.textContent = res?.message || 'Đăng ký không thành công. Vui lòng kiểm tra lại.';
+                        registerErrorBanner.textContent = errorMsg;
                         registerErrorBanner.style.display = 'block';
                     } else {
-                        alert(res?.message || 'Đăng ký không thành công.');
+                        alert(errorMsg);
                     }
                 }
             } catch (err) {
