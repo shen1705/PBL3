@@ -241,14 +241,30 @@ public class BookingService : IBookingService
 
         _db.Bookings.Add(booking);
 
+        string cardDetailNote = "";
+        if (request.PaymentMethod == "card" && request.PaymentCardId.HasValue)
+        {
+            var card = await _db.PaymentCards.AsNoTracking()
+                .FirstOrDefaultAsync(c => c.CardId == request.PaymentCardId.Value && c.UserId == renterUserId, ct);
+            if (card != null)
+            {
+                cardDetailNote = $" (Thẻ {card.CardBrand} {card.CardNumberMasked})";
+            }
+        }
+
         // Tạo giao dịch ngân hàng ảo ký quỹ Escrow 100%
         var escrowAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.AccountNumber == "ESCROW-0001", ct);
         var renterAcc = await _db.MockBankAccounts.FirstOrDefaultAsync(a => a.UserId == renterUserId, ct);
         if (escrowAcc != null && renterAcc != null)
         {
+            var refCode = ReferenceCodes.Deposit(hold.HoldId);
+            if (request.PaymentMethod == "card" && request.PaymentCardId.HasValue)
+            {
+                refCode += $"-CARD-{request.PaymentCardId.Value}";
+            }
             _db.MockBankTransactions.Add(new MockBankTransaction
             {
-                ReferenceCode = ReferenceCodes.Deposit(hold.HoldId),
+                ReferenceCode = refCode,
                 FromAccountId = renterAcc.AccountId,
                 ToAccountId = escrowAcc.AccountId,
                 TransactionType = MockTransactionTypes.Deposit,
@@ -265,7 +281,7 @@ public class BookingService : IBookingService
         await _notificationService.CreateNotificationAsync(
             renterUserId,
             "Đặt xe & Ký quỹ thành công",
-            $"Đơn #{booking.BookingId} cho xe {carTitle} ({listing.Vehicle.LicensePlate}) đã được gửi đến chủ xe. Tiền ký quỹ 100% ({depositAmount:N0} đ) đang được bảo lưu an toàn tại Sàn AZU Car.",
+            $"Đơn #{booking.BookingId} cho xe {carTitle} ({listing.Vehicle.LicensePlate}) đã được gửi đến chủ xe. Tiền ký quỹ 100% ({depositAmount:N0} đ) đang được bảo lưu an toàn{cardDetailNote} tại Sàn AZU Car.",
             "trip",
             booking.BookingId,
             "/account#trips",

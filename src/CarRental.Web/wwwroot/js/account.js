@@ -1659,12 +1659,23 @@ async function loadPaymentCards() {
     }
 }
 
+function getFavoritesStorageKey() {
+    const user = window.AzuStore?.getUser ? window.AzuStore.getUser() : null;
+    return user?.userId ? `azuCarFavorites_${user.userId}` : 'azuCarFavorites_guest';
+}
+
 // Xe da luu (Favorites)
 async function loadFavoriteCars() {
     if (!favoritesGrid || !favoritesEmpty) return;
+    const key = getFavoritesStorageKey();
     let favIds = [];
     try {
-        favIds = JSON.parse(localStorage.getItem('azuCarFavorites') || '[]');
+        let stored = localStorage.getItem(key);
+        if (!stored) {
+            stored = localStorage.getItem('azuCarFavorites');
+            if (stored) localStorage.setItem(key, stored);
+        }
+        favIds = stored ? JSON.parse(stored) : [];
     } catch {
         favIds = [];
     }
@@ -1735,8 +1746,10 @@ async function loadFavoriteCars() {
                 e.stopPropagation();
                 const idToRemove = btn.getAttribute('data-fav-id');
                 if (!idToRemove) return;
-                let currentFavs = JSON.parse(localStorage.getItem('azuCarFavorites') || '[]');
+                const key = getFavoritesStorageKey();
+                let currentFavs = JSON.parse(localStorage.getItem(key) || localStorage.getItem('azuCarFavorites') || '[]');
                 currentFavs = currentFavs.filter(x => String(x) !== String(idToRemove));
+                localStorage.setItem(key, JSON.stringify(currentFavs));
                 localStorage.setItem('azuCarFavorites', JSON.stringify(currentFavs));
                 window.dispatchEvent(new CustomEvent('azuCarFavoritesChanged', { detail: { favorites: currentFavs } }));
                 loadFavoriteCars();

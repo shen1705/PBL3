@@ -36,4 +36,6 @@ public class CreateBookingRequest
 
     [MaxLength(50)]
     public string? PaymentMethod { get; set; } = "qr"; // "qr" | "bank" | "card"
+
+    public int? PaymentCardId { get; set; }
 }

@@ -152,8 +152,7 @@
         
         const isVerified = Boolean(
             u.isDriverLicenseVerified === true ||
-            (Array.isArray(u.claims) && u.claims.includes('DriverLicenseVerified')) ||
-            (u.hasDriverLicense && (u.licenseNumber || sessionStorage.getItem(KEYS.licenseNumber)))
+            (Array.isArray(u.claims) && u.claims.includes('DriverLicenseVerified'))
         );
         sessionStorage.setItem(KEYS.isDriverLicenseVerified, isVerified ? 'true' : 'false');
 
@@ -337,7 +336,7 @@
             email: sessionStorage.getItem(KEYS.email) || '',
             phone: sessionStorage.getItem(KEYS.phone) || '',
             hasDriverLicense: sessionStorage.getItem(KEYS.hasDriverLicense) === 'true',
-            isDriverLicenseVerified: sessionStorage.getItem(KEYS.isDriverLicenseVerified) === 'true' || sessionStorage.getItem(KEYS.hasDriverLicense) === 'true',
+            isDriverLicenseVerified: sessionStorage.getItem(KEYS.isDriverLicenseVerified) === 'true',
             licenseNumber: sessionStorage.getItem(KEYS.licenseNumber) || '',
             licenseClass: sessionStorage.getItem(KEYS.licenseClass) || '',
             licenseExpiryDate: sessionStorage.getItem(KEYS.licenseExpiryDate) || '',

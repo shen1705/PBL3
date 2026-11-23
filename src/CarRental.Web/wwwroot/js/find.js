@@ -20,10 +20,23 @@ function resolveVehicleImage(car) {
     return window.AzuVehicleImages?.resolve(vehicleName, currentImage) || currentImage;
 }
 
-// Quản lý Yêu thích xe (Favorites) lưu LocalStorage
+// Quản lý Yêu thích xe (Favorites) lưu LocalStorage theo tài khoản
+function getFavoritesStorageKey() {
+    const user = window.AzuStore?.getUser ? window.AzuStore.getUser() : null;
+    return user?.userId ? `azuCarFavorites_${user.userId}` : 'azuCarFavorites_guest';
+}
+
 function getFavoriteCars() {
     try {
-        const stored = localStorage.getItem('azuCarFavorites');
+        const key = getFavoritesStorageKey();
+        let stored = localStorage.getItem(key);
+        if (!stored) {
+            const legacy = localStorage.getItem('azuCarFavorites');
+            if (legacy) {
+                stored = legacy;
+                localStorage.setItem(key, legacy);
+            }
+        }
         return stored ? JSON.parse(stored) : [];
     } catch {
         return [];
@@ -45,6 +58,8 @@ function toggleFavoriteCar(carId, btnEl) {
     }
 
     try {
+        const key = getFavoritesStorageKey();
+        localStorage.setItem(key, JSON.stringify(favorites));
         localStorage.setItem('azuCarFavorites', JSON.stringify(favorites));
     } catch {}
 
@@ -2360,27 +2375,38 @@ async function loadBookingPaymentCards() {
         `;
         document.getElementById('btnConnectCardEmpty')?.addEventListener('click', openAddPaymentCardModalFromBooking);
     } else {
-        if (!selectedBookingCard) {
-            selectedBookingCard = userBookingCards.find(c => c.isDefault) || userBookingCards[0];
+        const now = new Date();
+        const curYear = now.getFullYear();
+        const curMonth = now.getMonth() + 1;
+        const isCardExpired = (card) => {
+            const expY = Number(card.expiryYear);
+            const expM = Number(card.expiryMonth);
+            return expY < curYear || (expY === curYear && expM < curMonth);
+        };
+
+        if (!selectedBookingCard || isCardExpired(selectedBookingCard)) {
+            selectedBookingCard = userBookingCards.find(c => !isCardExpired(c) && c.isDefault) ||
+                                  userBookingCards.find(c => !isCardExpired(c)) || null;
         }
 
         cardList.innerHTML = userBookingCards.map(c => {
-            const isChecked = selectedBookingCard && selectedBookingCard.cardId === c.cardId;
+            const expired = isCardExpired(c);
+            const isChecked = !expired && selectedBookingCard && selectedBookingCard.cardId === c.cardId;
             const brandIcon = (c.cardBrand || '').toLowerCase().includes('mastercard') ? 'fa-brands fa-cc-mastercard'
                 : (c.cardBrand || '').toLowerCase().includes('jcb') ? 'fa-brands fa-cc-jcb'
                 : 'fa-brands fa-cc-visa';
 
             return `
-                <label style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border:1px solid ${isChecked ? '#059669' : '#e2e8f0'}; border-radius:8px; margin-bottom:6px; cursor:pointer; background:${isChecked ? '#f0fdf4' : '#fff'}; transition:all 0.2s;">
+                <label style="display:flex; align-items:center; justify-content:space-between; padding:9px 12px; border:1px solid ${isChecked ? '#059669' : '#e2e8f0'}; border-radius:8px; margin-bottom:6px; cursor:${expired ? 'not-allowed' : 'pointer'}; opacity:${expired ? '0.6' : '1'}; background:${isChecked ? '#f0fdf4' : '#fff'}; transition:all 0.2s;">
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <input type="radio" name="selectedCardId" value="${c.cardId}" ${isChecked ? 'checked' : ''} style="accent-color:#059669;">
+                        <input type="radio" name="selectedCardId" value="${c.cardId}" ${isChecked ? 'checked' : ''} ${expired ? 'disabled' : ''} style="accent-color:#059669;">
                         <i class="${brandIcon}" style="font-size:20px; color:#1e293b;"></i>
                         <div>
                             <strong style="display:block; font-size:13px; color:#1e293b; font-family:monospace;">${c.cardNumberMasked || ('•••• ' + c.last4Digits)}</strong>
                             <span style="font-size:11.5px; color:#64748b;">${c.cardHolderName || 'Chủ thẻ'} · Hạn: ${String(c.expiryMonth).padStart(2, '0')}/${String(c.expiryYear).slice(-2)}</span>
                         </div>
                     </div>
-                    ${c.isDefault ? '<span style="font-size:11px; background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px; font-weight:600;">Mặc định</span>' : ''}
+                    ${expired ? '<span style="font-size:11px; background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; font-weight:600;">Hết hạn</span>' : (c.isDefault ? '<span style="font-size:11px; background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px; font-weight:600;">Mặc định</span>' : '')}
                 </label>
             `;
         }).join('');
@@ -2519,9 +2545,7 @@ document.getElementById('btnRentCarSubmit')?.addEventListener('click', () => {
     const isDlVerified = Boolean(
         user && (
             user.isDriverLicenseVerified === true ||
-            sessionStorage.getItem('azuCarLicenseVerified') === 'true' ||
-            (Array.isArray(user.claims) && user.claims.includes('DriverLicenseVerified')) ||
-            user.hasDriverLicense === true
+            (Array.isArray(user.claims) && user.claims.includes('DriverLicenseVerified'))
         )
     );
     if (!isDlVerified) {
@@ -3402,9 +3426,7 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
     const isDlVerified = Boolean(
         user && (
             user.isDriverLicenseVerified === true ||
-            sessionStorage.getItem('azuCarLicenseVerified') === 'true' ||
-            (Array.isArray(user.claims) && user.claims.includes('DriverLicenseVerified')) ||
-            user.hasDriverLicense === true
+            (Array.isArray(user.claims) && user.claims.includes('DriverLicenseVerified'))
         )
     );
     if (!isDlVerified) {
@@ -3443,7 +3465,8 @@ bookingCheckoutForm?.addEventListener('submit', (e) => {
             renterName: name,
             renterPhone: phone,
             renterEmail: email,
-            paymentMethod: paymentMethod
+            paymentMethod: paymentMethod,
+            paymentCardId: (paymentMethod === 'card' && selectedBookingCard) ? selectedBookingCard.cardId : null
         },
         display: {
             carName: currentPopupCar.name,

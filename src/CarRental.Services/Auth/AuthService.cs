@@ -90,7 +90,7 @@ public class AuthService : IAuthService
         _logger.LogInformation("User {UserName} logged in successfully.", user.UserName);
         return ServiceResult<AuthUserDto>.Success(dto, "Đăng nhập thành công.");
     }
-    private static string FormatIdentityPasswordErrors(IEnumerable<IdentityError> errors)
+    private static string FormatIdentityUserErrors(IEnumerable<IdentityError> errors)
     {
         var messages = new List<string>();
         foreach (var err in errors)
@@ -126,7 +126,13 @@ public class AuthService : IAuthService
                     break;
             }
         }
-        return "Mật khẩu không đủ mạnh hoặc không hợp lệ: " + string.Join(" ", messages);
+        return string.Join(" ", messages);
+    }
+
+    private static string FormatIdentityPasswordErrors(IEnumerable<IdentityError> errors)
+    {
+        var msg = FormatIdentityUserErrors(errors);
+        return string.IsNullOrWhiteSpace(msg) ? "Mật khẩu không hợp lệ." : "Mật khẩu không hợp lệ: " + msg;
     }
 
     // Register ( Dang ki )
@@ -178,7 +184,7 @@ public class AuthService : IAuthService
         var createResult = await _userManager.CreateAsync(newUser, request.Password);
         if (!createResult.Succeeded)
         {
-            var errorMsg = FormatIdentityPasswordErrors(createResult.Errors);
+            var errorMsg = FormatIdentityUserErrors(createResult.Errors);
             return ServiceResult<AuthUserDto>.Fail(errorMsg, "CREATE_USER_FAILED");
         }
 
