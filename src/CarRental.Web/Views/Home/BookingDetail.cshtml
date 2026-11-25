@@ -1,15 +1,43 @@
 @{
     var bookingId = ViewData["BookingId"];
-    ViewData["Title"] = $"Chi tiết chuyến đi #{bookingId} - AZU Car";
+    ViewData["Title"] = $"Chi tiết đơn thuê #{bookingId} - AZU Car";
 }
 
-<div style="text-align: center; padding: 80px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-    <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: #2563eb;"></i>
-    <p style="margin-top: 14px; font-size: 15px; color: #475569;">Đang chuyển hướng đến chi tiết chuyến đi...</p>
-</div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/mytrips.css" asp-append-version="true">
+    <style>
+        .booking-detail-page {
+            max-width: 1120px;
+            margin: 32px auto 64px;
+            padding: 0 20px;
+        }
+        .booking-detail-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+        }
+        @@media (max-width: 768px) {
+            .booking-detail-page {
+                margin: 18px auto 40px;
+                padding: 0 12px;
+            }
+            .booking-detail-card {
+                padding: 18px 14px;
+            }
+        }
+    </style>
+}
+
+<main class="booking-detail-page" id="booking-detail-page" data-booking-id="@bookingId">
+    <div class="booking-detail-card">
+        <section class="trip-detail-view" id="trip-detail-view" aria-live="polite">
+            <p class="trip-detail-loading"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải chi tiết đơn thuê #@bookingId...</p>
+        </section>
+    </div>
+</main>
 
 @section Scripts {
-    <script>
-        window.location.replace('/account?bookingId=@bookingId#trips');
-    </script>
+    <script src="~/js/booking-detail.js" asp-append-version="true"></script>
 }

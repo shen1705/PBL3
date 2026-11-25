@@ -65,7 +65,7 @@
             sessionStorage.removeItem(KEYS.returnTo);
             sessionStorage.setItem('azuCarPromptLogin', '1');
         } catch (e) {}
-        window.location.assign('index.html');
+        window.location.assign('/');
         return false;
     }
 
@@ -317,7 +317,7 @@
                 try {
                     sessionStorage.setItem(isReg ? 'azuCarPromptRegister' : 'azuCarPromptLogin', '1');
                 } catch (err) {}
-                window.location.href = 'index.html';
+                window.location.href = '/';
             } else {
                 const modal = document.getElementById(isReg ? 'registerModal' : 'loginModal');
                 if (modal) modal.classList.add('active');

@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // redirect home
         const cur = window.location.pathname.split('/').pop() || '';
         if (cur !== '' && cur !== 'index.html') {
-            window.location.assign('index.html');
+            window.location.assign('/');
             return;
         }
 

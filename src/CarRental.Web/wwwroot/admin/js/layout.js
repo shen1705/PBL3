@@ -20,7 +20,6 @@ const menuGroups = [
     title: "Hệ thống",
     items: [
       { id: "logs", label: "Nhật ký", href: "logs.html" },
-      { id: "settings", label: "Cài đặt", href: "settings.html" },
     ],
   },
 ];

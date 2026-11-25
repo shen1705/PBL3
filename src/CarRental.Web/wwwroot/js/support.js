@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <li><strong>Doanh thu hấp dẫn:</strong> Chủ xe nhận từ <strong>80% – 85% giá trị hợp đồng thuê</strong>. Tiền được chuyển vào thứ 2 hàng tuần hoặc sau mỗi chuyến đi.</li>
                     <li><strong>Bảo vệ xe:</strong> AZU Car có hợp đồng pháp lý chặt chẽ và bảo hiểm mở rộng dành riêng cho xe cho thuê tự lái.</li>
                 </ul>
-                <p>👉 Bạn có thể nhấn vào menu <a href="become-owner.html" style="color:#3ac274; font-weight:700;">Trở thành chủ xe</a> để đăng ký ngay chỉ mất 5 phút!</p>
+                <p>👉 Bạn có thể nhấn vào menu <a href="/become-owner" style="color:#3ac274; font-weight:700;">Trở thành chủ xe</a> để đăng ký ngay chỉ mất 5 phút!</p>
             `,
             suggestions: ['Bảo hiểm xe cho thuê được bảo vệ thế nào?', 'Thủ tục thuê xe cần những giấy tờ gì?']
         },
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <li><strong>SUV / Crossover gầm cao (Sonet, Seltos, Creta, CX-5):</strong> từ 800.000đ – 1.200.000đ/ngày.</li>
                     <li><strong>MPV 7 chỗ rộng rãi (Xpander, XL7, Veloz, Innova, Carnival):</strong> từ 900.000đ – 1.600.000đ/ngày.</li>
                 </ul>
-                <p>👉 Bạn có thể vào trang <a href="find.html" style="color:#3ac274; font-weight:700;">Tìm xe</a> để xem danh sách xe thực tế và giá tốt nhất theo ngày bạn chọn!</p>
+                <p>👉 Bạn có thể vào trang <a href="/find" style="color:#3ac274; font-weight:700;">Tìm xe</a> để xem danh sách xe thực tế và giá tốt nhất theo ngày bạn chọn!</p>
             `,
             suggestions: ['Có cần đặt cọc tiền mặt không?', 'Thủ tục thuê xe cần những giấy tờ gì?']
         },

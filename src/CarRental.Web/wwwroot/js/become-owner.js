@@ -1,6 +1,6 @@
 if (!window.AzuStore.isLoggedIn()) {
 
-    window.AzuStore.requireLogin('become-owner.html');
+    window.AzuStore.requireLogin('/become-owner');
 
 }
 
@@ -890,7 +890,7 @@ document.querySelectorAll('.btn-back').forEach(btn => {
 
         if (btn.classList.contains('btn-back-home')) {
 
-            window.location.href = 'index.html';
+            window.location.href = '/';
 
         } else {
 
@@ -1848,7 +1848,7 @@ function renderOwnerTrips(items) {
         title.style.cssText = 'margin: 0; font-size: 16px; font-weight: 700;';
 
         const titleLink = document.createElement('a');
-        titleLink.href = `/account?bookingId=${req.bookingId}#trips`;
+        titleLink.href = `/booking/${req.bookingId}`;
         titleLink.textContent = `#${req.bookingId} - ${req.vehicleName}`;
         titleLink.title = 'Xem chi tiết đơn thuê xe';
         titleLink.style.cssText = 'color: #1e293b; text-decoration: none; transition: color 0.2s ease; cursor: pointer;';
@@ -2070,7 +2070,7 @@ function renderOwnerTrips(items) {
         }
 
         const detailLink = document.createElement('a');
-        detailLink.href = `/account?bookingId=${req.bookingId}#trips`;
+        detailLink.href = `/booking/${req.bookingId}`;
         detailLink.className = 'trip-detail-open';
         detailLink.style.cssText = 'color: #8f6b24; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; font-weight: 600; margin-left: auto; cursor: pointer; background: transparent; border: 0;';
         detailLink.textContent = 'Xem chi tiết';

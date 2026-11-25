@@ -2535,7 +2535,7 @@ document.getElementById('btnRentCarSubmit')?.addEventListener('click', () => {
         if (loginModal) {
             loginModal.classList.add('active');
         } else {
-            window.location.href = 'index.html';
+            window.location.href = '/';
         }
         return;
     }
