@@ -2426,8 +2426,9 @@ async function loadBookingPaymentCards() {
 function openAddPaymentCardModalFromBooking() {
     const modal = document.getElementById('addPaymentCardModal');
     if (modal) {
-        modal.style.display = 'flex';
         modal.hidden = false;
+        modal.style.display = 'flex';
+        modal.classList.add('active');
         document.getElementById('card-number-input')?.focus();
     }
 }
@@ -2440,6 +2441,7 @@ const findCloseAddCardBtn = document.getElementById('closeAddPaymentCardBtn');
 findCloseAddCardBtn?.addEventListener('click', () => {
     const modal = document.getElementById('addPaymentCardModal');
     if (modal) {
+        modal.classList.remove('active');
         modal.style.display = 'none';
         modal.hidden = true;
     }
@@ -2485,13 +2487,13 @@ findAddCardForm?.addEventListener('submit', async (e) => {
                 expiryYear: year,
                 cardBrand: brand,
                 cvv: cvv,
-                isDefault: true
+                setAsDefault: true
             })
         });
         const resData = await resp.json();
         if (resp.ok && resData.isSuccess) {
             const modal = document.getElementById('addPaymentCardModal');
-            if (modal) { modal.style.display = 'none'; modal.hidden = true; }
+            if (modal) { modal.classList.remove('active'); modal.style.display = 'none'; modal.hidden = true; }
             findAddCardForm.reset();
             await loadBookingPaymentCards();
             if (resData.data) selectedBookingCard = resData.data;

@@ -316,6 +316,8 @@ public class AuthService : IAuthService
         if (user == null)
             return ServiceResult<bool>.Fail("Không tìm thấy thông tin tài khoản.", "USER_NOT_FOUND");
 
+        var resolvedImagePath = ResolveAndSaveDriverLicenseImage(userId, request.ImageFront, user.UserName);
+
         var dl = await _db.DriverLicenses.FirstOrDefaultAsync(d => d.UserId == userId, ct);
         if (dl == null)
         {
@@ -325,7 +327,7 @@ public class AuthService : IAuthService
                 LicenseNumber = request.LicenseNumber.Trim(),
                 LicenseClass = string.IsNullOrWhiteSpace(request.LicenseClass) ? "B2" : request.LicenseClass.Trim(),
                 ExpiryDate = request.ExpiryDate ?? new DateOnly(2035, 12, 31),
-                ImageFront = string.IsNullOrWhiteSpace(request.ImageFront) ? $"/seed/license-renter1.jpg" : request.ImageFront.Trim()
+                ImageFront = resolvedImagePath ?? "/seed/license-renter1.jpg"
             };
             _db.DriverLicenses.Add(dl);
         }
@@ -336,8 +338,8 @@ public class AuthService : IAuthService
                 dl.LicenseClass = request.LicenseClass.Trim();
             if (request.ExpiryDate.HasValue)
                 dl.ExpiryDate = request.ExpiryDate.Value;
-            if (!string.IsNullOrWhiteSpace(request.ImageFront))
-                dl.ImageFront = request.ImageFront.Trim();
+            if (!string.IsNullOrWhiteSpace(resolvedImagePath))
+                dl.ImageFront = resolvedImagePath;
         }
 
         var claims = await _userManager.GetClaimsAsync(user);
@@ -350,6 +352,47 @@ public class AuthService : IAuthService
         await _db.SaveChangesAsync(ct);
         _logger.LogInformation("Driver license updated for user {UserId}, awaiting admin moderation.", userId);
         return ServiceResult<bool>.Success(true, "Cập nhật Giấy phép lái xe thành công. Hồ sơ đang chờ Quản trị viên duyệt.");
+    }
+
+    private string? ResolveAndSaveDriverLicenseImage(string userId, string? rawImage, string? userName)
+    {
+        if (string.IsNullOrWhiteSpace(rawImage))
+            return null;
+
+        var trimmed = rawImage.Trim();
+        if (trimmed.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
+        {
+            var commaIdx = trimmed.IndexOf(',');
+            if (commaIdx > 0)
+            {
+                var header = trimmed[..commaIdx].ToLowerInvariant();
+                var base64Data = trimmed[(commaIdx + 1)..];
+                var ext = header.Contains("png") ? "png" : header.Contains("webp") ? "webp" : "jpg";
+                try
+                {
+                    var bytes = Convert.FromBase64String(base64Data);
+                    var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                    if (!Directory.Exists(wwwrootPath))
+                        wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+
+                    var uploadsDir = Path.Combine(wwwrootPath, "uploads", "licenses");
+                    Directory.CreateDirectory(uploadsDir);
+
+                    var safeId = new string(userId.Where(c => char.IsLetterOrDigit(c) || c == '-' || c == '_').ToArray());
+                    var fileName = $"license-{safeId}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.{ext}";
+                    File.WriteAllBytes(Path.Combine(uploadsDir, fileName), bytes);
+                    return $"/uploads/licenses/{fileName}";
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to save base64 driver license image for user {UserId}", userId);
+                    var safeName = string.IsNullOrWhiteSpace(userName) ? "renter1" : userName.ToLowerInvariant();
+                    return $"/seed/license-{safeName}.jpg";
+                }
+            }
+        }
+
+        return trimmed.Length <= 255 ? trimmed : trimmed[..255];
     }
 
     public async Task<AccountSanction?> GetActiveSanctionAsync(string userId, CancellationToken ct = default)

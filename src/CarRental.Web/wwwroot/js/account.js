@@ -2032,16 +2032,24 @@ btnOpenAddCard?.addEventListener('click', () => {
     if (addPaymentCardForm) addPaymentCardForm.reset();
     if (addCardErrorBanner) addCardErrorBanner.style.display = 'none';
     if (cardBrandBadge) cardBrandBadge.innerHTML = '<i class="fa-regular fa-credit-card"></i>';
-    if (addPaymentCardModal) addPaymentCardModal.style.display = 'flex';
+    if (addPaymentCardModal) {
+        addPaymentCardModal.hidden = false;
+        addPaymentCardModal.style.display = 'flex';
+        addPaymentCardModal.classList.add('active');
+    }
     cardNumberInput?.focus();
 });
 
 closeAddPaymentCardBtn?.addEventListener('click', () => {
-    if (addPaymentCardModal) addPaymentCardModal.style.display = 'none';
+    if (addPaymentCardModal) {
+        addPaymentCardModal.classList.remove('active');
+        addPaymentCardModal.style.display = 'none';
+    }
 });
 
 addPaymentCardModal?.addEventListener('click', (e) => {
     if (e.target === addPaymentCardModal) {
+        addPaymentCardModal.classList.remove('active');
         addPaymentCardModal.style.display = 'none';
     }
 });
@@ -2094,7 +2102,7 @@ addPaymentCardForm?.addEventListener('submit', async (e) => {
         expiryYear: year,
         cvv: cvv,
         bankName: bankName || null,
-        isDefault: isDefault
+        setAsDefault: isDefault
     };
 
     const submitBtn = document.getElementById('btnSubmitAddCard');
@@ -2114,7 +2122,10 @@ addPaymentCardForm?.addEventListener('submit', async (e) => {
         });
         const result = await resp.json();
         if (resp.ok && result && result.isSuccess) {
-            if (addPaymentCardModal) addPaymentCardModal.style.display = 'none';
+            if (addPaymentCardModal) {
+                addPaymentCardModal.classList.remove('active');
+                addPaymentCardModal.style.display = 'none';
+            }
             await loadPaymentCards();
         } else {
             showCardError(result?.message || 'Không thể liên kết thẻ. Vui lòng kiểm tra lại thông tin.');
