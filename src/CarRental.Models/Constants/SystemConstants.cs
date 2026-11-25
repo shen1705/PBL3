@@ -179,7 +179,7 @@ public static class SettingKeys
 
 public static class BusinessRules
 {
-    public const decimal DepositRate = 1.00m;             // 100% online rental payment held in Escrow
+    public const decimal DepositRate = 0.25m;             // 25% deposit upon booking, 75% paid at trip completion
     public const decimal OwnerCancelPenaltyRate = 0.08m;  // Owner penalty 8% price_locked_total
     public const decimal DefaultCommissionRate = 0.05m;   // platform commission 5%
     public const int ResponseDeadlineHours = 24;          // max owner response time in hours

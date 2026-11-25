@@ -253,7 +253,7 @@
                 <div class="azu-tm-trip-info">
                     <div><strong>Phương tiện:</strong> ${carName} ${plate}</div>
                     <div><strong>Đối tác cùng kiểm tra:</strong> ${partnerName}</div>
-                    <div><strong>Thanh toán:</strong> <span style="color:#059669;font-weight:700;">Đã ký quỹ 100% qua sàn AZU Car</span></div>
+                    <div><strong>Thanh toán:</strong> <span style="color:#059669;font-weight:700;">Đã thanh toán 100% online qua sàn AZU Car</span></div>
                 </div>
 
                 <form id="azuHandoverForm">
@@ -282,7 +282,7 @@
                             <label>Trạng thái thanh toán tiền thuê xe</label>
                             <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:10px 14px;color:#065f46;font-size:13px;display:flex;align-items:center;gap:10px;">
                                 <i class="fa-solid fa-circle-check" style="font-size:18px;color:#10b981;flex-shrink:0;"></i>
-                                <span><strong>Đã thanh toán 100% trực tuyến qua Ký quỹ Sàn AZU Car.</strong> Khách thuê không phải trả tiền thuê tại điểm nhận xe.</span>
+                                <span><strong>Đã thanh toán 100% online qua sàn AZU Car.</strong> Khách thuê không phải trả tiền thuê tại điểm nhận xe.</span>
                             </div>
                             <input type="hidden" id="tmPaymentMethod" value="online_escrow_100pct" />
                         </div>
@@ -435,8 +435,8 @@
                     </div>
                     Đơn thuê đã được chủ xe phê duyệt và xe đã được giữ lịch. Theo Điều 4.3 Chính sách hủy chuyến AZU Car:
                     <ul style="margin:6px 0 0 0;padding-left:18px;">
-                        <li><strong>Toàn bộ tiền ký quỹ (${depositPrice.toLocaleString('vi-VN')} đ) SẼ KHÔNG ĐƯỢC HOÀN LẠI</strong> để bồi thường chi phí giữ lịch của chủ xe.</li>
-                        <li>Số tiền ký quỹ sau khi trừ hoa hồng nền tảng sẽ được chuyển cho chủ xe.</li>
+                        <li><strong>Khoản tiền đã thanh toán (${depositPrice.toLocaleString('vi-VN')} đ) SẼ KHÔNG ĐƯỢC HOÀN LẠI</strong> để bồi thường chi phí giữ lịch của chủ xe.</li>
+                        <li>Số tiền này sau khi trừ hoa hồng nền tảng sẽ được chuyển cho chủ xe.</li>
                     </ul>
                 </div>
             `;
@@ -449,7 +449,7 @@
                     </div>
                     Đơn thuê đã được phê duyệt. Việc chủ xe chủ động hủy đơn gây ảnh hưởng trực tiếp đến kế hoạch của khách:
                     <ul style="margin:6px 0 0 0;padding-left:18px;">
-                        <li>Khách thuê được <strong>hoàn tiền ký quỹ 100% (${depositPrice.toLocaleString('vi-VN')} đ)</strong> ngay lập tức.</li>
+                        <li>Khách thuê được <strong>hoàn tiền 100% (${depositPrice.toLocaleString('vi-VN')} đ)</strong> ngay lập tức.</li>
                         <li><strong>Chủ xe BỊ PHẠT 8% GIÁ TRỊ ĐƠN THUÊ: ${ownerPenalty.toLocaleString('vi-VN')} đ</strong> (khấu trừ vào kỳ chi trả doanh thu hoặc hạn chế quyền đăng xe theo chế tài hệ thống).</li>
                     </ul>
                 </div>
@@ -470,7 +470,7 @@
                 <div class="azu-tm-trip-info">
                     <div><strong>Phương tiện:</strong> ${carName} ${plate}</div>
                     <div><strong>Giá trị đơn thuê:</strong> ${totalPrice.toLocaleString('vi-VN')} đ</div>
-                    <div><strong>Tiền thanh toán ký quỹ:</strong> ${depositPrice.toLocaleString('vi-VN')} đ</div>
+                    <div><strong>Số tiền đã thanh toán:</strong> ${depositPrice.toLocaleString('vi-VN')} đ</div>
                 </div>
 
                 ${warningHtml}
@@ -539,9 +539,9 @@
                 const data = await res.json();
                 if (res.ok && data.isSuccess) {
                     if (isPending) {
-                        alert('Đã hủy chuyến thành công. Toàn bộ tiền ký quỹ đã được hoàn trả lại cho bạn.');
+                        alert('Đã hủy chuyến thành công. Toàn bộ số tiền đã thanh toán đã được hoàn trả lại cho bạn.');
                     } else if (!isOwner) {
-                        alert('Đã hủy chuyến. Tiền ký quỹ đã được xử lý bồi thường theo Điều khoản hủy chuyến.');
+                        alert('Đã hủy chuyến. Số tiền đã thanh toán đã được xử lý bồi thường theo Điều khoản hủy chuyến.');
                     } else {
                         alert(`Đã hủy chuyến. Khoản phạt 8% (${ownerPenalty.toLocaleString('vi-VN')} đ) đã được ghi nhận vào hệ thống.`);
                     }

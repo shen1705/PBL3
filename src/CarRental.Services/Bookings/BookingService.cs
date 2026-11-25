@@ -280,8 +280,8 @@ public class BookingService : IBookingService
         var carTitle = $"{listing.Vehicle.Brand} {listing.Vehicle.Model}";
         await _notificationService.CreateNotificationAsync(
             renterUserId,
-            "Đặt xe & Ký quỹ thành công",
-            $"Đơn #{booking.BookingId} cho xe {carTitle} ({listing.Vehicle.LicensePlate}) đã được gửi đến chủ xe. Tiền ký quỹ 100% ({depositAmount:N0} đ) đang được bảo lưu an toàn{cardDetailNote} tại Sàn AZU Car.",
+            "Đặt xe & Đặt cọc thành công",
+            $"Đơn #{booking.BookingId} cho xe {carTitle} ({listing.Vehicle.LicensePlate}) đã được gửi đến chủ xe. Tiền cọc 25% ({depositAmount:N0} đ) đã được ghi nhận{cardDetailNote}; phần còn lại thanh toán ở cuối chuyến.",
             "trip",
             booking.BookingId,
             "/account#trips",
@@ -811,7 +811,7 @@ public class BookingService : IBookingService
                     FromAccountId = escrowAcc.AccountId,
                     ToAccountId = renterAcc.AccountId,
                     TransactionType = MockTransactionTypes.Refund,
-                    Amount = booking.PriceLockedTotal,
+                    Amount = booking.DepositAmount,
                     Status = MockTransactionStatuses.Succeeded,
                     CreatedAt = now
                 });
@@ -836,7 +836,7 @@ public class BookingService : IBookingService
             await _notificationService.CreateNotificationAsync(
                 booking.RenterId,
                 "Chủ xe từ chối đơn thuê",
-                $"Chủ xe đã từ chối đơn #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}). Lý do: {booking.RejectReason}. Toàn bộ tiền ký quỹ 100% ({booking.PriceLockedTotal:N0} đ) đã được hoàn trả lại cho bạn.",
+                $"Chủ xe đã từ chối đơn #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}). Lý do: {booking.RejectReason}. Tiền cọc ({booking.DepositAmount:N0} đ) đã được hoàn trả lại cho bạn.",
                 "trip",
                 booking.BookingId,
                 "/account#trips",
@@ -919,7 +919,7 @@ public class BookingService : IBookingService
                     FromAccountId = escrowAccount.AccountId,
                     ToAccountId = renterAccount.AccountId,
                     TransactionType = MockTransactionTypes.Refund,
-                    Amount = booking.PriceLockedTotal,
+                    Amount = booking.DepositAmount,
                     Status = MockTransactionStatuses.Succeeded,
                     CreatedAt = now
                 });
@@ -931,14 +931,13 @@ public class BookingService : IBookingService
             {
                 // Renter tự hủy sau khi đã duyệt nhưng trước giờ nhận xe -> Mất cọc (Forfeited), cọc chuyển cho Owner trừ hoa hồng 5%
                 decimal commissionRate = BusinessRules.DefaultCommissionRate;
-                decimal commissionAmount = Math.Round(booking.PriceLockedTotal * commissionRate);
+                decimal commissionAmount = Math.Round(booking.DepositAmount * commissionRate);
                 payment.DepositStatus = DepositStatuses.Forfeited;
                 payment.CommissionRate = commissionRate;
                 payment.CommissionAmount = commissionAmount;
                 payment.RevenueRecordedAt = now;
 
-                // Task 1 - Flaw 7: Nếu có giao xe tận nơi và hủy sát giờ (< 4 giờ), bảo lưu toàn bộ phí giao xe cho chủ xe
-                decimal ownerPayout = booking.PriceLockedTotal - commissionAmount;
+                decimal ownerPayout = booking.DepositAmount - commissionAmount;
 
                 if (escrowAccount != null && ownerAccount != null)
                 {
@@ -971,7 +970,7 @@ public class BookingService : IBookingService
                         FromAccountId = escrowAccount.AccountId,
                         ToAccountId = renterAccount.AccountId,
                         TransactionType = MockTransactionTypes.Refund,
-                        Amount = booking.PriceLockedTotal,
+                        Amount = booking.DepositAmount,
                         Status = MockTransactionStatuses.Succeeded,
                         CreatedAt = now
                     });
@@ -998,12 +997,85 @@ public class BookingService : IBookingService
             await _notificationService.CreateNotificationAsync(
                 booking.RenterId,
                 "Chủ xe đã hủy đơn thuê",
-                $"Chủ xe đã hủy đơn #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}). Lý do: {booking.CancelReason}. Toàn bộ tiền ký quỹ đã được hoàn lại cho bạn.",
+                $"Chủ xe đã hủy đơn #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}). Lý do: {booking.CancelReason}. Tiền cọc ({booking.DepositAmount:N0} đ) đã được hoàn lại cho bạn.",
                 "trip",
                 booking.BookingId,
                 "/account#trips",
                 ct);
         }
+
+        await _db.SaveChangesAsync(ct);
+
+        return await GetBookingDetailAsync(bookingId, currentUserId, ct);
+    }
+
+    public async Task<ServiceResult<BookingDetailDto>> ExtendBookingAsync(
+        int bookingId,
+        ExtendBookingRequest request,
+        string currentUserId,
+        CancellationToken ct = default)
+    {
+        var booking = await _db.Bookings
+            .Include(b => b.Vehicle)
+                .ThenInclude(v => v.Owner)
+            .Include(b => b.Listing)
+            .FirstOrDefaultAsync(b => b.BookingId == bookingId, ct);
+
+        if (booking == null)
+            return ServiceResult<BookingDetailDto>.Fail("Không tìm thấy đơn thuê xe.", ErrorCodes.NotFound);
+
+        bool isRenter = booking.RenterId == currentUserId;
+        bool isOwner = booking.Vehicle.OwnerId == currentUserId;
+        if (!isRenter && !isOwner)
+            return ServiceResult<BookingDetailDto>.Fail("Bạn không có quyền gia hạn đơn thuê này.", ErrorCodes.Forbidden);
+
+        if (booking.Status != BookingStatuses.Accepted && booking.Status != BookingStatuses.Ongoing)
+            return ServiceResult<BookingDetailDto>.Fail("Chỉ có thể thuê thêm ngày khi đơn đã được duyệt hoặc đang trong chuyến.", ErrorCodes.InvalidState);
+
+        var newEndUtc = request.NewEndDate.Kind == DateTimeKind.Utc
+            ? request.NewEndDate
+            : request.NewEndDate.ToUniversalTime();
+
+        if (newEndUtc <= booking.EndDate)
+            return ServiceResult<BookingDetailDto>.Fail("Thời gian trả xe mới phải sau thời gian trả xe hiện tại.", ErrorCodes.Validation);
+
+        // Kiểm tra lịch khoảng mở rộng [booking.EndDate, newEndUtc] — bỏ qua khoảng đệm 2h và không áp penalty
+        var blockedByOwner = await _db.VehicleUnavailabilities.AsNoTracking()
+            .AnyAsync(u => u.VehicleId == booking.VehicleId && u.StartDate < newEndUtc && u.EndDate > booking.EndDate, ct);
+        if (blockedByOwner)
+            return ServiceResult<BookingDetailDto>.Fail("Chủ xe đã khóa lịch trong khoảng thời gian muốn thuê thêm.", ErrorCodes.Conflict);
+
+        var lockingStatuses = BookingStatuses.Locking.ToArray();
+        var alreadyBooked = await _db.Bookings.AsNoTracking()
+            .AnyAsync(b => b.VehicleId == booking.VehicleId
+                        && b.BookingId != bookingId
+                        && lockingStatuses.Contains(b.Status)
+                        && b.StartDate < newEndUtc
+                        && b.EndDate > booking.EndDate, ct);
+        if (alreadyBooked)
+            return ServiceResult<BookingDetailDto>.Fail("Xe đã có đơn thuê khác trong khoảng thời gian muốn thuê thêm.", ErrorCodes.Conflict);
+
+        int newTotalDays = Math.Max(1, (int)Math.Ceiling((newEndUtc - booking.StartDate).TotalHours / 24.0));
+        int extraDays = Math.Max(0, newTotalDays - booking.RentalDays);
+        decimal dailyRate = booking.PricePerDayAtBooking ?? booking.Listing?.PricePerDay ?? 0m;
+        decimal extraAmount = extraDays * dailyRate;
+
+        booking.EndDate = newEndUtc;
+        booking.RentalDays = newTotalDays;
+        booking.RentalSubtotal = (booking.RentalSubtotal ?? booking.PriceLockedTotal) + extraAmount;
+        booking.PriceLockedTotal += extraAmount;
+        // Không tăng DepositAmount — phần thuê thêm chỉ thanh toán ở cuối chuyến
+
+        var targetUserId = isRenter ? booking.Vehicle.OwnerId : booking.RenterId;
+        var actorLabel = isRenter ? "Khách thuê" : "Chủ xe";
+        await _notificationService.CreateNotificationAsync(
+            targetUserId,
+            "Đơn thuê đã được gia hạn ngày",
+            $"{actorLabel} đã gia hạn đơn #{booking.BookingId} ({booking.Vehicle.Brand} {booking.Vehicle.Model}) đến {newEndUtc.ToLocalTime():HH:mm dd/MM/yyyy}. Phụ thu thuê thêm ({extraAmount:N0} đ) sẽ thanh toán ở cuối chuyến.",
+            "trip",
+            booking.BookingId,
+            $"/booking/{booking.BookingId}",
+            ct);
 
         await _db.SaveChangesAsync(ct);
 

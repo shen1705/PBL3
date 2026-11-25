@@ -366,6 +366,30 @@ public class BookingsController : ControllerBase
         return Ok(result);
     }
 
+    // Gia hạn thuê thêm ngày (chỉ thanh toán ở cuối chuyến)
+    [Authorize]
+    [HttpPost("api/bookings/{id:int}/extend")]
+    public async Task<IActionResult> ExtendBooking(int id, [FromBody] ExtendBookingRequest request, CancellationToken ct)
+    {
+        var userId = _currentUser.UserId;
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new { isSuccess = false, message = "Vui lòng đăng nhập.", errorCode = ErrorCodes.Unauthorized });
+
+        if (request == null || !ModelState.IsValid)
+            return BadRequest(new { isSuccess = false, message = "Vui lòng chọn thời gian trả xe mới hợp lệ.", errorCode = ErrorCodes.Validation });
+
+        var result = await _bookingService.ExtendBookingAsync(id, request, userId, ct);
+        if (!result.IsSuccess)
+        {
+            if (result.ErrorCode == ErrorCodes.NotFound) return NotFound(result);
+            if (result.ErrorCode == ErrorCodes.Forbidden) return StatusCode(StatusCodes.Status403Forbidden, result);
+            if (result.ErrorCode == ErrorCodes.Conflict) return Conflict(result);
+            return BadRequest(result);
+        }
+
+        return Ok(result);
+    }
+
     // Doanh thu chủ xe
     [Authorize]
     [HttpGet("api/bookings/owner-revenue")]

@@ -179,7 +179,7 @@
             </form>` : '';
             return `<article class="trip-handover-card">
                 <div class="trip-detail-title-row"><h3>${title}</h3><span class="trip-detail-state ${userConfirmation ? 'is-done' : ''}">${statusText}</span></div>
-                ${confirmations.length ? confirmations.map(item => `<p>${escapeHtml(item.confirmerName || 'Thành viên')} · ${escapeHtml(formatDate(item.confirmedAt, true))}${item.odometer != null ? ` · ${escapeHtml(item.odometer)} km` : ''}${item.fuelLevel ? ` · ${escapeHtml(item.fuelLevel)}` : ''} · Ký quỹ sàn 100%</p>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}`).join('') : '<p>Chưa có xác nhận.</p>'}
+                ${confirmations.length ? confirmations.map(item => `<p>${escapeHtml(item.confirmerName || 'Thành viên')} · ${escapeHtml(formatDate(item.confirmedAt, true))}${item.odometer != null ? ` · ${escapeHtml(item.odometer)} km` : ''}${item.fuelLevel ? ` · ${escapeHtml(item.fuelLevel)}` : ''} · Thanh toán 100% online</p>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}`).join('') : '<p>Chưa có xác nhận.</p>'}
                 ${formMarkup}
             </article>`;
         };
@@ -271,7 +271,7 @@
                 <div class="trip-detail-clauses">
                     <h4>Điều khoản áp dụng</h4>
                     <ul>
-                        <li>Thanh toán ký quỹ 100% tổng giá thuê trực tuyến qua sàn AZU Car (tài khoản bảo chứng); không trả tiền thuê bằng tiền mặt khi nhận xe.</li>
+                        <li>Thanh toán 100% online tổng giá thuê qua sàn AZU Car; không trả tiền thuê bằng tiền mặt khi nhận xe.</li>
                         <li>Chỉ có thể hủy khi đơn đang chờ duyệt hoặc đã được duyệt; đơn đã duyệt không thể hủy từ thời điểm nhận xe.</li>
                         <li>Nếu phát sinh sự cố trong quá trình giao nhận hoặc vận hành xe, gửi báo sự cố kèm bằng chứng để Staff xác minh và xử lý theo quy trình khiếu nại.</li>
                     </ul>
@@ -321,7 +321,23 @@
                     ${detailRow('Nhận xe', formatDate(booking.startDate, true))}
                     ${detailRow('Trả xe', formatDate(booking.endDate, true))}
                     ${detailRow('Thời gian thuê', `${booking.rentalDays || 0} ngày`)}
-                    <details class="trip-rental-calendar"><summary>Lịch hoạt động &amp; ngày bận</summary>${renderRentalCalendar(booking)}</details>
+                    <details class="trip-rental-calendar" open><summary>Lịch hoạt động &amp; ngày bận</summary>${renderRentalCalendar(booking)}</details>
+                    ${(status === 'Accepted' || status === 'Ongoing') ? (() => {
+                        const endDt = new Date(booking.endDate);
+                        const pad = n => String(n).padStart(2, '0');
+                        const localMin = Number.isNaN(endDt.getTime()) ? '' : `${endDt.getFullYear()}-${pad(endDt.getMonth() + 1)}-${pad(endDt.getDate())}T${pad(endDt.getHours())}:${pad(endDt.getMinutes())}`;
+                        const nextDay = new Date(endDt.getTime() + 86400000);
+                        const localVal = Number.isNaN(nextDay.getTime()) ? '' : `${nextDay.getFullYear()}-${pad(nextDay.getMonth() + 1)}-${pad(nextDay.getDate())}T${pad(nextDay.getHours())}:${pad(nextDay.getMinutes())}`;
+                        return `<div class="trip-extend-box" style="margin-top: 14px; padding: 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px;">
+                            <h4 style="margin: 0 0 6px; font-size: 14px; color: #0f172a;"><i class="fa-regular fa-calendar-plus" style="color: #059669;"></i> Thuê thêm ngày (nếu lịch trống)</h4>
+                            <p style="margin: 0 0 10px; font-size: 12.5px; color: #475569;">Gia hạn ngày trả xe nếu xe chưa có lịch đặt khác. Không áp dụng phí đệm 2h hay tiền phạt; tiền thuê thêm chỉ thanh toán ở cuối chuyến.</p>
+                            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <input type="datetime-local" id="extendEndDateInput" min="${escapeHtml(localMin)}" value="${escapeHtml(localVal)}" style="padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;">
+                                <button type="button" class="trip-detail-action is-primary" data-trip-detail-action="extend">Xác nhận thuê thêm</button>
+                            </div>
+                            <p class="trip-extend-feedback" style="margin: 8px 0 0; font-size: 12.5px; color: #b91c1c;" role="status"></p>
+                        </div>`;
+                    })() : ''}
                     ${detailRow('Hình thức nhận xe', booking.deliveryMethod || 'Nhận tại địa điểm xe')}
                     ${booking.deliveryAddress ? detailRow('Địa chỉ giao xe', booking.deliveryAddress) : ''}
                     <h3 class="trip-detail-subheading">Thông tin khách hàng</h3>
@@ -346,9 +362,14 @@
                     <div class="trip-payment-total"><span>Tổng giá trị thuê</span><strong>${formatMoney(booking.priceLockedTotal)}</strong></div>
                     <div class="trip-payment-deposit">
                         <div class="trip-payment-line">
-                            <div><span>Thanh toán Ký quỹ (100%)</span><span class="trip-payment-status">${escapeHtml(depositLabel)}</span></div>
+                            <div><span>Tiền cọc đã đặt</span><span class="trip-payment-status">${escapeHtml(depositLabel)}</span><small>Mất tiền cọc khi hủy chuyến đã duyệt</small></div>
                             <strong>${formatMoney(booking.depositAmount)}</strong>
                         </div>
+                        <div class="trip-payment-line" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #cbd5e1;">
+                            <div><span>Còn lại trả ở cuối chuyến</span><small>Bao gồm tiền thuê thêm ngày (nếu có)</small></div>
+                            <strong style="color: #059669;">${formatMoney(Math.max(0, Number(booking.priceLockedTotal || 0) - Number(booking.depositAmount || 0)))}</strong>
+                        </div>
+                        ${booking.depositReferenceCode ? `<div class="trip-payment-line" style="margin-top: 6px;"><div><span>Mã giao dịch</span></div><small>${escapeHtml(booking.depositReferenceCode)}</small></div>` : ''}
                     </div>
                 </aside>
             </div>
@@ -405,6 +426,41 @@
             return;
         }
         const id = currentBooking.bookingId;
+        if (action === 'extend') {
+            const input = tripDetailView.querySelector('#extendEndDateInput');
+            const fb = tripDetailView.querySelector('.trip-extend-feedback');
+            if (!input || !input.value) {
+                if (fb) fb.textContent = 'Vui lòng chọn thời gian trả xe mới.';
+                return;
+            }
+            const newEnd = new Date(input.value);
+            if (Number.isNaN(newEnd.getTime())) {
+                if (fb) fb.textContent = 'Thời gian trả xe mới không hợp lệ.';
+                return;
+            }
+            button.disabled = true;
+            if (fb) fb.textContent = '';
+            try {
+                const resp = await fetch(`/api/bookings/${id}/extend`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newEndDate: newEnd.toISOString() })
+                });
+                const resData = await resp.json();
+                if (!resp.ok || !resData?.isSuccess) {
+                    if (fb) fb.textContent = resData?.message || 'Không thể gia hạn lịch thuê.';
+                    button.disabled = false;
+                    return;
+                }
+                currentBooking = resData.data || currentBooking;
+                renderCurrent();
+                alert('Gia hạn thuê thêm ngày thành công! Phụ thu thuê thêm sẽ được thanh toán ở cuối chuyến.');
+            } catch {
+                if (fb) fb.textContent = 'Lỗi kết nối máy chủ.';
+                button.disabled = false;
+            }
+            return;
+        }
         const isOwner = getIsOwner(currentBooking);
 
         if (action === 'review') {

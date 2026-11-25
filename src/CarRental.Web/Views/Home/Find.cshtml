@@ -915,21 +915,21 @@
                         </div>
                     </div>
 
-                    <!-- Phần 2b: Quy định Ký quỹ Sàn Trực tuyến -->
+                    <!-- Phần 2b: Quy định Đặt cọc & Thanh toán cuối chuyến -->
                     <div class="booking-section-card booking-collateral-alert-card">
-                        <h4 class="section-card-title">Quy định ký quỹ trực tuyến</h4>
+                        <h4 class="section-card-title">Quy định đặt cọc &amp; thanh toán</h4>
                         <div class="booking-collateral-content" id="bookCollateralContent" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 14px;">
                             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                                 <span class="collateral-type-tag" id="bookCollateralTag" style="background: #00a550; color: #fff; font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px;">
-                                    Ký quỹ sàn 100%
+                                    Đặt cọc 25%
                                 </span>
-                                <strong id="bookCollateralTitle" style="font-size: 13.5px; color: #166534;">Bảo chứng trực tuyến</strong>
+                                <strong id="bookCollateralTitle" style="font-size: 13.5px; color: #166534;">Thanh toán phần còn lại cuối chuyến</strong>
                             </div>
                             <p class="collateral-desc-text" id="bookCollateralText" style="margin: 0 0 6px 0; font-size: 13px; color: #14532d; line-height: 1.45;">
-                                Không yêu cầu khách thuê thế chấp Tiền mặt hoặc Xe máy.
+                                Chỉ cần đặt cọc 25% khi đặt xe để giữ lịch; mất tiền cọc nếu hủy chuyến đã duyệt.
                             </p>
                             <small class="collateral-hint-text" style="display: block; font-size: 12px; color: #15803d;">
-                                Toàn bộ tiền thuê và tiền ký quỹ được bảo chứng trực tuyến 100% qua sàn AZU Car; không giao nhận tiền mặt tại chỗ.
+                                Số tiền còn lại (75% và tiền thuê thêm ngày nếu phát sinh) chỉ thanh toán ở cuối chuyến khi trả xe.
                             </small>
                         </div>
                     </div>
@@ -1045,8 +1045,12 @@
                                 <strong class="total-number" id="bookTotalPrice">0đ</strong>
                             </div>
                             <div class="sum-row" style="color: #1d4ed8; font-weight: 700; margin-top: 6px;">
-                                <span>Thanh toán Ký quỹ Trực tuyến (100%)</span>
+                                <span>Tiền cọc đặt xe (25% — trả trước)</span>
                                 <strong id="bookDepositPrice">0đ</strong>
+                            </div>
+                            <div class="sum-row" style="color: #059669; font-weight: 600; margin-top: 4px;">
+                                <span>Còn lại (75% — trả cuối chuyến)</span>
+                                <strong id="bookRemainingPrice">0đ</strong>
                             </div>
                         </div>
 
@@ -1108,7 +1112,7 @@
 
                         <h4 class="contract-sec-title">ĐIỀU 2: GIÁ THUÊ, ĐẶT CỌC &amp; PHƯƠNG THỨC THANH TOÁN</h4>
                         <p>2.1. Tổng giá trị hợp đồng thuê xe: <strong id="contractTotalPrice">[Tổng thành tiền]</strong>.</p>
-                        <p>2.2. Thanh toán ký quỹ giữ chỗ (100%): <strong id="contractDepositPrice" style="color: #0284c7;">[Số tiền ký quỹ 100%]</strong> được ký quỹ bảo chứng trực tuyến qua AZU Car.</p>
+                        <p>2.2. Thanh toán 100% online: <strong id="contractDepositPrice" style="color: #0284c7;">[Số tiền thanh toán 100%]</strong> được thanh toán trực tuyến qua sàn AZU Car.</p>
                         <p>2.3. Khách thuê không phải trả tiền thuê tại điểm nhận xe. Sau khi chuyến đi hoàn tất, sàn AZU Car sẽ tự động quyết toán chuyển tiền thuê cho Bên A.</p>
 
                         <h4 class="contract-sec-title">ĐIỀU 3: NGHĨA VỤ VÀ TRÁCH NHIỆM CỦA BÊN B (KHÁCH THUÊ)</h4>
@@ -1149,20 +1153,20 @@
         </div>
     </div>
 
-    <!-- Modal Thanh toán Ký quỹ (100% Trực tuyến) -->
+    <!-- Modal Đặt cọc 25% khi thuê xe -->
     <div class="payment-sim-overlay" id="paymentSimulationModal" hidden>
         <div class="payment-sim-dialog" role="dialog" aria-modal="true" aria-labelledby="paySimTitle">
             <button type="button" class="payment-sim-close" id="closePaymentSimModal" type="button" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
 
             <div class="pay-sim-header">
-                <div class="pay-sim-badge"><i class="fa-solid fa-shield-halved"></i> CỔNG THANH TOÁN BẢO CHỨNG AZU CAR</div>
-                <h3 id="paySimTitle">Thanh toán Ký quỹ Trực tuyến (100%)</h3>
-                <p>Khoản thanh toán được bảo chứng an toàn tại tài khoản trung gian AZU Car cho đến khi hoàn tất chuyến đi.</p>
+                <div class="pay-sim-badge"><i class="fa-solid fa-shield-halved"></i> CỔNG THANH TOÁN ĐẶT CỌC AZU CAR</div>
+                <h3 id="paySimTitle">Đặt cọc giữ xe (25%)</h3>
+                <p>Thanh toán tiền cọc 25% để giữ lịch xe. Phần còn lại (75%) chỉ thanh toán ở cuối chuyến khi trả xe.</p>
             </div>
 
             <div class="pay-sim-body">
                 <div class="pay-sim-amount-card">
-                    <span class="pay-sim-amount-label">SỐ TIỀN THANH TOÁN KÝ QUỸ (100%)</span>
+                    <span class="pay-sim-amount-label">SỐ TIỀN CỌC ĐẶT XE (25%)</span>
                     <strong class="pay-sim-amount-val" id="paySimAmount">0 đ</strong>
                     <div class="pay-sim-car-meta" id="paySimCarMeta">Thuê xe Vinfast VF3 • 2 ngày</div>
                 </div>

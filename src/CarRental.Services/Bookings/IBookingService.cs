@@ -24,6 +24,8 @@ public interface IBookingService
 
     Task<ServiceResult<BookingDetailDto>> CancelBookingAsync(int bookingId, CancelBookingRequest request, string currentUserId, CancellationToken ct = default);
 
+    Task<ServiceResult<BookingDetailDto>> ExtendBookingAsync(int bookingId, ExtendBookingRequest request, string currentUserId, CancellationToken ct = default);
+
     Task<ServiceResult<BookingDetailDto>> ConfirmPickupAsync(int bookingId, ConfirmHandoverRequest request, string currentUserId, CancellationToken ct = default);
 
     Task<ServiceResult<BookingDetailDto>> ConfirmReturnAsync(int bookingId, ConfirmHandoverRequest request, string currentUserId, CancellationToken ct = default);

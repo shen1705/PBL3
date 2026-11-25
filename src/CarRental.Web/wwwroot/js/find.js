@@ -2201,6 +2201,7 @@ async function refreshBookingPrice() {
                     document.getElementById('bookDeliveryFee') && (document.getElementById('bookDeliveryFee').textContent = d.deliveryFee > 0 ? `${d.deliveryFee.toLocaleString('vi-VN')} đ` : 'Miễn phí');
                     document.getElementById('bookTotalPrice') && (document.getElementById('bookTotalPrice').textContent = `${d.priceLockedTotal.toLocaleString('vi-VN')} đ`);
                     document.getElementById('bookDepositPrice') && (document.getElementById('bookDepositPrice').textContent = `${d.depositAmount.toLocaleString('vi-VN')} đ`);
+                    document.getElementById('bookRemainingPrice') && (document.getElementById('bookRemainingPrice').textContent = `${Number(d.remainingAmount ?? (d.priceLockedTotal - d.depositAmount)).toLocaleString('vi-VN')} đ`);
                     return;
                 }
             }
@@ -2217,14 +2218,15 @@ async function refreshBookingPrice() {
     const delivery = deliveryMethod === 'delivery' ? 100000 : 0;
     const ins = 50000 * days;
     const total = subtotal + delivery + ins;
-    const deposit = total;
-    const rem = 0;
+    const deposit = Math.round(total * 0.25);
+    const rem = total - deposit;
 
     document.getElementById('bookBasePrice') && (document.getElementById('bookBasePrice').textContent = `${subtotal.toLocaleString('vi-VN')} đ (${days} ngày)`);
     document.getElementById('bookInsurancePrice') && (document.getElementById('bookInsurancePrice').textContent = `${ins.toLocaleString('vi-VN')} đ`);
     document.getElementById('bookDeliveryFee') && (document.getElementById('bookDeliveryFee').textContent = delivery > 0 ? `${delivery.toLocaleString('vi-VN')} đ` : 'Miễn phí');
     document.getElementById('bookTotalPrice') && (document.getElementById('bookTotalPrice').textContent = `${total.toLocaleString('vi-VN')} đ`);
     document.getElementById('bookDepositPrice') && (document.getElementById('bookDepositPrice').textContent = `${deposit.toLocaleString('vi-VN')} đ`);
+    document.getElementById('bookRemainingPrice') && (document.getElementById('bookRemainingPrice').textContent = `${rem.toLocaleString('vi-VN')} đ`);
 }
 
 function openBookingModal(car) {
@@ -3317,7 +3319,7 @@ document.getElementById('btnConfirmPaymentSimulation')?.addEventListener('click'
     const btn = document.getElementById('btnConfirmPaymentSimulation');
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xác thực thanh toán ký quỹ...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xác thực thanh toán...';
     }
 
     try {
@@ -3365,7 +3367,7 @@ document.getElementById('btnConfirmPaymentSimulation')?.addEventListener('click'
                 ? Number(resData.data.depositAmount).toLocaleString('vi-VN') + ' đ'
                 : pendingBookingData.display.deposit;
 
-            alert(`Thanh toán trực tuyến & Đặt xe thành công!\n\n• Mã đơn: #${bookingId}\n• Ký quỹ Sàn 100%: ${depositFormatted}\n• Đã ký Hợp đồng thuê xe điện tử AZU Car\n\nQuý khách không cần thanh toán tiền thuê tại điểm nhận xe. Hệ thống sẽ chuyển bạn đến trang Quản lý đơn thuê chi tiết!`);
+            alert(`Đặt cọc & Đặt xe thành công!\n\n• Mã đơn: #${bookingId}\n• Tiền cọc đã thanh toán (25%): ${depositFormatted}\n• Phần còn lại thanh toán ở cuối chuyến khi trả xe\n• Đã ký Hợp đồng thuê xe điện tử AZU Car\n\nHệ thống sẽ chuyển bạn đến trang Chi tiết đơn thuê!`);
 
             window.location.href = `/booking/${bookingId}`;
         } else {
